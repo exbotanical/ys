@@ -1,0 +1,9 @@
+{
+  "name": "rest-c",
+  "version": "0.0.1",
+  "author": "Matthew Zito",
+  "license": "MIT",
+	"dependencies": {
+    "exbotanical/lib.hash": "0.0.1"
+  }
+}

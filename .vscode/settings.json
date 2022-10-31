@@ -1,0 +1,24 @@
+{
+  "files.associations": {
+    "*.html": "html",
+    "*.tsx": "typescriptreact",
+    "*.ts": "typescript",
+    "socket.h": "c",
+    "stdlib.h": "c",
+    "rest.h": "c",
+    "array": "c",
+    "deque": "c",
+    "list": "c",
+    "string": "c",
+    "unordered_map": "c",
+    "unordered_set": "c",
+    "vector": "c",
+    "string_view": "c",
+    "initializer_list": "c",
+    "stdio.h": "c",
+    "hash.h": "c",
+    "stdbool.h": "c",
+    "string.h": "c",
+    "prime.h": "c"
+  }
+}
