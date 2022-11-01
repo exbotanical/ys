@@ -5,19 +5,19 @@ LDFLAGS=-shared -o
 BIN=librest.so
 TARGET=run
 
-OBJFILES=$(wildcard src/*.c)
+SRC=$(wildcard src/*.c)
 DEPS=$(wildcard deps/*/*.c)
 
 TESTS = $(patsubst %.c, %, $(wildcard t/*.c))
 
 all:
-	$(CC) $(CFLAGS) $(DEPS) $(OBJFILES) $(LDFLAGS) $(BIN)
+	$(CC) $(CFLAGS) $(DEPS) $(SRC) $(LDFLAGS) $(BIN)
 
 clean:
-	rm -f $(TARGET) $(BIN) $(BIN).so main*
+	rm -f $(SRC:.c=.o) $(TARGET) $(BIN) $(BIN).so main*
 
 run:
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJFILES)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC)
 
 test:
 	./scripts/test.bash

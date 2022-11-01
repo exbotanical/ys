@@ -1,23 +1,41 @@
 #include "array.h"
 
-void initArray(array_t *a, size_t initialSize) {
-  a->array = malloc(initialSize * sizeof(int));
-  a->used = 0;
-  a->size = initialSize;
+#include <stdlib.h>
+#include <string.h>
+
+ch_array_t* ch_array_init(size_t initial_size) {
+	ch_array_t* a = malloc(sizeof(ch_array_t));
+	if (a == NULL) {
+		return NULL;
+	}
+
+  a->state = malloc(initial_size * sizeof(char*));
+	if (a->state == NULL) {
+		return NULL;
+	}
+
+  a->size = initial_size;
+
+	return a;
 }
 
-void insertArray(array_t *a, int element) {
-  // a->used is the number of used entries, because a->array[a->used++] updates a->used only *after* the array has been accessed.
-  // Therefore a->used can go up to a->size
-  if (a->used == a->size) {
-    a->size *= 2;
-    a->array = realloc(a->array, a->size * sizeof(int));
-  }
-  a->array[a->used++] = element;
+// TODO: document, make safe w/null checks (for all functions)
+void ch_array_insert(ch_array_t* a, char* el) {
+	char* cp = strdup(el);
+	if (cp == NULL) {
+		return; // TODO: retval
+	}
+
+	char** next_state = realloc(a->state, (a->size + 1) * sizeof(char*));
+	if (next_state == NULL) {
+		return; // TODO: retval
+	}
+
+	a->state = next_state;
+  a->state[a->size++] = cp;
 }
 
-void freeArray(array_t *a) {
-  free(a->array);
-  a->array = NULL;
-  a->used = a->size = 0;
+void ch_array_free(ch_array_t* a) {
+  free(a->state);
+  a->state = NULL;
 }

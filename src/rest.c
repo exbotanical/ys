@@ -57,13 +57,13 @@ int run() {
 
 buffer_t* build_response(char* body) {
 	buffer_t* response = buffer_init();
-	buffer_extend(response, "HTTP/1.1 200 OK\n");
-	buffer_extend(response, "Server: My Personal HTTP Server\n");
-	buffer_extend(response, "Content-Type: text/plain\n");
-	buffer_extend(response, "Content-Length: ");
-	buffer_extend(response, safe_itoa(strlen(body)));
-	buffer_extend(response, "\n\n");
-	buffer_extend(response, body);
+	buffer_append(response, "HTTP/1.1 200 OK\n");
+	buffer_append(response, "Server: My Personal HTTP Server\n");
+	buffer_append(response, "Content-Type: text/plain\n");
+	buffer_append(response, "Content-Length: ");
+	buffer_append(response, safe_itoa(strlen(body)));
+	buffer_append(response, "\n\n");
+	buffer_append(response, body);
 
 	return response;
 }

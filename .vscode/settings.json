@@ -19,6 +19,9 @@
     "hash.h": "c",
     "stdbool.h": "c",
     "string.h": "c",
-    "prime.h": "c"
+    "prime.h": "c",
+    "stddef.h": "c",
+    "path.h": "c",
+    "buffer.h": "c"
   }
 }

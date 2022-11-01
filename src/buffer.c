@@ -6,25 +6,12 @@
 
 buffer_t* buffer_init() {
   buffer_t* buf = malloc(sizeof(buffer_t));
-	// Memory insufficient
   if (NULL == buf) {
-		goto buffer_new_fail;
+		free(buf);
+		return NULL;
 	}
-
-  // allocate space for the string itself
-  buf->state = malloc(BUFFER_SIZE_INIT);
-  //quit and cleanup if this failed
-  if (NULL == buf->state) {
-		goto buffer_new_fail;
-	}
-
-  buf->len = BUFFER_SIZE_INIT;
 
   return buf;
-
-buffer_new_fail:
-	free(buf);
-	return NULL;
 }
 
 
@@ -34,7 +21,7 @@ buffer_new_fail:
  * @param buf the buffer to which `s` will be appended
  * @param s char pointer to be appended to the buffer
  */
-void buffer_extend(buffer_t* buf, const char* s) {
+void buffer_append(buffer_t* buf, const char* s) {
 	int len = strlen(s); // TODO: null check
 
   // get mem sizeof current str + sizeof append str

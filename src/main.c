@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-int main(int argc, char* argv[]) {
+int main() {
 	run();
 	return EXIT_SUCCESS;
 }

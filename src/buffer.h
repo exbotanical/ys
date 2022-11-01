@@ -10,7 +10,7 @@ typedef struct buffer {
 
 buffer_t* buffer_init();
 
-void buffer_extend(buffer_t* buf, const char* s);
+void buffer_append(buffer_t* buf, const char* s);
 
 void buffer_free(buffer_t* buf);
 

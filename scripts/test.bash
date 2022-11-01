@@ -6,19 +6,23 @@ UTIL_F=util.bash
 REPO_DIR=rest
 
 declare -a SKIP_FILES=(
-
+	'buffer_test.c'
+	'array_test.c'
+	# 'path_test.c'
 )
 
 not_test_file () {
 	local test=$1
+	local ret=0
 
 	for (( i=0; i < ${#SKIP_FILES[@]}; i++ )); do
 		if [[ $test == ${SKIP_FILES[i]} ]]; then
-			return 1
-		else
-			return 0
+			ret=1
+			break
 		fi
 	done
+
+	return $ret
 }
 
 run_test () {
@@ -28,9 +32,11 @@ run_test () {
 	gcc -o main main.o -L./ -l$REPO_DIR -lm
 
 	export LD_LIBRARY_PATH=$HOME/repositories/$REPO_DIR/src/:$HOME/repositories/$REPO_DIR/include/:$LD_LIBRARY_PATH
-	green "\n[+] Running test...\n\n"
+	green "\n[+] Running test $file_name...\n\n"
 
 	./main
+
+	green "\n[+] Tests for $file_name passed\n\n"
 }
 
 main () {
