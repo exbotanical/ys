@@ -22,6 +22,7 @@
     "prime.h": "c",
     "stddef.h": "c",
     "path.h": "c",
-    "buffer.h": "c"
+    "buffer.h": "c",
+    "typeinfo": "c"
   }
 }

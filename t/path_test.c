@@ -5,6 +5,12 @@
 #include <string.h>
 #include <stdio.h>
 
+typedef struct test_case {
+	char* name;
+	char* input;
+	char* expected;
+} test_case_t;
+
 void test_split_ok() {
 	char* test_str = "aa:b:c:d";
 	ch_array_t* ca = split(test_str, PARAMETER_DELIMITER);
@@ -88,7 +94,7 @@ void test_substr_ok() {
 
 	char* substring = substr(test_str, 4, 6, false);
 
-	is(substring, "_s", "");
+	is(substring, "_s", "substring matches");
 }
 
 void test_substr_inclusive() {
@@ -96,7 +102,7 @@ void test_substr_inclusive() {
 
 	char* substring = substr(test_str, 4, 6, true);
 
-	is(substring, "_st", "");
+	is(substring, "_st", "inclusive substring matches");
 }
 
 void test_substr_no_range() {
@@ -104,7 +110,7 @@ void test_substr_no_range() {
 
 	char* substring = substr(test_str, 1, 1, false);
 
-	is(substring, "", "");
+	is(substring, "", "substring sans range yields empty string");
 }
 
 void test_substr_no_range_inclusive() {
@@ -112,22 +118,16 @@ void test_substr_no_range_inclusive() {
 
 	char* substring = substr(test_str, 1, 1, true);
 
-	is(substring, "e", "");
+	is(substring, "e", "inclusive substring sans range yields char at start index");
 }
 
-void test_derive_label_pattern_ok() {
-	typedef struct test_case {
-		char* name;
-		char* input;
-		char* expected;
-	} test_case_t;
-
+void test_derive_label_pattern() {
 	test_case_t tests[] = {
-		{ .name = "BasicRegex", .input = ":id[^\\d+$]", .expected = "^\\d+$"},
-		{ .name = "EmptyRegex", .input = ":id[]", .expected = ""},
-		{ .name = "NoRegex", .input = ":id", .expected = "(.+)"},
-		{ .name = "LiteralRegex", .input = ":id[xxx]", .expected = "xxx"},
-		{ .name = "WildcardRegex", .input = ":id[*]", .expected = "*"},
+		{ .name = "BasicRegex", .input = ":id[^\\d+$]", .expected = "^\\d+$" },
+		{ .name = "EmptyRegex", .input = ":id[]", .expected = "" },
+		{ .name = "NoRegex", .input = ":id", .expected = "(.+)" },
+		{ .name = "LiteralRegex", .input = ":id[xxx]", .expected = "xxx" },
+		{ .name = "WildcardRegex", .input = ":id[*]", .expected = "*" },
 	};
 
 	for (int i = 0; i < sizeof(tests) / sizeof(test_case_t); i++) {
@@ -138,8 +138,24 @@ void test_derive_label_pattern_ok() {
 	}
 }
 
+void test_derive_parameter_key() {
+	test_case_t tests[] = {
+		{ .name = "BasicKey", .input = ":id[^\\d+$]", .expected = "id" },
+		{ .name = "BasicKeyEmptyRegex", .input = ":val[]", .expected = "val" },
+		{ .name = "BasicKeyWildcardRegex", .input = ":ex[(.*)]", .expected = "ex" },
+		{ .name = "BasicKeyNoRegex", .input = ":id", .expected = "id" },
+	};
+
+	for (int i = 0; i < sizeof(tests) / sizeof(test_case_t); i++) {
+		test_case_t test_case = tests[i];
+
+		char* pattern = derive_parameter_key(test_case.input);
+		is(pattern, test_case.expected, test_case.name);
+	}
+}
+
 int main () {
-	plan(26);
+	plan(30);
 
 	test_split_ok();
 	test_split_no_match();
@@ -157,7 +173,9 @@ int main () {
 	test_substr_no_range();
 	test_substr_no_range_inclusive();
 
-	test_derive_label_pattern_ok();
+	test_derive_label_pattern();
 
-  done_testing();
+	test_derive_parameter_key();
+
+	done_testing();
 }

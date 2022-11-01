@@ -84,10 +84,18 @@ char* derive_label_pattern(const char* label) {
 		return strdup(PATTERN_WILDCARD);
 	}
 
-	printf("HERE: %d %d\n", start+1, end);
 	return substr(label, start + 1, end, false);
 }
 
-char* derive_parameter_key(const char* label);
+char* derive_parameter_key(const char* label) {
+	int start = index_of(label, PARAMETER_DELIMITER);
+	int end = index_of(label, PARAMETER_DELIMITER_START);
+
+	if (end == -1) {
+		end = strlen(label);
+	}
+
+	return substr(label, start + 1, end, false);
+}
 
 char* regex_cache_get(char* pattern);
