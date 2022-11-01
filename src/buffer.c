@@ -11,15 +11,14 @@ buffer_t* buffer_init() {
 		goto buffer_new_fail;
 	}
 
-  // // allocate space for the string itself
-  // buf->state = malloc(BUFFER_SIZE_INIT);
-  // //quit and cleanup if this failed
-  // if (NULL == buf->state) {
-	// 	goto buffer_new_fail;
-	// }
+  // allocate space for the string itself
+  buf->state = malloc(BUFFER_SIZE_INIT);
+  //quit and cleanup if this failed
+  if (NULL == buf->state) {
+		goto buffer_new_fail;
+	}
 
-
-  // buf->len = BUFFER_SIZE_INIT;
+  buf->len = BUFFER_SIZE_INIT;
 
   return buf;
 
@@ -37,6 +36,7 @@ buffer_new_fail:
  */
 void buffer_extend(buffer_t* buf, const char* s) {
 	int len = strlen(s); // TODO: null check
+
   // get mem sizeof current str + sizeof append str
   char* next = realloc(buf->state, buf->len + len);
 

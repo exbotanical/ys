@@ -1,36 +1,26 @@
 CC=gcc
-INSTALL_DIR=/usr/local/bin
-CFLAGS=-Ideps -Wall -Wextra -pedantic -lm -std=c17
+CFLAGS=-g -fPIC -Ideps -lm -Wall -Wextra -pedantic
+LDFLAGS=-shared -o
 
-SRC = $(wildcard src/*.c)
-SRC += $(wildcard deps/*/*.c)
-OBJFILES = $(SRC:.c=.o)
+BIN=librest.so
+TARGET=run
 
-TARGET=rest-c
+OBJFILES=$(wildcard src/*.c)
+DEPS=$(wildcard deps/*/*.c)
 
-.PHONY:
-all: $(TARGET)
+TESTS = $(patsubst %.c, %, $(wildcard t/*.c))
 
-.PHONY:
-$(TARGET): $(OBJFILES)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(TARGET) $(OBJFILES)
+all:
+	$(CC) $(CFLAGS) $(DEPS) $(OBJFILES) $(LDFLAGS) $(BIN)
 
-.PHONY:
-%.o: %.c
-	$(CC) $(DEP_FLAG) $(CFLAGS) $(LDFLAGS) -o $@ -c $<
-
-.PHONY:
 clean:
-	rm -f $(OBJFILES) $(TARGET)
+	rm -f $(TARGET) $(BIN) $(BIN).so main*
 
-.PHONY:
-install: $(TARGET)
-	cp -f $(TARGET) $(INSTALL_DIR)
-	# install -m 0777 $(TARGET) $(DEST)/$(TARGET)
+run:
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJFILES)
 
-.PHONY:
-uninstall: $(INSTALL_DIR)/$(TARGET)
-	rm -f $(INSTALL_DIR)/$(TARGET)
+test:
+	./scripts/test.bash
+	$(MAKE) clean
 
-debug: CFLAGS += -D debug
-debug: $(TARGET)
+.PHONY: test clean

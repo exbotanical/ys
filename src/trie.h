@@ -1,6 +1,8 @@
 #ifndef TRIE_H
 #define TRIE_H
 
+#include "http.h"
+
 #include "lib.hash/hash.h" /* for TODO: */
 
 typedef struct node {
