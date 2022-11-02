@@ -8,7 +8,8 @@ REPO_DIR=rest
 declare -a SKIP_FILES=(
 	'buffer_test.c'
 	'array_test.c'
-	# 'path_test.c'
+	'path_test.c'
+	# 'trie_test.c'
 )
 
 not_test_file () {

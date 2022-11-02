@@ -1,7 +1,7 @@
 #ifndef TRIE_H
 #define TRIE_H
 
-#include "http.h"
+#include "array.h"
 
 #include "lib.hash/hash.h" /* for TODO: */
 
@@ -12,11 +12,11 @@ typedef struct node {
 } node_t;
 
 typedef struct trie {
-	node_t* root;
+	node_t *root;
 } trie_t;
 
 typedef struct action {
-	handler_t handler;
+	void*(*handler)(void*);
 } action_t;
 
 typedef struct parameter {
@@ -29,13 +29,11 @@ typedef struct result {
 	parameter_t parameter[];
 } result_t;
 
-typedef struct handler {
 
-} handler_t;
-
-trie_t* trie_init();
-void trie_insert(method methods[], const char* path, handler_t* handler);
-result_t* trie_search(method method, const char* search_path);
-result_t* result_init();
+trie_t *trie_init();
+void trie_insert(trie_t *trie, ch_array_t *methods, const char* path, void*(*handler)(void*));
+result_t *trie_search(trie_t *trie, char *method, const char* search_path);
+result_t *result_init();
+node_t *node_init();
 
 #endif /* TRIE_H */

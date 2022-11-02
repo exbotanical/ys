@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-buffer_t* buffer_init() {
-  buffer_t* buf = malloc(sizeof(buffer_t));
+buffer_t *buffer_init() {
+  buffer_t *buf = malloc(sizeof(buffer_t));
   if (NULL == buf) {
 		free(buf);
 		return NULL;
@@ -21,11 +21,11 @@ buffer_t* buffer_init() {
  * @param buf the buffer to which `s` will be appended
  * @param s char pointer to be appended to the buffer
  */
-void buffer_append(buffer_t* buf, const char* s) {
+void buffer_append(buffer_t *buf, const char *s) {
 	int len = strlen(s); // TODO: null check
 
   // get mem sizeof current str + sizeof append str
-  char* next = realloc(buf->state, buf->len + len);
+  char *next = realloc(buf->state, buf->len + len);
 
   if (!next) {
 		return;
@@ -41,6 +41,6 @@ void buffer_append(buffer_t* buf, const char* s) {
  *
  * @param buf the buffer pointer
  */
-void buffer_free(buffer_t* buf) {
+void buffer_free(buffer_t *buf) {
   free(buf->state);
 }

@@ -45,7 +45,7 @@ int run() {
 			exit(EXIT_FAILURE);
 		}
 
-		buffer_t* response = build_response("Hello world!");
+		buffer_t *response = build_response("Hello world!");
 		write(new_socket, response->state, response->len);
 		buffer_free(response);
 
@@ -55,8 +55,8 @@ int run() {
 	return EXIT_SUCCESS;
 }
 
-buffer_t* build_response(char* body) {
-	buffer_t* response = buffer_init();
+buffer_t *build_response(char *body) {
+	buffer_t *response = buffer_init();
 	buffer_append(response, "HTTP/1.1 200 OK\n");
 	buffer_append(response, "Server: My Personal HTTP Server\n");
 	buffer_append(response, "Content-Type: text/plain\n");

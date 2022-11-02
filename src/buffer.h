@@ -8,10 +8,10 @@ typedef struct buffer {
   int len;
 } buffer_t;
 
-buffer_t* buffer_init();
+buffer_t *buffer_init();
 
-void buffer_append(buffer_t* buf, const char* s);
+void buffer_append(buffer_t *buf, const char* s);
 
-void buffer_free(buffer_t* buf);
+void buffer_free(buffer_t *buf);
 
 #endif

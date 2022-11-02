@@ -7,6 +7,6 @@
 #define PORT 9000
 
 int run();
-buffer_t* build_response();
+buffer_t *build_response();
 void process_headers (h_record* r);
 #endif /* REST_H */

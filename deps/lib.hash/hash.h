@@ -6,7 +6,7 @@
  */
 typedef struct {
 	char* key;
-	char* value;
+	void* value;
 } h_record;
 
 /**
@@ -37,7 +37,7 @@ typedef struct {
 
 h_table* h_init_table (int base_capacity);
 
-void h_insert (h_table* ht, const char* key, const char* value);
+void h_insert (h_table* ht, const char* key, void* value);
 
 h_record* h_search (h_table* ht, const char* key);
 

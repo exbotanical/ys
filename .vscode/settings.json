@@ -23,6 +23,9 @@
     "stddef.h": "c",
     "path.h": "c",
     "buffer.h": "c",
-    "typeinfo": "c"
+    "typeinfo": "c",
+    "trie.h": "c",
+    "http.h": "c",
+    "stdarg.h": "c"
   }
 }

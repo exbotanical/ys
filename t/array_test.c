@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 void test_ch_array_init() {
-	ch_array_t* ca;
+	ch_array_t *ca;
 
 	lives_ok({
 		ca = ch_array_init(0);
@@ -19,7 +19,7 @@ void test_ch_array_init() {
 }
 
 void test_ch_array_insert() {
-	ch_array_t* ca = ch_array_init(0);
+	ch_array_t *ca = ch_array_init(0);
 
 	ch_array_insert(ca, "test");
 
@@ -34,14 +34,14 @@ void test_ch_array_insert() {
 }
 
 void test_ch_array_free() {
-	ch_array_t* ca = ch_array_init(0);
+	ch_array_t *ca = ch_array_init(0);
 
 	lives_ok({
 		ch_array_free(ca);
 	}, "frees the allocated char array");
 }
 
-int main (int argc, char* argv[]) {
+int main (int argc, char *argv[]) {
 	plan(8);
 
 	test_ch_array_init();

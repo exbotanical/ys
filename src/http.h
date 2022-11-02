@@ -3,7 +3,7 @@
 
 #include "lib.hash/hash.h" /* for TODO: */
 
-enum method {
+typedef enum method {
 	GET,
 	HEAD,
 	POST,
@@ -13,6 +13,6 @@ enum method {
 	CONNECT,
 	OPTIONS,
 	TRACE
-};
+} method_t;
 
 #endif /* HTTP_H */

@@ -136,10 +136,10 @@ static void h_resize_down (h_table* ht) {
  * @param v Record value
  * @return h_record*
  */
-static h_record* h_init_record (const char* k, const char* v) {
+static h_record* h_init_record (const char* k, void* v) {
 	h_record* r = malloc(sizeof(h_record));
 	r->key = strdup(k);
-	r->value = strdup(v);
+	r->value = v;
 
 	return r;
 }
@@ -151,7 +151,7 @@ static h_record* h_init_record (const char* k, const char* v) {
  */
 static void h_delete_record (h_record* r) {
 	free(r->key);
-	free(r->value);
+	// free(r->value);
 	free(r);
 }
 
@@ -183,7 +183,11 @@ h_table* h_init_table (int base_capacity) {
  * @param key
  * @param value
  */
-void h_insert (h_table* ht, const char* key, const char* value) {
+void h_insert (h_table* ht, const char* key, void* value) {
+	if (ht == NULL) {
+		return;
+	}
+
 	const int load = ht->count * 100 / ht->capacity;
 
   if (load > 70) {

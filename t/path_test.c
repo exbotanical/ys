@@ -6,14 +6,14 @@
 #include <stdio.h>
 
 typedef struct test_case {
-	char* name;
-	char* input;
-	char* expected;
+	char *name;
+	char *input;
+	char *expected;
 } test_case_t;
 
 void test_split_ok() {
-	char* test_str = "aa:b:c:d";
-	ch_array_t* ca = split(test_str, PARAMETER_DELIMITER);
+	char *test_str = "aa:b:c:d";
+	ch_array_t *ca = split(test_str, PARAMETER_DELIMITER);
 
 	ok(ca->size == 4, "only the matched characters are captured");
 	is(ca->state[0], "aa", "substring is captured");
@@ -25,8 +25,8 @@ void test_split_ok() {
 }
 
 void test_split_no_match() {
-	char* test_str = "a:b:c:d";
-	ch_array_t* ca = split(test_str, PATH_ROOT);
+	char *test_str = "a:b:c:d";
+	ch_array_t *ca = split(test_str, PATH_ROOT);
 
 	ok(ca->size == 0, "split returns if delimiter not extant");
 
@@ -34,8 +34,8 @@ void test_split_no_match() {
 }
 
 void test_split_empty_input() {
-	char* test_str = "";
-	ch_array_t* ca = split(test_str, PATH_ROOT);
+	char *test_str = "";
+	ch_array_t *ca = split(test_str, PATH_ROOT);
 
 	ok(ca->size == 0, "split returns if input is empty");
 
@@ -43,8 +43,8 @@ void test_split_empty_input() {
 }
 
 void test_split_end_match() {
-	char* test_str = "a:b:c:d/test";
-	ch_array_t* ca = split(test_str, PATH_ROOT);
+	char *test_str = "a:b:c:d/test";
+	ch_array_t *ca = split(test_str, PATH_ROOT);
 
 	ok(ca->size == 2, "only the matched characters are captured");
 	is(ca->state[0], "a:b:c:d", "substring is captured");
@@ -54,9 +54,9 @@ void test_split_end_match() {
 }
 
 void test_expand_path_ok() {
-	char* test_str = "/path/to/route";
+	char *test_str = "/path/to/route";
 
-	ch_array_t* ca = expand_path(test_str);
+	ch_array_t *ca = expand_path(test_str);
 
 	ok(ca->size == 3, "only the matched characters are captured");
 	is(ca->state[0], "path", "substring is captured");
@@ -67,56 +67,56 @@ void test_expand_path_ok() {
 }
 
 void test_expand_no_match() {
-	char* test_str = "path:to:[^route]";
+	char *test_str = "path:to:[^route]";
 
-	ch_array_t* ca = expand_path(test_str);
+	ch_array_t *ca = expand_path(test_str);
 	ok(ca->size == 0, "no matches recorded");
 
 	ch_array_free(ca);
 }
 
 void test_index_of_ok() {
-	char* test_str = "test_str";
+	char *test_str = "test_str";
 
 	int idx = index_of(test_str, "_");
 	ok(idx == 4, "finds the index of the target string");
 }
 
 void test_index_of_no_match() {
-	char* test_str = "test_str";
+	char *test_str = "test_str";
 
 	int idx = index_of(test_str, "/");
 	ok(idx == -1, "returns -1 indicating no match");
 }
 
 void test_substr_ok() {
-	char* test_str = "test_str";
+	char *test_str = "test_str";
 
-	char* substring = substr(test_str, 4, 6, false);
+	char *substring = substr(test_str, 4, 6, false);
 
 	is(substring, "_s", "substring matches");
 }
 
 void test_substr_inclusive() {
-	char* test_str = "test_str";
+	char *test_str = "test_str";
 
-	char* substring = substr(test_str, 4, 6, true);
+	char *substring = substr(test_str, 4, 6, true);
 
 	is(substring, "_st", "inclusive substring matches");
 }
 
 void test_substr_no_range() {
-	char* test_str = "test_str";
+	char *test_str = "test_str";
 
-	char* substring = substr(test_str, 1, 1, false);
+	char *substring = substr(test_str, 1, 1, false);
 
 	is(substring, "", "substring sans range yields empty string");
 }
 
 void test_substr_no_range_inclusive() {
-	char* test_str = "test_str";
+	char *test_str = "test_str";
 
-	char* substring = substr(test_str, 1, 1, true);
+	char *substring = substr(test_str, 1, 1, true);
 
 	is(substring, "e", "inclusive substring sans range yields char at start index");
 }
@@ -133,7 +133,7 @@ void test_derive_label_pattern() {
 	for (int i = 0; i < sizeof(tests) / sizeof(test_case_t); i++) {
 		test_case_t test_case = tests[i];
 
-		char* pattern = derive_label_pattern(test_case.input);
+		char *pattern = derive_label_pattern(test_case.input);
 		is(pattern, test_case.expected, test_case.name);
 	}
 }
@@ -149,7 +149,7 @@ void test_derive_parameter_key() {
 	for (int i = 0; i < sizeof(tests) / sizeof(test_case_t); i++) {
 		test_case_t test_case = tests[i];
 
-		char* pattern = derive_parameter_key(test_case.input);
+		char *pattern = derive_parameter_key(test_case.input);
 		is(pattern, test_case.expected, test_case.name);
 	}
 }
