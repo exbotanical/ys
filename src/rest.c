@@ -1,5 +1,10 @@
-#include "util.h"
 #include "rest.h"
+
+#include "util.h"
+#include "array.h"
+#include "router.h"
+#include "path.h"
+#include "context.h"
 
 #include <stdio.h>
 #include <sys/socket.h>
@@ -7,8 +12,19 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <stdarg.h>
+
+void *handler (void *arg) {
+	route_context_t *context = arg;
+
+	printf("MATCH! METHOD: %s, PATH: %s\n", context->method, context->path);
+	return NULL;
+}
 
 int run() {
+	router_t *router = router_init();
+	router_register(router, collect_methods("GET", NULL), PATH_ROOT, handler);
+
 	int server_fd;
 	int new_socket;
 
@@ -45,7 +61,36 @@ int run() {
 			exit(EXIT_FAILURE);
 		}
 
-		buffer_t *response = build_response("Hello world!");
+		char recv_buffer[1024];
+
+		/*Step 8: Server recieving the data from client. Client IP and PORT no will be stored in client_addr
+			* by the kernel. Server will use this client_addr info to reply back to client*/
+
+		/*Like in client case, this is also a blocking system call, meaning, server process halts here untill
+			* data arrives on this comm_socket_fd from client whose connection request has been accepted via accept()*/
+		/* state Machine state 3*/
+		recvfrom(
+			new_socket,
+			(char *)recv_buffer,
+			sizeof(recv_buffer), 0,
+			(struct sockaddr *)&address,
+			&addrlen
+		);
+
+		printf("BUFFER: %s\n", recv_buffer);
+
+		struct request r = build_request(recv_buffer);
+
+		router_run(router, r.method, r.url);
+
+		buffer_t *response = build_response("Hello world!",
+			"HTTP/1.1 200 OK",
+			"X-Powered-By: rest-c",
+			"Content-Type: text/plain",
+			NULL
+		);
+		printf(response->state);
+
 		write(new_socket, response->state, response->len);
 		buffer_free(response);
 
@@ -55,20 +100,48 @@ int run() {
 	return EXIT_SUCCESS;
 }
 
-buffer_t *build_response(char *body) {
-	buffer_t *response = buffer_init();
-	buffer_append(response, "HTTP/1.1 200 OK\n");
-	buffer_append(response, "Server: My Personal HTTP Server\n");
-	buffer_append(response, "Content-Type: text/plain\n");
-	buffer_append(response, "Content-Length: ");
-	buffer_append(response, safe_itoa(strlen(body)));
-	buffer_append(response, "\n\n");
-	buffer_append(response, body);
+// uses sentinel variant
+buffer_t *build_response(char *body, char *header, ...) {
+	buffer_t *headers = buffer_init();
 
-	return response;
+  va_list arg;
+
+	va_start(arg, header);
+
+	while (header) {
+		// Content-Length needs to be accurate; thus we ensure the framework is setting it
+		if (!strcasestr(header, "Content-Length:")) {
+			buffer_append(headers, header);
+			buffer_append(headers, "\n");
+		}
+
+		header = va_arg(arg, const char *);
+	}
+
+	va_end(arg);
+
+	buffer_append(headers, "Content-Length: ");
+	buffer_append(headers, safe_itoa(strlen(body)));
+	buffer_append(headers, "\n\n");
+	buffer_append(headers, body);
+
+	return headers;
 }
 
-void process_headers (h_record* r) {
+void process_headers(h_record* r) {
 	printf("key: %s\n", r->key);
-	printf("value: %s\n",r->value);
+	// printf("value: %s\n",r->value);
+}
+
+struct request build_request(char *buffer) {
+	char *raw_request = strtok(buffer, "\n");
+	char *method = strtok(raw_request, " ");
+	char *url = strtok(NULL, " ");
+
+	struct request request = {
+		.method = method,
+		.url = url
+	};
+
+	return request;
 }

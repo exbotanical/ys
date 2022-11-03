@@ -15,18 +15,20 @@ typedef struct router {
 
 typedef struct route {
 	ch_array_t *methods;
-	char* path;
+	char *path;
 	void*(*handler)(void*);
 } route_t;
 
 router_t *router_init();
 
-int router_register(const char* path, ch_array_t *methods[], void*(*handler)(void*));
+int router_register(router_t *router, ch_array_t *methods, const char *path, void*(*handler)(void*));
 
 route_t *route_init(ch_array_t *methods, char *path, void*(*handler)(void*));
 
-ch_array_t *collect_methods(char *str, ...);
+void router_run(router_t *router, char *method, char *path);
 
-char* regex_cache_get(char* pattern);
+ch_array_t *collect_methods(char *method, ...);
+
+char *regex_cache_get(char *pattern);
 
 #endif /* ROUTER_H */

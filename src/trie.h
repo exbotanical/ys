@@ -26,15 +26,14 @@ typedef struct parameter {
 
 typedef struct result {
 	action_t *action;
-	ch_array_t *parameters[];
+	array_t *parameters[];
 } result_t;
-
 
 trie_t *trie_init();
 
-void trie_insert(trie_t *trie, ch_array_t *methods, const char* path, void*(*handler)(void*));
+void trie_insert(trie_t *trie, ch_array_t *methods, const char *path, void*(*handler)(void*));
 
-result_t *trie_search(trie_t *trie, char *method, const char* search_path);
+result_t *trie_search(trie_t *trie, char *method, const char *search_path);
 result_t *result_init();
 node_t *node_init();
 

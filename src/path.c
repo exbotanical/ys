@@ -12,7 +12,7 @@ ch_array_t *expand_path(const char *path) {
 ch_array_t *split(const char *str, const char *delimiter) {
 	// @see https://wiki.sei.cmu.edu/confluence/display/c/STR06-C.+Do+not+assume+that+strtok%28%29+leaves+the+parse+string+unchanged
 	char *input = strdup(str);
-	ch_array_t *ca = ch_array_init(0);
+	ch_array_t *ca = ch_array_init();
 
 	if (!strstr(input, delimiter)) {
 		return ca;

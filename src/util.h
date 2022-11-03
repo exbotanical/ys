@@ -7,7 +7,7 @@
 
 static const char NULL_TERM = '\0';
 
-char* safe_itoa(int x);
+char *safe_itoa(int x);
 
 void iterate_h_table(h_table* ht, void (*cb)());
 

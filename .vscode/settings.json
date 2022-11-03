@@ -29,6 +29,8 @@
     "stdarg.h": "c",
     "random": "c",
     "array.h": "c",
-    "algorithm": "c"
+    "algorithm": "c",
+    "unistd.h": "c",
+    "router.h": "c"
   }
 }

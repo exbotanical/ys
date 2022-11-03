@@ -5,8 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <regex.h>
-#include <pcre.h>
+#include <pcre.h> /* This library relies on the ability to utilize PCRE regex. */
 
 trie_t *trie_init() {
 	trie_t *trie = malloc(sizeof(trie_t));
@@ -79,13 +78,13 @@ void trie_insert(trie_t *trie, ch_array_t *methods, const char *path, void*(*han
 }
 
 // search searches a given path and method in the trie's routing results.
-result_t *trie_search(trie_t *trie, char *method, const char* search_path) {
+result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 	result_t *result = malloc(sizeof(result_t)); // TODO: validate
 
 	node_t *curr = trie->root;
 
 	ch_array_t *ca = expand_path(search_path);
-	for (int i = 0; i < ca->size; i++) {
+	for (int i = 0; i < (int)ca->size; i++) {
 		char *path = ca->state[i];
 
 		h_record* next = h_search(curr->children, path);
@@ -105,12 +104,13 @@ result_t *trie_search(trie_t *trie, char *method, const char* search_path) {
 		bool is_param_match = false;
 
 		for (int k = 0; k < curr->children->capacity; k++) {
-			node_t *child = curr->children->records[k];
- 			if (!child) {
+			h_record *child_record = curr->children->records[k];
+ 			if (!child_record) {
 				continue;
 			}
 
-			char *child_prefix = child->label[0];
+			node_t *child = child_record->value;
+			char child_prefix = child->label[0];
 
 			if (child_prefix == PARAMETER_DELIMITER[0]) {
 				char *pattern = derive_label_pattern(child->label);
@@ -139,13 +139,13 @@ result_t *trie_search(trie_t *trie, char *method, const char* search_path) {
 
 				free(re);
 
-				char *param_key = derive_parameter_key(child);
+				char *param_key = derive_parameter_key(child->label);
 
 				parameter_t *param = malloc(sizeof(parameter_t)); // TODO: validate
-				param->key = param;
+				param->key = param_key;
 				param->value = path;
 
-				ch_array_insert(result->parameters, param);
+				// array_insert(result->parameters, param);
 
 				h_record *next = h_search(curr->children, child->label);
 				if (!next) {

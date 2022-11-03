@@ -1,5 +1,6 @@
 CC=gcc
 CFLAGS=-g -fPIC -Ideps -lm -lpcre -Wall -Wextra -pedantic
+SILENT_FLAGS=-Wno-unused-variable -Wno-discarded-qualifiers
 LDFLAGS=-shared -o
 
 BIN=librest.so
@@ -17,7 +18,8 @@ clean:
 	rm -f $(SRC:.c=.o) $(TARGET) $(BIN) $(BIN).so main*
 
 run:
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC)
+	$(CC) $(CFLAGS) $(SILENT_FLAGS) -o $(TARGET) $(DEPS) $(SRC)
+	./run
 
 test:
 	./scripts/test.bash

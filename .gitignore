@@ -1,3 +1,5 @@
 rest-c
 deps
+run
 *.o
+*.so
