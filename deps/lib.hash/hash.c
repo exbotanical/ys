@@ -29,14 +29,12 @@ static int h_hash (const char* key, const int prime, const int capacity) {
 	long hash = 0;
 
 	const int len_s = strlen(key);
-
 	for (int i = 0; i < len_s; i++) {
 		// convert the key to a large integer
 		hash += (long)pow(prime, len_s - (i+1)) * key[i];
 		// reduce said large integer to a fixed range
+		hash = hash % capacity;
 	}
-
-	hash = hash % capacity;
 
 	return (int)hash;
 }
@@ -189,17 +187,15 @@ void h_insert (h_table* ht, const char* key, void* value) {
 	}
 
 	const int load = ht->count * 100 / ht->capacity;
-
   if (load > 70) {
     h_resize_up(ht);
   }
 
 	h_record* new_record = h_init_record(key, value);
 
-  int i = 0;
-  int idx = h_resolve_hash(new_record->key, ht->capacity, i);
-
+  int idx = h_resolve_hash(new_record->key, ht->capacity, 0);
   h_record* current_record = ht->records[idx];
+  int i = 1;
 
 	// i.e. if there was a collision
   while (current_record != NULL && current_record != &H_RECORD_SENTINEL) {
@@ -212,8 +208,9 @@ void h_insert (h_table* ht, const char* key, void* value) {
     }
 
 		// TODO verify i is 1..
-    idx = h_resolve_hash(new_record->key, ht->capacity, ++i);
+    idx = h_resolve_hash(new_record->key, ht->capacity, i);
 		current_record = ht->records[idx];
+		i++;
   }
 
   ht->records[idx] = new_record;
@@ -228,18 +225,18 @@ void h_insert (h_table* ht, const char* key, void* value) {
  * @return char*
  */
 h_record* h_search (h_table* ht, const char* key) {
-  int i = 0;
-  int idx = h_resolve_hash(key, ht->capacity, i);
-
+  int idx = h_resolve_hash(key, ht->capacity, 0);
   h_record* current_record = ht->records[idx];
+  int i = 1;
 
   while (current_record != NULL && current_record != &H_RECORD_SENTINEL) {
 		if (strcmp(current_record->key, key) == 0) {
 			return current_record;
 		}
 
-    idx = h_resolve_hash(key, ht->capacity, ++i);
+    idx = h_resolve_hash(key, ht->capacity, i);
 		current_record = ht->records[idx];
+		i++;
   }
 
 	return NULL;

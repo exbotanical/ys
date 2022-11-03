@@ -6,9 +6,9 @@
 #include "lib.hash/hash.h" /* for TODO: */
 
 typedef struct node {
-	char* label;
-	h_table* children;
-	h_table* actions;
+	char *label;
+	h_table *children;
+	h_table *actions;
 } node_t;
 
 typedef struct trie {

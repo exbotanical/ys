@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-g -fPIC -Ideps -lm -Wall -Wextra -pedantic
+CFLAGS=-g -fPIC -Ideps -lm -lpcre -Wall -Wextra -pedantic
 LDFLAGS=-shared -o
 
 BIN=librest.so

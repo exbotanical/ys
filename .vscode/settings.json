@@ -27,6 +27,8 @@
     "trie.h": "c",
     "http.h": "c",
     "stdarg.h": "c",
-    "random": "c"
+    "random": "c",
+    "array.h": "c",
+    "algorithm": "c"
   }
 }

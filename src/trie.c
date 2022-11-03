@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <regex.h>
+#include <pcre.h>
 
 trie_t *trie_init() {
 	trie_t *trie = malloc(sizeof(trie_t));
@@ -34,14 +35,10 @@ void trie_insert(trie_t *trie, ch_array_t *methods, const char *path, void*(*han
 		curr->label = path;
 
 		for (int i = 0; i < (int)methods->size; i++) {
-			struct action a = {
-				.handler = handler,
-			};
+			action_t *action = malloc(sizeof(action_t));
+			action->handler = handler;
 
-			action_t *aa = malloc(sizeof(action_t));
-			aa->handler = handler;
-
-			h_insert(curr->actions, methods->state[i], aa);
+			h_insert(curr->actions, methods->state[i], action);
 		}
 
 		return;
@@ -56,21 +53,24 @@ void trie_insert(trie_t *trie, ch_array_t *methods, const char *path, void*(*han
 			curr = next->value;
 		} else {
 			node_t *node = node_init();
+			node->label = split_path;
+
 			h_insert(curr->children, split_path, node);
+
 			curr = node;
 		}
 
 		// Overwrite existing data on last path
 		if (i == (int)ca->size - 1) {
 			curr->label = split_path;
+
 			for (int k = 0; k < (int)(methods->size); k++) {
 				char *method = methods->state[k];
 
-				action_t action = {
-					.handler = handler,
-				};
+				action_t *action = malloc(sizeof(action_t));
+				action->handler = handler;
 
-				h_insert(curr->actions, method, &action);
+				h_insert(curr->actions, method, action);
 			}
 
 			break;
@@ -104,45 +104,58 @@ result_t *trie_search(trie_t *trie, char *method, const char* search_path) {
 
 		bool is_param_match = false;
 
-		for (int k = 0; k < curr->children->count; k++) {
-			node_t *child = curr->children->records[i];
-			char *child_label = child->label[0];
+		for (int k = 0; k < curr->children->capacity; k++) {
+			node_t *child = curr->children->records[k];
+ 			if (!child) {
+				continue;
+			}
 
-			if ((strcmp(child_label, PARAMETER_DELIMITER) == 0)) {
-				char *pattern = derive_label_pattern(child_label);
+			char *child_prefix = child->label[0];
+
+			if (child_prefix == PARAMETER_DELIMITER[0]) {
+				char *pattern = derive_label_pattern(child->label);
 				if (!pattern) {
 					return NULL; // TODO: ErrNotFound
 				}
 
-				regex_t regex;
-				int ret = regcomp(&regex, pattern, 0);
-				if (ret) {
+			  pcre *re;
+        const char *error;
+        int erroffset;
+
+				re = pcre_compile(pattern, 0, &error, &erroffset, NULL);
+				if (re == NULL) {
+					printf("PCRE compilation failed at offset %d: %s/n", erroffset, error);
+					return NULL;
+        }
+
+				int ovecsize = 30;
+				int ovector[ovecsize];
+
+				if (pcre_exec(re, NULL, path, strlen(path), 0, 0, ovector, ovecsize) < 0) {
+					free(re);
+					// No parameter match.
 					return NULL; // TODO: ErrNotFound
 				}
 
-				bool matches = regexec(&regex, path, 0, NULL, 0);
-				if (matches != REG_NOMATCH) {
-					char *param_key = derive_parameter_key(child_label);
+				free(re);
 
-					parameter_t *param = malloc(sizeof(parameter_t)); // TODO: validate
-					param->key = param;
-					param->value = path;
+				char *param_key = derive_parameter_key(child);
 
-					ch_array_insert(result->parameters, param);
+				parameter_t *param = malloc(sizeof(parameter_t)); // TODO: validate
+				param->key = param;
+				param->value = path;
 
-					h_record *next = h_search(curr->children, child_label);
-					if (!next) {
-						printf("\n!!! no next\n"); // TODO: log and validate
-					}
+				ch_array_insert(result->parameters, param);
 
-					curr = next;
-					is_param_match = true;
-
-					break;
+				h_record *next = h_search(curr->children, child->label);
+				if (!next) {
+					printf("\n!!! no next\n"); // TODO: log and validate
 				}
 
-				// No parameter match.
-				return NULL; // TODO: ErrNotFound
+				curr = next->value;
+				is_param_match = true;
+
+				break;
 			}
 		}
 
@@ -160,6 +173,12 @@ result_t *trie_search(trie_t *trie, char *method, const char* search_path) {
 	}
 
 	h_record *action_record = h_search(curr->actions, method); // TODO: validate
+
+	// No matching handler.
+	if (action_record == NULL) {
+		return NULL; // TODO: ErrMethodNotAllowed
+	}
+
 	action_t *next_action = action_record->value;
 
 	// No matching handler.

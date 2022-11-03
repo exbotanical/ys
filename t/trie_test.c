@@ -9,8 +9,7 @@
 #include <stdio.h>
 
 void* test_handler(void* arg) {
-	printf("RESULT %s\n", arg);
-
+	// printf("RESULT %s\n", arg);
 	return NULL;
 }
 
@@ -72,22 +71,6 @@ void test_trie_insert() {
 			trie_insert(trie, route.methods, route.path, route.handler);
 		}, "inserts the trie node");
 	}
-}
-
-void test_trie_search() {
-	trie_t *trie = trie_init();
-
-	route_t record = {
-		.path = PATH_ROOT,
-		.methods = collect_methods("GET", NULL),
-		.handler = test_handler
-	};
-
-	trie_insert(trie, record.methods, record.path, record.handler);
-	result_t *r = trie_search(trie, "GET", "/");
-
-	void *(*h)(void *) = r->action->handler;
-	h("DUDE");
 }
 
 void test_trie_search_ok () {
@@ -225,50 +208,37 @@ void test_trie_search_ok () {
 	trie_t *trie = trie_init();
 
 	int i;
+
 	for (i = 0; i < sizeof(records) / sizeof(route_t); i++) {
 		route_t record = records[i];
 		trie_insert(trie, record.methods, record.path, record.handler);
 	}
 
 	for (i = 0; i < sizeof(tests) / sizeof(test_case); i++) {
+		test_case test = tests[i];
 
+		result_t *result = trie_search(trie, test.search.method, test.search.path);
+
+		void *(*h)(void *);
+
+		lives_ok({
+			h = result->action->handler;
+		}, "%s test - accessible handler with %s", test.name, test.search.path);
+
+		lives_ok({
+			h("DUDE");
+		}, "%s test - callable handler", test.name);
 	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			actual, err := trie.search(test.search.method, test.search.path)
-
-			if err != nil {
-				t.Errorf("expected a result but got error %v", err)
-			}
-
-			if reflect.ValueOf(actual.actions.handler) != reflect.ValueOf(test.expected.actions.handler) {
-				t.Errorf("expected %v but got %v", test.expected.actions.handler, actual.actions.handler)
-			}
-
-			if len(actual.parameters) != len(test.expected.parameters) {
-				t.Errorf("expected %v but got %v", len(test.expected.parameters), len(actual.parameters))
-			}
-
-			for i, param := range actual.parameters {
-				if !reflect.DeepEqual(param, test.expected.parameters[i]) {
-					t.Errorf("expected %v but got %v", test.expected.parameters[i], param)
-				}
-			}
-		})
-	}
-}
-
 
 	free(trie);
 }
 
 int main (int argc, char *argv[]) {
-	plan(0);
+	plan(29);
 
-	// test_trie_init();
-	// test_trie_insert();
-	test_trie_search();
+	test_trie_init();
+	test_trie_insert();
+	test_trie_search_ok();
 
   done_testing();
 }
