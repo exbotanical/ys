@@ -8,6 +8,16 @@
 #include <string.h>
 #include <stdio.h>
 
+typedef struct {
+	char *method;
+	char *path;
+} search_query;
+
+typedef struct {
+	char *name;
+	search_query search;
+} test_case;
+
 void* test_handler(void* arg) {
 	// printf("RESULT %s\n", arg);
 	return NULL;
@@ -74,16 +84,6 @@ void test_trie_insert() {
 }
 
 void test_trie_search_ok () {
-	typedef struct {
-		char *method;
-		char *path;
-	} search_query;
-
-	typedef struct {
-		char *name;
-		search_query search;
-	} test_case;
-
 	route_t records[] = {
 		{
 			.path = PATH_ROOT,
@@ -233,12 +233,103 @@ void test_trie_search_ok () {
 	free(trie);
 }
 
+void test_trie_search_no_match() {
+	route_t records[] = {
+		{
+			.path = PATH_ROOT,
+			.methods = collect_methods("GET", NULL),
+			.handler = test_handler,
+		},
+		{
+			.path = PATH_ROOT,
+			.methods = collect_methods("GET", "POST", NULL),
+			.handler = test_handler,
+		},
+		{
+			.path = "/test",
+			.methods = collect_methods("GET", NULL),
+			.handler = test_handler,
+		},
+		{
+			.path = "/test/path",
+			.methods = collect_methods("GET", NULL),
+			.handler = test_handler,
+		},
+		{
+			.path = "/test/path",
+			.methods = collect_methods("POST", NULL),
+			.handler = test_handler,
+		},
+		{
+			.path = "/test/path/paths",
+			.methods = collect_methods("GET", NULL),
+			.handler = test_handler,
+		},
+		{
+			.path = "/test/path/:id[^\\d+$]",
+			.methods = collect_methods("GET", NULL),
+			.handler = test_handler,
+		}
+	};
+
+	test_case tests[] = {
+		{
+			.name = "SearchComplexRegex",
+			.search = {
+				.method = "GET",
+				.path =   "/test/path/12/31",
+			},
+		},
+		{
+			.name = "SearchNestedPath",
+			.search = {
+				.method = "GET",
+				.path =   "/test/path/path",
+			},
+		},
+		{
+			.name = "SearchSpaceInPath",
+			.search = {
+				.method = "POST",
+				.path =   "/test/pat h",
+			},
+		},
+		{
+			.name = "SearchNestedPathAlt",
+			.search = {
+				.method = "GET",
+				.path =   "/test/path/world",
+			},
+		},
+	};
+
+	trie_t *trie = trie_init();
+
+	int i;
+
+	for (i = 0; i < sizeof(records) / sizeof(route_t); i++) {
+		route_t record = records[i];
+		trie_insert(trie, record.methods, record.path, record.handler);
+	}
+
+	for (i = 0; i < sizeof(tests) / sizeof(test_case); i++) {
+		test_case test = tests[i];
+
+		result_t *result = trie_search(trie, test.search.method, test.search.path);
+
+		is(result, NULL, "%s test - the record is NULL because there was no match", test.name);
+	}
+
+	free(trie);
+}
+
 int main (int argc, char *argv[]) {
-	plan(29);
+	plan(33);
 
 	test_trie_init();
 	test_trie_insert();
 	test_trie_search_ok();
+	test_trie_search_no_match();
 
   done_testing();
 }
