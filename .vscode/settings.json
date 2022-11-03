@@ -26,6 +26,7 @@
     "typeinfo": "c",
     "trie.h": "c",
     "http.h": "c",
-    "stdarg.h": "c"
+    "stdarg.h": "c",
+    "random": "c"
   }
 }
