@@ -31,6 +31,8 @@
     "array.h": "c",
     "algorithm": "c",
     "unistd.h": "c",
-    "router.h": "c"
+    "router.h": "c",
+    "future": "cpp",
+    "system_error": "cpp"
   }
 }
