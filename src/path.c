@@ -1,25 +1,58 @@
 #include "path.h"
 #include "buffer.h"
+#include "logger.h"
 
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
+
 
 ch_array_t *expand_path(const char *path) {
 	return split(path, PATH_DELIMITER);
 }
 
 ch_array_t *split(const char *str, const char *delimiter) {
+	if (str == NULL || delimiter == NULL) {
+		LOG(
+			"[path::split] invariant violation - null arguments(s), \
+			where str was %s and delimiter was %s\n",
+			str,
+			delimiter
+		);
+
+		STDERR("%s\n", "[path::split] invariant violation - null arguments(s) were provided");
+		errno = EINVAL;
+
+		return NULL;
+	}
+
+	// Maintain immutability
 	// @see https://wiki.sei.cmu.edu/confluence/display/c/STR06-C.+Do+not+assume+that+strtok%28%29+leaves+the+parse+string+unchanged
 	char *input = strdup(str);
-	ch_array_t *ca = ch_array_init();
 
+	ch_array_t *ca = ch_array_init();
+	if (ca == NULL) {
+		LOG("[path::split] failed to allocate ch_array_t `ca`\n");
+
+		return NULL;
+	}
+
+	// If the input doesn't even contain the delimiter, return early and avoid further computation
 	if (!strstr(input, delimiter)) {
 		return ca;
 	}
 
   char *token = strtok(input, delimiter);
 	if (token == NULL) {
+		LOG(
+			"[path::split] `strtok` returned NULL for its initial token; this is likely a bug \
+			because the input contains the delimiter. input was %s and delimiter was %s
+			\n",
+			input,
+			delimiter
+		);
+
 		return ca;
 	}
 
@@ -33,7 +66,21 @@ ch_array_t *split(const char *str, const char *delimiter) {
 	return ca;
 }
 
-int index_of (const char *str, const char *target) {
+int index_of(const char *str, const char *target) {
+	if (str == NULL || target == NULL) {
+		LOG(
+			"[path::index_of] invariant violation - null arguments(s), \
+			where str was %s and target was %s\n",
+			str,
+			target
+		);
+
+		STDERR("%s\n", "[path::index_of] invariant violation - null arguments(s) were provided");
+		errno = EINVAL;
+
+		return -1;
+	}
+
 	char *needle = strstr(str, target);
 	if (needle == NULL) {
 		return -1;
@@ -42,26 +89,79 @@ int index_of (const char *str, const char *target) {
 	return needle - str;
 }
 
-	// TODO: validate and test
 char *substr(const char *str, int start, int end, bool inclusive) {
-	// int len = strlen(str);
 	end = inclusive ? end : end - 1;
 
 	if (start > end) {
-		return "";
+		LOG(
+			"[path::substr] invariant violation - start index greater than end, \
+			where str was %s, start was %d, end was %d, and inclusive flag was %s\n",
+			str,
+			start,
+			end,
+			inclusive ? "set" : "not set"
+		);
+
+		STDERR("%s\n", "[path::substr] invariant violation - start index greater than end");
+		errno = EINVAL;
+
+		return NULL;
 	}
 
-	// if (start < 0 || start > len) {
-	// 	printf("Invalid \'start\' index\n");
-	// 	return 1;
-	// }
+	int len = strlen(str);
+	if (start < 0 || start > len) {
+		LOG(
+			"[path::substr] invariant violation - \
+			start index less than zero or greater than str length, \
+			where str was %s, start was %d, end was %d, and inclusive flag was %s\n",
+			str,
+			start,
+			end,
+			inclusive ? "set" : "not set"
+		);
 
-	// if(end > len) {
-	// 	printf("Invalid \'end\' index\n");
-	// 	return 1;
-	// }
+		STDERR(
+			"%s\n",
+			"[path::substr] invariant violation - \
+			start index less than zero or greater than str length"
+		);
+		errno = EINVAL;
 
-	char *ret = malloc(sizeof(char) * (end - start));
+		return NULL;
+	}
+
+	if (end > len) {
+		LOG(
+			"[path::substr] invariant violation - end index was greater than str length, \
+			where str was %s, start was %d, end was %d, and inclusive flag was %s\n",
+			str,
+			start,
+			end,
+			inclusive ? "set" : "not set"
+		);
+
+		STDERR(
+			"%s\n",
+			"[path::substr] invariant violation - end index was greater than str length"
+		);
+		errno = EINVAL;
+
+		return NULL;
+	}
+
+	int size_multiplier = end - start;
+	char *ret = malloc(sizeof(char) * size_multiplier);
+	if (ret == NULL) {
+		LOG(
+			"[path::substr] failed to allocate char* with `malloc`, where \
+			size multiplier was %d\n",
+			size_multiplier
+		);
+
+		STDERR("%s\n", "[path::substr] failed to allocate char* with `malloc`");
+
+		return NULL;
+	}
 
 	int i = 0;
 	int j = 0;
@@ -80,7 +180,6 @@ char *derive_label_pattern(const char *label) {
 
 	// If the label doesn't contain a pattern, default to the wildcard pattern.
 	if (start == -1 || end == -1) {
-		// TODO: validate
 		return strdup(PATTERN_WILDCARD);
 	}
 

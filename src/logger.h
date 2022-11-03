@@ -13,9 +13,9 @@
 
 #define LOG(fmt, ...)
 
-
 #endif /* DEBUG */
 
-#define DIE(rc, fmt, ...) fprintf(stderr, fmt, __VA_ARGS__), exit(rc)
+#define STDERR(fmt, ...) fprintf(stderr, fmt, __VA_ARGS__)
+#define DIE(rc, fmt, ...) STDERR(fmt, __VA_ARGS__), exit(rc)
 
 #endif /* LOGGER_H */
