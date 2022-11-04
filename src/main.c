@@ -16,13 +16,7 @@
 #include <stdarg.h>
 
 int main() {
-	// run();
-	char *s = fmt_str("first: %s %d %s", "HTTP/1.1", 200, "OK");
-
-	http_status_t e = CONFLICT;
-	printf("%s\n", http_status_names[e]);
-
-	printf(s);
+	run();
 	return EXIT_SUCCESS;
 }
 
@@ -75,12 +69,6 @@ int run() {
 
 		char recv_buffer[1024];
 
-		/*Step 8: Server recieving the data from client. Client IP and PORT no will be stored in client_addr
-			* by the kernel. Server will use this client_addr info to reply back to client*/
-
-		/*Like in client case, this is also a blocking system call, meaning, server process halts here untill
-			* data arrives on this comm_socket_fd from client whose connection request has been accepted via accept()*/
-		/* state Machine state 3*/
 		recvfrom(
 			new_socket,
 			(char *)recv_buffer,
@@ -95,12 +83,14 @@ int run() {
 
 		router_run(router, r.method, r.url);
 
-		buffer_t *response = build_response(OK, "Hello world!",
-			"HTTP/1.1 200 OK",
+		buffer_t *response = build_response(
+			OK,
+			"text/plain",
+			"Hello world!",
 			"X-Powered-By: rest-c",
-			"Content-Type: text/plain",
 			NULL
 		);
+
 		printf(response->state);
 
 		write(new_socket, response->state, response->len);

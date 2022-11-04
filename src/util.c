@@ -15,20 +15,22 @@ char *safe_itoa(int x) {
 }
 
 char *fmt_str (char *fmt, ...) {
-	va_list args;
+	va_list args, args_cp;
  	va_start(args, fmt);
+	va_copy(args_cp, args);
 
 	// Pass length of zero first to determine number of bytes needed
-	size_t n_bytes = snprintf(NULL, 0, fmt, args) + 1;
- 	va_end(args);
-
-	char *str = malloc(n_bytes);
-	if (!str) {
+	int n = vsnprintf(NULL, 0, fmt, args) + 1;
+	char *buf = malloc(n);
+	if (!buf) {
 		LOG("%s\n", "[util::fmt_str] failed to allocate char*");
 		return NULL;
 	}
 
-	vsnprintf(str, n_bytes, fmt, args);
+	vsnprintf(buf, n, fmt, args_cp);
 
-	return str;
+ 	va_end(args);
+ 	va_end(args_cp);
+
+	return buf;
 }

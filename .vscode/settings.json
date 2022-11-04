@@ -34,6 +34,7 @@
     "router.h": "c",
     "future": "cpp",
     "system_error": "cpp",
-    "errno.h": "c"
+    "errno.h": "c",
+    "in.h": "c"
   }
 }

@@ -13,7 +13,12 @@ typedef struct request {
 	char *method;
 } request_t;
 
-buffer_t *build_response(http_status_t status, char *body, char *header, ...);
+buffer_t *build_response(
+	http_status_t status,
+	char *content_type,
+	char *body,
+	...
+);
 
 struct request build_request(char *buffer);
 

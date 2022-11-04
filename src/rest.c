@@ -17,25 +17,33 @@
 #include <stdarg.h>
 
 // uses sentinel variant
-buffer_t *build_response(http_status_t status, char *body, char *header, ...) {
+buffer_t *build_response(
+	http_status_t status,
+	char *content_type,
+	char *body,
+	...
+) {
 	buffer_t *headers = buffer_init();
 	buffer_append(
 		headers,
-		fmt_str("HTTP/1.1 %d %s", status, http_status_names[status])
+		fmt_str("HTTP/1.1 %d %s\n", status, http_status_names[status])
 	);
-	buffer_append(headers, "Content-Type: text/plain"); // TODO: arg
+	buffer_append(
+		headers,
+		fmt_str("Content-Type: %s\n", content_type)
+	);
 
   va_list args;
-	va_start(args, header);
+	va_start(args, body);
 
-	while (header) {
+	char *header;
+	// Add user-defined headers
+	while ((header = va_arg(args, const char *)) != NULL) {
 		// Content-Length needs to be accurate; thus we ensure the framework is setting it
 		if (!strcasestr(header, "Content-Length:")) {
 			buffer_append(headers, header);
 			buffer_append(headers, "\n");
 		}
-
-		header = va_arg(args, const char *);
 	}
 
 	va_end(args);
