@@ -7,6 +7,8 @@
 ch_array_t *ch_array_init() {
 	ch_array_t *a = malloc(sizeof(ch_array_t));
 	if (a == NULL) {
+		free(a);
+
 		LOG("[array::ch_array_init] failed to allocate ch_array_t\n");
 
 		return NULL;
@@ -14,6 +16,8 @@ ch_array_t *ch_array_init() {
 
   a->state = malloc(sizeof(char*));
 	if (a->state == NULL) {
+		ch_array_free(a);
+
 		LOG("[array::ch_array_init] failed to allocate ch_array_t::state\n");
 
 		return NULL;
@@ -27,6 +31,8 @@ ch_array_t *ch_array_init() {
 bool ch_array_insert(ch_array_t *a, char *el) {
 	char *cp = strdup(el);
 	if (cp == NULL) {
+		free(cp);
+
 		LOG(
 			"[array::ch_array_insert] failed to copy provided element with `strdup`, \
 			where `a` was %p and `el` was %s\n",
@@ -39,6 +45,9 @@ bool ch_array_insert(ch_array_t *a, char *el) {
 
 	char **next_state = realloc(a->state, (a->size + 1) * sizeof(char*));
 	if (next_state == NULL) {
+		free(cp);
+		free(next_state);
+
 		LOG(
 			"[array::ch_array_insert] failed to reallocate array memory with `realloc`, \
 			where `a` was %p and `el` was %s\n",
@@ -59,17 +68,24 @@ void ch_array_free(ch_array_t *a) {
   free(a->state);
 	// Mitigate potential memory corruption if dangling pointer is accessed
   a->state = NULL;
+	free(a);
 }
 
 array_t *array_init() {
 	array_t *a = malloc(sizeof(array_t));
 	if (a == NULL) {
+		free(a);
+
+		LOG("[array::array_init] failed to allocate array_t\n");
+
 		return NULL;
 	}
 
   a->state = malloc(sizeof(void*));
 	if (a->state == NULL) {
-		return NULL;
+		array_free(a);
+
+		LOG("[array::array_init] failed to allocate array_t::state\n");
 	}
 
   a->size = 0;
@@ -80,6 +96,8 @@ array_t *array_init() {
 bool array_insert(array_t *a, void *el) {
 	void **next_state = realloc(a->state, (a->size + 1) * sizeof(void*));
 	if (next_state == NULL) {
+		free(next_state);
+
 		LOG(
 			"[array::array_insert] failed to reallocate array memory with `realloc`, \
 			where `a` was %p and `el` was %s\n",
@@ -100,4 +118,5 @@ void array_free(array_t *a) {
   free(a->state);
 	// Mitigate potential memory corruption if dangling pointer is accessed
   a->state = NULL;
+	free(a);
 }

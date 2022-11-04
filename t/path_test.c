@@ -55,7 +55,6 @@ void test_split_end_match() {
 
 void test_expand_path_ok() {
 	char *test_str = "/path/to/route";
-
 	ch_array_t *ca = expand_path(test_str);
 
 	ok(ca->size == 3, "only the matched characters are captured");
@@ -110,7 +109,7 @@ void test_substr_no_range() {
 
 	char *substring = substr(test_str, 1, 1, false);
 
-	is(substring, "", "substring sans range yields empty string");
+	is(substring, NULL, "substring sans range yields empty string");
 }
 
 void test_substr_no_range_inclusive() {
@@ -124,7 +123,7 @@ void test_substr_no_range_inclusive() {
 void test_derive_label_pattern() {
 	test_case_t tests[] = {
 		{ .name = "BasicRegex", .input = ":id[^\\d+$]", .expected = "^\\d+$" },
-		{ .name = "EmptyRegex", .input = ":id[]", .expected = "" },
+		{ .name = "EmptyRegex", .input = ":id[]", .expected = NULL },
 		{ .name = "NoRegex", .input = ":id", .expected = "(.+)" },
 		{ .name = "LiteralRegex", .input = ":id[xxx]", .expected = "xxx" },
 		{ .name = "WildcardRegex", .input = ":id[*]", .expected = "*" },

@@ -1,6 +1,7 @@
 #include "trie.h"
 
 #include "path.h"
+#include "logger.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -10,23 +11,23 @@
 trie_t *trie_init() {
 	trie_t *trie = malloc(sizeof(trie_t));
 	if (trie == NULL) {
+		free(trie);
+		LOG("[trie::trie_init] failed to allocate trie_t\n");
+
 		return NULL;
 	}
 
 	trie->root = node_init();
+	if (!trie->root) {
+		LOG("[trie::trie_init] failed to allocate root node via node_init\n");
+
+		return NULL;
+	}
 
 	return trie;
 }
 
-node_t *node_init() {
-	node_t *node = malloc(sizeof(node_t));
-	node->children = h_init_table(0);
-	node->actions = h_init_table(0);
-
-	return node;
-}
-
-void trie_insert(trie_t *trie, ch_array_t *methods, const char *path, void*(*handler)(void*)) {
+bool trie_insert(trie_t *trie, ch_array_t *methods, const char *path, void*(*handler)(void*)) {
 	node_t *curr = trie->root;
 
 	// Handle root path
@@ -35,12 +36,19 @@ void trie_insert(trie_t *trie, ch_array_t *methods, const char *path, void*(*han
 
 		for (int i = 0; i < (int)methods->size; i++) {
 			action_t *action = malloc(sizeof(action_t));
+			if (!action) {
+				free(action);
+				LOG("[trie::trie_insert] failed to allocate action\n");
+
+				return false;
+			}
+
 			action->handler = handler;
 
 			h_insert(curr->actions, methods->state[i], action);
 		}
 
-		return;
+		return true;
 	}
 
 	ch_array_t *ca = expand_path(path);
@@ -52,10 +60,14 @@ void trie_insert(trie_t *trie, ch_array_t *methods, const char *path, void*(*han
 			curr = next->value;
 		} else {
 			node_t *node = node_init();
+			if (!node) {
+				LOG("[trie::trie_insert] failed to allocate node via node_init\n");
+
+				return false;
+			}
+
 			node->label = split_path;
-
 			h_insert(curr->children, split_path, node);
-
 			curr = node;
 		}
 
@@ -67,19 +79,32 @@ void trie_insert(trie_t *trie, ch_array_t *methods, const char *path, void*(*han
 				char *method = methods->state[k];
 
 				action_t *action = malloc(sizeof(action_t));
-				action->handler = handler;
+				if (!action) {
+					free(action);
+					LOG("[trie::trie_insert] failed to allocate action\n");
 
+					return false;
+				}
+
+				action->handler = handler;
 				h_insert(curr->actions, method, action);
 			}
 
 			break;
 		}
 	}
+
+	return true;
 }
 
-// search searches a given path and method in the trie's routing results.
 result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
-	result_t *result = malloc(sizeof(result_t)); // TODO: validate
+	result_t *result = malloc(sizeof(result_t));
+	if (!result) {
+		free(result);
+		LOG("[trie::trie_search] failed to allocate result\n");
+
+		return NULL; // TODO: 500
+	}
 
 	node_t *curr = trie->root;
 
@@ -95,7 +120,7 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 
 		if (curr->children->count == 0) {
 			if (strcmp(curr->label, path) != 0) {
-				// No matching route result found.
+				// No matching route result found
 				return NULL; // TODO: ErrNotFound
 			}
 			break;
@@ -124,8 +149,10 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 
 				re = pcre_compile(pattern, 0, &error, &erroffset, NULL);
 				if (re == NULL) {
-					printf("PCRE compilation failed at offset %d: %s/n", erroffset, error);
-					return NULL;
+					free(re);
+					LOG("[trie::trie_search] PCRE compilation failed at offset %d: %s\n", erroffset, error);
+
+					return NULL; // TODO: 500
         }
 
 				int ovecsize = 30;
@@ -133,7 +160,7 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 
 				if (pcre_exec(re, NULL, path, strlen(path), 0, 0, ovector, ovecsize) < 0) {
 					free(re);
-					// No parameter match.
+					// No parameter match
 					return NULL; // TODO: ErrNotFound
 				}
 
@@ -141,15 +168,32 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 
 				char *param_key = derive_parameter_key(child->label);
 
-				parameter_t *param = malloc(sizeof(parameter_t)); // TODO: validate
+				parameter_t *param = malloc(sizeof(parameter_t));
+				if (!param) {
+					free(param);
+					LOG("[trie::trie_search] failed to allocate param\n");
+
+					return NULL; // TODO: 500
+				}
+
 				param->key = param_key;
 				param->value = path;
 
-				// array_insert(result->parameters, param);
+				if (!array_insert(result->parameters, param)) {
+					char *message = "failed to insert parameter record in result->parameters";
+					LOG("[trie::trie_search] %s\n", message);
+					STDERR("%s\n", message);
+				}
 
 				h_record *next = h_search(curr->children, child->label);
 				if (!next) {
-					printf("\n!!! no next\n"); // TODO: log and validate
+					LOG(
+						"[trie::trie_search] did not match a route but expected to, \
+						where label is %s\n",
+						child->label
+					);
+
+					return NULL; // TODO: 500
 				}
 
 				curr = next->value;
@@ -159,29 +203,27 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 			}
 		}
 
-		// No parameter match.
+		// No parameter match
 		if (!is_param_match) {
 			return NULL; // TODO: ErrNotFound
 		}
 	}
 
 	if (strcmp(search_path, PATH_ROOT) == 0) {
-		// No matching handler.
+		// No matching handler
 		if (curr->actions->count == 0) {
 			return NULL; // TODO: ErrNotFound
 		}
 	}
 
-	h_record *action_record = h_search(curr->actions, method); // TODO: validate
-
-	// No matching handler.
+	h_record *action_record = h_search(curr->actions, method);
+	// No matching handler
 	if (action_record == NULL) {
 		return NULL; // TODO: ErrMethodNotAllowed
 	}
 
 	action_t *next_action = action_record->value;
-
-	// No matching handler.
+	// No matching handler
 	if (next_action == NULL) {
 		return NULL; // TODO: ErrMethodNotAllowed
 	}
@@ -189,4 +231,34 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 	result->action = next_action;
 
 	return result;
+}
+
+node_t *node_init() {
+	node_t *node = malloc(sizeof(node_t));
+	if (!node) {
+		free(node);
+		LOG("[trie::node_init] failed to allocate node\n");
+
+		return NULL;
+	}
+
+	node->children = h_init_table(0);
+	if (!node->children) {
+		free(node->children);
+		free(node);
+		LOG("[trie::node_init] failed to initialize hash table for node children\n");
+
+		return NULL;
+	}
+
+	node->actions = h_init_table(0);
+	if (!node->actions) {
+		free(node->actions);
+		free(node);
+		LOG("[trie::node_init] failed to initialize hash table for node actions\n");
+
+		return NULL;
+	}
+
+	return node;
 }

@@ -33,6 +33,8 @@ ch_array_t *split(const char *str, const char *delimiter) {
 
 	ch_array_t *ca = ch_array_init();
 	if (ca == NULL) {
+		free(ca);
+
 		LOG("[path::split] failed to allocate ch_array_t `ca`\n");
 
 		return NULL;
@@ -152,6 +154,8 @@ char *substr(const char *str, int start, int end, bool inclusive) {
 	int size_multiplier = end - start;
 	char *ret = malloc(sizeof(char) * size_multiplier);
 	if (ret == NULL) {
+		free(ret);
+
 		LOG(
 			"[path::substr] failed to allocate char* with `malloc`, where \
 			size multiplier was %d\n",

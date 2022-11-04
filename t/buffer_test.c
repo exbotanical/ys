@@ -10,8 +10,6 @@ void test_buffer_init() {
 
 	is(buf->state, NULL, "newly initialized buffer's state is NULL");
 	ok(buf->len == 0, "newly initialized buffer's length is 0");
-
-	buffer_free(buf);
 }
 
 void test_buffer_append() {
