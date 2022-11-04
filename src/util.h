@@ -1,5 +1,5 @@
-#ifndef RESTC_UTIL_H
-#define RESTC_UTIL_H
+#ifndef UTIL_H
+#define UTIL_H
 
 #include "lib.hash/hash.h"
 
@@ -9,6 +9,6 @@ static const char NULL_TERM = '\0';
 
 char *safe_itoa(int x);
 
-void iterate_h_table(h_table* ht, void (*cb)());
+char *fmt_str (char *fmt, ...);
 
-#endif /* RESTC_UTIL_H */
+#endif /* UTIL_H */

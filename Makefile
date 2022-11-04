@@ -2,6 +2,7 @@ CC=gcc
 CFLAGS=-g -fPIC -Ideps -lm -lpcre -Wall -Wextra -pedantic
 SILENT_FLAGS=-Wno-unused-variable -Wno-discarded-qualifiers
 LDFLAGS=-shared -o
+DEBUG=-DDEBUG=1 # TODO: use opt
 
 BIN=librest.so
 TARGET=run
@@ -12,7 +13,7 @@ DEPS=$(wildcard deps/*/*.c)
 TESTS = $(patsubst %.c, %, $(wildcard t/*.c))
 
 all:
-	$(CC) $(CFLAGS) $(DEPS) $(SRC) $(LDFLAGS) $(BIN)
+	$(CC) $(DEBUG) $(CFLAGS) $(DEPS) $(SRC) $(LDFLAGS) $(BIN)
 
 clean:
 	rm -f $(SRC:.c=.o) $(TARGET) $(BIN) $(BIN).so main*

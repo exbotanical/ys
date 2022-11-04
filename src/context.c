@@ -9,7 +9,10 @@ route_context_t *route_context_init(char *method, char *path, array_t *parameter
 	if (!context) {
 		free(context);
 
-		LOG("[context::route_context_init] failed to allocate route_context_t\n");
+		LOG(
+			"[context::route_context_init] %s\n",
+			"failed to allocate route_context_t"
+		);
 
 		return NULL;
 	}

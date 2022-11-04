@@ -9,7 +9,10 @@ ch_array_t *ch_array_init() {
 	if (a == NULL) {
 		free(a);
 
-		LOG("[array::ch_array_init] failed to allocate ch_array_t\n");
+		LOG(
+			"[array::ch_array_init] %s\n",
+			"failed to allocate ch_array_t"
+		);
 
 		return NULL;
 	}
@@ -18,7 +21,10 @@ ch_array_t *ch_array_init() {
 	if (a->state == NULL) {
 		ch_array_free(a);
 
-		LOG("[array::ch_array_init] failed to allocate ch_array_t::state\n");
+		LOG(
+			"[array::ch_array_init] %s\n",
+			"failed to allocate ch_array_t::state"
+		);
 
 		return NULL;
 	}
@@ -76,7 +82,7 @@ array_t *array_init() {
 	if (a == NULL) {
 		free(a);
 
-		LOG("[array::array_init] failed to allocate array_t\n");
+		LOG("[array::array_init] %s\n", "failed to allocate array_t");
 
 		return NULL;
 	}
@@ -85,7 +91,7 @@ array_t *array_init() {
 	if (a->state == NULL) {
 		array_free(a);
 
-		LOG("[array::array_init] failed to allocate array_t::state\n");
+		LOG("[array::array_init] %s\n", "failed to allocate array_t::state");
 	}
 
   a->size = 0;

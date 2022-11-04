@@ -28,7 +28,7 @@ typedef struct parameter {
 
 typedef struct result {
 	action_t *action;
-	array_t *parameters[];
+	array_t *parameters;
 } result_t;
 
 /**

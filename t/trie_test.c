@@ -226,7 +226,7 @@ void test_trie_search_ok () {
 		}, "%s test - accessible handler with %s", test.name, test.search.path);
 
 		lives_ok({
-			h("DUDE");
+			h("DUDE"); // TODO: pass route context and test
 		}, "%s test - callable handler", test.name);
 	}
 

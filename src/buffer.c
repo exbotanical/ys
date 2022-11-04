@@ -11,7 +11,7 @@ buffer_t *buffer_init() {
   if (buf == NULL) {
 		free(buf);
 
-		LOG("[buffer::buffer_init] failed to allocate buffer_t\n");
+		LOG("[buffer::buffer_init] %s\n", "failed to allocate buffer_t");
 
 		return NULL;
 	}
@@ -20,13 +20,19 @@ buffer_t *buffer_init() {
 }
 
 bool buffer_append(buffer_t *buf, const char *s) {
+	if (!s) {
+		LOG("[buffer::buffer_append] %s\n", "invariant violation - arg `s` was NULL");
+
+		return false;
+	}
+
 	int len = strlen(s);
 
   // get mem sizeof current str + sizeof append str
   char *next = realloc(buf->state, buf->len + len);
   if (!next) {
 		free(next);
-		LOG("[buffer::buffer_append] failed to reallocate buf->state\n");
+		LOG("[buffer::buffer_append] %s\n", "failed to reallocate buf->state");
 
 		return false;
 	}

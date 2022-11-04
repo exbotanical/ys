@@ -34,7 +34,7 @@ ch_array_t *split(const char *str, const char *delimiter) {
 	if (ca == NULL) {
 		free(ca);
 
-		LOG("[path::split] failed to allocate ch_array_t `ca`\n");
+		LOG("[path::split] %s\n", "failed to allocate ch_array_t `ca`");
 
 		return NULL;
 	}
@@ -44,12 +44,17 @@ ch_array_t *split(const char *str, const char *delimiter) {
 		return ca;
 	}
 
+	// If the input *is* the delimiter, just return the empty array
+	if (strcmp(input, delimiter) == 0) {
+		return ca;
+	}
+
   char *token = strtok(input, delimiter);
 	if (token == NULL) {
 		LOG(
+			// TODO: Fix other log strings with tab chars being inadvertently inserted
 			"[path::split] `strtok` returned NULL for its initial token; this is likely a bug \
-			because the input contains the delimiter. input was %s and delimiter was %s
-			\n",
+because the input contains the delimiter. input was %s and delimiter was %s\n",
 			input,
 			delimiter
 		);

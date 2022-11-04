@@ -27,13 +27,18 @@ typedef struct route {
 	void*(*handler)(void*);
 } route_t;
 
-
 /**
- * @brief Allocates memory for a new router and its `trie` member.
+ * @brief Allocates memory for a new router and its `trie` member;
+ * sets the handlers for 404 and 405 (if none provided, defaults will be used).
  *
+ * @param not_found_handler
+ * @param method_not_allowed_handler
  * @return router_t*
  */
-router_t *router_init();
+router_t *router_init(
+	void*(*not_found_handler)(void*),
+	void*(*method_not_allowed_handler)(void*)
+);
 
 /**
  * @brief Registers a new route record. Registered routes will be matched

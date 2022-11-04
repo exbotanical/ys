@@ -12,14 +12,17 @@ trie_t *trie_init() {
 	trie_t *trie = malloc(sizeof(trie_t));
 	if (trie == NULL) {
 		free(trie);
-		LOG("[trie::trie_init] failed to allocate trie_t\n");
+		LOG("[trie::trie_init] %s\n", "failed to allocate trie_t");
 
 		return NULL;
 	}
 
 	trie->root = node_init();
 	if (!trie->root) {
-		LOG("[trie::trie_init] failed to allocate root node via node_init\n");
+		LOG(
+			"[trie::trie_init] %s\n",
+			"failed to allocate root node via node_init"
+		);
 
 		return NULL;
 	}
@@ -38,7 +41,10 @@ bool trie_insert(trie_t *trie, ch_array_t *methods, const char *path, void*(*han
 			action_t *action = malloc(sizeof(action_t));
 			if (!action) {
 				free(action);
-				LOG("[trie::trie_insert] failed to allocate action\n");
+				LOG(
+					"[trie::trie_insert] %s\n",
+					"failed to allocate action"
+				);
 
 				return false;
 			}
@@ -61,7 +67,10 @@ bool trie_insert(trie_t *trie, ch_array_t *methods, const char *path, void*(*han
 		} else {
 			node_t *node = node_init();
 			if (!node) {
-				LOG("[trie::trie_insert] failed to allocate node via node_init\n");
+				LOG(
+					"[trie::trie_insert] %s\n",
+					"failed to allocate node via node_init"
+				);
 
 				return false;
 			}
@@ -81,7 +90,10 @@ bool trie_insert(trie_t *trie, ch_array_t *methods, const char *path, void*(*han
 				action_t *action = malloc(sizeof(action_t));
 				if (!action) {
 					free(action);
-					LOG("[trie::trie_insert] failed to allocate action\n");
+					LOG(
+						"[trie::trie_insert] %s\n",
+						"failed to allocate action"
+					);
 
 					return false;
 				}
@@ -101,7 +113,22 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 	result_t *result = malloc(sizeof(result_t));
 	if (!result) {
 		free(result);
-		LOG("[trie::trie_search] failed to allocate result\n");
+		LOG(
+			"[trie::trie_search] %s\n",
+			"failed to allocate result"
+		);
+
+		return NULL; // TODO: 500
+	}
+
+	// TODO: make failure optional here with configuration options
+	result->parameters = array_init();
+	if (!result->parameters) {
+		free(result->parameters);
+		LOG(
+			"[trie::trie_search] %s\n",
+			"failed to allocate result->parameters via array_init"
+		);
 
 		return NULL; // TODO: 500
 	}
@@ -129,6 +156,7 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 		bool is_param_match = false;
 
 		for (int k = 0; k < curr->children->capacity; k++) {
+
 			h_record *child_record = curr->children->records[k];
  			if (!child_record) {
 				continue;
@@ -150,7 +178,12 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 				re = pcre_compile(pattern, 0, &error, &erroffset, NULL);
 				if (re == NULL) {
 					free(re);
-					LOG("[trie::trie_search] PCRE compilation failed at offset %d: %s\n", erroffset, error);
+					LOG(
+						"[trie::trie_search] %s %d: %s\n",
+						"PCRE compilation failed at offset",
+						erroffset,
+						error
+					);
 
 					return NULL; // TODO: 500
         }
@@ -171,7 +204,10 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 				parameter_t *param = malloc(sizeof(parameter_t));
 				if (!param) {
 					free(param);
-					LOG("[trie::trie_search] failed to allocate param\n");
+					LOG(
+						"[trie::trie_search] %s\n",
+						"failed to allocate param"
+					);
 
 					return NULL; // TODO: 500
 				}
@@ -188,8 +224,8 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 				h_record *next = h_search(curr->children, child->label);
 				if (!next) {
 					LOG(
-						"[trie::trie_search] did not match a route but expected to, \
-						where label is %s\n",
+						"[trie::trie_search] %s %s\n",
+						"did not match a route but expected to, where label is",
 						child->label
 					);
 
@@ -237,7 +273,7 @@ node_t *node_init() {
 	node_t *node = malloc(sizeof(node_t));
 	if (!node) {
 		free(node);
-		LOG("[trie::node_init] failed to allocate node\n");
+		LOG("[trie::node_init] %s\n", "failed to allocate node");
 
 		return NULL;
 	}
@@ -246,7 +282,10 @@ node_t *node_init() {
 	if (!node->children) {
 		free(node->children);
 		free(node);
-		LOG("[trie::node_init] failed to initialize hash table for node children\n");
+		LOG(
+			"[trie::node_init] %s\n",
+			"failed to initialize hash table for node children"
+		);
 
 		return NULL;
 	}
@@ -255,7 +294,10 @@ node_t *node_init() {
 	if (!node->actions) {
 		free(node->actions);
 		free(node);
-		LOG("[trie::node_init] failed to initialize hash table for node actions\n");
+		LOG(
+			"[trie::node_init] %s\n",
+			"failed to initialize hash table for node actions"
+		);
 
 		return NULL;
 	}
