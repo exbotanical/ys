@@ -5,12 +5,12 @@
 #include "util.h"
 #include "array.h"
 
-#include "lib.hash/hash.h" /* for TODO: */
+#include "lib.hash/hash.h"
 
 #include <stdbool.h>
 
 /**
- * @brief TODO: doc
+ * @brief A router object.
  */
 typedef struct router {
 	trie_t *trie;
@@ -19,7 +19,7 @@ typedef struct router {
 } router_t;
 
 /**
- * @brief TODO: doc
+ * @brief A route record.
  */
 typedef struct route {
 	ch_array_t *methods;

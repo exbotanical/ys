@@ -1,8 +1,6 @@
 #ifndef HTTP_H
 #define HTTP_H
 
-#include "lib.hash/hash.h" /* for TODO: */
-
 typedef enum method {
 	GET,
 	HEAD,

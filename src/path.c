@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <errno.h>
 
-
 ch_array_t *expand_path(const char *path) {
 	return split(path, PATH_DELIMITER);
 }

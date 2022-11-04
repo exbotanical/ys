@@ -4,14 +4,12 @@
 #include <stdbool.h>
 
 /**
- * @brief TODO: doc
- *
+ * @brief Default initial buffer size.
  */
 #define BUFFER_SIZE_INIT 16
 
 /**
- * @brief TODO: doc
- *
+ * @brief A dynamic string buffer.
  */
 typedef struct buffer {
   char *state;

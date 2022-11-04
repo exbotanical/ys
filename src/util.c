@@ -8,8 +8,6 @@ char *safe_itoa(int x) {
 	char *str = malloc(length + 1 );
 	snprintf(str, length + 1, "%d", x);
 
-	// TODO: return struct w/ callback to free
-	// free(str);
 	return str;
 }
 

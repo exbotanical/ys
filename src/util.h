@@ -1,7 +1,7 @@
 #ifndef RESTC_UTIL_H
 #define RESTC_UTIL_H
 
-#include "lib.hash/hash.h" /* for TODO: */
+#include "lib.hash/hash.h"
 
 #include <stddef.h>
 

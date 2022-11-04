@@ -20,7 +20,7 @@ buffer_t *buffer_init() {
 }
 
 bool buffer_append(buffer_t *buf, const char *s) {
-	int len = strlen(s); // TODO: null check
+	int len = strlen(s);
 
   // get mem sizeof current str + sizeof append str
   char *next = realloc(buf->state, buf->len + len);

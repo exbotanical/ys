@@ -5,8 +5,7 @@
 #include <stdbool.h>
 
 /**
- * @brief TODO: doc
- *
+ * @brief A dynamic character pointer array.
  */
 typedef struct ch_array {
   char** state;
@@ -14,8 +13,7 @@ typedef struct ch_array {
 } ch_array_t;
 
 /**
- * @brief  TODO: doc
- *
+ * @brief A dynamic void pointer array.
  */
 typedef struct array {
   void** state;

@@ -1,5 +1,5 @@
 # TODOs
 
-- [ ] Clean up all objects w/ free where necessary
-- [ ] Validate NULLs and allocated objects
-- [ ] Add logging
+- [x] Clean up all objects w/ free where necessary
+- [x] Validate NULLs and allocated objects
+- [x] Add logging

@@ -3,7 +3,7 @@
 
 #include "array.h"
 
-#include "lib.hash/hash.h" /* for TODO: */
+#include "lib.hash/hash.h"
 
 #include <stdbool.h>
 

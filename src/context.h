@@ -4,8 +4,8 @@
 #include "array.h"
 
 /**
- * @brief TODO: doc
- *
+ * @brief A context object containing metadata to be passed
+ * to matched route handlers.
  */
 typedef struct route_context {
 	char *method;
