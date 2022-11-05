@@ -1,7 +1,8 @@
 rest-c
 deps
 run
+demo
+main
 *.o
 *.so
-
-*.bak
+.vscode

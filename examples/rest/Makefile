@@ -1,12 +1,11 @@
-CC=gcc 
+CC=gcc
 OBJFILES=$(wildcard ./*.c)
-INTERMEDIARY=main
 TARGET=demo
 
 all: $(TARGET)
 
 $(TARGET): $(OBJFILES)
-	$(CC) -I../../src -I../../deps $(OBJFILES) -o $(INTERMEDIARY) -L../../ -lthread
+	$(CC) -I../../src -I../../deps $(OBJFILES) -o $(TARGET) -L../../ -lrest
 
 clean:
 	rm $(TARGET)

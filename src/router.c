@@ -66,7 +66,7 @@ router_t *router_init(
 	if (method_not_allowed_handler == NULL) {
 		LOG(
 			"[router::router_init] %s\n",
-			"not_found_handler is NULL, using fallback handler"
+			"method_not_allowed_handler is NULL, using fallback handler"
 		);
 		router->method_not_allowed_handler = default_method_not_allowed_handler;
 	} else {

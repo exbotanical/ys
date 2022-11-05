@@ -32,7 +32,7 @@ run_test () {
 	gcc -D debug -Ideps -Isrc -c "$TESTING_DIR/$file_name" -o main.o
 	gcc -D debug -o main main.o -L./ -l$REPO_DIR -lm
 
-	export LD_LIBRARY_PATH=$HOME/repositories/$REPO_DIR/src/:$HOME/repositories/$REPO_DIR/include/:$LD_LIBRARY_PATH
+	export LD_LIBRARY_PATH=$(pwd)/src/:$(pwd)/include/:$LD_LIBRARY_PATH
 	green "\n[+] Running test $file_name...\n\n"
 
 	./main
