@@ -3,7 +3,7 @@
 #include "util.h"
 #include "router.h"
 #include "path.h"
-#include "context.h"
+#include "server.h"
 
 #include "lib.thread/libthread.h"
 
@@ -19,17 +19,7 @@
 #include <netdb.h>
 #include <errno.h>
 
-typedef struct client_context {
-	int client_socket;
-	struct sockaddr *address;
-	socklen_t *addr_len;
-	router_t *router;
-} client_context_t;
-
-int main() {
-	run();
-	return EXIT_SUCCESS;
-}
+#define PORT 9000
 
 void *handler (void *arg) {
 	route_context_t *context = arg;
@@ -50,98 +40,12 @@ void *handler (void *arg) {
 	return NULL;
 }
 
-void client_thread_handler(void* args) {
-	client_context_t *c_ctx = args;
-		char recv_buffer[1024];
-
-		recvfrom(
-			c_ctx->client_socket,
-			(char *)recv_buffer,
-			sizeof(recv_buffer), 0,
-			c_ctx->address,
-			c_ctx->addr_len
-		);
-
-		printf("BUFFER: %s\n", recv_buffer);
-
-		struct request r = build_request(recv_buffer);
-		route_context_t *context = route_context_init(
-			c_ctx->client_socket,
-			r.method,
-			r.url,
-			NULL
-		);
-
-		router_run(c_ctx->router, context);
-}
-
-int run() {
-  thread_pool_t* pool = calloc(1, sizeof(thread_pool_t));
-	thread_pool_init(pool);
-
-	router_t *router = router_init(NULL, NULL);
+int main() {
+  router_t *router = router_init(NULL, NULL);
 	router_register(router, collect_methods("GET", NULL), PATH_ROOT, handler);
+	server_t *server = server_init(router, PORT);
 
-	int master_socket;
-	int client_socket;
-	fd_set readfds;
-
-	struct sockaddr_in address;
-	int addrlen = sizeof(address);
-
-	// Create socket file descriptor
-	if ((master_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) == 0) {
-		perror("socket");
-		exit(EXIT_FAILURE);
-	}
-
-	address.sin_family = AF_INET;
-	address.sin_addr.s_addr = INADDR_ANY;
-	address.sin_port = htons(PORT);
-
-	// memset(address.sin_zero, NULL_TERM, sizeof address.sin_zero);
-
-	if (bind(master_socket, (struct sockaddr *)&address, sizeof(address))<0) {
-		perror("bind");
-		exit(EXIT_FAILURE);
-	}
-
-	if (listen(master_socket, 10) < 0) {
-		perror("listen");
-		exit(EXIT_FAILURE);
-	}
-
-	printf("Listening on port %i...\n", PORT);
-
-  while(1) {
-		FD_ZERO(&readfds);
-		FD_SET(master_socket, &readfds);
-
-		select(master_socket + 1, &readfds, NULL, NULL, NULL);
-		if (FD_ISSET(master_socket, &readfds)) {
-			if ((client_socket = accept(master_socket, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0) {
-				perror("accept");
-				exit(EXIT_FAILURE);
-			}
-
-  	  thread_t* client_thread = thread_init(0, "client thread");
-      // Make this a detached thread
-      thread_set_attr(client_thread, false);
-
-	    thread_pool_insert(pool, client_thread);
-
-			client_context_t *c_ctx = malloc(sizeof(client_context_t));
-			c_ctx->address = (struct sockaddr *)&address;
-			c_ctx->addr_len = &addrlen;
-			c_ctx->client_socket = client_socket;
-			c_ctx->router = router;
-
-      printf("THREAD!");
-      if (!thread_pool_dispatch(pool, client_thread_handler, c_ctx, true)) {
-        printf("failed dispatch\n");
-      }
-		}
-	}
+  server_start(server);
 
 	return EXIT_SUCCESS;
 }

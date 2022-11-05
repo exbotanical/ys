@@ -36,6 +36,7 @@
     "system_error": "cpp",
     "errno.h": "c",
     "in.h": "c",
-    "*.bak": "c"
+    "*.bak": "c",
+    "select.h": "c"
   }
 }

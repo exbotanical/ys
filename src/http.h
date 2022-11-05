@@ -5,8 +5,6 @@
 
 #include "lib.hash/hash.h"
 
-#define PORT 9000 // TODO: user-defined
-
 #define EP(x) [x] = #x
 
 typedef enum method {

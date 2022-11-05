@@ -7,6 +7,32 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+route_context_t *route_context_init(
+	int client_socket,
+	char *method,
+	char *path,
+	array_t *parameters
+) {
+	route_context_t *context = malloc(sizeof(route_context_t));
+	if (!context) {
+		free(context);
+
+		LOG(
+			"[context::route_context_init] %s\n",
+			"failed to allocate route_context_t"
+		);
+
+		return NULL;
+	}
+
+	context->client_socket = client_socket;
+	context->method = method;
+	context->path = path;
+	context->parameters = parameters;
+
+	return context;
+}
+
 router_t *router_init(
 	void*(*not_found_handler)(void*),
 	void*(*method_not_allowed_handler)(void*)
@@ -37,7 +63,6 @@ router_t *router_init(
 		router->not_found_handler = not_found_handler;
 	}
 
-
 	if (method_not_allowed_handler == NULL) {
 		LOG(
 			"[router::router_init] %s\n",
@@ -53,7 +78,7 @@ router_t *router_init(
 
 bool router_register(router_t *router, ch_array_t *methods, const char *path, void*(*handler)(void*)) {
 	if (!router || !methods || !path || !handler) {
-		DIE(1, "%s\n", "invariant violation - router_register arguments cannot be NULL");
+		DIE(EXIT_FAILURE, "%s\n", "invariant violation - router_register arguments cannot be NULL");
 	}
 
 	if (!trie_insert(router->trie, methods, path, handler)) {
@@ -71,8 +96,8 @@ bool router_run(router_t *router, route_context_t *context) {
 	if (!context) {
 		LOG("[router::router_run] context initialization via route_context_init \
 			failed with method %s, path %s",
-		 	method,
-			path
+		 	context->method,
+			context->path
 		);
 
 		return false;
@@ -82,8 +107,8 @@ bool router_run(router_t *router, route_context_t *context) {
 	if (!result) { // TODO: NotFound vs NotAllowed
 		LOG(
 			"[router::router_run] no route matched for method %s at %s; selecting 404 handler",
-			method,
-			path
+			context->method,
+			context->path
 		);
 		// return router->not_found_handler;
 		return true;

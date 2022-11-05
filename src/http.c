@@ -3,7 +3,6 @@
 #include "http.h"
 
 #include "array.h"
-#include "context.h"
 #include "path.h"
 #include "router.h"
 #include "util.h"
