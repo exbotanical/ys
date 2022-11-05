@@ -5,6 +5,8 @@
 #include "path.h"
 #include "context.h"
 
+#include "lib.thread/libthread.h"
+
 #include <stdio.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -74,6 +76,9 @@ void client_thread_handler(void* args) {
 }
 
 int run() {
+  thread_pool_t* pool = calloc(1, sizeof(thread_pool_t));
+	thread_pool_init(pool);
+
 	router_t *router = router_init(NULL, NULL);
 	router_register(router, collect_methods("GET", NULL), PATH_ROOT, handler);
 
@@ -119,11 +124,11 @@ int run() {
 				exit(EXIT_FAILURE);
 			}
 
-			pthread_t client_thread;
-			pthread_attr_t attr;
+  	  thread_t* client_thread = thread_init(0, "client thread");
+      // Make this a detached thread
+      thread_set_attr(client_thread, false);
 
-			pthread_attr_init(&attr);
-			pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+	    thread_pool_insert(pool, client_thread);
 
 			client_context_t *c_ctx = malloc(sizeof(client_context_t));
 			c_ctx->address = (struct sockaddr *)&address;
@@ -131,9 +136,10 @@ int run() {
 			c_ctx->client_socket = client_socket;
 			c_ctx->router = router;
 
-			pthread_create(&client_thread, &attr, client_thread_handler, c_ctx); // TODO: join
-
-			pthread_join(client_thread, NULL);
+      printf("THREAD!");
+      if (!thread_pool_dispatch(pool, client_thread_handler, c_ctx, true)) {
+        printf("failed dispatch\n");
+      }
 		}
 	}
 

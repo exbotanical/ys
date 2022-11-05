@@ -2,6 +2,7 @@
   "name": "rest-c",
   "version": "0.0.1",
   "author": "Matthew Zito",
+  "repo": "exbotanical/rest-c",
   "license": "MIT",
 	"dependencies": {
     "exbotanical/lib.hash": "0.0.2",
@@ -9,5 +10,8 @@
   },
 	"development": {
     "thlorenz/tap.c": "*"
-  }
+  },
+  "src": [
+    "src/*"
+  ]
 }
