@@ -19,6 +19,12 @@
 #include <netdb.h>
 #include <errno.h>
 
+void send_response(int socket, buffer_t *response) {
+	write(socket, response->state, response->len);
+	buffer_free(response);
+	close(socket);
+}
+
 /**
  * @brief TODO:
  *

@@ -1,4 +1,3 @@
-#include "buffer.h"
 #include "path.h"
 #include "router.h"
 #include "http.h"
@@ -24,19 +23,13 @@ void *handler (void *arg) {
 	route_context_t *context = arg;
 	printf("MATCH! METHOD: %s, PATH: %s\n", context->method, context->path);
 
-	buffer_t *response = build_response(
-		OK,
-		"text/plain",
-		"Hello world!",
-		"X-Powered-By: rest-c",
-		NULL
-	);
+  response_t *response = malloc(sizeof(response_t));
+  response->headers = malloc(sizeof(char *));
+  response->headers[0] = "Content-Type: text/plain";
+  response->body = "Hello World!";
+  response->status = OK;
 
-	write(context->client_socket, response->state, response->len);
-	buffer_free(response);
-	close(context->client_socket);
-
-	return NULL;
+	return response;
 }
 
 int main() {

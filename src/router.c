@@ -2,6 +2,7 @@
 
 #include "http.h"
 #include "logger.h"
+#include "server.h"
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -103,6 +104,7 @@ bool router_run(router_t *router, route_context_t *context) {
 		return false;
 	}
 
+  response_t *response;
 	result_t *result = trie_search(router->trie, context->method, context->path); // TODO: args same order
 	if (!result) { // TODO: NotFound vs NotAllowed
 		LOG(
@@ -110,13 +112,17 @@ bool router_run(router_t *router, route_context_t *context) {
 			context->method,
 			context->path
 		);
-		// return router->not_found_handler;
-		return true;
+    response = router->not_found_handler(context->client_socket);
+    send_response(context->client_socket, response);
+
+    return false;
 	}
 
-	context->parameters = result->parameters;
-	void *(*h)(void *) = result->action->handler;
-	h(context);
+  context->parameters = result->parameters;
+  response_t *(*h)(void *) = result->action->handler;
+
+  response = h(context);
+  send_response(context->client_socket, response);
 
 	return true;
 }

@@ -28,6 +28,12 @@ typedef struct client_context {
 	router_t *router;
 } client_context_t;
 
+typedef struct response {
+  http_status_t status;
+  char **headers;
+  char *body;
+} response_t;
+
 /**
  * @brief TODO:
  *
@@ -42,5 +48,7 @@ server_t *server_init(router_t *router, int port);
  * @param server
  */
 void server_start(server_t *server);
+
+void send_response(int socket, buffer_t *response);
 
 #endif /* SERVER_H */

@@ -16,45 +16,29 @@
 #include <stdarg.h>
 
 // uses sentinel variant
-buffer_t *build_response(
-	http_status_t status,
-	char *content_type,
-	char *body,
-	...
-) {
-	buffer_t *headers = buffer_init();
+buffer_t *build_response(http_status_t status, char **headers, char *body) {
+	buffer_t *response = buffer_init();
 	buffer_append(
-		headers,
+		response,
 		fmt_str("HTTP/1.1 %d %s\n", status, http_status_names[status])
 	);
-	buffer_append(
-		headers,
-		fmt_str("Content-Type: %s\n", content_type)
-	);
 
-  va_list args;
-	va_start(args, body);
-
-	char *header;
-	// Add user-defined headers
-	while ((header = va_arg(args, char *)) != NULL) {
-		// Content-Length needs to be accurate; thus we ensure the framework is setting it
-		if (!strcasestr(header, "Content-Length:")) {
-			buffer_append(headers, header);
-			buffer_append(headers, "\n");
-		}
+  for (int i = 0; i < sizeof(headers[i]) / sizeof(char*); i++) {
+    char *header = headers[i];
+    buffer_append(response, header);
+    buffer_append(response, "\n");
 	}
 
-	va_end(args);
+  char *body = body;
 
 	buffer_append(
-		headers,
-		fmt_str("Content-Length: %d\n\n", strlen(body))
+		response,
+		fmt_str("Content-Length: %d\n\n", body ? strlen(body) : 0)
 	);
 
-	buffer_append(headers, body);
+	buffer_append(response, body ? body : "");
 
-	return headers;
+	return response;
 }
 
 struct request build_request(char *buffer) {
@@ -87,6 +71,7 @@ void* default_not_found_handler (void *arg) {
 	// 	"Content-Type: text/plain",
 	// 	NULL
 	// );
+
 	return NULL;
 }
 

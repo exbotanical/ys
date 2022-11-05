@@ -165,12 +165,7 @@ typedef struct request {
 	char *method;
 } request_t;
 
-buffer_t *build_response(
-	http_status_t status,
-	char *content_type,
-	char *body,
-	...
-);
+buffer_t *build_response(http_status_t status, char **headers, char *body);
 
 struct request build_request(char *buffer);
 
