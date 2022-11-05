@@ -1,6 +1,12 @@
 #ifndef HTTP_H
 #define HTTP_H
 
+#include "buffer.h"
+
+#include "lib.hash/hash.h"
+
+#define PORT 9000 // TODO: user-defined
+
 #define EP(x) [x] = #x
 
 typedef enum method {
@@ -155,5 +161,23 @@ static const char* http_status_names[] = {
   EP(NOT_EXTENDED),
   EP(NETWORK_AUTHENTICATION_REQUIRED),
 };
+
+typedef struct request {
+	char *url;
+	char *method;
+} request_t;
+
+buffer_t *build_response(
+	http_status_t status,
+	char *content_type,
+	char *body,
+	...
+);
+
+struct request build_request(char *buffer);
+
+void* default_not_found_handler (void *arg);
+
+void* default_method_not_allowed_handler (void *arg);
 
 #endif /* HTTP_H */

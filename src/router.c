@@ -1,8 +1,7 @@
 #include "router.h"
 
-#include "context.h"
+#include "http.h"
 #include "logger.h"
-#include "rest.h"
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -68,20 +67,7 @@ bool router_register(router_t *router, ch_array_t *methods, const char *path, vo
 	return true;
 }
 
-bool router_run(router_t *router, char *method, char *path) {
-	result_t *result = trie_search(router->trie, method, path); // TODO: args same order
-	if (!result) { // TODO: NotFound vs NotAllowed
-		LOG(
-			"[router::router_run] no route matched for method %s at %s; selecting 404 handler",
-			method,
-			path
-		);
-		// return router->not_found_handler;
-		return true;
-	}
-
-	void *(*h)(void *) = result->action->handler;
-	route_context_t *context = route_context_init(method, path, result->parameters);
+bool router_run(router_t *router, route_context_t *context) {
 	if (!context) {
 		LOG("[router::router_run] context initialization via route_context_init \
 			failed with method %s, path %s",
@@ -92,6 +78,19 @@ bool router_run(router_t *router, char *method, char *path) {
 		return false;
 	}
 
+	result_t *result = trie_search(router->trie, context->method, context->path); // TODO: args same order
+	if (!result) { // TODO: NotFound vs NotAllowed
+		LOG(
+			"[router::router_run] no route matched for method %s at %s; selecting 404 handler",
+			method,
+			path
+		);
+		// return router->not_found_handler;
+		return true;
+	}
+
+	context->parameters = result->parameters;
+	void *(*h)(void *) = result->action->handler;
 	h(context);
 
 	return true;

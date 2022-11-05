@@ -1,9 +1,10 @@
 #ifndef ROUTER_H
 #define ROUTER_H
 
+#include "array.h"
+#include "context.h"
 #include "trie.h"
 #include "util.h"
-#include "array.h"
 
 #include "lib.hash/hash.h"
 
@@ -61,7 +62,7 @@ bool router_register(router_t *router, ch_array_t *methods, const char *path, vo
  * @param path The path to search for
  * @return bool A boolean indicating whether a route record was matched and executed
  */
-bool router_run(router_t *router, char *method, char *path);
+bool router_run(router_t *router, route_context_t *context);
 
 /**
  * @brief Deallocates memory for router_t `router`.

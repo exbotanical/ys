@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-g -fPIC -Ideps -lm -lpcre -Wall -Wextra -pedantic
+CFLAGS=-g -fPIC -Ideps -lm -lpcre -Wall -Wextra -pedantic -pthread
 SILENT_FLAGS=-Wno-unused-variable -Wno-discarded-qualifiers
 LDFLAGS=-shared -o
 DEBUG=-DDEBUG=1 # TODO: use opt

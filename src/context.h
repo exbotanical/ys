@@ -8,6 +8,7 @@
  * to matched route handlers.
  */
 typedef struct route_context {
+	int client_socket;
 	char *method;
 	char *path;
 	array_t *parameters;
@@ -21,6 +22,11 @@ typedef struct route_context {
  * @param parameters Any parameters derived from the matched route
  * @return route_context_t* Route context, or NULL if memory allocation failed
  */
-route_context_t *route_context_init(char *method, char *path, array_t *parameters);
+route_context_t *route_context_init(
+	int client_socket,
+	char *method,
+	char *path,
+	array_t *parameters
+);
 
 #endif /* CONTEXT_H */

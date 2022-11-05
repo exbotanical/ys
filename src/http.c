@@ -1,6 +1,6 @@
 #define _GNU_SOURCE
 
-#include "rest.h"
+#include "http.h"
 
 #include "array.h"
 #include "context.h"
@@ -62,6 +62,16 @@ struct request build_request(char *buffer) {
 	char *raw_request = strtok(buffer, "\n");
 	char *method = strtok(raw_request, " ");
 	char *url = strtok(NULL, " ");
+	char *protocol = strtok(raw_request, " ");
+	char *host = strtok(raw_request, "\n");
+
+	printf("Raw Request: %s, Method: %s, URL: %s, Protocol: %s, Host: %s\n",
+		raw_request,
+		method,
+		url,
+		protocol,
+		host
+	);
 
 	struct request request = {
 		.method = method,
