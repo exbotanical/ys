@@ -81,7 +81,7 @@ void server_start(server_t *server) {
 	}
 
   struct sockaddr_in address;
-	int addr_len = sizeof(address);
+	socklen_t addr_len = sizeof(address);
 
 	memset((char *)&address, NULL_TERM, sizeof(address));
 	address.sin_family = AF_INET;
@@ -130,7 +130,7 @@ void server_start(server_t *server) {
 
 		select(master_socket + 1, &readfds, NULL, NULL, NULL);
 		if (FD_ISSET(master_socket, &readfds)) {
-			if ((client_socket = accept(master_socket, (struct sockaddr *)&address, (socklen_t*)&addr_len)) < 0) {
+			if ((client_socket = accept(master_socket, (struct sockaddr *)&address, &addr_len)) < 0) {
         char *message = fmt_str(
           "failed to accept client socket on %s:%d",
           address.sin_addr,

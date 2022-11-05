@@ -39,11 +39,9 @@ bool ch_array_insert(ch_array_t *a, char *el) {
 	if (cp == NULL) {
 		free(cp);
 
-		LOG(
-			"[array::ch_array_insert] failed to copy provided element with `strdup`, \
-			where `a` was %p and `el` was %s\n",
-			a,
-			el
+    LOG(
+			"[array::ch_array_insert] %s\n",
+			"failed to copy provided element with `strdup`"
 		);
 
 		return false;
@@ -55,10 +53,8 @@ bool ch_array_insert(ch_array_t *a, char *el) {
 		free(next_state);
 
 		LOG(
-			"[array::ch_array_insert] failed to reallocate array memory with `realloc`, \
-			where `a` was %p and `el` was %s\n",
-			a,
-			el
+			"[array::ch_array_insert] %s\n",
+			"failed to reallocate array memory with `realloc`"
 		);
 
 		return false;
@@ -105,10 +101,8 @@ bool array_insert(array_t *a, void *el) {
 		free(next_state);
 
 		LOG(
-			"[array::array_insert] failed to reallocate array memory with `realloc`, \
-			where `a` was %p and `el` was %s\n",
-			a,
-			el
+			"[array::array_insert] %s\n",
+			"failed to reallocate array memory with `realloc`"
 		);
 
 		return false;

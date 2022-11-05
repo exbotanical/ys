@@ -4,14 +4,22 @@
   "author": "Matthew Zito",
   "repo": "exbotanical/rest-c",
   "license": "MIT",
+  "description": "A C server framework",
+  "keywords": [
+    "rest",
+    "api",
+    "server framework",
+    "multiplexing",
+    "concurrency"
+  ],
+  "src": [
+    "src/*"
+  ],
 	"dependencies": {
     "exbotanical/lib.hash": "0.0.2",
     "exbotanical/lib.thread": "0.0.1"
   },
 	"development": {
     "thlorenz/tap.c": "*"
-  },
-  "src": [
-    "src/*"
-  ]
+  }
 }

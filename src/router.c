@@ -163,7 +163,7 @@ ch_array_t *collect_methods(char *method, ...) {
 			return NULL;
 		}
 
-		method = va_arg(args, const char *);
+		method = va_arg(args, char *);
 	}
 
 	va_end(args);

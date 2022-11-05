@@ -37,7 +37,7 @@ buffer_t *build_response(
 
 	char *header;
 	// Add user-defined headers
-	while ((header = va_arg(args, const char *)) != NULL) {
+	while ((header = va_arg(args, char *)) != NULL) {
 		// Content-Length needs to be accurate; thus we ensure the framework is setting it
 		if (!strcasestr(header, "Content-Length:")) {
 			buffer_append(headers, header);
