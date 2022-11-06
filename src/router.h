@@ -116,6 +116,10 @@ route_t *route_init(ch_array_t *methods, char *path, void*(*handler)(void*));
  */
 ch_array_t *collect_methods(char *method, ...);
 
+void* default_not_found_handler(void *arg);
+
+void* default_method_not_allowed_handler(void *arg);
+
 char *regex_cache_get(char *pattern);
 
 #endif /* ROUTER_H */

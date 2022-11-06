@@ -19,7 +19,20 @@
 #include <netdb.h>
 #include <errno.h>
 
-void send_response(int socket, buffer_t *response) {
+response_t *response_init() {
+  response_t *response = malloc(sizeof(response_t));
+  response->headers = ch_array_init();
+
+  return response;
+}
+
+void send_response(int socket, response_t *response_data) {
+  buffer_t *response = build_response(
+    response_data->status,
+    response_data->headers,
+    response_data->body
+  );
+
 	write(socket, response->state, response->len);
 	buffer_free(response);
 	close(socket);
@@ -85,6 +98,13 @@ void server_start(server_t *server) {
 		perror("socket");
     DIE(EXIT_FAILURE, "%s\n", message);
 	}
+
+  int yes = 1;
+  // lose the pesky "Address already in use" error message (thanks, beej!)
+  if (setsockopt(master_socket, SOL_SOCKET,SO_REUSEADDR, &yes, sizeof(yes)) == -1) {
+    perror("setsockopt");
+    exit(1); // TODO:
+  }
 
   struct sockaddr_in address;
 	socklen_t addr_len = sizeof(address);

@@ -16,20 +16,19 @@
 #include <stdarg.h>
 
 // uses sentinel variant
-buffer_t *build_response(http_status_t status, char **headers, char *body) {
+buffer_t *build_response(http_status_t status, ch_array_t *headers, char *body) {
 	buffer_t *response = buffer_init();
 	buffer_append(
 		response,
 		fmt_str("HTTP/1.1 %d %s\n", status, http_status_names[status])
 	);
 
-  for (int i = 0; i < sizeof(headers[i]) / sizeof(char*); i++) {
-    char *header = headers[i];
+  for (int i = 0; i < headers->size; i++) {
+    char *header = headers->state[i];
+
     buffer_append(response, header);
     buffer_append(response, "\n");
 	}
-
-  char *body = body;
 
 	buffer_append(
 		response,
@@ -62,20 +61,4 @@ struct request build_request(char *buffer) {
 	};
 
 	return request;
-}
-
-void* default_not_found_handler (void *arg) {
-	printf(arg);
-	// buffer_t *response = build_response( NULL,
-	// 	"X-Powered-By: rest-c",
-	// 	"Content-Type: text/plain",
-	// 	NULL
-	// );
-
-	return NULL;
-}
-
-void* default_method_not_allowed_handler (void *arg) {
-	printf(arg);
-	return NULL;
 }

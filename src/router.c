@@ -112,7 +112,7 @@ bool router_run(router_t *router, route_context_t *context) {
 			context->method,
 			context->path
 		);
-    response = router->not_found_handler(context->client_socket);
+    response = router->not_found_handler(context);
     send_response(context->client_socket, response);
 
     return false;
@@ -120,9 +120,7 @@ bool router_run(router_t *router, route_context_t *context) {
 
   context->parameters = result->parameters;
   response_t *(*h)(void *) = result->action->handler;
-
-  response = h(context);
-  send_response(context->client_socket, response);
+  send_response(context->client_socket, h(context));
 
 	return true;
 }
@@ -174,4 +172,22 @@ ch_array_t *collect_methods(char *method, ...) {
 
 	va_end(args);
 	return methods;
+}
+
+void* default_not_found_handler(void *arg) {
+	route_context_t *context = arg;
+
+  response_t *response = malloc(sizeof(response_t));
+  response->status = NOT_FOUND;
+
+	return response;
+}
+
+void* default_method_not_allowed_handler(void *arg) {
+	route_context_t *context = arg;
+
+  response_t *response = malloc(sizeof(response_t));
+  response->status = METHOD_NOT_ALLOWED;
+
+  return response;
 }

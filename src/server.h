@@ -1,6 +1,8 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include "buffer.h"
+#include "http.h"
 #include "router.h"
 
 #include <sys/socket.h>
@@ -30,9 +32,11 @@ typedef struct client_context {
 
 typedef struct response {
   http_status_t status;
-  char **headers;
+  ch_array_t *headers;
   char *body;
 } response_t;
+
+response_t *response_init();
 
 /**
  * @brief TODO:
@@ -49,6 +53,6 @@ server_t *server_init(router_t *router, int port);
  */
 void server_start(server_t *server);
 
-void send_response(int socket, buffer_t *response);
+void send_response(int socket, response_t *response_data);
 
 #endif /* SERVER_H */

@@ -1,6 +1,7 @@
 #ifndef HTTP_H
 #define HTTP_H
 
+#include "array.h"
 #include "buffer.h"
 
 #include "lib.hash/hash.h"
@@ -165,12 +166,8 @@ typedef struct request {
 	char *method;
 } request_t;
 
-buffer_t *build_response(http_status_t status, char **headers, char *body);
+buffer_t *build_response(http_status_t status, ch_array_t *headers, char *body);
 
 struct request build_request(char *buffer);
-
-void* default_not_found_handler (void *arg);
-
-void* default_method_not_allowed_handler (void *arg);
 
 #endif /* HTTP_H */
