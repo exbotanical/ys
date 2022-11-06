@@ -1,8 +1,8 @@
 {
-  "name": "rest-c",
+  "name": "lib.http",
   "version": "0.0.1",
   "author": "Matthew Zito",
-  "repo": "exbotanical/rest-c",
+  "repo": "exbotanical/lib.http",
   "license": "MIT",
   "description": "A C server framework",
   "keywords": [

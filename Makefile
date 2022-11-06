@@ -4,7 +4,7 @@ SILENT_FLAGS=-Wno-unused-variable -Wno-discarded-qualifiers
 LDFLAGS=-shared -o
 DEBUG=-DDEBUG=1 # TODO: use opt
 
-BIN=librest.so
+BIN=libhttp.so
 TARGET=run
 
 SRC=$(wildcard src/*.c)

@@ -3,7 +3,7 @@ IFS=$'\n'
 
 TESTING_DIR=t
 UTIL_F=util.bash
-REPO_DIR=rest
+REPO_DIR=http
 
 declare -a SKIP_FILES=(
 	# 'buffer_test.c'
