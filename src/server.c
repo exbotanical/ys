@@ -1,7 +1,6 @@
 #include "server.h"
 
 #include "array.h"
-#include "http.h"
 #include "util.h"
 #include "path.h"
 #include "logger.h"
@@ -19,27 +18,64 @@
 #include <netdb.h>
 #include <errno.h>
 
-response_t *response_init() {
-  response_t *response = malloc(sizeof(response_t));
-  response->headers = ch_array_init();
+/**
+ * @brief Converts a user-defined response object into a buffer.
+ * @internal
+ *
+ * @param status
+ * @param headers
+ * @param body
+ * @return buffer_t*
+ */
+buffer_t *build_response(http_status_t status, ch_array_t *headers, char *body) {
+	buffer_t *response = buffer_init();
+	buffer_append(
+		response,
+		fmt_str("HTTP/1.1 %d %s\n", status, http_status_names[status])
+	);
 
-  return response;
-}
+  for (int i = 0; i < (int)headers->size; i++) {
+    char *header = headers->state[i];
 
-void send_response(int socket, response_t *response_data) {
-  buffer_t *response = build_response(
-    response_data->status,
-    response_data->headers,
-    response_data->body
-  );
+    buffer_append(response, header);
+    buffer_append(response, "\n");
+	}
 
-	write(socket, response->state, response->len);
-	buffer_free(response);
-	close(socket);
+	buffer_append(
+		response,
+		fmt_str("Content-Length: %d\n\n", body ? strlen(body) : 0)
+	);
+
+	buffer_append(response, body ? body : "");
+
+	return response;
 }
 
 /**
- * @brief TODO:
+ * @brief Extract and structure a client request.
+ * @internal
+ *
+ * @param buffer
+ * @return request_t*
+*/
+request_t *build_request(char *buffer) {
+  // TODO: do something sensible here - this is placeholder logic
+	char *raw_request = strtok(buffer, "\n");
+	char *method = strtok(raw_request, " ");
+	char *path = strtok(NULL, " ");
+
+	request_t *request = malloc(sizeof(request));
+
+  request->method = method;
+  request->path = path;
+  request->raw = raw_request;
+
+	return request;
+}
+
+/**
+ * @brief Handles client connections and executes the user-defined router.
+ * @internal
  *
  * @param args
  */
@@ -58,11 +94,12 @@ void* client_thread_handler(void* args) {
 
   LOG("[server::client_thread_handler] client request received: %s\n", recv_buffer);
 
-  struct request r = build_request(recv_buffer);
+  request_t *r = build_request(recv_buffer);
   route_context_t *context = route_context_init(
     c_ctx->client_socket,
-    r.method,
-    r.url,
+    r->method,
+    r->path,
+    r->raw,
     NULL
   );
 
@@ -102,8 +139,10 @@ void server_start(server_t *server) {
   int yes = 1;
   // lose the pesky "Address already in use" error message (thanks, beej!)
   if (setsockopt(master_socket, SOL_SOCKET,SO_REUSEADDR, &yes, sizeof(yes)) == -1) {
+    char *message = "failed to set sock opt";
+    LOG("[server::start] %s\n", message);
     perror("setsockopt");
-    exit(1); // TODO:
+    DIE(EXIT_FAILURE, "%s\n", message);
   }
 
   struct sockaddr_in address;
@@ -188,4 +227,23 @@ void server_start(server_t *server) {
 	}
 
   // TODO: interrupt cancel, kill sig
+}
+
+response_t *response_init() {
+  response_t *response = malloc(sizeof(response_t));
+  response->headers = ch_array_init();
+
+  return response;
+}
+
+void send_response(int socket, response_t *response_data) {
+  buffer_t *response = build_response(
+    response_data->status,
+    response_data->headers,
+    response_data->body
+  );
+
+	write(socket, response->state, response->len);
+	buffer_free(response);
+	close(socket);
 }

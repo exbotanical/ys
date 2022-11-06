@@ -7,28 +7,52 @@
 
 #include <stdbool.h>
 
+/**
+ * @brief Initial flags state for result record.
+ */
+static const unsigned int INITIAL_FLAG_STATE = 0b00000000;
+static const unsigned int NOT_FOUND_MASK = 0b00000001;
+static const unsigned int NOT_ALLOWED_MASK = 0b00000010;
+
+/**
+ * @brief A trie node.
+ */
 typedef struct node {
 	char *label;
 	h_table *children;
 	h_table *actions;
 } node_t;
 
+/**
+ * @brief A trie data structure used for routing.
+ */
 typedef struct trie {
 	node_t *root;
+  h_table *regex_cache;
 } trie_t;
 
+/**
+ * @brief A route handler.
+ */
 typedef struct action {
 	void*(*handler)(void*);
 } action_t;
 
+/**
+ * @brief Parameters collected from a route match.
+ */
 typedef struct parameter {
 	char *key;
 	char *value;
 } parameter_t;
 
+/**
+ * @brief A trie search result.
+ */
 typedef struct result {
 	action_t *action;
 	array_t *parameters;
+  unsigned int flags;
 } result_t;
 
 /**

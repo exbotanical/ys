@@ -35,6 +35,7 @@ typedef struct route_context {
 	int client_socket;
 	char *method;
 	char *path;
+  char *raw_request;
 	array_t *parameters;
 } route_context_t;
 
@@ -43,6 +44,7 @@ typedef struct route_context {
  *
  * @param method The HTTP method of the matched route
  * @param path The path of the matched route
+ * @param raw_request The as-is request body
  * @param parameters Any parameters derived from the matched route
  * @return route_context_t* Route context, or NULL if memory allocation failed
  */
@@ -50,6 +52,7 @@ route_context_t *route_context_init(
 	int client_socket,
 	char *method,
 	char *path,
+  char *raw_request,
 	array_t *parameters
 );
 
@@ -87,7 +90,7 @@ bool router_register(router_t *router, ch_array_t *methods, const char *path, vo
  * @param path The path to search for
  * @return bool A boolean indicating whether a route record was matched and executed
  */
-bool router_run(router_t *router, route_context_t *context);
+void router_run(router_t *router, route_context_t *context);
 
 /**
  * @brief Deallocates memory for router_t `router`.
@@ -116,10 +119,20 @@ route_t *route_init(ch_array_t *methods, char *path, void*(*handler)(void*));
  */
 ch_array_t *collect_methods(char *method, ...);
 
+/**
+ * @brief Executes the default 404 handler.
+ *
+ * @param arg
+ * @return void*
+ */
 void* default_not_found_handler(void *arg);
 
+/**
+ * @brief Executes the default 405 handler.
+ *
+ * @param arg
+ * @return void*
+ */
 void* default_method_not_allowed_handler(void *arg);
-
-char *regex_cache_get(char *pattern);
 
 #endif /* ROUTER_H */

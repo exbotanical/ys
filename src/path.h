@@ -70,6 +70,4 @@ char *derive_label_pattern(const char *label);
  */
 char *derive_parameter_key(const char *label);
 
-char *regex_cache_get(char *pattern);
-
 #endif /* PATH_H */

@@ -204,5 +204,3 @@ char *derive_parameter_key(const char *label) {
 
 	return substr(label, start + 1, end, false);
 }
-
-char *regex_cache_get(char *pattern);

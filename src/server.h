@@ -8,12 +8,12 @@
 #include <sys/socket.h>
 
 /**
- * @brief TODO:
+ * @brief Maximum number of queued connections allowed for server.
  */
 static const int MAX_CONN = 100;
 
 /**
- * @brief TODO:
+ * @brief A server configuration object.
  */
 typedef struct server {
   router_t *router;
@@ -21,7 +21,7 @@ typedef struct server {
 } server_t;
 
 /**
- * @brief TODO:
+ * @brief A context object for a client connection.
  */
 typedef struct client_context {
 	int client_socket;
@@ -30,16 +30,30 @@ typedef struct client_context {
 	router_t *router;
 } client_context_t;
 
+/**
+ * @brief A response object; client handlers must return this
+ * struct to be sent to the client.
+ */
 typedef struct response {
+  /** HTTP status code - required */
   http_status_t status;
+  /** HTTP headers - optional, but you should pass content-type if sending a body */
   ch_array_t *headers;
+  /** Response body - optional; Content-length header will be set for you */
   char *body;
 } response_t;
 
-response_t *response_init();
+/**
+ * @brief Request metadata collected from an inbound client request.
+ */
+typedef struct request {
+	char *path;
+	char *method;
+  char *raw;
+} request_t;
 
 /**
- * @brief TODO:
+ * @brief Allocates the necessary memory for a `server_t`.
  *
  * @param router
  * @param port
@@ -47,12 +61,26 @@ response_t *response_init();
 server_t *server_init(router_t *router, int port);
 
 /**
- * @brief TODO:
+ * @brief Listens for client connections and executes routing.
  *
  * @param server
  */
 void server_start(server_t *server);
 
+/**
+ * @brief Allocates the necessary memory for a `response_t`.
+ *
+ * @return response_t*
+ */
+response_t *response_init();
+
+/**
+ * @brief Sends the user-provided response and closes the socket connection.
+ * @internal
+ *
+ * @param socket
+ * @param response_data
+ */
 void send_response(int socket, response_t *response_data);
 
 #endif /* SERVER_H */

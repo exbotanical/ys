@@ -16,6 +16,7 @@ typedef struct {
 typedef struct {
 	char *name;
 	search_query search;
+  const unsigned int expected_flag;
 } test_case;
 
 void* test_handler(void* arg) {
@@ -30,7 +31,7 @@ void test_trie_init() {
 		trie = trie_init();
 	}, "initializes the trie");
 
-	isnt(trie->root, NULL, "root is initialized");
+	ok(trie->root != NULL, "root is initialized");
 }
 
 void test_trie_insert() {
@@ -226,7 +227,7 @@ void test_trie_search_ok () {
 		}, "%s test - accessible handler with %s", test.name, test.search.path);
 
 		lives_ok({
-			h("DUDE"); // TODO: pass route context and test
+			h("TEST"); // TODO: pass route context and test
 		}, "%s test - callable handler", test.name);
 	}
 
@@ -279,6 +280,7 @@ void test_trie_search_no_match() {
 				.method = "GET",
 				.path =   "/test/path/12/31",
 			},
+      .expected_flag = NOT_FOUND_MASK,
 		},
 		{
 			.name = "SearchNestedPath",
@@ -286,6 +288,7 @@ void test_trie_search_no_match() {
 				.method = "GET",
 				.path =   "/test/path/path",
 			},
+      .expected_flag = NOT_FOUND_MASK,
 		},
 		{
 			.name = "SearchSpaceInPath",
@@ -293,6 +296,7 @@ void test_trie_search_no_match() {
 				.method = "POST",
 				.path =   "/test/pat h",
 			},
+      .expected_flag = NOT_FOUND_MASK,
 		},
 		{
 			.name = "SearchNestedPathAlt",
@@ -300,6 +304,15 @@ void test_trie_search_no_match() {
 				.method = "GET",
 				.path =   "/test/path/world",
 			},
+      .expected_flag = NOT_FOUND_MASK,
+		},
+    	{
+			.name = "SearchMethodNotRegistered",
+			.search = {
+				.method = "DELETE",
+				.path =   "/test/path",
+			},
+      .expected_flag = NOT_ALLOWED_MASK,
 		},
 	};
 
@@ -317,14 +330,18 @@ void test_trie_search_no_match() {
 
 		result_t *result = trie_search(trie, test.search.method, test.search.path);
 
-		is(result, NULL, "%s test - the record is NULL because there was no match", test.name);
+		ok(
+      ((result->flags & test.expected_flag) == test.expected_flag),
+      "%s test - the record contains the appropriate no match flag",
+      test.name
+    );
 	}
 
 	free(trie);
 }
 
 int main (int argc, char *argv[]) {
-	plan(33);
+	plan(34);
 
 	test_trie_init();
 	test_trie_insert();

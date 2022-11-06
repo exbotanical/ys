@@ -8,6 +8,9 @@
 
 #define EP(x) [x] = #x
 
+/**
+ * @brief HTTP methods.
+ */
 typedef enum method {
 	GET,
 	HEAD,
@@ -20,6 +23,9 @@ typedef enum method {
 	TRACE
 } method_t;
 
+/**
+ * @brief HTTP status codes.
+ */
 typedef enum http_status {
   CONTINUE = 100, // RFC 7231, 6.2.1
   SWITCHING_PROTOCOLS = 101, // RFC 7231, 6.2.2
@@ -91,6 +97,9 @@ typedef enum http_status {
 
 } http_status_t;
 
+/**
+ * @brief HTTP status names.
+ */
 static const char* http_status_names[] = {
 	EP(CONTINUE),
   EP(SWITCHING_PROTOCOLS),
@@ -160,14 +169,5 @@ static const char* http_status_names[] = {
   EP(NOT_EXTENDED),
   EP(NETWORK_AUTHENTICATION_REQUIRED),
 };
-
-typedef struct request {
-	char *url;
-	char *method;
-} request_t;
-
-buffer_t *build_response(http_status_t status, ch_array_t *headers, char *body);
-
-struct request build_request(char *buffer);
 
 #endif /* HTTP_H */

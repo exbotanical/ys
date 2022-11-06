@@ -4,3 +4,5 @@
 - [x] Validate NULLs and allocated objects
 - [x] Add logging
 - [ ] Add global config (e.g. global HTTP headers)
+- [ ] HTTP request parser
+- [ ] test handlers with a mocking libary

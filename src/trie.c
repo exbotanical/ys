@@ -1,7 +1,8 @@
 #include "trie.h"
 
-#include "path.h"
+#include "cache.h"
 #include "logger.h"
+#include "path.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -27,6 +28,18 @@ trie_t *trie_init() {
 		return NULL;
 	}
 
+  trie->regex_cache = h_init_table(0);
+  if (!trie->regex_cache) {
+		free(trie->regex_cache);
+		free(trie);
+		LOG(
+			"[trie::trie_init] %s\n",
+			"failed to initialize hash table for trie regex cache"
+		);
+
+		return NULL;
+	}
+
 	return trie;
 }
 
@@ -35,7 +48,7 @@ bool trie_insert(trie_t *trie, ch_array_t *methods, const char *path, void*(*han
 
 	// Handle root path
 	if (strcmp(path, PATH_ROOT) == 0) {
-		curr->label = path;
+		curr->label = strdup(path);
 
 		for (int i = 0; i < (int)methods->size; i++) {
 			action_t *action = malloc(sizeof(action_t));
@@ -118,10 +131,9 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 			"failed to allocate result"
 		);
 
-		return NULL; // TODO: 500
+		return NULL; // 500
 	}
 
-	// TODO: make failure optional here with configuration options
 	result->parameters = array_init();
 	if (!result->parameters) {
 		free(result->parameters);
@@ -130,8 +142,9 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 			"failed to allocate result->parameters via array_init"
 		);
 
-		return NULL; // TODO: 500
+		return NULL; // 500
 	}
+  result->flags = INITIAL_FLAG_STATE;
 
 	node_t *curr = trie->root;
 
@@ -148,7 +161,8 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 		if (curr->children->count == 0) {
 			if (strcmp(curr->label, path) != 0) {
 				// No matching route result found
-				return NULL; // TODO: ErrNotFound
+        result->flags |= NOT_FOUND_MASK;
+				return result;
 			}
 			break;
 		}
@@ -168,36 +182,27 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 			if (child_prefix == PARAMETER_DELIMITER[0]) {
 				char *pattern = derive_label_pattern(child->label);
 				if (!pattern) {
-					return NULL; // TODO: ErrNotFound
+					result->flags |= NOT_FOUND_MASK;
+				  return result;
 				}
 
-			  pcre *re;
-        const char *error;
-        int erroffset;
-
-				re = pcre_compile(pattern, 0, &error, &erroffset, NULL);
-				if (re == NULL) {
-					free(re);
-					LOG(
-						"[trie::trie_search] %s %d: %s\n",
-						"PCRE compilation failed at offset",
-						erroffset,
-						error
-					);
-
-					return NULL; // TODO: 500
+        pcre *re = regex_cache_get(trie->regex_cache, pattern);
+        if (!re) {
+          LOG(
+            "[trie::trie_search] %s\n",
+            "regex was NULL"
+          );
+					return NULL; // 500
         }
 
 				int ovecsize = 30;
 				int ovector[ovecsize];
 
 				if (pcre_exec(re, NULL, path, strlen(path), 0, 0, ovector, ovecsize) < 0) {
-					free(re);
 					// No parameter match
-					return NULL; // TODO: ErrNotFound
+					result->flags |= NOT_FOUND_MASK;
+				  return result;
 				}
-
-				free(re);
 
 				char *param_key = derive_parameter_key(child->label);
 
@@ -209,7 +214,7 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 						"failed to allocate param"
 					);
 
-					return NULL; // TODO: 500
+					return NULL; // 500
 				}
 
 				param->key = param_key;
@@ -229,7 +234,7 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 						child->label
 					);
 
-					return NULL; // TODO: 500
+					return NULL; // 500
 				}
 
 				curr = next->value;
@@ -241,27 +246,31 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 
 		// No parameter match
 		if (!is_param_match) {
-			return NULL; // TODO: ErrNotFound
+			result->flags |= NOT_FOUND_MASK;
+			return result;
 		}
 	}
 
 	if (strcmp(search_path, PATH_ROOT) == 0) {
 		// No matching handler
 		if (curr->actions->count == 0) {
-			return NULL; // TODO: ErrNotFound
+			result->flags |= NOT_FOUND_MASK;
+			return result;
 		}
 	}
 
 	h_record *action_record = h_search(curr->actions, method);
 	// No matching handler
 	if (action_record == NULL) {
-		return NULL; // TODO: ErrMethodNotAllowed
+		result->flags |= NOT_ALLOWED_MASK;
+		return result;
 	}
 
 	action_t *next_action = action_record->value;
 	// No matching handler
 	if (next_action == NULL) {
-		return NULL; // TODO: ErrMethodNotAllowed
+    result->flags |= NOT_ALLOWED_MASK;
+		return result;
 	}
 
 	result->action = next_action;

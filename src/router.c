@@ -1,6 +1,5 @@
 #include "router.h"
 
-#include "http.h"
 #include "logger.h"
 #include "server.h"
 
@@ -12,6 +11,7 @@ route_context_t *route_context_init(
 	int client_socket,
 	char *method,
 	char *path,
+  char *raw_request,
 	array_t *parameters
 ) {
 	route_context_t *context = malloc(sizeof(route_context_t));
@@ -29,6 +29,7 @@ route_context_t *route_context_init(
 	context->client_socket = client_socket;
 	context->method = method;
 	context->path = path;
+  context->raw_request = raw_request;
 	context->parameters = parameters;
 
 	return context;
@@ -93,7 +94,7 @@ bool router_register(router_t *router, ch_array_t *methods, const char *path, vo
 	return true;
 }
 
-bool router_run(router_t *router, route_context_t *context) {
+void router_run(router_t *router, route_context_t *context) {
 	if (!context) {
 		LOG("[router::router_run] context initialization via route_context_init \
 			failed with method %s, path %s",
@@ -101,28 +102,34 @@ bool router_run(router_t *router, route_context_t *context) {
 			context->path
 		);
 
-		return false;
+		return;
 	}
 
   response_t *response;
-	result_t *result = trie_search(router->trie, context->method, context->path); // TODO: args same order
-	if (!result) { // TODO: NotFound vs NotAllowed
+	result_t *result = trie_search(
+    router->trie,
+    context->method,
+    context->path
+  );
+
+	if (!result) {
 		LOG(
 			"[router::router_run] no route matched for method %s at %s; selecting 404 handler",
 			context->method,
 			context->path
 		);
     response = router->not_found_handler(context);
-    send_response(context->client_socket, response);
+	} else if ((result->flags & NOT_FOUND_MASK) == NOT_FOUND_MASK) {
+    response = router->not_found_handler(context);
+  } else if ((result->flags & NOT_ALLOWED_MASK) == NOT_ALLOWED_MASK) {
+    response = router->method_not_allowed_handler(context);
+  } else {
+    context->parameters = result->parameters;
+    response_t *(*h)(void *) = result->action->handler;
+    response = h(context);
+  }
 
-    return false;
-	}
-
-  context->parameters = result->parameters;
-  response_t *(*h)(void *) = result->action->handler;
-  send_response(context->client_socket, h(context));
-
-	return true;
+  send_response(context->client_socket, response);
 }
 
 void router_free(router_t *router) {
@@ -176,6 +183,10 @@ ch_array_t *collect_methods(char *method, ...) {
 
 void* default_not_found_handler(void *arg) {
 	route_context_t *context = arg;
+  LOG(
+    "[router::default_not_found_handler] default 404 handler in effect at request path %s\n",
+    context->path
+  );
 
   response_t *response = malloc(sizeof(response_t));
   response->status = NOT_FOUND;
@@ -185,6 +196,10 @@ void* default_not_found_handler(void *arg) {
 
 void* default_method_not_allowed_handler(void *arg) {
 	route_context_t *context = arg;
+  LOG(
+    "[router::default_method_not_allowed_handler] default 405 handler in effect at request path %s\n",
+    context->path
+  );
 
   response_t *response = malloc(sizeof(response_t));
   response->status = METHOD_NOT_ALLOWED;
