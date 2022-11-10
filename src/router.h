@@ -33,26 +33,48 @@ typedef struct route {
  */
 typedef struct route_context {
 	int client_socket;
-	char *method;
 	char *path;
-  char *raw_request;
+	char *method;
+  char *protocol;
+  char *host;
+  char *user_agent;
+  char *accept;
+  char *content_len;
+  char *content_type;
+  char *content;
+  char *raw;
 	array_t *parameters;
 } route_context_t;
 
 /**
  * @brief Initializes an object containing request metadata for a matched route.
  *
- * @param method The HTTP method of the matched route
+ * @param client_socket
  * @param path The path of the matched route
- * @param raw_request The as-is request body
+ * @param method The HTTP method of the matched route
+ * @param protocol
+ * @param host
+ * @param user_agent
+ * @param accept
+ * @param content_len
+ * @param content_type
+ * @param content
+ * @param raw
  * @param parameters Any parameters derived from the matched route
  * @return route_context_t* Route context, or NULL if memory allocation failed
  */
 route_context_t *route_context_init(
 	int client_socket,
-	char *method,
 	char *path,
-  char *raw_request,
+	char *method,
+  char *protocol,
+  char *host,
+  char *user_agent,
+  char *accept,
+  char *content_len,
+  char *content_type,
+  char *content,
+  char *raw,
 	array_t *parameters
 );
 
@@ -134,5 +156,13 @@ void* default_not_found_handler(void *arg);
  * @return void*
  */
 void* default_method_not_allowed_handler(void *arg);
+
+/**
+ * @brief Executes the internal 500 handler.
+ *
+ * @param arg
+ * @return void*
+ */
+void* internal_server_error_handler(void *arg);
 
 #endif /* ROUTER_H */

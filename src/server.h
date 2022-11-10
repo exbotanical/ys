@@ -49,6 +49,13 @@ typedef struct response {
 typedef struct request {
 	char *path;
 	char *method;
+  char *protocol;
+  char *host;
+  char *user_agent;
+  char *accept;
+  char *content_len;
+  char *content_type;
+  char *content;
   char *raw;
 } request_t;
 

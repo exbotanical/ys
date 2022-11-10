@@ -59,16 +59,44 @@ buffer_t *build_response(http_status_t status, ch_array_t *headers, char *body) 
  * @return request_t*
 */
 request_t *build_request(char *buffer) {
+  char *buffer_cp = strdup(buffer);
+	request_t *request = malloc(sizeof(request_t));
+  request->raw = buffer;
+
   // TODO: do something sensible here - this is placeholder logic
-	char *raw_request = strtok(buffer, "\n");
-	char *method = strtok(raw_request, " ");
-	char *path = strtok(NULL, " ");
+  char *n1 = strtok(buffer_cp, "\n");
+  char *n2 = strtok(NULL, "\n");
+  char *n3 = strtok(NULL, "\n");
+  char *n4 = strtok(NULL, "\n");
+  char *n5 = strtok(NULL, "\n");
+  char *n6 = strtok(NULL, "\n");
 
-	request_t *request = malloc(sizeof(request));
+  // get the body, if any
+  buffer_t *content = buffer_init();
+  char *n7 = NULL;
+  while ((n7 = strtok(NULL, "\n")) != NULL) {
+    buffer_append(content, n7);
+  }
+  request->content = content->state;
 
-  request->method = method;
-  request->path = path;
-  request->raw = raw_request;
+  request->method = strtok(n1, " ");
+  request->path = strtok(NULL, " ");
+  request->protocol = strtok(NULL, " ");
+
+  strtok(n2, " ");
+  request->host = strtok(NULL, " ");
+
+  strtok(n3, " ");
+  request->user_agent = strtok(NULL, " ");
+
+  strtok(n4, " ");
+  request->accept = strtok(NULL, " ");
+
+  strtok(n5, " ");
+  request->content_len = strtok(NULL, " ");
+
+  strtok(n6, " ");
+  request->content_type = strtok(NULL, " ");
 
 	return request;
 }
@@ -81,7 +109,7 @@ request_t *build_request(char *buffer) {
  */
 void* client_thread_handler(void* args) {
 	client_context_t *c_ctx = args;
-  char recv_buffer[1024];
+  char recv_buffer[1024]; // TODO: MAJOR todo - iterate content-length until entire request is consumed
 
   recvfrom(
     c_ctx->client_socket,
@@ -97,8 +125,15 @@ void* client_thread_handler(void* args) {
   request_t *r = build_request(recv_buffer);
   route_context_t *context = route_context_init(
     c_ctx->client_socket,
-    r->method,
     r->path,
+    r->method,
+    r->protocol,
+    r->host,
+    r->user_agent,
+    r->accept,
+    r->content_len,
+    r->content_type,
+    r->content,
     r->raw,
     NULL
   );

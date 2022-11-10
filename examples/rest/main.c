@@ -20,14 +20,29 @@
 
 #define PORT 9000
 
-void *handler (void *arg) {
-	route_context_t *context = arg;
-  if (!context) {
-    exit(EXIT_FAILURE);
+typedef struct record {
+  char *key;
+  char *value;
+} record_t;
+
+static const record_t records[] = {
+  { .key = "1", .value = "value1" },
+  { .key = "2", .value = "value2" },
+  { .key = "3", .value = "value3" },
+};
+
+record_t *search_records(char *key) {
+  for (size_t i = 0; i < 3; i++) {
+    record_t *record = &records[i];
+    if (strcmp(record->key, key) == 0) {
+      return record;
+    }
   }
 
-	printf("MATCH! METHOD: %s, PATH: %s\n", context->method, context->path);
+  return NULL;
+}
 
+response_t *global_response() {
   response_t *response = response_init();
   if (!response) {
     exit(EXIT_FAILURE);
@@ -40,10 +55,117 @@ void *handler (void *arg) {
     exit(EXIT_FAILURE);
   }
 
-  response->body = "Hello World!";
-  response->status = OK;
+  return response;
+}
 
-	return response;
+void *handle_get (void *arg) {
+  route_context_t *context = arg;
+  if (!context) {
+    exit(EXIT_FAILURE);
+  }
+
+  response_t *response = global_response();
+
+  if (!context->parameters) {
+    response->body = "must provide an id";
+    response->status = BAD_REQUEST;
+    return response;
+  }
+
+  parameter_t *param = context->parameters->state[0];
+  record_t *record = search_records(param->value);
+  if (!record) {
+    response->body = "no matching record";
+    response->status = NOT_FOUND;
+    return response;
+  }
+
+  response->body = "no matching record";
+  response->status = NOT_FOUND;
+  return response;
+}
+
+void *handle_delete (void *arg) {
+  route_context_t *context = arg;
+  if (!context) {
+    exit(EXIT_FAILURE);
+  }
+
+  response_t *response = global_response();
+
+  if (!context->parameters) {
+    response->body = "must provide an id";
+    response->status = BAD_REQUEST;
+    return response;
+  }
+
+  parameter_t *param = context->parameters->state[0];
+  record_t *record = search_records(param->value);
+  if (!record) {
+    response->body = "no matching record";
+    response->status = NOT_FOUND;
+    return response;
+  }
+
+  // Flag record as deleted
+  record->key = NULL;
+  record->value = NULL;
+  return response;
+}
+
+void *handle_put (void *arg) {
+  route_context_t *context = arg;
+  if (!context) {
+    exit(EXIT_FAILURE);
+  }
+
+  response_t *response = global_response();
+
+  if (!context->parameters) {
+    response->body = "must provide an id";
+    response->status = BAD_REQUEST;
+    return response;
+  }
+
+  parameter_t *param = context->parameters->state[0];
+  record_t *record = search_records(param->value);
+  if (!record) {
+    response->body = "no matching record";
+    response->status = NOT_FOUND;
+    return response;
+  }
+
+  record->value = param->value;
+  return response;
+}
+
+void *handle_post (void *arg) {
+  route_context_t *context = arg;
+  if (!context) {
+    exit(EXIT_FAILURE);
+  }
+
+  response_t *response = global_response();
+
+  if (!context->parameters) {
+    response->body = "must provide an id";
+    response->status = BAD_REQUEST;
+    return response;
+  }
+
+  parameter_t *param = context->parameters->state[0];
+  record_t *record = search_records(param->value);
+  if (record) {
+    response->body = "record exists";
+    response->status = BAD_REQUEST;
+    return response;
+  }
+
+  response->status = OK;
+  // TODO:
+  printf("content --> %s\n", context->content);
+
+  return response;
 }
 
 int main() {
@@ -52,7 +174,14 @@ int main() {
     return EXIT_FAILURE;
   }
 
-	if (!router_register(router, collect_methods("GET", NULL), PATH_ROOT, handler)) {
+  char *record_path = "/records/:id[^\\d+$]";
+
+	if (
+    !router_register(router, collect_methods("GET", NULL), record_path, handle_get)
+    || !router_register(router, collect_methods("DELETE", NULL), record_path, handle_delete)
+    || !router_register(router, collect_methods("PUT", NULL), record_path, handle_put)
+    || !router_register(router, collect_methods("POST", NULL), record_path, handle_post)
+  ) {
     return EXIT_FAILURE;
   }
 

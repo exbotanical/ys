@@ -9,9 +9,16 @@
 
 route_context_t *route_context_init(
 	int client_socket,
-	char *method,
 	char *path,
-  char *raw_request,
+	char *method,
+  char *protocol,
+  char *host,
+  char *user_agent,
+  char *accept,
+  char *content_len,
+  char *content_type,
+  char *content,
+  char *raw,
 	array_t *parameters
 ) {
 	route_context_t *context = malloc(sizeof(route_context_t));
@@ -27,9 +34,16 @@ route_context_t *route_context_init(
 	}
 
 	context->client_socket = client_socket;
-	context->method = method;
 	context->path = path;
-  context->raw_request = raw_request;
+	context->method = method;
+  context->protocol = protocol;
+  context->host = host;
+  context->user_agent = user_agent;
+  context->accept = accept;
+  context->content_len = content_len;
+  context->content_type = content_type;
+  context->content = content;
+  context->raw = raw;
 	context->parameters = parameters;
 
 	return context;
@@ -48,27 +62,27 @@ router_t *router_init(
 	}
 
 	router->trie = trie_init();
-	if (router->trie == NULL) {
+	if (!router->trie) {
 		router_free(router);
 		LOG("[router::router_init] %s\n", "failed to allocate trie via trie_init");
 
 		return NULL;
 	}
 
-	if (not_found_handler == NULL) {
+	if (!not_found_handler) {
 		LOG(
 			"[router::router_init] %s\n",
-			"not_found_handler is NULL, using fallback handler"
+			"not_found_handler is NULL, registering fallback handler"
 		);
 		router->not_found_handler = default_not_found_handler;
 	} else {
 		router->not_found_handler = not_found_handler;
 	}
 
-	if (method_not_allowed_handler == NULL) {
+	if (!method_not_allowed_handler) {
 		LOG(
 			"[router::router_init] %s\n",
-			"method_not_allowed_handler is NULL, using fallback handler"
+			"method_not_allowed_handler is NULL, registering fallback handler"
 		);
 		router->method_not_allowed_handler = default_method_not_allowed_handler;
 	} else {
@@ -113,12 +127,7 @@ void router_run(router_t *router, route_context_t *context) {
   );
 
 	if (!result) {
-		LOG(
-			"[router::router_run] no route matched for method %s at %s; selecting 404 handler",
-			context->method,
-			context->path
-		);
-    response = router->not_found_handler(context);
+    response = internal_server_error_handler(context);
 	} else if ((result->flags & NOT_FOUND_MASK) == NOT_FOUND_MASK) {
     response = router->not_found_handler(context);
   } else if ((result->flags & NOT_ALLOWED_MASK) == NOT_ALLOWED_MASK) {
@@ -154,7 +163,7 @@ route_t *route_init(ch_array_t *methods, char *path, void*(*handler)(void*)) {
 
 ch_array_t *collect_methods(char *method, ...) {
 	ch_array_t *methods = ch_array_init();
-	if (methods == NULL) {
+	if (!methods) {
 		LOG(
 			"[router::collect_methods] %s\n",
 			"failed to allocate methods array via ch_array_init"
@@ -181,6 +190,20 @@ ch_array_t *collect_methods(char *method, ...) {
 	return methods;
 }
 
+void* internal_server_error_handler(void *arg) {
+	route_context_t *context = arg;
+  LOG(
+    "[router::internal_server_error_handler] 500 handler in effect at request path %s\n",
+    context->path
+  );
+
+  response_t *response = response_init();
+  response->status = INTERNAL_SERVER_ERROR;
+
+	return response;
+}
+
+
 void* default_not_found_handler(void *arg) {
 	route_context_t *context = arg;
   LOG(
@@ -188,7 +211,7 @@ void* default_not_found_handler(void *arg) {
     context->path
   );
 
-  response_t *response = malloc(sizeof(response_t));
+  response_t *response = response_init();
   response->status = NOT_FOUND;
 
 	return response;
@@ -201,7 +224,7 @@ void* default_method_not_allowed_handler(void *arg) {
     context->path
   );
 
-  response_t *response = malloc(sizeof(response_t));
+  response_t *response = response_init();
   response->status = METHOD_NOT_ALLOWED;
 
   return response;
