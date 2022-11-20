@@ -1,22 +1,21 @@
-#include "array.h"
-#include "path.h"
-#include "router.h"
-#include "http.h"
-#include "server.h"
-
-#include "lib.thread/libthread.h"
-
+#include <errno.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <pthread.h>
+#include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <stdlib.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <stdarg.h>
-#include <sys/select.h>
-#include <pthread.h>
-#include <netdb.h>
-#include <errno.h>
+
+#include "array.h"
+#include "http.h"
+#include "lib.thread/libthread.h"
+#include "path.h"
+#include "router.h"
+#include "server.h"
 
 #define PORT 9000
 
@@ -26,9 +25,9 @@ typedef struct record {
 } record_t;
 
 static const record_t records[] = {
-  { .key = "1", .value = "value1" },
-  { .key = "2", .value = "value2" },
-  { .key = "3", .value = "value3" },
+    {.key = "1", .value = "value1"},
+    {.key = "2", .value = "value2"},
+    {.key = "3", .value = "value3"},
 };
 
 record_t *search_records(char *key) {
@@ -42,23 +41,27 @@ record_t *search_records(char *key) {
   return NULL;
 }
 
+char *response_ok(char *data) { return fmt_str("{\"data\":\"%s\"}", data); }
+
+char *response_err(char *errmsg) {
+  return fmt_str("{\"message\":\"%s\"}", errmsg);
+}
+
 response_t *global_response() {
   response_t *response = response_init();
   if (!response) {
     exit(EXIT_FAILURE);
   }
 
-  if (
-    !ch_array_insert(response->headers, "Content-Type: text/plain")
-    || !ch_array_insert(response->headers, "X-Powered-By: demo")
-  ) {
+  if (!ch_array_insert(response->headers, "Content-Type: application/json") ||
+      !ch_array_insert(response->headers, "X-Powered-By: demo")) {
     exit(EXIT_FAILURE);
   }
 
   return response;
 }
 
-void *handle_get (void *arg) {
+void *handle_get(void *arg) {
   route_context_t *context = arg;
   if (!context) {
     exit(EXIT_FAILURE);
@@ -67,25 +70,27 @@ void *handle_get (void *arg) {
   response_t *response = global_response();
 
   if (!context->parameters) {
-    response->body = "must provide an id";
+    response->body = response_err("must provide an id");
     response->status = BAD_REQUEST;
     return response;
   }
 
   parameter_t *param = context->parameters->state[0];
   record_t *record = search_records(param->value);
+
   if (!record) {
-    response->body = "no matching record";
+    response->body = response_err("no matching record");
     response->status = NOT_FOUND;
     return response;
   }
 
-  response->body = "no matching record";
-  response->status = NOT_FOUND;
+  response->body = response_ok(
+      fmt_str("{\"key\":\"%s\",\"value\":\"%s\"}", record->key, record->value));
+  response->status = OK;
   return response;
 }
 
-void *handle_delete (void *arg) {
+void *handle_delete(void *arg) {
   route_context_t *context = arg;
   if (!context) {
     exit(EXIT_FAILURE);
@@ -94,7 +99,7 @@ void *handle_delete (void *arg) {
   response_t *response = global_response();
 
   if (!context->parameters) {
-    response->body = "must provide an id";
+    response->body = response_err("must provide an id");
     response->status = BAD_REQUEST;
     return response;
   }
@@ -102,7 +107,7 @@ void *handle_delete (void *arg) {
   parameter_t *param = context->parameters->state[0];
   record_t *record = search_records(param->value);
   if (!record) {
-    response->body = "no matching record";
+    response->body = response_err("no matching record");
     response->status = NOT_FOUND;
     return response;
   }
@@ -113,7 +118,7 @@ void *handle_delete (void *arg) {
   return response;
 }
 
-void *handle_put (void *arg) {
+void *handle_put(void *arg) {
   route_context_t *context = arg;
   if (!context) {
     exit(EXIT_FAILURE);
@@ -122,7 +127,7 @@ void *handle_put (void *arg) {
   response_t *response = global_response();
 
   if (!context->parameters) {
-    response->body = "must provide an id";
+    response->body = response_err("must provide an id");
     response->status = BAD_REQUEST;
     return response;
   }
@@ -130,7 +135,7 @@ void *handle_put (void *arg) {
   parameter_t *param = context->parameters->state[0];
   record_t *record = search_records(param->value);
   if (!record) {
-    response->body = "no matching record";
+    response->body = response_err("no matching record");
     response->status = NOT_FOUND;
     return response;
   }
@@ -139,7 +144,7 @@ void *handle_put (void *arg) {
   return response;
 }
 
-void *handle_post (void *arg) {
+void *handle_post(void *arg) {
   route_context_t *context = arg;
   if (!context) {
     exit(EXIT_FAILURE);
@@ -148,7 +153,7 @@ void *handle_post (void *arg) {
   response_t *response = global_response();
 
   if (!context->parameters) {
-    response->body = "must provide an id";
+    response->body = response_err("must provide an id");
     response->status = BAD_REQUEST;
     return response;
   }
@@ -156,7 +161,7 @@ void *handle_post (void *arg) {
   parameter_t *param = context->parameters->state[0];
   record_t *record = search_records(param->value);
   if (record) {
-    response->body = "record exists";
+    response->body = response_err("record exists");
     response->status = BAD_REQUEST;
     return response;
   }
@@ -176,17 +181,19 @@ int main() {
 
   char *record_path = "/records/:id[^\\d+$]";
 
-	if (
-    !router_register(router, collect_methods("GET", NULL), record_path, handle_get)
-    || !router_register(router, collect_methods("DELETE", NULL), record_path, handle_delete)
-    || !router_register(router, collect_methods("PUT", NULL), record_path, handle_put)
-    || !router_register(router, collect_methods("POST", NULL), record_path, handle_post)
-  ) {
+  if (!router_register(router, collect_methods("GET", NULL), record_path,
+                       handle_get) ||
+      !router_register(router, collect_methods("DELETE", NULL), record_path,
+                       handle_delete) ||
+      !router_register(router, collect_methods("PUT", NULL), record_path,
+                       handle_put) ||
+      !router_register(router, collect_methods("POST", NULL), record_path,
+                       handle_post)) {
     return EXIT_FAILURE;
   }
 
-	server_t *server = server_init(router, PORT);
+  server_t *server = server_init(router, PORT);
   server_start(server);
 
-	return EXIT_SUCCESS;
+  return EXIT_SUCCESS;
 }
