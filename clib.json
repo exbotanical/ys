@@ -13,7 +13,24 @@
     "concurrency"
   ],
   "src": [
-    "src/*"
+    "src/array.c",
+    "src/cache.c",
+    "src/path.c",
+    "src/server.c",
+    "src/util.c",
+    "src/array.h",
+    "src/cache.h",
+    "src/path.h",
+    "src/server.h",
+    "src/util.h",
+    "src/buffer.c",
+    "src/http.h",
+    "src/router.c",
+    "src/trie.c",
+    "src/buffer.h",
+    "src/logger.h",
+    "src/router.h",
+    "src/trie.h"
   ],
 	"dependencies": {
     "exbotanical/lib.hash": "0.0.2",
