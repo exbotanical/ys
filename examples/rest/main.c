@@ -75,7 +75,7 @@ void *handle_get(void *arg) {
     return response;
   }
 
-  parameter_t *param = context->parameters->state[0];
+  parameter_t *param = array_get(context->parameters, 0);
   record_t *record = search_records(param->value);
 
   if (!record) {
@@ -104,7 +104,7 @@ void *handle_delete(void *arg) {
     return response;
   }
 
-  parameter_t *param = context->parameters->state[0];
+  parameter_t *param = array_get(context->parameters, 0);
   record_t *record = search_records(param->value);
   if (!record) {
     response->body = response_err("no matching record");
@@ -132,7 +132,7 @@ void *handle_put(void *arg) {
     return response;
   }
 
-  parameter_t *param = context->parameters->state[0];
+  parameter_t *param = array_get(context->parameters, 0);
   record_t *record = search_records(param->value);
   if (!record) {
     response->body = response_err("no matching record");
@@ -158,7 +158,7 @@ void *handle_post(void *arg) {
     return response;
   }
 
-  parameter_t *param = context->parameters->state[0];
+  parameter_t *param = array_get(context->parameters, 0);
   record_t *record = search_records(param->value);
   if (record) {
     response->body = response_err("record exists");

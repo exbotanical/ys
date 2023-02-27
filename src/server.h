@@ -1,16 +1,18 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include "buffer.h"
-#include "http.h"
-#include "router.h"
-
 #include <sys/socket.h>
+
+#include "http.h"
+#include "libutil/libutil.h"
+#include "router.h"
 
 /**
  * @brief Maximum number of queued connections allowed for server.
  */
 static const int MAX_CONN = 100;
+
+static const int DEFAULT_NUM_THREADS = 4;
 
 /**
  * @brief A server configuration object.
@@ -24,10 +26,10 @@ typedef struct server {
  * @brief A context object for a client connection.
  */
 typedef struct client_context {
-	int client_socket;
-	struct sockaddr *address;
-	socklen_t *addr_len;
-	router_t *router;
+  int client_socket;
+  struct sockaddr *address;
+  socklen_t *addr_len;
+  router_t *router;
 } client_context_t;
 
 /**
@@ -37,7 +39,8 @@ typedef struct client_context {
 typedef struct response {
   /** HTTP status code - required */
   http_status_t status;
-  /** HTTP headers - optional, but you should pass content-type if sending a body */
+  /** HTTP headers - optional, but you should pass content-type if sending a
+   * body */
   ch_array_t *headers;
   /** Response body - optional; Content-length header will be set for you */
   char *body;
@@ -47,8 +50,8 @@ typedef struct response {
  * @brief Request metadata collected from an inbound client request.
  */
 typedef struct request {
-	char *path;
-	char *method;
+  char *path;
+  char *method;
   char *protocol;
   char *host;
   char *user_agent;

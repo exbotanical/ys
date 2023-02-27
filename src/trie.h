@@ -1,33 +1,33 @@
 #ifndef TRIE_H
 #define TRIE_H
 
-#include "array.h"
-
-#include "lib.hash/hash.h"
-
 #include <stdbool.h>
+
+#include "array.h"
+#include "lib.hash/hash.h"
+#include "libutil/libutil.h"
 
 /**
  * @brief Initial flags state for result record.
  */
-static const unsigned int INITIAL_FLAG_STATE = 0b00000000;
-static const unsigned int NOT_FOUND_MASK = 0b00000001;
-static const unsigned int NOT_ALLOWED_MASK = 0b00000010;
+static const unsigned int INITIAL_FLAG_STATE = 0x00;
+static const unsigned int NOT_FOUND_MASK = 0x01;
+static const unsigned int NOT_ALLOWED_MASK = 0x02;
 
 /**
  * @brief A trie node.
  */
 typedef struct node {
-	char *label;
-	h_table *children;
-	h_table *actions;
+  char *label;
+  h_table *children;
+  h_table *actions;
 } node_t;
 
 /**
  * @brief A trie data structure used for routing.
  */
 typedef struct trie {
-	node_t *root;
+  node_t *root;
   h_table *regex_cache;
 } trie_t;
 
@@ -35,23 +35,23 @@ typedef struct trie {
  * @brief A route handler.
  */
 typedef struct action {
-	void*(*handler)(void*);
+  void *(*handler)(void *);
 } action_t;
 
 /**
  * @brief Parameters collected from a route match.
  */
 typedef struct parameter {
-	char *key;
-	char *value;
+  char *key;
+  char *value;
 } parameter_t;
 
 /**
  * @brief A trie search result.
  */
 typedef struct result {
-	action_t *action;
-	array_t *parameters;
+  action_t *action;
+  Array *parameters;
   unsigned int flags;
 } result_t;
 
@@ -71,7 +71,8 @@ trie_t *trie_init();
  * @param handler The handler to be associated with the inserted node
  * @return bool A boolean indicating whether the insertion succeeded
  */
-bool trie_insert(trie_t *trie, ch_array_t *methods, const char *path, void*(*handler)(void*));
+bool trie_insert(trie_t *trie, ch_array_t *methods, const char *path,
+                 void *(*handler)(void *));
 
 /**
  * @brief Searches a trie for a node matching the given method and path

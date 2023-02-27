@@ -1,30 +1,30 @@
 #ifndef ROUTER_H
 #define ROUTER_H
 
+#include <stdbool.h>
+
 #include "array.h"
+#include "lib.hash/hash.h"
+#include "libutil/libutil.h"
 #include "trie.h"
 #include "util.h"
-
-#include "lib.hash/hash.h"
-
-#include <stdbool.h>
 
 /**
  * @brief A router object.
  */
 typedef struct router {
-	trie_t *trie;
-	void*(*not_found_handler)(void*);
-	void*(*method_not_allowed_handler)(void*);
+  trie_t *trie;
+  void *(*not_found_handler)(void *);
+  void *(*method_not_allowed_handler)(void *);
 } router_t;
 
 /**
  * @brief A route record.
  */
 typedef struct route {
-	ch_array_t *methods;
-	char *path;
-	void*(*handler)(void*);
+  ch_array_t *methods;
+  char *path;
+  void *(*handler)(void *);
 } route_t;
 
 /**
@@ -32,9 +32,9 @@ typedef struct route {
  * to matched route handlers.
  */
 typedef struct route_context {
-	int client_socket;
-	char *path;
-	char *method;
+  int client_socket;
+  char *path;
+  char *method;
   char *protocol;
   char *host;
   char *user_agent;
@@ -43,7 +43,7 @@ typedef struct route_context {
   char *content_type;
   char *content;
   char *raw;
-	array_t *parameters;
+  Array *parameters;
 } route_context_t;
 
 /**
@@ -63,20 +63,12 @@ typedef struct route_context {
  * @param parameters Any parameters derived from the matched route
  * @return route_context_t* Route context, or NULL if memory allocation failed
  */
-route_context_t *route_context_init(
-	int client_socket,
-	char *path,
-	char *method,
-  char *protocol,
-  char *host,
-  char *user_agent,
-  char *accept,
-  char *content_len,
-  char *content_type,
-  char *content,
-  char *raw,
-	array_t *parameters
-);
+route_context_t *route_context_init(int client_socket, char *path, char *method,
+                                    char *protocol, char *host,
+                                    char *user_agent, char *accept,
+                                    char *content_len, char *content_type,
+                                    char *content, char *raw,
+                                    Array *parameters);
 
 /**
  * @brief Allocates memory for a new router and its `trie` member;
@@ -86,10 +78,8 @@ route_context_t *route_context_init(
  * @param method_not_allowed_handler
  * @return router_t*
  */
-router_t *router_init(
-	void*(*not_found_handler)(void*),
-	void*(*method_not_allowed_handler)(void*)
-);
+router_t *router_init(void *(*not_found_handler)(void *),
+                      void *(*method_not_allowed_handler)(void *));
 
 /**
  * @brief Registers a new route record. Registered routes will be matched
@@ -101,7 +91,8 @@ router_t *router_init(
  * @param handler The handler to associate with the route
  * @return bool A boolean indicating whether the registration was successful
  */
-bool router_register(router_t *router, ch_array_t *methods, const char *path, void*(*handler)(void*));
+bool router_register(router_t *router, ch_array_t *methods, const char *path,
+                     void *(*handler)(void *));
 
 /**
  * @brief Matches an inbound HTTP request against a route, passing route_context
@@ -110,7 +101,8 @@ bool router_register(router_t *router, ch_array_t *methods, const char *path, vo
  * @param router The router instance in which to search for routes
  * @param method The method to search for
  * @param path The path to search for
- * @return bool A boolean indicating whether a route record was matched and executed
+ * @return bool A boolean indicating whether a route record was matched and
+ * executed
  */
 void router_run(router_t *router, route_context_t *context);
 
@@ -129,7 +121,7 @@ void router_free(router_t *router);
  * @param handler The handler to associate with the route record
  * @return route_t*
  */
-route_t *route_init(ch_array_t *methods, char *path, void*(*handler)(void*));
+route_t *route_init(ch_array_t *methods, char *path, void *(*handler)(void *));
 
 /**
  * @brief Collects n methods into a character array. The variadic arguments here
@@ -147,7 +139,7 @@ ch_array_t *collect_methods(char *method, ...);
  * @param arg
  * @return void*
  */
-void* default_not_found_handler(void *arg);
+void *default_not_found_handler(void *arg);
 
 /**
  * @brief Executes the default 405 handler.
@@ -155,7 +147,7 @@ void* default_not_found_handler(void *arg);
  * @param arg
  * @return void*
  */
-void* default_method_not_allowed_handler(void *arg);
+void *default_method_not_allowed_handler(void *arg);
 
 /**
  * @brief Executes the internal 500 handler.
@@ -163,6 +155,6 @@ void* default_method_not_allowed_handler(void *arg);
  * @param arg
  * @return void*
  */
-void* internal_server_error_handler(void *arg);
+void *internal_server_error_handler(void *arg);
 
 #endif /* ROUTER_H */

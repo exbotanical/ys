@@ -1,20 +1,20 @@
 #ifndef PATH_H
 #define PATH_H
 
-#include "array.h"
-
 #include <stdbool.h>
 
-static const char *PATH_ROOT = "/";
-static const char *PATH_DELIMITER = "/";
-static const char *PARAMETER_DELIMITER = ":";
-static const char *PARAMETER_DELIMITER_START = "[";
-static const char *PARAMETER_DELIMITER_END = "]";
-static const char *PATTERN_WILDCARD = "(.+)";
+#include "array.h"
+
+extern const char *PATH_ROOT;
+extern const char *PATH_DELIMITER;
+extern const char *PARAMETER_DELIMITER;
+extern const char *PARAMETER_DELIMITER_START;
+extern const char *PARAMETER_DELIMITER_END;
+extern const char *PATTERN_WILDCARD;
 
 /**
- * @brief Expands a path into an array of all words delimited by `PATH_DELIMITER`.
- * Sets errno if provided null argument(s).
+ * @brief Expands a path into an array of all words delimited by
+ * `PATH_DELIMITER`. Sets errno if provided null argument(s).
  *
  * @param path The path to expand
  * @return ch_array_t*
@@ -40,7 +40,7 @@ ch_array_t *split(const char *str, const char *delimiter);
  *
  * @return int The index of `target` qua `str`, or -1 if not extant
  */
-int index_of (const char *str, const char *target);
+int index_of(const char *str, const char *target);
 
 /**
  * @brief For a given string `str`, finds and returns the substring between
@@ -49,10 +49,11 @@ int index_of (const char *str, const char *target);
  * @param str The string in which to find a substring
  * @param start The starting index, always inclusive
  * @param end The ending index, only inclusive if specified
- * @param inclusive A flag indicating whether the substring match should be end-inclusive
+ * @param inclusive A flag indicating whether the substring match should be
+ * end-inclusive
  * @return char* The matching substring, or NULL if erroneous
  */
-char *substr (const char *str, int start, int end, bool inclusive);
+char *substr(const char *str, int start, int end, bool inclusive);
 
 /**
  * @brief Extracts from a label a PCRE-compliant regular expression.
