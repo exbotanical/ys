@@ -2,7 +2,7 @@
 #define HTTP_H
 
 #include "array.h"
-#include "lib.hash/hash.h"
+#include "libhash/libhash.h"
 #include "libutil/libutil.h"
 
 #define EP(x) [x] = #x

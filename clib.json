@@ -33,8 +33,9 @@
     "src/trie.h"
   ],
 	"dependencies": {
-    "exbotanical/lib.hash": "0.0.2",
-    "exbotanical/lib.thread": "0.0.1"
+    "exbotanical/libhash": "0.0.3",
+    "exbotanical/lib.thread": "0.0.1",
+    "exbotanical/libutil": "0.0.1"
   },
 	"development": {
     "thlorenz/tap.c": "*"

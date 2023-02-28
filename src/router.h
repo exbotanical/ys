@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 #include "array.h"
-#include "lib.hash/hash.h"
+#include "libhash/libhash.h"
 #include "libutil/libutil.h"
 #include "trie.h"
 #include "util.h"

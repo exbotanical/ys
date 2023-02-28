@@ -1,9 +1,9 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include "lib.hash/hash.h"
-
 #include <stddef.h>
+
+#include "libhash/libhash.h"
 
 static const char NULL_TERM = '\0';
 
@@ -22,6 +22,6 @@ char *safe_itoa(int x);
  * @param ...
  * @return char*
  */
-char *fmt_str (char *fmt, ...);
+char *fmt_str(char *fmt, ...);
 
 #endif /* UTIL_H */

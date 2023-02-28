@@ -1,12 +1,13 @@
 #ifndef CACHE_H
 #define CACHE_H
 
-#include "lib.hash/hash.h"
-
 #include <pcre.h>
 
+#include "libhash/libhash.h"
+
 /**
- * @brief TODO: Retrieves a regex from the cache, or creates (and caches) one if not extant.
+ * @brief TODO: Retrieves a regex from the cache, or creates (and caches) one if
+ * not extant.
  *
  * @param pattern
  * @return char*
