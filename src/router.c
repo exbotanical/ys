@@ -1,11 +1,9 @@
-#include "router.h"
-
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "libhttp.h"
 #include "logger.h"
-#include "server.h"
 
 /**
  * @brief Executes the internal 500 handler.
@@ -19,7 +17,7 @@ static void *internal_server_error_handler(void *arg) {
       "request path %s\n",
       context->path);
 
-  response_t *response = response_init();
+  Response *response = response_init();
   response->status = INTERNAL_SERVER_ERROR;
 
   return response;
@@ -37,7 +35,7 @@ static void *default_not_found_handler(void *arg) {
       "request path %s\n",
       context->path);
 
-  response_t *response = response_init();
+  Response *response = response_init();
   response->status = NOT_FOUND;
 
   return response;
@@ -55,7 +53,7 @@ static void *default_method_not_allowed_handler(void *arg) {
       "effect at request path %s\n",
       context->path);
 
-  response_t *response = response_init();
+  Response *response = response_init();
   response->status = METHOD_NOT_ALLOWED;
 
   return response;
@@ -159,7 +157,7 @@ void router_run(router_t *router, route_context_t *context) {
     return;
   }
 
-  response_t *response;
+  Response *response;
   result_t *result = trie_search(router->trie, context->method, context->path);
 
   if (!result) {
@@ -170,7 +168,7 @@ void router_run(router_t *router, route_context_t *context) {
     response = router->method_not_allowed_handler(context);
   } else {
     context->parameters = result->parameters;
-    response_t *(*h)(void *) = result->action->handler;
+    Response *(*h)(void *) = result->action->handler;
     response = h(context);
   }
 

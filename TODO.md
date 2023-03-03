@@ -12,4 +12,6 @@
 - [ ] error-handling
 - [ ] documentation
 - [ ] use attr struct for fallback handlers
-- [ ] Figure out file routing. The problem here is we want the `response_t` type to be accessible to consumers without having to compile the entire library and link it.
+- [ ] Figure out file routing. The problem here is we want the `Response` type to be accessible to consumers without having to compile the entire library and link it.
+- [ ] ssl
+- [ ]

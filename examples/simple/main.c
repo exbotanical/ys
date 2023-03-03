@@ -10,40 +10,25 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include "array.h"
-#include "http.h"
 #include "lib.thread/libthread.h"
-#include "path.h"
-#include "router.h"
-#include "server.h"
+#include "libhttp.h"
 
 #define PORT 9000
 
 void *handler(void *arg) {
-  route_context_t *context = arg;
-  if (!context) {
-    exit(EXIT_FAILURE);
-  }
+  Response *response = get_response();
+  set_header(response, "Content-Type: text/plain");
+  set_header(response, "X-Powered-By: demo");
 
-  response_t *response = response_init();
-  if (!response) {
-    exit(EXIT_FAILURE);
-  }
-
-  if (!ch_array_insert(response->headers, "Content-Type: text/plain") ||
-      !ch_array_insert(response->headers, "X-Powered-By: demo")) {
-    exit(EXIT_FAILURE);
-  }
-
-  response->body = "Hello World!";
-  response->status = OK;
+  set_body(response, "Hello World!");
+  set_status(response, OK);
 
   return response;
 }
 
 int main() {
   router_t *router = router_init(NULL, NULL);
-  router_register(router, collect_methods("GET", NULL), PATH_ROOT, handler);
+  router_register(router, collect_methods("GET", NULL), "/", handler);
 
   server_t *server = server_init(router, PORT);
   if (!server_start(server)) {

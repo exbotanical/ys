@@ -10,12 +10,8 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#include "array.h"
-#include "http.h"
 #include "lib.thread/libthread.h"
-#include "path.h"
-#include "router.h"
-#include "server.h"
+#include "libhttp.h"
 
 #define PORT 9000
 
@@ -47,46 +43,37 @@ char *response_err(char *errmsg) {
   return fmt_str("{\"message\":\"%s\"}", errmsg);
 }
 
-response_t *global_response() {
-  response_t *response = response_init();
-  if (!response) {
-    exit(EXIT_FAILURE);
-  }
-
-  if (!ch_array_insert(response->headers, "Content-Type: application/json") ||
-      !ch_array_insert(response->headers, "X-Powered-By: demo")) {
-    exit(EXIT_FAILURE);
-  }
+Response *global_response() {
+  Response *response = get_response();
+  set_header(response, "Content-Type: application/json");
+  set_header(response, "X-Powered-By: demo");
 
   return response;
 }
 
 void *handle_get(void *arg) {
   route_context_t *context = arg;
-  if (!context) {
-    exit(EXIT_FAILURE);
-  }
 
-  response_t *response = global_response();
+  Response *response = global_response();
 
-  if (!context->parameters) {
-    response->body = response_err("must provide an id");
-    response->status = BAD_REQUEST;
+  if (!has_parameters(context)) {
+    set_body(response, response_err("must provide an id"));
+    set_status(response, BAD_REQUEST);
     return response;
   }
 
-  parameter_t *param = array_get(context->parameters, 0);
+  parameter_t *param = get_param(context, 0);
   record_t *record = search_records(param->value);
 
   if (!record) {
-    response->body = response_err("no matching record");
-    response->status = NOT_FOUND;
+    set_body(response, response_err("no matching record"));
+    set_status(response, NOT_FOUND);
     return response;
   }
 
-  response->body = response_ok(
-      fmt_str("{\"key\":\"%s\",\"value\":\"%s\"}", record->key, record->value));
-  response->status = OK;
+  set_body(response, response_ok(fmt_str("{\"key\":\"%s\",\"value\":\"%s\"}",
+                                         record->key, record->value)));
+  set_status(response, OK);
   return response;
 }
 
@@ -96,19 +83,19 @@ void *handle_delete(void *arg) {
     exit(EXIT_FAILURE);
   }
 
-  response_t *response = global_response();
+  Response *response = global_response();
 
-  if (!context->parameters) {
-    response->body = response_err("must provide an id");
-    response->status = BAD_REQUEST;
+  if (!has_parameters(context)) {
+    set_body(response, response_err("must provide an id"));
+    set_status(response, BAD_REQUEST);
     return response;
   }
 
-  parameter_t *param = array_get(context->parameters, 0);
+  parameter_t *param = get_param(context, 0);
   record_t *record = search_records(param->value);
   if (!record) {
-    response->body = response_err("no matching record");
-    response->status = NOT_FOUND;
+    set_body(response, response_err("no matching record"));
+    set_status(response, NOT_FOUND);
     return response;
   }
 
@@ -124,19 +111,19 @@ void *handle_put(void *arg) {
     exit(EXIT_FAILURE);
   }
 
-  response_t *response = global_response();
+  Response *response = global_response();
 
-  if (!context->parameters) {
-    response->body = response_err("must provide an id");
-    response->status = BAD_REQUEST;
+  if (!has_parameters(context)) {
+    set_body(response, response_err("must provide an id"));
+    set_status(response, BAD_REQUEST);
     return response;
   }
 
-  parameter_t *param = array_get(context->parameters, 0);
+  parameter_t *param = get_param(context, 0);
   record_t *record = search_records(param->value);
   if (!record) {
-    response->body = response_err("no matching record");
-    response->status = NOT_FOUND;
+    set_body(response, response_err("no matching record"));
+    set_status(response, NOT_FOUND);
     return response;
   }
 
@@ -150,23 +137,23 @@ void *handle_post(void *arg) {
     exit(EXIT_FAILURE);
   }
 
-  response_t *response = global_response();
+  Response *response = global_response();
 
-  if (!context->parameters) {
-    response->body = response_err("must provide an id");
-    response->status = BAD_REQUEST;
+  if (!has_parameters(context)) {
+    set_body(response, response_err("must provide an id"));
+    set_status(response, BAD_REQUEST);
     return response;
   }
 
-  parameter_t *param = array_get(context->parameters, 0);
+  parameter_t *param = get_param(context, 0);
   record_t *record = search_records(param->value);
   if (record) {
-    response->body = response_err("record exists");
-    response->status = BAD_REQUEST;
+    set_body(response, response_err("record exists"));
+    set_status(response, BAD_REQUEST);
     return response;
   }
 
-  response->status = OK;
+  set_status(response, OK);
   // TODO:
   printf("content --> %s\n", context->content);
 

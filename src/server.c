@@ -1,4 +1,3 @@
-#include "server.h"
 
 #include <errno.h>
 #include <netdb.h>
@@ -11,9 +10,9 @@
 #include <sys/select.h>
 #include <unistd.h>
 
-#include "array.h"
 #include "config.h"
 #include "lib.thread/libthread.h"
+#include "libhttp.h"
 #include "logger.h"
 #include "path.h"
 #include "request.h"
@@ -38,7 +37,7 @@ static int get_num_threads() {
  * @param body
  * @return Buffer*
  */
-static Buffer *build_response(response_t *response_data) {
+static Buffer *build_response(Response *response_data) {
   Buffer *response = buffer_init(NULL);
   if (!response) {
     // TODO constant template str for malloc failures
@@ -258,10 +257,10 @@ bool server_start(server_t *server) {
   return true;
 }
 
-response_t *response_init() {
-  response_t *response = malloc(sizeof(response_t));
+Response *response_init() {
+  Response *response = malloc(sizeof(Response));
   if (!response) {
-    DIE(EXIT_FAILURE, "%s\n", "unable to allocate response_t");
+    DIE(EXIT_FAILURE, "%s\n", "unable to allocate Response");
   }
 
   response->headers = ch_array_init();
@@ -269,13 +268,9 @@ response_t *response_init() {
   return response;
 }
 
-void send_response(int socket, response_t *response_data) {
+void send_response(int socket, Response *response_data) {
   Buffer *response = build_response(response_data);
   write(socket, buffer_state(response), buffer_size(response));
   buffer_free(response);
   close(socket);
-}
-
-bool append_header(response_t *response, char *header) {
-  return ch_array_insert(response->headers, header);
 }
