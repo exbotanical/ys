@@ -14,12 +14,8 @@ pcre *regex_cache_get(h_table *regex_cache, char *pattern) {
   pcre *re = pcre_compile(pattern, 0, &error, &erroffset, NULL);
   if (re == NULL) {
     free(re);
-    LOG(
-      "[cache::regex_cache_get] %s %d: %s\n",
-      "PCRE compilation failed at offset",
-      erroffset,
-      error
-    );
+    LOG("[cache::regex_cache_get] %s %d: %s\n",
+        "PCRE compilation failed at offset", erroffset, error);
 
     return NULL;
   }

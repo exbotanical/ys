@@ -16,18 +16,15 @@
 #include "lib.thread/libthread.h"
 #include "logger.h"
 #include "path.h"
+#include "request.h"
 #include "util.h"
 
-int get_num_threads() {
+static int get_num_threads() {
   char *num_threads = getenv(NUM_THREADS_KEY);
-  if (num_threads == NULL) {
-    return DEFAULT_NUM_THREADS;
-  }
-  int env_threads = atoi(num_threads);
+  if (num_threads == NULL) return DEFAULT_NUM_THREADS;
 
-  if (env_threads && env_threads > 0) {
-    return env_threads;
-  }
+  int env_threads = atoi(num_threads);
+  if (env_threads && env_threads > 0) return env_threads;
 
   return DEFAULT_NUM_THREADS;
 }
@@ -41,8 +38,18 @@ int get_num_threads() {
  * @param body
  * @return Buffer*
  */
-Buffer *build_response(http_status_t status, ch_array_t *headers, char *body) {
+static Buffer *build_response(response_t *response_data) {
   Buffer *response = buffer_init(NULL);
+  if (!response) {
+    // TODO constant template str for malloc failures
+    DIE(EXIT_FAILURE, "%s\n", "could not allocate memory for Buffer");
+  }
+
+  // TODO constants for response_data fields for brevity
+  int status = response_data->status;
+  ch_array_t *headers = response_data->headers;
+  char *body = response_data->body;
+
   buffer_append(response,
                 fmt_str("HTTP/1.1 %d %s\n", status, http_status_names[status]));
 
@@ -68,7 +75,7 @@ Buffer *build_response(http_status_t status, ch_array_t *headers, char *body) {
  * @param buffer
  * @return request_t*
  */
-request_t *build_request(char *buffer) {
+static request_t *build_request(char *buffer) {
   char *buffer_cp = strdup(buffer);
   request_t *request = malloc(sizeof(request_t));
   request->raw = buffer;
@@ -128,12 +135,8 @@ void *client_thread_handler(void *args) {
   LOG("[server::client_thread_handler] client request received: %s\n",
       recv_buffer);
 
-  request_t *r = build_request(recv_buffer);
-  // TODO: simplify args / is this even needed?
-  route_context_t *context =
-      route_context_init(c_ctx->client_socket, r->path, r->method, r->protocol,
-                         r->host, r->user_agent, r->accept, r->content_len,
-                         r->content_type, r->content, r->raw, NULL);
+  route_context_t *context = route_context_init(
+      c_ctx->client_socket, build_request(recv_buffer), NULL);
   router_run(c_ctx->router, context);
 
   return NULL;
@@ -153,7 +156,7 @@ server_t *server_init(router_t *router, int port) {
   return server;
 }
 
-void server_start(server_t *server) {
+bool server_start(server_t *server) {
   int port = server->port;
   int master_socket;
 
@@ -162,7 +165,7 @@ void server_start(server_t *server) {
         fmt_str("failed to initialize server socket on port %d", port);
     LOG("[server::start] %s\n", message);
     perror("socket");
-    DIE(EXIT_FAILURE, "%s\n", message);
+    return false;
   }
 
   int yes = 1;
@@ -172,7 +175,7 @@ void server_start(server_t *server) {
     char *message = "failed to set sock opt";
     LOG("[server::start] %s\n", message);
     perror("setsockopt");
-    DIE(EXIT_FAILURE, "%s\n", message);
+    return false;
   }
 
   struct sockaddr_in address;
@@ -188,7 +191,7 @@ void server_start(server_t *server) {
                             address.sin_addr, port);
     LOG("[server::start] %s\n", message);
     perror("bind");
-    DIE(EXIT_FAILURE, "%s\n", message);
+    return false;
   }
 
   if (listen(master_socket, MAX_CONN) < 0) {
@@ -196,7 +199,7 @@ void server_start(server_t *server) {
         fmt_str("failed to listen on %s:%d", address.sin_addr, port);
     LOG("[server::start] %s\n", message);
     perror("listen");
-    DIE(EXIT_FAILURE, "%s\n", message);
+    return false;
   }
 
   printf("Listening on port %d...\n", port);
@@ -232,7 +235,7 @@ void server_start(server_t *server) {
                                 address.sin_addr, port);
         LOG("[server::start] %s\n", message);
         perror("accept");
-        DIE(EXIT_FAILURE, "%s\n", message);
+        return false;
       }
 
       LOG("[server::start] %s\n",
@@ -252,19 +255,27 @@ void server_start(server_t *server) {
   }
 
   // TODO: interrupt cancel, kill sig
+  return true;
 }
 
 response_t *response_init() {
   response_t *response = malloc(sizeof(response_t));
+  if (!response) {
+    DIE(EXIT_FAILURE, "%s\n", "unable to allocate response_t");
+  }
+
   response->headers = ch_array_init();
 
   return response;
 }
 
 void send_response(int socket, response_t *response_data) {
-  Buffer *response = build_response(
-      response_data->status, response_data->headers, response_data->body);
+  Buffer *response = build_response(response_data);
   write(socket, buffer_state(response), buffer_size(response));
   buffer_free(response);
   close(socket);
+}
+
+bool append_header(response_t *response, char *header) {
+  return ch_array_insert(response->headers, header);
 }

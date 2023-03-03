@@ -43,17 +43,12 @@ void *handler(void *arg) {
 
 int main() {
   router_t *router = router_init(NULL, NULL);
-  if (!router) {
-    return EXIT_FAILURE;
-  }
-
-  if (!router_register(router, collect_methods("GET", NULL), PATH_ROOT,
-                       handler)) {
-    return EXIT_FAILURE;
-  }
+  router_register(router, collect_methods("GET", NULL), PATH_ROOT, handler);
 
   server_t *server = server_init(router, PORT);
-  server_start(server);
+  if (!server_start(server)) {
+    return EXIT_FAILURE;
+  }
 
   return EXIT_SUCCESS;
 }

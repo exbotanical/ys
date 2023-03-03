@@ -40,10 +40,8 @@ ch_array_t *split(const char *str, const char *delimiter) {
   ch_array_t *ca = ch_array_init();
   if (ca == NULL) {
     free(ca);
-
-    LOG("[path::split] %s\n", "failed to allocate ch_array_t `ca`");
-
-    return NULL;
+    DIE(EXIT_FAILURE, "[path::split] %s\n",
+        "failed to allocate ch_array_t `ca`");
   }
 
   // If the input doesn't even contain the delimiter, return early and avoid
@@ -148,14 +146,10 @@ char *substr(const char *str, int start, int end, bool inclusive) {
   char *ret = malloc(sizeof(char) * size_multiplier);
   if (ret == NULL) {
     free(ret);
-
-    LOG("[path::substr] failed to allocate char* with `malloc`, where \
+    DIE(EXIT_FAILURE,
+        "[path::substr] failed to allocate char* with `malloc`, where \
 			size multiplier was %d\n",
         size_multiplier);
-
-    STDERR("%s\n", "[path::substr] failed to allocate char* with `malloc`");
-
-    return NULL;
   }
 
   int i = 0;

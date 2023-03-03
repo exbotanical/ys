@@ -175,25 +175,21 @@ void *handle_post(void *arg) {
 
 int main() {
   router_t *router = router_init(NULL, NULL);
-  if (!router) {
-    return EXIT_FAILURE;
-  }
-
   char *record_path = "/records/:id[^\\d+$]";
 
-  if (!router_register(router, collect_methods("GET", NULL), record_path,
-                       handle_get) ||
-      !router_register(router, collect_methods("DELETE", NULL), record_path,
-                       handle_delete) ||
-      !router_register(router, collect_methods("PUT", NULL), record_path,
-                       handle_put) ||
-      !router_register(router, collect_methods("POST", NULL), record_path,
-                       handle_post)) {
-    return EXIT_FAILURE;
-  }
+  router_register(router, collect_methods("GET", NULL), record_path,
+                  handle_get);
+  router_register(router, collect_methods("DELETE", NULL), record_path,
+                  handle_delete);
+  router_register(router, collect_methods("PUT", NULL), record_path,
+                  handle_put);
+  router_register(router, collect_methods("POST", NULL), record_path,
+                  handle_post);
 
   server_t *server = server_init(router, PORT);
-  server_start(server);
+  if (!server_start(server)) {
+    return EXIT_FAILURE;
+  }
 
   return EXIT_SUCCESS;
 }

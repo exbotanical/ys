@@ -7,33 +7,104 @@
 #include "logger.h"
 #include "server.h"
 
-route_context_t *route_context_init(int client_socket, char *path, char *method,
-                                    char *protocol, char *host,
-                                    char *user_agent, char *accept,
-                                    char *content_len, char *content_type,
-                                    char *content, char *raw,
+/**
+ * @brief Executes the internal 500 handler.
+ *
+ * @param arg
+ * @return void*
+ */
+static void *internal_server_error_handler(void *arg) {
+  route_context_t *context = arg;
+  LOG("[router::internal_server_error_handler] 500 handler in effect at "
+      "request path %s\n",
+      context->path);
+
+  response_t *response = response_init();
+  response->status = INTERNAL_SERVER_ERROR;
+
+  return response;
+}
+
+/**
+ * @brief Executes the default 404 handler.
+ *
+ * @param arg
+ * @return void*
+ */
+static void *default_not_found_handler(void *arg) {
+  route_context_t *context = arg;
+  LOG("[router::default_not_found_handler] default 404 handler in effect at "
+      "request path %s\n",
+      context->path);
+
+  response_t *response = response_init();
+  response->status = NOT_FOUND;
+
+  return response;
+}
+
+/**
+ * @brief Executes the default 405 handler.
+ *
+ * @param arg
+ * @return void*
+ */
+static void *default_method_not_allowed_handler(void *arg) {
+  route_context_t *context = arg;
+  LOG("[router::default_method_not_allowed_handler] default 405 handler in "
+      "effect at request path %s\n",
+      context->path);
+
+  response_t *response = response_init();
+  response->status = METHOD_NOT_ALLOWED;
+
+  return response;
+}
+
+/**
+ * @brief Initializes a new route_t.
+ *
+ * @param methods A list of methods to associate with the route record
+ * @param path The path to associate with the route record
+ * @param handler The handler to associate with the route record
+ * @return route_t*
+ */
+static route_t *route_init(ch_array_t *methods, char *path,
+                           void *(*handler)(void *)) {
+  route_t *route_record = malloc(sizeof(route_t));
+  if (!route_record) {
+    free(route_record);
+    DIE(EXIT_FAILURE, "[router::route_init] %s\n",
+        "failed to allocate route_record");
+  }
+
+  route_record->methods = methods;
+  route_record->path = path;
+  route_record->handler = handler;
+
+  return route_record;
+}
+
+route_context_t *route_context_init(int client_socket, request_t *r,
                                     Array *parameters) {
   route_context_t *context = malloc(sizeof(route_context_t));
   if (!context) {
     free(context);
-
-    LOG("[context::route_context_init] %s\n",
+    DIE(EXIT_FAILURE, "[context::route_context_init] %s\n",
         "failed to allocate route_context_t");
-
-    return NULL;
   }
 
   context->client_socket = client_socket;
-  context->path = path;
-  context->method = method;
-  context->protocol = protocol;
-  context->host = host;
-  context->user_agent = user_agent;
-  context->accept = accept;
-  context->content_len = content_len;
-  context->content_type = content_type;
-  context->content = content;
-  context->raw = raw;
+  context->path = r->path;
+  context->method = r->method;
+  context->protocol = r->protocol;
+  context->host = r->host;
+  context->user_agent = r->user_agent;
+  context->accept = r->accept;
+  context->content_len = r->content_len;
+  context->content_type = r->content_type;
+  context->content = r->content;
+  context->raw = r->raw;
   context->parameters = parameters;
 
   return context;
@@ -44,18 +115,11 @@ router_t *router_init(void *(*not_found_handler)(void *),
   router_t *router = malloc(sizeof(router_t));
   if (!router) {
     router_free(router);
-    LOG("[router::router_init] %s\n", "failed to allocate router_t");
-
-    return NULL;
+    DIE(EXIT_FAILURE, "[router::router_init] %s\n",
+        "failed to allocate router_t");
   }
 
   router->trie = trie_init();
-  if (!router->trie) {
-    router_free(router);
-    LOG("[router::router_init] %s\n", "failed to allocate trie via trie_init");
-
-    return NULL;
-  }
 
   if (!not_found_handler) {
     LOG("[router::router_init] %s\n",
@@ -76,22 +140,14 @@ router_t *router_init(void *(*not_found_handler)(void *),
   return router;
 }
 
-bool router_register(router_t *router, ch_array_t *methods, const char *path,
+void router_register(router_t *router, ch_array_t *methods, const char *path,
                      void *(*handler)(void *)) {
   if (!router || !methods || !path || !handler) {
     DIE(EXIT_FAILURE, "%s\n",
         "invariant violation - router_register arguments cannot be NULL");
   }
 
-  if (!trie_insert(router->trie, methods, path, handler)) {
-    char *message = "failed to insert route record";
-    LOG("[route::router_register] %s\n", message);
-    STDERR("%s\n", message);
-
-    return false;
-  }
-
-  return true;
+  trie_insert(router->trie, methods, path, handler);
 }
 
 void router_run(router_t *router, route_context_t *context) {
@@ -123,29 +179,11 @@ void router_run(router_t *router, route_context_t *context) {
 
 void router_free(router_t *router) { free(router); }
 
-route_t *route_init(ch_array_t *methods, char *path, void *(*handler)(void *)) {
-  route_t *route_record = malloc(sizeof(route_t));
-  if (!route_record) {
-    free(route_record);
-    LOG("[router::route_init] %s\n", "failed to allocate route_record");
-
-    return NULL;
-  }
-
-  route_record->methods = methods;
-  route_record->path = path;
-  route_record->handler = handler;
-
-  return route_record;
-}
-
 ch_array_t *collect_methods(char *method, ...) {
   ch_array_t *methods = ch_array_init();
   if (!methods) {
-    LOG("[router::collect_methods] %s\n",
+    DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
         "failed to allocate methods array via ch_array_init");
-
-    return NULL;
   }
 
   va_list args;
@@ -154,10 +192,8 @@ ch_array_t *collect_methods(char *method, ...) {
   while (method) {
     if (!ch_array_insert(methods, method)) {
       free(methods);
-      LOG("[router::collect_methods] %s\n",
+      DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
           "failed to insert into methods array");
-
-      return NULL;
     }
 
     method = va_arg(args, char *);
@@ -165,40 +201,4 @@ ch_array_t *collect_methods(char *method, ...) {
 
   va_end(args);
   return methods;
-}
-
-void *internal_server_error_handler(void *arg) {
-  route_context_t *context = arg;
-  LOG("[router::internal_server_error_handler] 500 handler in effect at "
-      "request path %s\n",
-      context->path);
-
-  response_t *response = response_init();
-  response->status = INTERNAL_SERVER_ERROR;
-
-  return response;
-}
-
-void *default_not_found_handler(void *arg) {
-  route_context_t *context = arg;
-  LOG("[router::default_not_found_handler] default 404 handler in effect at "
-      "request path %s\n",
-      context->path);
-
-  response_t *response = response_init();
-  response->status = NOT_FOUND;
-
-  return response;
-}
-
-void *default_method_not_allowed_handler(void *arg) {
-  route_context_t *context = arg;
-  LOG("[router::default_method_not_allowed_handler] default 405 handler in "
-      "effect at request path %s\n",
-      context->path);
-
-  response_t *response = response_init();
-  response->status = METHOD_NOT_ALLOWED;
-
-  return response;
 }

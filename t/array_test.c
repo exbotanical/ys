@@ -11,7 +11,8 @@ void test_ch_array_init() {
   lives_ok({ ca = ch_array_init(); }, "initializes the char array");
 
   ok(ca->size == 0, "newly initialized array's size is 0");
-  ok(strcmp(ca->state, "") == 0, "newly initialized array's state is empty");
+  cmp_ok(strcmp(ca->state, ""), "==", 0,
+         "newly initialized array's state is empty");
 
   ch_array_free(ca);
 }

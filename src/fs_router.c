@@ -83,10 +83,7 @@ static void load_route(const char *file_path) {
     char *route_path =
         str_truncate(str_truncate(file_path, -2), strlen(ignore_dir));
     // TODO: multiple methods
-    if (!router_register(router, collect_methods(METHODS[i], NULL), route_path,
-                         fn)) {
-      DIE(1, "%s\n", "router_register failed");
-    }
+    router_register(router, collect_methods(METHODS[i], NULL), route_path, fn);
   }
 
   // dlclose(h);

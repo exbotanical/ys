@@ -10,36 +10,57 @@
 #include "logger.h"
 #include "path.h"
 
+/**
+ * @brief Allocates memory for a new node, its children and action members.
+ *
+ * @return node_t*
+ */
+static node_t *node_init() {
+  node_t *node = malloc(sizeof(node_t));
+  if (!node) {
+    free(node);
+    DIE(EXIT_FAILURE, "[trie::node_init] %s\n", "failed to allocate node");
+  }
+
+  node->children = h_init_table(0);
+  if (!node->children) {
+    free(node->children);
+    free(node);
+    DIE(EXIT_FAILURE, "[trie::node_init] %s\n",
+        "failed to initialize hash table for node children");
+  }
+
+  node->actions = h_init_table(0);
+  if (!node->actions) {
+    free(node->actions);
+    free(node);
+    DIE(EXIT_FAILURE, "[trie::node_init] %s\n",
+        "failed to initialize hash table for node actions");
+  }
+
+  return node;
+}
+
 trie_t *trie_init() {
   trie_t *trie = malloc(sizeof(trie_t));
   if (trie == NULL) {
     free(trie);
-    LOG("[trie::trie_init] %s\n", "failed to allocate trie_t");
-
-    return NULL;
+    DIE(EXIT_FAILURE, "[trie::trie_init] %s\n", "failed to allocate trie_t");
   }
 
   trie->root = node_init();
-  if (!trie->root) {
-    LOG("[trie::trie_init] %s\n", "failed to allocate root node via node_init");
-
-    return NULL;
-  }
-
   trie->regex_cache = h_init_table(0);
   if (!trie->regex_cache) {
     free(trie->regex_cache);
     free(trie);
-    LOG("[trie::trie_init] %s\n",
+    DIE(EXIT_FAILURE, "[trie::trie_init] %s\n",
         "failed to initialize hash table for trie regex cache");
-
-    return NULL;
   }
 
   return trie;
 }
 
-bool trie_insert(trie_t *trie, ch_array_t *methods, const char *path,
+void trie_insert(trie_t *trie, ch_array_t *methods, const char *path,
                  void *(*handler)(void *)) {
   node_t *curr = trie->root;
 
@@ -51,9 +72,8 @@ bool trie_insert(trie_t *trie, ch_array_t *methods, const char *path,
       action_t *action = malloc(sizeof(action_t));
       if (!action) {
         free(action);
-        LOG("[trie::trie_insert] %s\n", "failed to allocate action");
-
-        return false;
+        DIE(EXIT_FAILURE, "[trie::trie_insert] %s\n",
+            "failed to allocate action");
       }
 
       action->handler = handler;
@@ -61,7 +81,7 @@ bool trie_insert(trie_t *trie, ch_array_t *methods, const char *path,
       h_insert(curr->actions, methods->state[i], action);
     }
 
-    return true;
+    return;
   }
 
   ch_array_t *ca = expand_path(path);
@@ -73,12 +93,6 @@ bool trie_insert(trie_t *trie, ch_array_t *methods, const char *path,
       curr = next->value;
     } else {
       node_t *node = node_init();
-      if (!node) {
-        LOG("[trie::trie_insert] %s\n",
-            "failed to allocate node via node_init");
-
-        return false;
-      }
 
       node->label = split_path;
       h_insert(curr->children, split_path, node);
@@ -95,9 +109,8 @@ bool trie_insert(trie_t *trie, ch_array_t *methods, const char *path,
         action_t *action = malloc(sizeof(action_t));
         if (!action) {
           free(action);
-          LOG("[trie::trie_insert] %s\n", "failed to allocate action");
-
-          return false;
+          DIE(EXIT_FAILURE, "[trie::trie_insert] %s\n",
+              "failed to allocate action");
         }
 
         action->handler = handler;
@@ -107,26 +120,20 @@ bool trie_insert(trie_t *trie, ch_array_t *methods, const char *path,
       break;
     }
   }
-
-  return true;
 }
 
 result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
   result_t *result = malloc(sizeof(result_t));
   if (!result) {
     free(result);
-    LOG("[trie::trie_search] %s\n", "failed to allocate result");
-
-    return NULL;  // 500
+    DIE(EXIT_FAILURE, "[trie::trie_search] %s\n", "failed to allocate result");
   }
 
   result->parameters = array_init();
   if (!result->parameters) {
     free(result->parameters);
-    LOG("[trie::trie_search] %s\n",
+    DIE(EXIT_FAILURE, "[trie::trie_search] %s\n",
         "failed to allocate result->parameters via array_init");
-
-    return NULL;  // 500
   }
   result->flags = INITIAL_FLAG_STATE;
 
@@ -190,9 +197,8 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
         parameter_t *param = malloc(sizeof(parameter_t));
         if (!param) {
           free(param);
-          LOG("[trie::trie_search] %s\n", "failed to allocate param");
-
-          return NULL;  // 500
+          DIE(EXIT_FAILURE, "[trie::trie_search] %s\n",
+              "failed to allocate param");
         }
 
         param->key = param_key;
@@ -253,36 +259,4 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
   result->action = next_action;
 
   return result;
-}
-
-node_t *node_init() {
-  node_t *node = malloc(sizeof(node_t));
-  if (!node) {
-    free(node);
-    LOG("[trie::node_init] %s\n", "failed to allocate node");
-
-    return NULL;
-  }
-
-  node->children = h_init_table(0);
-  if (!node->children) {
-    free(node->children);
-    free(node);
-    LOG("[trie::node_init] %s\n",
-        "failed to initialize hash table for node children");
-
-    return NULL;
-  }
-
-  node->actions = h_init_table(0);
-  if (!node->actions) {
-    free(node->actions);
-    free(node);
-    LOG("[trie::node_init] %s\n",
-        "failed to initialize hash table for node actions");
-
-    return NULL;
-  }
-
-  return node;
 }

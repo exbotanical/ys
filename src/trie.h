@@ -69,9 +69,8 @@ trie_t *trie_init();
  * @param methods The methods on which to create a node
  * @param path The path on which to create a node
  * @param handler The handler to be associated with the inserted node
- * @return bool A boolean indicating whether the insertion succeeded
  */
-bool trie_insert(trie_t *trie, ch_array_t *methods, const char *path,
+void trie_insert(trie_t *trie, ch_array_t *methods, const char *path,
                  void *(*handler)(void *));
 
 /**
@@ -83,12 +82,5 @@ bool trie_insert(trie_t *trie, ch_array_t *methods, const char *path,
  * @return result_t* A result object, or NULL if not found
  */
 result_t *trie_search(trie_t *trie, char *method, const char *search_path);
-
-/**
- * @brief Allocates memory for a new node, its children and action members.
- *
- * @return node_t*
- */
-node_t *node_init();
 
 #endif /* TRIE_H */

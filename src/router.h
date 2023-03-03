@@ -6,6 +6,7 @@
 #include "array.h"
 #include "libhash/libhash.h"
 #include "libutil/libutil.h"
+#include "request.h"
 #include "trie.h"
 #include "util.h"
 
@@ -50,29 +51,17 @@ typedef struct route_context {
  * @brief Initializes an object containing request metadata for a matched route.
  *
  * @param client_socket
- * @param path The path of the matched route
- * @param method The HTTP method of the matched route
- * @param protocol
- * @param host
- * @param user_agent
- * @param accept
- * @param content_len
- * @param content_type
- * @param content
- * @param raw
+ * @param request
  * @param parameters Any parameters derived from the matched route
  * @return route_context_t* Route context, or NULL if memory allocation failed
  */
-route_context_t *route_context_init(int client_socket, char *path, char *method,
-                                    char *protocol, char *host,
-                                    char *user_agent, char *accept,
-                                    char *content_len, char *content_type,
-                                    char *content, char *raw,
+route_context_t *route_context_init(int client_socket, request_t *r,
                                     Array *parameters);
 
 /**
  * @brief Allocates memory for a new router and its `trie` member;
- * sets the handlers for 404 and 405 (if none provided, defaults will be used).
+ * sets the handlers for 404 and 405 (if none provided, defaults will be
+ * used).
  *
  * @param not_found_handler
  * @param method_not_allowed_handler
@@ -89,9 +78,9 @@ router_t *router_init(void *(*not_found_handler)(void *),
  * @param methods Methods to associate with the route
  * @param path The path to associate with the route
  * @param handler The handler to associate with the route
- * @return bool A boolean indicating whether the registration was successful
+ *
  */
-bool router_register(router_t *router, ch_array_t *methods, const char *path,
+void router_register(router_t *router, ch_array_t *methods, const char *path,
                      void *(*handler)(void *));
 
 /**
@@ -114,16 +103,6 @@ void router_run(router_t *router, route_context_t *context);
 void router_free(router_t *router);
 
 /**
- * @brief Initializes a new route_t.
- *
- * @param methods A list of methods to associate with the route record
- * @param path The path to associate with the route record
- * @param handler The handler to associate with the route record
- * @return route_t*
- */
-route_t *route_init(ch_array_t *methods, char *path, void *(*handler)(void *));
-
-/**
  * @brief Collects n methods into a character array. The variadic arguments here
  * use the sentinel variant; the list must be punctuated with NULL.
  *
@@ -132,29 +111,5 @@ route_t *route_init(ch_array_t *methods, char *path, void *(*handler)(void *));
  * @return ch_array_t*
  */
 ch_array_t *collect_methods(char *method, ...);
-
-/**
- * @brief Executes the default 404 handler.
- *
- * @param arg
- * @return void*
- */
-void *default_not_found_handler(void *arg);
-
-/**
- * @brief Executes the default 405 handler.
- *
- * @param arg
- * @return void*
- */
-void *default_method_not_allowed_handler(void *arg);
-
-/**
- * @brief Executes the internal 500 handler.
- *
- * @param arg
- * @return void*
- */
-void *internal_server_error_handler(void *arg);
 
 #endif /* ROUTER_H */

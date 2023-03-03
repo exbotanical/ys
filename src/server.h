@@ -47,22 +47,6 @@ typedef struct response {
 } response_t;
 
 /**
- * @brief Request metadata collected from an inbound client request.
- */
-typedef struct request {
-  char *path;
-  char *method;
-  char *protocol;
-  char *host;
-  char *user_agent;
-  char *accept;
-  char *content_len;
-  char *content_type;
-  char *content;
-  char *raw;
-} request_t;
-
-/**
  * @brief Allocates the necessary memory for a `server_t`.
  *
  * @param router
@@ -74,8 +58,9 @@ server_t *server_init(router_t *router, int port);
  * @brief Listens for client connections and executes routing.
  *
  * @param server
+ * @returns bool indicating whether this blocking operation failed
  */
-void server_start(server_t *server);
+bool server_start(server_t *server);
 
 /**
  * @brief Allocates the necessary memory for a `response_t`.
