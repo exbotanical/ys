@@ -5,6 +5,7 @@
 
 #include "libhttp.h"
 #include "path.h"
+#include "router.h"
 #include "tap.c/tap.h"
 
 typedef struct {

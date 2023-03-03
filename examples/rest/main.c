@@ -56,7 +56,7 @@ void *handle_get(void *arg) {
 
   Response *response = global_response();
 
-  if (!has_parameters(context)) {
+  if (!has_params(context)) {
     set_body(response, response_err("must provide an id"));
     set_status(response, BAD_REQUEST);
     return response;
@@ -85,7 +85,7 @@ void *handle_delete(void *arg) {
 
   Response *response = global_response();
 
-  if (!has_parameters(context)) {
+  if (!has_params(context)) {
     set_body(response, response_err("must provide an id"));
     set_status(response, BAD_REQUEST);
     return response;
@@ -113,7 +113,7 @@ void *handle_put(void *arg) {
 
   Response *response = global_response();
 
-  if (!has_parameters(context)) {
+  if (!has_params(context)) {
     set_body(response, response_err("must provide an id"));
     set_status(response, BAD_REQUEST);
     return response;
@@ -139,7 +139,7 @@ void *handle_post(void *arg) {
 
   Response *response = global_response();
 
-  if (!has_parameters(context)) {
+  if (!has_params(context)) {
     set_body(response, response_err("must provide an id"));
     set_status(response, BAD_REQUEST);
     return response;

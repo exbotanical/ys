@@ -5,6 +5,8 @@
 
 #include "libhash/libhash.h"
 
+#define EP(x) [x] = #x
+
 static const char NULL_TERM = '\0';
 
 /**

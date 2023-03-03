@@ -10,12 +10,14 @@
 #include <sys/select.h>
 #include <unistd.h>
 
+#include "client.h"
 #include "config.h"
 #include "lib.thread/libthread.h"
 #include "libhttp.h"
 #include "logger.h"
 #include "path.h"
 #include "request.h"
+#include "router.h"
 #include "util.h"
 
 static int get_num_threads() {
@@ -134,9 +136,8 @@ void *client_thread_handler(void *args) {
   LOG("[server::client_thread_handler] client request received: %s\n",
       recv_buffer);
 
-  route_context_t *context = route_context_init(
-      c_ctx->client_socket, build_request(recv_buffer), NULL);
-  router_run(c_ctx->router, context);
+  router_run(c_ctx->router, c_ctx->client_socket, build_request(recv_buffer),
+             NULL);
 
   return NULL;
 }

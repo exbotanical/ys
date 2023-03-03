@@ -12,7 +12,7 @@ void set_status(Response *response, http_status_t status) {
   response->status = status;
 }
 
-bool has_parameters(route_context_t *ctx) {
+bool has_params(route_context_t *ctx) {
   return ctx->parameters && array_size(ctx->parameters) > 0;
 }
 

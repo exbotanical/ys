@@ -1,3 +1,5 @@
+#include "router.h"
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -83,8 +85,16 @@ static route_t *route_init(ch_array_t *methods, char *path,
   return route_record;
 }
 
-route_context_t *route_context_init(int client_socket, request_t *r,
-                                    Array *parameters) {
+/**
+ * @brief Initializes an object containing request metadata for a matched route.
+ *
+ * @param client_socket
+ * @param request
+ * @param parameters Any parameters derived from the matched route
+ * @return route_context_t* Route context, or NULL if memory allocation failed
+ */
+static route_context_t *route_context_init(int client_socket, request_t *r,
+                                           Array *parameters) {
   route_context_t *context = malloc(sizeof(route_context_t));
   if (!context) {
     free(context);
@@ -148,14 +158,9 @@ void router_register(router_t *router, ch_array_t *methods, const char *path,
   trie_insert(router->trie, methods, path, handler);
 }
 
-void router_run(router_t *router, route_context_t *context) {
-  if (!context) {
-    LOG("[router::router_run] context initialization via route_context_init \
-			failed with method %s, path %s",
-        context->method, context->path);
-
-    return;
-  }
+void router_run(router_t *router, int client_socket, request_t *r,
+                Array *parameters) {
+  route_context_t *context = route_context_init(client_socket, r, parameters);
 
   Response *response;
   result_t *result = trie_search(router->trie, context->method, context->path);

@@ -8,15 +8,27 @@
 #include "libutil/libutil.h"
 #include "request.h"
 #include "trie.h"
-
-#define EP(x) [x] = #x
+#include "util.h"
 
 /**
- * @brief Maximum number of queued connections allowed for server.
+ * @brief HTTP status names.
  */
-static const int MAX_CONN = 100;
+extern const char *http_status_names[];
 
-static const int DEFAULT_NUM_THREADS = 4;
+/**
+ * @brief HTTP methods.
+ */
+typedef enum method {
+  GET,
+  HEAD,
+  POST,
+  PUT,
+  PATCH,  // RFC 5789
+  DELETE,
+  CONNECT,
+  OPTIONS,
+  TRACE
+} method_t;
 
 /**
  * @brief HTTP status codes.
@@ -102,15 +114,6 @@ typedef struct router {
 } router_t;
 
 /**
- * @brief A route record.
- */
-typedef struct route {
-  ch_array_t *methods;
-  char *path;
-  void *(*handler)(void *);
-} route_t;
-
-/**
  * @brief A context object containing metadata to be passed
  * to matched route handlers.
  */
@@ -136,16 +139,6 @@ typedef struct server {
   router_t *router;
   int port;
 } server_t;
-
-/**
- * @brief A context object for a client connection.
- */
-typedef struct client_context {
-  int client_socket;
-  struct sockaddr *address;
-  socklen_t *addr_len;
-  router_t *router;
-} client_context_t;
 
 /**
  * @brief A response object; client handlers must return this
@@ -177,26 +170,6 @@ Response *response_init();
  */
 void send_response(int socket, Response *response_data);
 
-/**
- * @brief HTTP methods.
- */
-typedef enum method {
-  GET,
-  HEAD,
-  POST,
-  PUT,
-  PATCH,  // RFC 5789
-  DELETE,
-  CONNECT,
-  OPTIONS,
-  TRACE
-} method_t;
-
-/**
- * @brief HTTP status names.
- */
-extern const char *http_status_names[];
-
 Response *get_response();
 
 bool set_header(Response *response, char *header);
@@ -205,32 +178,9 @@ void set_body(Response *response, const char *body);
 
 void set_status(Response *response, http_status_t status);
 
-bool has_parameters(route_context_t *ctx);
+bool has_params(route_context_t *ctx);
 
 parameter_t *get_param(route_context_t *ctx, int idx);
-
-/**
- * @brief Initializes an object containing request metadata for a matched route.
- *
- * @param client_socket
- * @param request
- * @param parameters Any parameters derived from the matched route
- * @return route_context_t* Route context, or NULL if memory allocation failed
- */
-route_context_t *route_context_init(int client_socket, request_t *r,
-                                    Array *parameters);
-
-/**
- * @brief Matches an inbound HTTP request against a route, passing route_context
- * to the matched handler.
- *
- * @param router The router instance in which to search for routes
- * @param method The method to search for
- * @param path The path to search for
- * @return bool A boolean indicating whether a route record was matched and
- * executed
- */
-void router_run(router_t *router, route_context_t *context);
 
 /**
  * @brief Deallocates memory for router_t `router`.
