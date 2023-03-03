@@ -164,14 +164,10 @@ int main() {
   router_t *router = router_init(NULL, NULL);
   char *record_path = "/records/:id[^\\d+$]";
 
-  router_register(router, collect_methods("GET", NULL), record_path,
-                  handle_get);
-  router_register(router, collect_methods("DELETE", NULL), record_path,
-                  handle_delete);
-  router_register(router, collect_methods("PUT", NULL), record_path,
-                  handle_put);
-  router_register(router, collect_methods("POST", NULL), record_path,
-                  handle_post);
+  router_register(router, record_path, handle_get, GET, NULL);
+  router_register(router, record_path, handle_delete, DELETE, NULL);
+  router_register(router, record_path, handle_put, PUT, NULL);
+  router_register(router, record_path, handle_post, POST, NULL);
 
   server_t *server = server_init(router, PORT);
   if (!server_start(server)) {

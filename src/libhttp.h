@@ -16,19 +16,25 @@
 extern const char *http_status_names[];
 
 /**
+ * @brief HTTP method names.
+ */
+extern const char *http_method_names[];
+
+/**
  * @brief HTTP methods.
  */
-typedef enum method {
-  GET,
-  HEAD,
+typedef enum http_method {
+  // MUST start with 1 for varargs handling e.g. collect_methods
+  GET = 1,
   POST,
   PUT,
   PATCH,  // RFC 5789
   DELETE,
-  CONNECT,
   OPTIONS,
+  HEAD,
+  CONNECT,
   TRACE
-} method_t;
+} http_method_t;
 
 /**
  * @brief HTTP status codes.
@@ -190,16 +196,6 @@ parameter_t *get_param(route_context_t *ctx, int idx);
 void router_free(router_t *router);
 
 /**
- * @brief Collects n methods into a character array. The variadic arguments here
- * use the sentinel variant; the list must be punctuated with NULL.
- *
- * @param method The first of n methods
- * @param ... n methods, ending with NULL
- * @return ch_array_t*
- */
-ch_array_t *collect_methods(char *method, ...);
-
-/**
  * @brief Allocates memory for a new router and its `trie` member;
  * sets the handlers for 404 and 405 (if none provided, defaults will be
  * used).
@@ -219,10 +215,10 @@ router_t *router_init(void *(*not_found_handler)(void *),
  * @param methods Methods to associate with the route
  * @param path The path to associate with the route
  * @param handler The handler to associate with the route
- *
+ * TODO: docs
  */
-void router_register(router_t *router, ch_array_t *methods, const char *path,
-                     void *(*handler)(void *));
+void router_register(router_t *router, const char *path,
+                     void *(*handler)(void *), http_method_t method, ...);
 
 /**
  * @brief Allocates the necessary memory for a `server_t`.

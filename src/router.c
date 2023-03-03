@@ -148,8 +148,13 @@ router_t *router_init(void *(*not_found_handler)(void *),
   return router;
 }
 
-void router_register(router_t *router, ch_array_t *methods, const char *path,
-                     void *(*handler)(void *)) {
+void router_register(router_t *router, const char *path,
+                     void *(*handler)(void *), http_method_t method, ...) {
+  va_list args;
+  va_start(args, method);
+  ch_array_t *methods = collect_methods(method, args);
+  va_end(args);
+
   if (!router || !methods || !path || !handler) {
     DIE(EXIT_FAILURE, "%s\n",
         "invariant violation - router_register arguments cannot be NULL");
@@ -182,7 +187,7 @@ void router_run(router_t *router, int client_socket, request_t *r,
 
 void router_free(router_t *router) { free(router); }
 
-ch_array_t *collect_methods(char *method, ...) {
+ch_array_t *collect_methods(http_method_t method, ...) {
   ch_array_t *methods = ch_array_init();
   if (!methods) {
     DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
@@ -193,15 +198,16 @@ ch_array_t *collect_methods(char *method, ...) {
   va_start(args, method);
 
   while (method) {
-    if (!ch_array_insert(methods, method)) {
+    if (!ch_array_insert(methods, http_method_names[method])) {
       free(methods);
       DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
           "failed to insert into methods array");
     }
 
-    method = va_arg(args, char *);
+    method = va_arg(args, int);
   }
 
   va_end(args);
+
   return methods;
 }

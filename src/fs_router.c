@@ -11,8 +11,6 @@
 #include "libutil/libutil.h"
 #include "logger.h"
 
-static const char *METHODS[] = {"GET", "POST", "PUT", "PATCH", "DELETE"};
-
 static router_t *router;
 // TODO: make atomic
 static const char *ignore_dir;
@@ -73,8 +71,9 @@ static void load_route(const char *file_path) {
     // TODO: handle
     return;
   }
-  for (int i = 0; i < sizeof(METHODS) / sizeof(char *); i++) {
-    void *(*fn)(void *) = dlsym(h, METHODS[i]);
+
+  for (http_method_t i = GET; i <= OPTIONS; i++) {
+    void *(*fn)(void *) = dlsym(h, http_method_names[i]);
     if (!fn) {
       continue;
     }
@@ -83,7 +82,7 @@ static void load_route(const char *file_path) {
     char *route_path =
         str_truncate(str_truncate(file_path, -2), strlen(ignore_dir));
     // TODO: multiple methods
-    router_register(router, collect_methods(METHODS[i], NULL), route_path, fn);
+    router_register(router, route_path, fn, i, NULL);
   }
 
   // dlclose(h);

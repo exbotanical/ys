@@ -1,4 +1,5 @@
 #include "libhttp.h"
+#include "util.h"
 
 const char* http_status_names[] = {
     EP(CONTINUE),
@@ -69,3 +70,7 @@ const char* http_status_names[] = {
     EP(NOT_EXTENDED),
     EP(NETWORK_AUTHENTICATION_REQUIRED),
 };
+
+const char* http_method_names[] = {EP(GET),     EP(HEAD),    EP(POST),
+                                   EP(PUT),     EP(PATCH),   EP(DELETE),
+                                   EP(CONNECT), EP(OPTIONS), EP(TRACE)};

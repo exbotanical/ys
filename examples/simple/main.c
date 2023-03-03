@@ -28,7 +28,7 @@ void *handler(void *arg) {
 
 int main() {
   router_t *router = router_init(NULL, NULL);
-  router_register(router, collect_methods("GET", NULL), "/", handler);
+  router_register(router, "/", handler, GET, NULL);
 
   server_t *server = server_init(router, PORT);
   if (!server_start(server)) {
