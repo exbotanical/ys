@@ -3,7 +3,6 @@
 
 #include <stdbool.h>
 
-#include "array.h"
 #include "libhash/libhash.h"
 #include "libutil/libutil.h"
 
@@ -70,7 +69,7 @@ trie_t *trie_init();
  * @param path The path on which to create a node
  * @param handler The handler to be associated with the inserted node
  */
-void trie_insert(trie_t *trie, ch_array_t *methods, const char *path,
+void trie_insert(trie_t *trie, Array *methods, const char *path,
                  void *(*handler)(void *));
 
 /**

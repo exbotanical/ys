@@ -3,15 +3,17 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "libhttp.h"
 #include "logger.h"
+#include "server.h"
 
 /**
  * @brief Executes the internal 500 handler.
  *
- * @param arg
- * @return void*
+ * @param arg Route context
+ * @return void* Response
  */
 static void *internal_server_error_handler(void *arg) {
   route_context_t *context = arg;
@@ -28,8 +30,8 @@ static void *internal_server_error_handler(void *arg) {
 /**
  * @brief Executes the default 404 handler.
  *
- * @param arg
- * @return void*
+ * @param arg Route context
+ * @return void* Response
  */
 static void *default_not_found_handler(void *arg) {
   route_context_t *context = arg;
@@ -46,8 +48,8 @@ static void *default_not_found_handler(void *arg) {
 /**
  * @brief Executes the default 405 handler.
  *
- * @param arg
- * @return void*
+ * @param arg Route context
+ * @return void* Response
  */
 static void *default_method_not_allowed_handler(void *arg) {
   route_context_t *context = arg;
@@ -62,36 +64,12 @@ static void *default_method_not_allowed_handler(void *arg) {
 }
 
 /**
- * @brief Initializes a new route_t.
- *
- * @param methods A list of methods to associate with the route record
- * @param path The path to associate with the route record
- * @param handler The handler to associate with the route record
- * @return route_t*
- */
-static route_t *route_init(ch_array_t *methods, char *path,
-                           void *(*handler)(void *)) {
-  route_t *route_record = malloc(sizeof(route_t));
-  if (!route_record) {
-    free(route_record);
-    DIE(EXIT_FAILURE, "[router::route_init] %s\n",
-        "failed to allocate route_record");
-  }
-
-  route_record->methods = methods;
-  route_record->path = path;
-  route_record->handler = handler;
-
-  return route_record;
-}
-
-/**
  * @brief Initializes an object containing request metadata for a matched route.
  *
  * @param client_socket
  * @param request
  * @param parameters Any parameters derived from the matched route
- * @return route_context_t* Route context, or NULL if memory allocation failed
+ * @return route_context_t* Route context
  */
 static route_context_t *route_context_init(int client_socket, request_t *r,
                                            Array *parameters) {
@@ -152,7 +130,7 @@ void router_register(router_t *router, const char *path,
                      void *(*handler)(void *), http_method_t method, ...) {
   va_list args;
   va_start(args, method);
-  ch_array_t *methods = collect_methods(method, args);
+  Array *methods = collect_methods(method, args);
   va_end(args);
 
   if (!router || !methods || !path || !handler) {
@@ -187,18 +165,18 @@ void router_run(router_t *router, int client_socket, request_t *r,
 
 void router_free(router_t *router) { free(router); }
 
-ch_array_t *collect_methods(http_method_t method, ...) {
-  ch_array_t *methods = ch_array_init();
+Array *collect_methods(http_method_t method, ...) {
+  Array *methods = array_init();
   if (!methods) {
     DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
-        "failed to allocate methods array via ch_array_init");
+        "failed to allocate methods array via array_init");
   }
 
   va_list args;
   va_start(args, method);
 
   while (method) {
-    if (!ch_array_insert(methods, http_method_names[method])) {
+    if (!array_push(methods, strdup(http_method_names[method]))) {
       free(methods);
       DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
           "failed to insert into methods array");

@@ -1,12 +1,16 @@
+#include <string.h>
+
 #include "libhttp.h"
 
 Response *get_response() { return response_init(); }
 
 bool set_header(Response *response, char *header) {
-  ch_array_insert(response->headers, header);
+  return array_push(response->headers, header);
 }
 
-void set_body(Response *response, const char *body) { response->body = body; }
+void set_body(Response *response, const char *body) {
+  response->body = strdup(body);
+}
 
 void set_status(Response *response, http_status_t status) {
   response->status = status;

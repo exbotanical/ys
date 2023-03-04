@@ -14,16 +14,13 @@ const char *PARAMETER_DELIMITER_START = "[";
 const char *PARAMETER_DELIMITER_END = "]";
 const char *PATTERN_WILDCARD = "(.+)";
 
-ch_array_t *expand_path(const char *path) {
-  return split(path, PATH_DELIMITER);
-}
+Array *expand_path(const char *path) { return split(path, PATH_DELIMITER); }
 
-ch_array_t *split(const char *str, const char *delimiter) {
+Array *split(const char *str, const char *delimiter) {
   if (str == NULL || delimiter == NULL) {
     LOG("[path::split] invariant violation - null arguments(s), \
 			where str was %s and delimiter was %s\n",
         str, delimiter);
-
     STDERR(
         "%s\n",
         "[path::split] invariant violation - null arguments(s) were provided");
@@ -37,22 +34,22 @@ ch_array_t *split(const char *str, const char *delimiter) {
   // https://wiki.sei.cmu.edu/confluence/display/c/STR06-C.+Do+not+assume+that+strtok%28%29+leaves+the+parse+string+unchanged
   char *input = strdup(str);
 
-  ch_array_t *ca = ch_array_init();
-  if (ca == NULL) {
-    free(ca);
+  Array *tokens = array_init();
+  if (tokens == NULL) {
+    free(tokens);
     DIE(EXIT_FAILURE, "[path::split] %s\n",
-        "failed to allocate ch_array_t `ca`");
+        "failed to allocate Array `tokens`");
   }
 
   // If the input doesn't even contain the delimiter, return early and avoid
   // further computation
   if (!strstr(input, delimiter)) {
-    return ca;
+    return tokens;
   }
 
   // If the input *is* the delimiter, just return the empty array
   if (strcmp(input, delimiter) == 0) {
-    return ca;
+    return tokens;
   }
 
   char *token = strtok(input, delimiter);
@@ -64,17 +61,17 @@ ch_array_t *split(const char *str, const char *delimiter) {
 because the input contains the delimiter. input was %s and delimiter was %s\n",
         input, delimiter);
 
-    return ca;
+    return tokens;
   }
 
   while (token != NULL) {
-    ch_array_insert(ca, token);
+    array_push(tokens, strdup(token));
     token = strtok(NULL, delimiter);
   }
 
   free(input);
 
-  return ca;
+  return tokens;
 }
 
 int index_of(const char *str, const char *target) {
@@ -82,7 +79,6 @@ int index_of(const char *str, const char *target) {
     LOG("[path::index_of] invariant violation - null arguments(s), \
 			where str was %s and target was %s\n",
         str, target);
-
     STDERR("%s\n",
            "[path::index_of] invariant violation - null arguments(s) were "
            "provided");
@@ -106,7 +102,6 @@ char *substr(const char *str, int start, int end, bool inclusive) {
     LOG("[path::substr] invariant violation - start index greater than end, \
 			where str was %s, start was %d, end was %d, and inclusive flag was %s\n",
         str, start, end, inclusive ? "set" : "not set");
-
     STDERR("%s\n",
            "[path::substr] invariant violation - start index greater than end");
     errno = EINVAL;
@@ -120,7 +115,6 @@ char *substr(const char *str, int start, int end, bool inclusive) {
 			start index less than zero or greater than str length, \
 			where str was %s, start was %d, end was %d, and inclusive flag was %s\n",
         str, start, end, inclusive ? "set" : "not set");
-
     STDERR("%s\n",
            "[path::substr] invariant violation - \
 			start index less than zero or greater than str length");
@@ -133,7 +127,6 @@ char *substr(const char *str, int start, int end, bool inclusive) {
     LOG("[path::substr] invariant violation - end index was greater than str length, \
 			where str was %s, start was %d, end was %d, and inclusive flag was %s\n",
         str, start, end, inclusive ? "set" : "not set");
-
     STDERR("%s\n",
            "[path::substr] invariant violation - end index was greater than "
            "str length");

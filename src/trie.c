@@ -60,7 +60,7 @@ trie_t *trie_init() {
   return trie;
 }
 
-void trie_insert(trie_t *trie, ch_array_t *methods, const char *path,
+void trie_insert(trie_t *trie, Array *methods, const char *path,
                  void *(*handler)(void *)) {
   node_t *curr = trie->root;
 
@@ -68,7 +68,7 @@ void trie_insert(trie_t *trie, ch_array_t *methods, const char *path,
   if (strcmp(path, PATH_ROOT) == 0) {
     curr->label = strdup(path);
 
-    for (int i = 0; i < (int)methods->size; i++) {
+    for (unsigned int i = 0; i < array_size(methods); i++) {
       action_t *action = malloc(sizeof(action_t));
       if (!action) {
         free(action);
@@ -78,16 +78,15 @@ void trie_insert(trie_t *trie, ch_array_t *methods, const char *path,
 
       action->handler = handler;
 
-      h_insert(curr->actions, methods->state[i], action);
+      h_insert(curr->actions, array_get(methods, i), action);
     }
 
     return;
   }
 
-  ch_array_t *ca = expand_path(path);
-  for (int i = 0; i < (int)ca->size; i++) {
-    char *split_path = ca->state[i];
-
+  Array *paths = expand_path(path);
+  for (unsigned int i = 0; i < array_size(paths); i++) {
+    char *split_path = array_get(paths, i);
     h_record *next = h_search(curr->children, split_path);
     if (next) {
       curr = next->value;
@@ -100,11 +99,11 @@ void trie_insert(trie_t *trie, ch_array_t *methods, const char *path,
     }
 
     // Overwrite existing data on last path
-    if (i == (int)ca->size - 1) {
+    if (i == array_size(paths) - 1) {
       curr->label = split_path;
 
-      for (int k = 0; k < (int)(methods->size); k++) {
-        char *method = methods->state[k];
+      for (unsigned int k = 0; k < array_size(methods); k++) {
+        char *method = array_get(methods, k);
 
         action_t *action = malloc(sizeof(action_t));
         if (!action) {
@@ -139,9 +138,9 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 
   node_t *curr = trie->root;
 
-  ch_array_t *ca = expand_path(search_path);
-  for (int i = 0; i < (int)ca->size; i++) {
-    char *path = ca->state[i];
+  Array *paths = expand_path(search_path);
+  for (unsigned int i = 0; i < array_size(paths); i++) {
+    char *path = array_get(paths, i);
 
     h_record *next = h_search(curr->children, path);
     if (next) {

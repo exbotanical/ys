@@ -1,6 +1,9 @@
 #include "libhttp.h"
 #include "util.h"
 
+/**
+ * @brief Mapping of HTTP status codes to stringified names.
+ */
 const char* http_status_names[] = {
     EP(CONTINUE),
     EP(SWITCHING_PROTOCOLS),
@@ -71,6 +74,9 @@ const char* http_status_names[] = {
     EP(NETWORK_AUTHENTICATION_REQUIRED),
 };
 
+/**
+ * @brief Mapping of HTTP method name enums to stringified names.
+ */
 const char* http_method_names[] = {EP(GET),     EP(HEAD),    EP(POST),
                                    EP(PUT),     EP(PATCH),   EP(DELETE),
                                    EP(CONNECT), EP(OPTIONS), EP(TRACE)};

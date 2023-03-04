@@ -4,7 +4,6 @@
 #include <arpa/inet.h>
 #include <stdbool.h>
 
-#include "array.h"
 #include "libutil/libutil.h"
 #include "request.h"
 #include "trie.h"
@@ -155,7 +154,7 @@ typedef struct response_t {
   http_status_t status;
   /** HTTP headers - optional, but you should pass content-type if sending a
    * body */
-  ch_array_t *headers;
+  Array *headers;
   /** Response body - optional; Content-length header will be set for you */
   char *body;
 } Response;

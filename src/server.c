@@ -1,4 +1,6 @@
 
+#include "server.h"
+
 #include <errno.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -20,6 +22,12 @@
 #include "router.h"
 #include "util.h"
 
+/**
+ * @brief Get the num threads for the thread pool. Uses either the default or a
+ * user-defined value.
+ *
+ * @return int
+ */
 static int get_num_threads() {
   char *num_threads = getenv(NUM_THREADS_KEY);
   if (num_threads == NULL) return DEFAULT_NUM_THREADS;
@@ -31,12 +39,10 @@ static int get_num_threads() {
 }
 
 /**
- * @brief Converts a user-defined response object into a buffer.
  * @internal
+ * @brief Converts a user-defined response object into a buffer.
  *
- * @param status
- * @param headers
- * @param body
+ * @param response_data
  * @return Buffer*
  */
 static Buffer *build_response(Response *response_data) {
@@ -48,14 +54,14 @@ static Buffer *build_response(Response *response_data) {
 
   // TODO constants for response_data fields for brevity
   int status = response_data->status;
-  ch_array_t *headers = response_data->headers;
+  Array *headers = response_data->headers;
   char *body = response_data->body;
 
   buffer_append(response,
                 fmt_str("HTTP/1.1 %d %s\n", status, http_status_names[status]));
 
-  for (int i = 0; i < (int)headers->size; i++) {
-    char *header = headers->state[i];
+  for (unsigned int i = 0; i < array_size(headers); i++) {
+    char *header = array_get(headers, i);
 
     buffer_append(response, header);
     buffer_append(response, "\n");
@@ -70,8 +76,8 @@ static Buffer *build_response(Response *response_data) {
 }
 
 /**
- * @brief Extract and structure a client request.
  * @internal
+ * @brief Extract and structure a client request.
  *
  * @param buffer
  * @return request_t*
@@ -120,13 +126,13 @@ static request_t *build_request(char *buffer) {
 }
 
 /**
- * @brief Handles client connections and executes the user-defined router.
  * @internal
+ * @brief Handles client connections and executes the user-defined router.
  *
- * @param args
+ * @param arg Route context
  */
-void *client_thread_handler(void *args) {
-  client_context_t *c_ctx = args;
+void *client_thread_handler(void *arg) {
+  client_context_t *c_ctx = arg;
   char recv_buffer[1024];  // TODO: MAJOR todo - iterate content-length until
                            // entire request is consumed
 
@@ -264,7 +270,7 @@ Response *response_init() {
     DIE(EXIT_FAILURE, "%s\n", "unable to allocate Response");
   }
 
-  response->headers = ch_array_init();
+  response->headers = array_init();
 
   return response;
 }

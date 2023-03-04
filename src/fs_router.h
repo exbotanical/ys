@@ -3,6 +3,7 @@
 
 #include "libhttp.h"
 
+// Feature in progress
 router_t *sync_file_router(const char *dir_path);
 
 #endif /* FS_ROUTER_H */

@@ -1,39 +1,64 @@
 #ifndef PATH_H
 #define PATH_H
 
-#include <stdbool.h>
+#include <stdbool.h>  // For boolean aliases
 
-#include "array.h"
+#include "libutil/libutil.h"  // For Array
 
+/**
+ * @brief Default root path e.g. /
+ */
 extern const char *PATH_ROOT;
+
+/**
+ * @brief Default path delimiter e.g. /
+ */
 extern const char *PATH_DELIMITER;
+
+/**
+ * @brief Default parameter delimiter e.g. :
+ */
 extern const char *PARAMETER_DELIMITER;
+
+/**
+ * @brief Default parameter start delimiter e.g. [
+ */
 extern const char *PARAMETER_DELIMITER_START;
+
+/**
+ * @brief Default parameter end delimiter e.g. ]
+ */
 extern const char *PARAMETER_DELIMITER_END;
+
+/**
+ * @brief Default pattern wildcard e.g. (.+)
+ */
 extern const char *PATTERN_WILDCARD;
 
 /**
  * @brief Expands a path into an array of all words delimited by
- * `PATH_DELIMITER`. Sets errno if provided null argument(s).
+ * `PATH_DELIMITER`. Sets errno if provided null or otherwise invalid
+ * argument(s).
  *
  * @param path The path to expand
- * @return ch_array_t*
+ * @return Array*
  */
-ch_array_t *expand_path(const char *path);
+Array *expand_path(const char *path);
 
 /**
- * @brief Splits a string on all instances of a delimiter.
+ * @brief Splits a string on all instances of a delimiter. Sets errno if
+ * provided null or otherwise invalid argument(s).
  *
  * @param str The string to split
  * @param delimiter The delimiter on which to split `str`
- * @return ch_array_t* An array of matches, if any; NULL if erroneous
+ * @return Array* An array of matches, if any; NULL if erroneous
  */
-ch_array_t *split(const char *str, const char *delimiter);
+Array *split(const char *str, const char *delimiter);
 
 /**
  * @brief Returns the index of a character `target`
  * as it exists in a character array `str`.
- * Sets errno if provided null argument(s).
+ * Sets errno if provided null or otherwise invalid argument(s).
  *
  * @param str The character array, or "haystack"
  * @param target The target, or "needle"
@@ -44,7 +69,8 @@ int index_of(const char *str, const char *target);
 
 /**
  * @brief For a given string `str`, finds and returns the substring between
- * indices `start` and `end`.
+ * indices `start` and `end`. Sets errno if provided null or otherwise invalid
+ * argument(s).
  *
  * @param str The string in which to find a substring
  * @param start The starting index, always inclusive
@@ -56,7 +82,8 @@ int index_of(const char *str, const char *target);
 char *substr(const char *str, int start, int end, bool inclusive);
 
 /**
- * @brief Extracts from a label a PCRE-compliant regular expression.
+ * @brief Extracts from a label a PCRE-compliant regular expression. Sets errno
+ * if provided null or otherwise invalid argument(s).
  *
  * @param label The string label that should contain a PCRE-compliant regex
  * @return char* The regex pattern, or a wildcard if none found
@@ -64,7 +91,8 @@ char *substr(const char *str, int start, int end, bool inclusive);
 char *derive_label_pattern(const char *label);
 
 /**
- * @brief Extracts from a label a parameter key.
+ * @brief Extracts from a label a parameter key. Sets errno if provided null or
+ * otherwise invalid argument(s).
  *
  * @param label The string label that should contain a parameter key/value pair
  * @return char* The matching parameter key

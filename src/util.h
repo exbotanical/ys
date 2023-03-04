@@ -3,7 +3,6 @@
 
 #include <stddef.h>
 
-#include "array.h"
 #include "libhash/libhash.h"
 #include "libhttp.h"
 

@@ -6,11 +6,13 @@
 #include "libhash/libhash.h"
 
 /**
- * @brief TODO: Retrieves a regex from the cache, or creates (and caches) one if
- * not extant.
+ * @brief Retrieves a pre-compiled pcre regex corresponding to the given pattern
+ * from a hash-table cache. If one does not exist, it will be compiled and
+ * cached for subsequent retrievals.
  *
+ * @param regex_cache
  * @param pattern
- * @return char*
+ * @return pcre*
  */
 pcre *regex_cache_get(h_table *regex_cache, char *pattern);
 

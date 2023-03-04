@@ -5,8 +5,11 @@
 #include <stdio.h>
 #endif /* fprintf */
 
+// TODO: clean up logging and make it consistent
 #ifdef DEBUG
-
+/**
+ * @brief Debug stderr logger
+ */
 #define LOG(fmt, ...) fprintf(stderr, fmt, __VA_ARGS__)
 
 #else
