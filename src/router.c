@@ -128,9 +128,25 @@ router_t *router_init(void *(*not_found_handler)(void *),
 
 void router_register(router_t *router, const char *path,
                      void *(*handler)(void *), http_method_t method, ...) {
+  Array *methods = array_init();
+  if (!methods) {
+    DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
+        "failed to allocate methods array via array_init");
+  }
+
   va_list args;
   va_start(args, method);
-  Array *methods = collect_methods(method, args);
+  // TODO: deduplicate this (and use collect_methods) or similar
+  // not doing this right now due to reference edge cases when doing so
+  while (method != NULL) {
+    if (!array_push(methods, strdup(http_method_names[method]))) {
+      free(methods);
+      DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
+          "failed to insert into methods array");
+    }
+    method = va_arg(args, http_method_t);
+  }
+
   va_end(args);
 
   if (!router || !methods || !path || !handler) {
@@ -175,14 +191,13 @@ Array *collect_methods(http_method_t method, ...) {
   va_list args;
   va_start(args, method);
 
-  while (method) {
+  while (method != NULL) {
     if (!array_push(methods, strdup(http_method_names[method]))) {
       free(methods);
       DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
           "failed to insert into methods array");
     }
-
-    method = va_arg(args, int);
+    method = va_arg(args, http_method_t);
   }
 
   va_end(args);

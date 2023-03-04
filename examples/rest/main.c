@@ -13,6 +13,7 @@
 #include "lib.thread/libthread.h"
 #include "libhttp.h"
 
+// TODO: finalize example
 #define PORT 9000
 
 typedef struct record {
@@ -20,7 +21,7 @@ typedef struct record {
   char *value;
 } record_t;
 
-static const record_t records[] = {
+record_t records[] = {
     {.key = "1", .value = "value1"},
     {.key = "2", .value = "value2"},
     {.key = "3", .value = "value3"},
@@ -93,7 +94,7 @@ void *handle_delete(void *arg) {
 
   parameter_t *param = get_param(context, 0);
   record_t *record = search_records(param->value);
-  if (!record) {
+  if (!record || !record->value) {
     set_body(response, response_err("no matching record"));
     set_status(response, NOT_FOUND);
     return response;
@@ -102,6 +103,8 @@ void *handle_delete(void *arg) {
   // Flag record as deleted
   record->key = NULL;
   record->value = NULL;
+  set_status(response, OK);
+
   return response;
 }
 
@@ -118,7 +121,7 @@ void *handle_put(void *arg) {
     set_status(response, BAD_REQUEST);
     return response;
   }
-
+  printf("checkpt\n");
   parameter_t *param = get_param(context, 0);
   record_t *record = search_records(param->value);
   if (!record) {
@@ -127,6 +130,7 @@ void *handle_put(void *arg) {
     return response;
   }
 
+  printf("checkpt2 %s\n", record->value);
   record->value = param->value;
   return response;
 }
@@ -153,9 +157,7 @@ void *handle_post(void *arg) {
     return response;
   }
 
-  set_status(response, OK);
-  // TODO:
-  printf("content --> %s\n", context->content);
+  set_status(response, CREATED);
 
   return response;
 }
