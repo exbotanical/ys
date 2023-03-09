@@ -23,22 +23,6 @@
 #include "util.h"
 
 /**
- * @brief Get the num threads for the thread pool. Uses either the default or a
- * user-defined value.
- *
- * @return int
- */
-static int get_num_threads() {
-  char *num_threads = getenv(NUM_THREADS_KEY);
-  if (num_threads == NULL) return DEFAULT_NUM_THREADS;
-
-  int env_threads = atoi(num_threads);
-  if (env_threads && env_threads > 0) return env_threads;
-
-  return DEFAULT_NUM_THREADS;
-}
-
-/**
  * @internal
  * @brief Converts a user-defined response object into a buffer.
  *
@@ -149,6 +133,10 @@ void *client_thread_handler(void *arg) {
 }
 
 server_t *server_init(router_t *router, int port) {
+  if (port == -1) {
+    port = server_config.port_num;
+  }
+
   server_t *server = malloc(sizeof(server_t));
   if (!server) {
     char *message = "failed to allocate server";
@@ -220,7 +208,7 @@ bool server_start(server_t *server) {
     DIE(EXIT_FAILURE, "%s\n", message);
   }
 
-  const int num_threads = get_num_threads();
+  const int num_threads = server_config.num_threads;
   thread_pool_init(pool);
   for (int i = 0; i < num_threads; i++) {
     thread_t *client_thread = thread_init(0, "client thread");

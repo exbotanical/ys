@@ -207,7 +207,6 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
           char *message =
               "failed to insert parameter record in result->parameters";
           LOG("[trie::trie_search] %s\n", message);
-          STDERR("%s\n", message);
         }
 
         h_record *next = h_search(curr->children, child->label);

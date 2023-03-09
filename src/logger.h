@@ -7,31 +7,15 @@
 #include <stdio.h>
 #endif /* fprintf */
 
-// TODO: clean up logging and make it consistent
-#ifdef DEBUG
 /**
  * @brief Debug stderr logger
  */
 #define LOG(fmt, ...) fprintf(stderr, fmt, __VA_ARGS__)
 
-#else
-
-/**
- * @brief Debug logger. No-ops unless `DEBUG` is defined.
- */
-#define LOG(fmt, ...)
-
-#endif /* DEBUG */
-
-/**
- * @brief User-facing error logger; prints to stderr.
- */
-#define STDERR(fmt, ...) fprintf(stderr, fmt, __VA_ARGS__)
-
 /**
  * @brief Logs a user-facing error to stderr and exits with return code `rc`.
  */
-#define DIE(rc, fmt, ...) STDERR(fmt, __VA_ARGS__), exit(rc)
+#define DIE(rc, fmt, ...) LOG(fmt, __VA_ARGS__), exit(rc)
 
 #define LOG_BUFFER 2048  /* max size of log line */
 #define SMALL_BUFFER 256 /* small buffer size */
@@ -49,5 +33,9 @@
 extern const char* log_header;
 extern const char* log_levels[];
 extern short log_level;
+
+void setup_logging();
+
+void printlogf(int level, const char* ctl, ...);
 
 #endif /* LOGGER_H */

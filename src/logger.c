@@ -19,9 +19,7 @@ const char *log_levels[] = {"emerg",   "alert",  "crit", "err",
 
 short log_level = LOG_LEVEL;
 
-void vlog(int level, int fd, const char *ctl, va_list va);
-
-void fdprintf(int fd, const char *ctl, ...) {
+static void fdprintf(int fd, const char *ctl, ...) {
   va_list va;
   char buf[LOG_BUFFER];
 
@@ -31,7 +29,57 @@ void fdprintf(int fd, const char *ctl, ...) {
   va_end(va);
 }
 
-void setup_log_level() {
+static void vlog(int level, int fd, const char *ctl, va_list va) {
+  char buf[LOG_BUFFER];
+
+  if (level <= log_level) {
+    char host_name[SMALL_BUFFER];
+    static short suppress_header = 0;
+
+    time_t t = time(NULL);
+    struct tm *tp = localtime(&t);
+    int buflen, header_len = 0;
+    buf[0] = 0;  // in case suppress_header or strftime fails
+
+    if (!suppress_header) {
+      char header[SMALL_BUFFER];
+      // strftime returns strlen of result, provided that result plus a \0
+      // fit into buf of size
+      if (strftime(header, sizeof(header), log_header, tp)) {
+        if (gethostname(host_name, sizeof(host_name)) == 0) {
+          // gethostname successful
+          // result will be \0-terminated except gethostname doesn't promise
+          // to do so if it has to truncate
+          host_name[sizeof(host_name) - 1] = 0;
+        } else {
+          host_name[0] = 0;  // gethostname() call failed
+        }
+        // snprintf null-terminates, even when truncating
+        // retval >= size means result was truncated
+        if ((header_len = snprintf(buf, sizeof(header), header, host_name)) >=
+            sizeof(header)) {
+          header_len = sizeof(header) - 1;
+        }
+      }
+    }
+
+    if ((buflen =
+             vsnprintf(buf + header_len, sizeof(buf) - header_len, ctl, va) +
+             header_len) >= sizeof(buf)) {
+      buflen = sizeof(buf) - 1;
+    }
+
+    if (server_config.log_file) {
+      write(fd, buf, buflen);
+    }
+    printf(buf);
+    // if previous write wasn't \n-terminated, we suppress header on next
+    // write
+    suppress_header = (buf[buflen - 1] != '\n');
+  }
+}
+
+static void setup_log_level() {
   char *ptr = server_config.log_level;
   int j;
   for (j = 0; log_levels[j]; ++j) {
@@ -82,18 +130,14 @@ void setup_log_level() {
 }
 
 void setup_logging() {
+  setup_log_level();
+
   if (getenv("LC_TIME") != NULL) {
     log_header = LOCALE_LOG_HEADER;
   }
 
   // TODO: stdout opt
-  if (server_config.use_syslog) {
-    // 2> /dev/null
-    fclose(stderr);
-    dup2(1, 2);
-
-    openlog(LOG_IDENT, LOG_CONS | LOG_PID, LOG_CRON);
-  } else {
+  if (server_config.log_file) {
     int fd;
     if ((fd = open(server_config.log_file, O_WRONLY | O_CREAT | O_APPEND,
                    0600)) >= 0) {
@@ -111,60 +155,7 @@ void setup_logging() {
 
 void printlogf(int level, const char *ctl, ...) {
   va_list va;
-
   va_start(va, ctl);
   vlog(level, 2, ctl, va);
   va_end(va);
-}
-
-void vlog(int level, int fd, const char *ctl, va_list va) {
-  char buf[LOG_BUFFER];
-
-  if (level <= log_level) {
-    // TODO: assign function pointer instead of cond
-    if (server_config.use_syslog) {
-      // log to syslog
-      vsnprintf(buf, sizeof(buf), ctl, va);
-      syslog(level, "%s", buf);
-    } else {
-      char host_name[SMALL_BUFFER];
-      static short suppress_header = 0;
-
-      // log to file
-      time_t t = time(NULL);
-      struct tm *tp = localtime(&t);
-      int buflen, header_len = 0;
-      buf[0] = 0;  // in case suppress_header or strftime fails
-
-      if (!suppress_header) {
-        char hdr[SMALL_BUFFER];
-        // strftime returns strlen of result, provided that result plus a \0
-        // fit into buf of size
-        if (strftime(hdr, sizeof(hdr), log_header, tp)) {
-          if (gethostname(host_name, sizeof(host_name)) == 0)
-            // gethostname successful
-            // result will be \0-terminated except gethostname doesn't promise
-            // to do so if it has to truncate
-            host_name[sizeof(host_name) - 1] = 0;
-          else
-            host_name[0] = 0;  // gethostname() call failed
-          // snprintf null-terminates, even when truncating
-          // retval >= size means result was truncated
-          if ((header_len = snprintf(buf, sizeof(hdr), hdr, host_name)) >=
-              sizeof(hdr))
-            header_len = sizeof(hdr) - 1;
-        }
-      }
-
-      if ((buflen =
-               vsnprintf(buf + header_len, sizeof(buf) - header_len, ctl, va) +
-               header_len) >= sizeof(buf))
-        buflen = sizeof(buf) - 1;
-
-      write(fd, buf, buflen);
-      // if previous write wasn't \n-terminated, we suppress header on next
-      // write
-      suppress_header = (buf[buflen - 1] != '\n');
-    }
-  }
 }

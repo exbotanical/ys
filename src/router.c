@@ -4,10 +4,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <syslog.h>
 
+#include "config.h"
 #include "libhttp.h"
 #include "logger.h"
 #include "server.h"
+
+const char CONFIG_FILE_NAME[13] = "libhttp.conf";
+
+void setup_env() {
+  parse_config(CONFIG_FILE_NAME);
+  setup_logging();
+}
 
 /**
  * @brief Executes the internal 500 handler.
@@ -17,9 +26,10 @@
  */
 static void *internal_server_error_handler(void *arg) {
   route_context_t *context = arg;
-  LOG("[router::internal_server_error_handler] 500 handler in effect at "
-      "request path %s\n",
-      context->path);
+  printlogf(LOG_INFO,
+            "[router::internal_server_error_handler] 500 handler in effect at "
+            "request path %s\n",
+            context->path);
 
   Response *response = response_init();
   response->status = INTERNAL_SERVER_ERROR;
@@ -35,7 +45,9 @@ static void *internal_server_error_handler(void *arg) {
  */
 static void *default_not_found_handler(void *arg) {
   route_context_t *context = arg;
-  LOG("[router::default_not_found_handler] default 404 handler in effect at "
+  printlogf(
+      LOG_INFO,
+      "[router::default_not_found_handler] default 404 handler in effect at "
       "request path %s\n",
       context->path);
 
@@ -53,7 +65,9 @@ static void *default_not_found_handler(void *arg) {
  */
 static void *default_method_not_allowed_handler(void *arg) {
   route_context_t *context = arg;
-  LOG("[router::default_method_not_allowed_handler] default 405 handler in "
+  printlogf(
+      LOG_INFO,
+      "[router::default_method_not_allowed_handler] default 405 handler in "
       "effect at request path %s\n",
       context->path);
 
@@ -98,6 +112,9 @@ static route_context_t *route_context_init(int client_socket, request_t *r,
 
 router_t *router_init(void *(*not_found_handler)(void *),
                       void *(*method_not_allowed_handler)(void *)) {
+  // initialize config opts
+  setup_env();
+
   router_t *router = malloc(sizeof(router_t));
   if (!router) {
     router_free(router);

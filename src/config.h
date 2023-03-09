@@ -8,7 +8,6 @@ typedef struct config_t {
   int port_num;
   char* log_level;
   char* log_file;
-  bool use_syslog;
 } ServerConfig;
 
 extern ServerConfig server_config;
@@ -25,12 +24,11 @@ static const short DEFAULT_NUM_THREADS = 4;
 
 static const int DEFAULT_PORT_NUM = 5000;
 static const char DEFAULT_LOG_LEVEL[] = "info";
-static const char DEFAULT_LOG_FILE[] = "/tmp/libhttp.log";  // TODO: generate
 
 /**
  * @brief Environment variable key for user-defined number of threads.
  */
-static const char NUM_THREADS_KEY[8] = "THREADS";
+static const char NUM_THREADS_KEY[12] = "NUM_THREADS";
 
 /**
  * @brief Environment variable key for user-defined port number.
@@ -38,10 +36,10 @@ static const char NUM_THREADS_KEY[8] = "THREADS";
  */
 static const char SERVER_PORT_KEY[5] = "PORT";
 
-static const char LOG_LEVEL_KEY[10] = "log_level";
+static const char LOG_LEVEL_KEY[10] = "LOG_LEVEL";
 
-static const char LOG_FILE_KEY[9] = "log_file";
+static const char LOG_FILE_KEY[9] = "LOG_FILE";
 
-static const char USE_SYSLOG_KEY[11] = "use_syslog";
+void parse_config(const char* filename);
 
 #endif /* CONFIG_H */

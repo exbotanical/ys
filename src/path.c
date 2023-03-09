@@ -21,9 +21,6 @@ Array *split(const char *str, const char *delimiter) {
     LOG("[path::split] invariant violation - null arguments(s), \
 			where str was %s and delimiter was %s\n",
         str, delimiter);
-    STDERR(
-        "%s\n",
-        "[path::split] invariant violation - null arguments(s) were provided");
     errno = EINVAL;
 
     return NULL;
@@ -79,9 +76,6 @@ int index_of(const char *str, const char *target) {
     LOG("[path::index_of] invariant violation - null arguments(s), \
 			where str was %s and target was %s\n",
         str, target);
-    STDERR("%s\n",
-           "[path::index_of] invariant violation - null arguments(s) were "
-           "provided");
     errno = EINVAL;
 
     return -1;
@@ -102,8 +96,6 @@ char *substr(const char *str, int start, int end, bool inclusive) {
     LOG("[path::substr] invariant violation - start index greater than end, \
 			where str was %s, start was %d, end was %d, and inclusive flag was %s\n",
         str, start, end, inclusive ? "set" : "not set");
-    STDERR("%s\n",
-           "[path::substr] invariant violation - start index greater than end");
     errno = EINVAL;
 
     return NULL;
@@ -115,9 +107,6 @@ char *substr(const char *str, int start, int end, bool inclusive) {
 			start index less than zero or greater than str length, \
 			where str was %s, start was %d, end was %d, and inclusive flag was %s\n",
         str, start, end, inclusive ? "set" : "not set");
-    STDERR("%s\n",
-           "[path::substr] invariant violation - \
-			start index less than zero or greater than str length");
     errno = EINVAL;
 
     return NULL;
@@ -127,9 +116,6 @@ char *substr(const char *str, int start, int end, bool inclusive) {
     LOG("[path::substr] invariant violation - end index was greater than str length, \
 			where str was %s, start was %d, end was %d, and inclusive flag was %s\n",
         str, start, end, inclusive ? "set" : "not set");
-    STDERR("%s\n",
-           "[path::substr] invariant violation - end index was greater than "
-           "str length");
     errno = EINVAL;
 
     return NULL;

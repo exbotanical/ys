@@ -4,11 +4,10 @@
 #include <stdlib.h>  // for free
 #include <string.h>  // for strcmp, strcspn, strdup
 
-ServerConfig server_config = {.log_file = DEFAULT_LOG_FILE,
+ServerConfig server_config = {.log_file = NULL,
                               .log_level = DEFAULT_LOG_LEVEL,
                               .num_threads = DEFAULT_NUM_THREADS,
-                              .port_num = DEFAULT_PORT_NUM,
-                              .use_syslog = false};
+                              .port_num = DEFAULT_PORT_NUM};
 
 void parse_config(const char* filename) {
   char line[256];
@@ -32,13 +31,9 @@ void parse_config(const char* filename) {
       } else if (strcmp(name, NUM_THREADS_KEY) == 0) {
         server_config.num_threads = atoi(value);
       } else if (strcmp(name, LOG_LEVEL_KEY) == 0) {
-        free(server_config.log_level);
         server_config.log_level = strdup(value);
       } else if (strcmp(name, LOG_FILE_KEY) == 0) {
-        free(server_config.log_file);
         server_config.log_file = strdup(value);
-      } else if (strcmp(name, USE_SYSLOG_KEY) == 0) {
-        server_config.use_syslog = (strcmp(value, "true") == 0);
       } else {
         fprintf(stderr, "Unknown option '%s' in config file\n", name);
       }

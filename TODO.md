@@ -8,7 +8,6 @@
 - [ ] test handlers with a mocking library
 - [ ] static
 - [ ] logging
-  - [ ] syslog
 - [ ] error-handling
 - [ ] documentation
 - [ ] use attr struct for fallback handlers
