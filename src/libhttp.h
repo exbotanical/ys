@@ -141,10 +141,11 @@ typedef struct route_context {
 /**
  * @brief A server configuration object.
  */
-typedef struct server {
+typedef struct {
   __router_t *router;
   int port;
-} server_t;
+} __server_t;
+typedef __server_t *server_t;
 
 /**
  * @brief A response object; client handlers must return this
@@ -238,5 +239,7 @@ server_t *server_init(router_t *router, int port);
  * @returns bool indicating whether this blocking operation failed
  */
 bool server_start(server_t *server);
+
+void server_free(server_t *server);
 
 #endif /* LIBHTTP_H */

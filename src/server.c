@@ -137,7 +137,7 @@ server_t *server_init(router_t *router, int port) {
     port = server_config.port_num;
   }
 
-  server_t *server = malloc(sizeof(server_t));
+  __server_t *server = malloc(sizeof(__server_t));
   if (!server) {
     char *message = "failed to allocate server";
     LOG("%s\n", message);
@@ -147,11 +147,11 @@ server_t *server_init(router_t *router, int port) {
   server->router = (__router_t *)router;
   server->port = port;
 
-  return server;
+  return (server_t *)server;
 }
 
 bool server_start(server_t *server) {
-  int port = server->port;
+  int port = ((__server_t *)server)->port;
   int master_socket;
 
   if ((master_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == 0) {
@@ -239,7 +239,7 @@ bool server_start(server_t *server) {
       c_ctx->address = (struct sockaddr *)&address;
       c_ctx->addr_len = &addr_len;
       c_ctx->client_socket = client_socket;
-      c_ctx->router = server->router;
+      c_ctx->router = ((__server_t *)server)->router;
 
       if (!thread_pool_dispatch(pool, client_thread_handler, c_ctx, true)) {
         LOG("[server::start] %s\n", "failed to dispatch thread from pool");
@@ -250,6 +250,11 @@ bool server_start(server_t *server) {
 
   // TODO: interrupt cancel, kill sig
   return true;
+}
+
+void server_free(server_t *server) {
+  router_free((router_t *)((__server_t *)server)->router);
+  free(server);
 }
 
 response_t *response_init() {

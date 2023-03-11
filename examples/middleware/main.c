@@ -56,6 +56,7 @@ int main() {
 
   server_t *server = server_init(router, PORT);
   if (!server_start(server)) {
+    server_free(server);  // also frees router
     return EXIT_FAILURE;
   }
 
