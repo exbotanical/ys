@@ -14,9 +14,9 @@ const char *PARAMETER_DELIMITER_START = "[";
 const char *PARAMETER_DELIMITER_END = "]";
 const char *PATTERN_WILDCARD = "(.+)";
 
-Array *expand_path(const char *path) { return split(path, PATH_DELIMITER); }
+array_t *expand_path(const char *path) { return split(path, PATH_DELIMITER); }
 
-Array *split(const char *str, const char *delimiter) {
+array_t *split(const char *str, const char *delimiter) {
   if (str == NULL || delimiter == NULL) {
     LOG("[path::split] invariant violation - null arguments(s), \
 			where str was %s and delimiter was %s\n",
@@ -31,11 +31,11 @@ Array *split(const char *str, const char *delimiter) {
   // https://wiki.sei.cmu.edu/confluence/display/c/STR06-C.+Do+not+assume+that+strtok%28%29+leaves+the+parse+string+unchanged
   char *input = strdup(str);
 
-  Array *tokens = array_init();
+  array_t *tokens = array_init();
   if (tokens == NULL) {
     free(tokens);
     DIE(EXIT_FAILURE, "[path::split] %s\n",
-        "failed to allocate Array `tokens`");
+        "failed to allocate array_t `tokens`");
   }
 
   // If the input doesn't even contain the delimiter, return early and avoid

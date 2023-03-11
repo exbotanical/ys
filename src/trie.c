@@ -60,8 +60,8 @@ trie_t *trie_init() {
   return trie;
 }
 
-void trie_insert(trie_t *trie, Array *methods, const char *path,
-                 void *(*handler)(void *)) {
+void trie_insert(trie_t *trie, array_t *methods, const char *path,
+                 void *(*handler)(void *), array_t *middlewares) {
   node_t *curr = trie->root;
 
   // Handle root path
@@ -77,6 +77,7 @@ void trie_insert(trie_t *trie, Array *methods, const char *path,
       }
 
       action->handler = handler;
+      action->middlewares = middlewares;
 
       h_insert(curr->actions, array_get(methods, i), action);
     }
@@ -84,7 +85,7 @@ void trie_insert(trie_t *trie, Array *methods, const char *path,
     return;
   }
 
-  Array *paths = expand_path(path);
+  array_t *paths = expand_path(path);
   for (unsigned int i = 0; i < array_size(paths); i++) {
     char *split_path = array_get(paths, i);
     h_record *next = h_search(curr->children, split_path);
@@ -113,6 +114,8 @@ void trie_insert(trie_t *trie, Array *methods, const char *path,
         }
 
         action->handler = handler;
+        action->middlewares = middlewares;
+
         h_insert(curr->actions, method, action);
       }
 
@@ -138,7 +141,7 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
 
   node_t *curr = trie->root;
 
-  Array *paths = expand_path(search_path);
+  array_t *paths = expand_path(search_path);
   for (unsigned int i = 0; i < array_size(paths); i++) {
     char *path = array_get(paths, i);
 

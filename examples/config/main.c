@@ -14,7 +14,7 @@
 #include "libhttp.h"
 
 void *handler(void *arg) {
-  Response *response = get_response();
+  response_t *response = get_response();
   set_header(response, "Content-Type: text/plain");
   set_header(response, "X-Powered-By: demo");
 
@@ -26,7 +26,7 @@ void *handler(void *arg) {
 
 int main() {
   router_t *router = router_init(NULL, NULL);
-  router_register(router, "/", handler, GET, NULL);
+  router_register(router, "/", handler, NULL, GET, NULL);
 
   server_t *server = server_init(router, -1);
   if (!server_start(server)) {

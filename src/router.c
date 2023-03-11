@@ -13,16 +13,23 @@
 
 const char CONFIG_FILE_NAME[13] = "libhttp.conf";
 
-void setup_env() {
+static void setup_env() {
   parse_config(CONFIG_FILE_NAME);
   setup_logging();
+}
+
+static void *invoke_chain(route_context_t *ctx, array_t *middlewares) {
+  void *h = ctx;
+  for (unsigned int i = array_size(middlewares); i > 0; i--) {
+    h = ((void *(*)(void *))array_get(middlewares, i))(h);
+  }
 }
 
 /**
  * @brief Executes the internal 500 handler.
  *
  * @param arg Route context
- * @return void* Response
+ * @return void* response_t
  */
 static void *internal_server_error_handler(void *arg) {
   route_context_t *context = arg;
@@ -31,7 +38,7 @@ static void *internal_server_error_handler(void *arg) {
             "request path %s\n",
             context->path);
 
-  Response *response = response_init();
+  response_t *response = response_init();
   response->status = INTERNAL_SERVER_ERROR;
 
   return response;
@@ -41,7 +48,7 @@ static void *internal_server_error_handler(void *arg) {
  * @brief Executes the default 404 handler.
  *
  * @param arg Route context
- * @return void* Response
+ * @return void* response_t
  */
 static void *default_not_found_handler(void *arg) {
   route_context_t *context = arg;
@@ -51,7 +58,7 @@ static void *default_not_found_handler(void *arg) {
       "request path %s\n",
       context->path);
 
-  Response *response = response_init();
+  response_t *response = response_init();
   response->status = NOT_FOUND;
 
   return response;
@@ -61,7 +68,7 @@ static void *default_not_found_handler(void *arg) {
  * @brief Executes the default 405 handler.
  *
  * @param arg Route context
- * @return void* Response
+ * @return void* response_t
  */
 static void *default_method_not_allowed_handler(void *arg) {
   route_context_t *context = arg;
@@ -71,7 +78,7 @@ static void *default_method_not_allowed_handler(void *arg) {
       "effect at request path %s\n",
       context->path);
 
-  Response *response = response_init();
+  response_t *response = response_init();
   response->status = METHOD_NOT_ALLOWED;
 
   return response;
@@ -86,7 +93,7 @@ static void *default_method_not_allowed_handler(void *arg) {
  * @return route_context_t* Route context
  */
 static route_context_t *route_context_init(int client_socket, request_t *r,
-                                           Array *parameters) {
+                                           array_t *parameters) {
   route_context_t *context = malloc(sizeof(route_context_t));
   if (!context) {
     free(context);
@@ -115,9 +122,9 @@ router_t *router_init(void *(*not_found_handler)(void *),
   // initialize config opts
   setup_env();
 
-  router_t *router = malloc(sizeof(router_t));
+  __router_t *router = malloc(sizeof(__router_t));
   if (!router) {
-    router_free(router);
+    router_free((router_t *)router);
     DIE(EXIT_FAILURE, "[router::router_init] %s\n",
         "failed to allocate router_t");
   }
@@ -140,12 +147,13 @@ router_t *router_init(void *(*not_found_handler)(void *),
     router->method_not_allowed_handler = method_not_allowed_handler;
   }
 
-  return router;
+  return (router_t *)router;
 }
 
 void router_register(router_t *router, const char *path,
-                     void *(*handler)(void *), http_method_t method, ...) {
-  Array *methods = array_init();
+                     void *(*handler)(void *), array_t *middlewares,
+                     http_method_t method, ...) {
+  array_t *methods = array_init();
   if (!methods) {
     DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
         "failed to allocate methods array via array_init");
@@ -171,25 +179,33 @@ void router_register(router_t *router, const char *path,
         "invariant violation - router_register arguments cannot be NULL");
   }
 
-  trie_insert(router->trie, methods, path, handler);
+  trie_insert(((__router_t *)router)->trie, methods, path, handler,
+              middlewares);
 }
 
-void router_run(router_t *router, int client_socket, request_t *r,
-                Array *parameters) {
+void router_run(__router_t *router, int client_socket, request_t *r,
+                array_t *parameters) {
+  __router_t *internal_router = (__router_t *)router;
   route_context_t *context = route_context_init(client_socket, r, parameters);
 
-  Response *response;
-  result_t *result = trie_search(router->trie, context->method, context->path);
+  response_t *response;
+  result_t *result =
+      trie_search(internal_router->trie, context->method, context->path);
 
   if (!result) {
     response = internal_server_error_handler(context);
   } else if ((result->flags & NOT_FOUND_MASK) == NOT_FOUND_MASK) {
-    response = router->not_found_handler(context);
+    response = internal_router->not_found_handler(context);
   } else if ((result->flags & NOT_ALLOWED_MASK) == NOT_ALLOWED_MASK) {
-    response = router->method_not_allowed_handler(context);
+    response = internal_router->method_not_allowed_handler(context);
   } else {
     context->parameters = result->parameters;
-    Response *(*h)(void *) = result->action->handler;
+    response_t *(*h)(void *) = result->action->handler;
+
+    if (array_size(result->action->middlewares) > 0) {
+      context = invoke_chain(context, result->action->middlewares);
+    }
+
     response = h(context);
   }
 
@@ -198,8 +214,8 @@ void router_run(router_t *router, int client_socket, request_t *r,
 
 void router_free(router_t *router) { free(router); }
 
-Array *collect_methods(http_method_t method, ...) {
-  Array *methods = array_init();
+array_t *collect_methods(http_method_t method, ...) {
+  array_t *methods = array_init();
   if (!methods) {
     DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
         "failed to allocate methods array via array_init");

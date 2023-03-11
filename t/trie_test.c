@@ -62,8 +62,9 @@ void test_trie_insert() {
   for (int i = 0; i < sizeof(records) / sizeof(route_t); i++) {
     route_t route = records[i];
 
-    lives_ok({ trie_insert(trie, route.methods, route.path, route.handler); },
-             "inserts the trie node");
+    lives_ok(
+        { trie_insert(trie, route.methods, route.path, route.handler, NULL); },
+        "inserts the trie node");
   }
 }
 
@@ -123,7 +124,7 @@ void test_trie_search_ok() {
 
   for (i = 0; i < sizeof(records) / sizeof(route_t); i++) {
     route_t record = records[i];
-    trie_insert(trie, record.methods, record.path, record.handler);
+    trie_insert(trie, record.methods, record.path, record.handler, NULL);
   }
 
   for (i = 0; i < sizeof(tests) / sizeof(test_case); i++) {
@@ -194,7 +195,7 @@ void test_trie_search_no_match() {
 
   for (i = 0; i < sizeof(records) / sizeof(route_t); i++) {
     route_t record = records[i];
-    trie_insert(trie, record.methods, record.path, record.handler);
+    trie_insert(trie, record.methods, record.path, record.handler, NULL);
   }
 
   for (i = 0; i < sizeof(tests) / sizeof(test_case); i++) {

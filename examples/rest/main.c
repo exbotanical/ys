@@ -44,8 +44,8 @@ char *response_err(char *errmsg) {
   return fmt_str("{\"message\":\"%s\"}", errmsg);
 }
 
-Response *global_response() {
-  Response *response = get_response();
+response_t *global_response() {
+  response_t *response = get_response();
   set_header(response, "Content-Type: application/json");
   set_header(response, "X-Powered-By: demo");
 
@@ -55,7 +55,7 @@ Response *global_response() {
 void *handle_get(void *arg) {
   route_context_t *context = arg;
 
-  Response *response = global_response();
+  response_t *response = global_response();
 
   if (!has_params(context)) {
     set_body(response, response_err("must provide an id"));
@@ -84,7 +84,7 @@ void *handle_delete(void *arg) {
     exit(EXIT_FAILURE);
   }
 
-  Response *response = global_response();
+  response_t *response = global_response();
 
   if (!has_params(context)) {
     set_body(response, response_err("must provide an id"));
@@ -114,7 +114,7 @@ void *handle_put(void *arg) {
     exit(EXIT_FAILURE);
   }
 
-  Response *response = global_response();
+  response_t *response = global_response();
 
   if (!has_params(context)) {
     set_body(response, response_err("must provide an id"));
@@ -141,7 +141,7 @@ void *handle_post(void *arg) {
     exit(EXIT_FAILURE);
   }
 
-  Response *response = global_response();
+  response_t *response = global_response();
 
   if (!has_params(context)) {
     set_body(response, response_err("must provide an id"));
@@ -166,10 +166,10 @@ int main() {
   router_t *router = router_init(NULL, NULL);
   char *record_path = "/records/:id[^\\d+$]";
 
-  router_register(router, record_path, handle_get, GET, NULL);
-  router_register(router, record_path, handle_delete, DELETE, NULL);
-  router_register(router, record_path, handle_put, PUT, NULL);
-  router_register(router, record_path, handle_post, POST, NULL);
+  router_register(router, record_path, handle_get, NULL, GET, NULL);
+  router_register(router, record_path, handle_delete, NULL, DELETE, NULL);
+  router_register(router, record_path, handle_put, NULL, PUT, NULL);
+  router_register(router, record_path, handle_post, NULL, POST, NULL);
 
   server_t *server = server_init(router, PORT);
   if (!server_start(server)) {

@@ -82,7 +82,7 @@ static void load_route(const char *file_path) {
     char *route_path =
         str_truncate(str_truncate(file_path, -2), strlen(ignore_dir));
     // TODO: multiple methods
-    router_register(router, route_path, fn, i, NULL);
+    router_register(router, route_path, fn, NULL, i, NULL);
   }
 
   // dlclose(h);

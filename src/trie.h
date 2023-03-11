@@ -35,6 +35,7 @@ typedef struct trie {
  */
 typedef struct action {
   void *(*handler)(void *);
+  array_t *middlewares;
 } action_t;
 
 /**
@@ -50,7 +51,7 @@ typedef struct parameter {
  */
 typedef struct result {
   action_t *action;
-  Array *parameters;
+  array_t *parameters;
   unsigned int flags;
 } result_t;
 
@@ -68,9 +69,10 @@ trie_t *trie_init();
  * @param methods The methods on which to create a node
  * @param path The path on which to create a node
  * @param handler The handler to be associated with the inserted node
+ * @param middlewares TODO: docs
  */
-void trie_insert(trie_t *trie, Array *methods, const char *path,
-                 void *(*handler)(void *));
+void trie_insert(trie_t *trie, array_t *methods, const char *path,
+                 void *(*handler)(void *), array_t *middlewares);
 
 /**
  * @brief Searches a trie for a node matching the given method and path

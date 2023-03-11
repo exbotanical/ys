@@ -13,7 +13,7 @@ typedef struct test_case {
 
 void test_split_ok() {
   char *test_str = "aa:b:c:d";
-  Array *paths = split(test_str, PARAMETER_DELIMITER);
+  array_t *paths = split(test_str, PARAMETER_DELIMITER);
 
   ok(array_size(paths) == 4, "only the matched characters are captured");
   is(array_get(paths, 0), "aa", "substring is captured");
@@ -26,7 +26,7 @@ void test_split_ok() {
 
 void test_split_no_match() {
   char *test_str = "a:b:c:d";
-  Array *paths = split(test_str, PATH_ROOT);
+  array_t *paths = split(test_str, PATH_ROOT);
 
   ok(array_size(paths) == 0, "split returns if delimiter not extant");
 
@@ -35,7 +35,7 @@ void test_split_no_match() {
 
 void test_split_empty_input() {
   char *test_str = "";
-  Array *paths = split(test_str, PATH_ROOT);
+  array_t *paths = split(test_str, PATH_ROOT);
 
   ok(array_size(paths) == 0, "split returns if input is empty");
 
@@ -44,7 +44,7 @@ void test_split_empty_input() {
 
 void test_split_end_match() {
   char *test_str = "a:b:c:d/test";
-  Array *paths = split(test_str, PATH_ROOT);
+  array_t *paths = split(test_str, PATH_ROOT);
 
   ok(array_size(paths) == 2, "only the matched characters are captured");
   is(array_get(paths, 0), "a:b:c:d", "substring is captured");
@@ -55,7 +55,7 @@ void test_split_end_match() {
 
 void test_expand_path_ok() {
   char *test_str = "/path/to/route";
-  Array *paths = expand_path(test_str);
+  array_t *paths = expand_path(test_str);
 
   ok(array_size(paths) == 3, "only the matched characters are captured");
   is(array_get(paths, 0), "path", "substring is captured");
@@ -68,7 +68,7 @@ void test_expand_path_ok() {
 void test_expand_no_match() {
   char *test_str = "path:to:[^route]";
 
-  Array *paths = expand_path(test_str);
+  array_t *paths = expand_path(test_str);
   ok(array_size(paths) == 0, "no matches recorded");
 
   array_free(paths);

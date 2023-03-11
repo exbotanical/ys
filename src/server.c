@@ -27,18 +27,18 @@
  * @brief Converts a user-defined response object into a buffer.
  *
  * @param response_data
- * @return Buffer*
+ * @return buffer_t*
  */
-static Buffer *build_response(Response *response_data) {
-  Buffer *response = buffer_init(NULL);
+static buffer_t *build_response(response_t *response_data) {
+  buffer_t *response = buffer_init(NULL);
   if (!response) {
     // TODO constant template str for malloc failures
-    DIE(EXIT_FAILURE, "%s\n", "could not allocate memory for Buffer");
+    DIE(EXIT_FAILURE, "%s\n", "could not allocate memory for buffer_t");
   }
 
   // TODO constants for response_data fields for brevity
   int status = response_data->status;
-  Array *headers = response_data->headers;
+  array_t *headers = response_data->headers;
   char *body = response_data->body;
 
   buffer_append(response,
@@ -80,7 +80,7 @@ static request_t *build_request(char *buffer) {
   char *n6 = strtok(NULL, "\n");
 
   // get the body, if any
-  Buffer *content = buffer_init(NULL);
+  buffer_t *content = buffer_init(NULL);
   char *n7 = NULL;
   while ((n7 = strtok(NULL, "\n")) != NULL) {
     buffer_append(content, n7);
@@ -144,7 +144,7 @@ server_t *server_init(router_t *router, int port) {
     DIE(EXIT_FAILURE, "%s\n", message);
   }
 
-  server->router = router;
+  server->router = (__router_t *)router;
   server->port = port;
 
   return server;
@@ -252,10 +252,10 @@ bool server_start(server_t *server) {
   return true;
 }
 
-Response *response_init() {
-  Response *response = malloc(sizeof(Response));
+response_t *response_init() {
+  response_t *response = malloc(sizeof(response_t));
   if (!response) {
-    DIE(EXIT_FAILURE, "%s\n", "unable to allocate Response");
+    DIE(EXIT_FAILURE, "%s\n", "unable to allocate response_t");
   }
 
   response->headers = array_init();
@@ -263,8 +263,8 @@ Response *response_init() {
   return response;
 }
 
-void send_response(int socket, Response *response_data) {
-  Buffer *response = build_response(response_data);
+void send_response(int socket, response_t *response_data) {
+  buffer_t *response = build_response(response_data);
   write(socket, buffer_state(response), buffer_size(response));
   buffer_free(response);
   close(socket);

@@ -112,11 +112,12 @@ typedef enum http_status {
 /**
  * @brief A router object.
  */
-typedef struct router {
+typedef struct {
   trie_t *trie;
   void *(*not_found_handler)(void *);
   void *(*method_not_allowed_handler)(void *);
-} router_t;
+} __router_t;
+typedef __router_t *router_t;
 
 /**
  * @brief A context object containing metadata to be passed
@@ -134,14 +135,14 @@ typedef struct route_context {
   char *content_type;
   char *content;
   char *raw;
-  Array *parameters;
+  array_t *parameters;
 } route_context_t;
 
 /**
  * @brief A server configuration object.
  */
 typedef struct server {
-  router_t *router;
+  __router_t *router;
   int port;
 } server_t;
 
@@ -149,22 +150,22 @@ typedef struct server {
  * @brief A response object; client handlers must return this
  * struct to be sent to the client.
  */
-typedef struct response_t {
+typedef struct {
   /** HTTP status code - required */
   http_status_t status;
   /** HTTP headers - optional, but you should pass content-type if sending a
    * body */
-  Array *headers;
-  /** Response body - optional; Content-length header will be set for you */
+  array_t *headers;
+  /** response_t body - optional; Content-length header will be set for you */
   char *body;
-} Response;
+} response_t;
 
 /**
- * @brief Allocates the necessary memory for a `Response`.
+ * @brief Allocates the necessary memory for a `response_t`.
  *
- * @return Response*
+ * @return response_t*
  */
-Response *response_init();
+response_t *response_init();
 
 /**
  * @brief Sends the user-provided response and closes the socket connection.
@@ -173,19 +174,21 @@ Response *response_init();
  * @param socket
  * @param response_data
  */
-void send_response(int socket, Response *response_data);
+void send_response(int socket, response_t *response_data);
 
-Response *get_response();
+response_t *get_response();
 
-bool set_header(Response *response, char *header);
+bool set_header(response_t *response, char *header);
 
-void set_body(Response *response, const char *body);
+void set_body(response_t *response, const char *body);
 
-void set_status(Response *response, http_status_t status);
+void set_status(response_t *response, http_status_t status);
 
 bool has_params(route_context_t *ctx);
 
 parameter_t *get_param(route_context_t *ctx, int idx);
+
+array_t *collect_middleware(void *(*middleware)(void *), ...);
 
 /**
  * @brief Deallocates memory for router_t `router`.
@@ -217,7 +220,8 @@ router_t *router_init(void *(*not_found_handler)(void *),
  * TODO: docs
  */
 void router_register(router_t *router, const char *path,
-                     void *(*handler)(void *), http_method_t method, ...);
+                     void *(*handler)(void *), array_t *middlewares,
+                     http_method_t method, ...);
 
 /**
  * @brief Allocates the necessary memory for a `server_t`.

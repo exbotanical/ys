@@ -9,6 +9,6 @@
  * @param socket
  * @param response_data
  */
-void send_response(int socket, Response *response_data);
+void send_response(int socket, response_t *response_data);
 
 #endif /* SERVER_H */

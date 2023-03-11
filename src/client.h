@@ -12,7 +12,7 @@ typedef struct client_context {
   int client_socket;
   struct sockaddr *address;
   socklen_t *addr_len;
-  router_t *router;
+  __router_t *router;
 } client_context_t;
 
 #endif /* CLIENT_H */

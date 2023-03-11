@@ -8,7 +8,7 @@
  * @brief A route record.
  */
 typedef struct route {
-  Array *methods;
+  array_t *methods;
   char *path;
   void *(*handler)(void *);
 } route_t;
@@ -21,8 +21,8 @@ typedef struct route {
  * @param method The method to search for
  * @param parameters Route match parameters
  */
-void router_run(router_t *router, int client_socket, request_t *r,
-                Array *parameters);
+void router_run(__router_t *router, int client_socket, request_t *r,
+                array_t *parameters);
 
 /**
  * @brief Collects n methods into a character array. The variadic arguments here
@@ -30,8 +30,8 @@ void router_run(router_t *router, int client_socket, request_t *r,
  *
  * @param method The first of n methods
  * @param ... n methods, ending with NULL
- * @return Array* List of stringified methods
+ * @return array_t* List of stringified methods
  */
-Array *collect_methods(http_method_t method, ...);
+array_t *collect_methods(http_method_t method, ...);
 
 #endif /* ROUTER_H */

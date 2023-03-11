@@ -3,7 +3,7 @@
 
 #include <stdbool.h>  // For boolean aliases
 
-#include "libutil/libutil.h"  // For Array
+#include "libutil/libutil.h"  // For array_t
 
 /**
  * @brief Default root path e.g. /
@@ -41,9 +41,9 @@ extern const char *PATTERN_WILDCARD;
  * argument(s).
  *
  * @param path The path to expand
- * @return Array*
+ * @return array_t*
  */
-Array *expand_path(const char *path);
+array_t *expand_path(const char *path);
 
 /**
  * @brief Splits a string on all instances of a delimiter. Sets errno if
@@ -51,9 +51,9 @@ Array *expand_path(const char *path);
  *
  * @param str The string to split
  * @param delimiter The delimiter on which to split `str`
- * @return Array* An array of matches, if any; NULL if erroneous
+ * @return array_t* An array of matches, if any; NULL if erroneous
  */
-Array *split(const char *str, const char *delimiter);
+array_t *split(const char *str, const char *delimiter);
 
 /**
  * @brief Returns the index of a character `target`
