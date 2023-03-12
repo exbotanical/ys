@@ -123,7 +123,7 @@ typedef __router_t *router_t;
  * @brief A context object containing metadata to be passed
  * to matched route handlers.
  */
-typedef struct route_context {
+typedef struct {
   int client_socket;
   char *path;
   char *method;
@@ -136,7 +136,8 @@ typedef struct route_context {
   char *content;
   char *raw;
   array_t *parameters;
-} route_context_t;
+} __route_context_t;
+typedef __route_context_t *route_context_t;
 
 /**
  * @brief A server configuration object.
@@ -184,10 +185,6 @@ bool set_header(response_t *response, char *header);
 void set_body(response_t *response, const char *body);
 
 void set_status(response_t *response, http_status_t status);
-
-bool has_params(route_context_t *ctx);
-
-parameter_t *get_param(route_context_t *ctx, int idx);
 
 array_t *collect_middleware(void *(*middleware)(void *), ...);
 
@@ -241,5 +238,14 @@ server_t *server_init(router_t *router, int port);
 bool server_start(server_t *server);
 
 void server_free(server_t *server);
+
+void *context_get_parameter(route_context_t *context, const char *key);
+
+parameter_t *context_get_parameter_at(route_context_t *context,
+                                      unsigned int idx);
+
+bool context_num_parameters(route_context_t *context);
+
+bool context_has_parameters(route_context_t *context);
 
 #endif /* LIBHTTP_H */

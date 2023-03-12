@@ -15,11 +15,3 @@ void set_body(response_t *response, const char *body) {
 void set_status(response_t *response, http_status_t status) {
   response->status = status;
 }
-
-bool has_params(route_context_t *ctx) {
-  return ctx->parameters && array_size(ctx->parameters) > 0;
-}
-
-parameter_t *get_param(route_context_t *ctx, int idx) {
-  return array_get(ctx->parameters, idx);
-}

@@ -1,16 +1,5 @@
-#include <errno.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <pthread.h>
-#include <stdarg.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/select.h>
-#include <sys/socket.h>
-#include <unistd.h>
 
-#include "lib.thread/libthread.h"
 #include "libhttp.h"
 
 #define PORT 9000
@@ -30,8 +19,11 @@ int main() {
   router_t *router = router_init(NULL, NULL);
   router_register(router, "/", handler, NULL, GET, NULL);
 
+  // passing PORT explicitly overrides config value if there is one
   server_t *server = server_init(router, PORT);
   if (!server_start(server)) {
+    server_free(server);  // also frees router
+
     return EXIT_FAILURE;
   }
 

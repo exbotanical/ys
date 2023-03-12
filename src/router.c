@@ -18,11 +18,14 @@ static void setup_env() {
   setup_logging();
 }
 
+// essentially a reduce operation
 static void *invoke_chain(route_context_t *ctx, array_t *middlewares) {
   void *h = ctx;
   for (unsigned int i = array_size(middlewares); i > 0; i--) {
-    h = ((void *(*)(void *))array_get(middlewares, i))(h);
+    h = ((void *(*)(void *))array_get(middlewares, i - 1))(h);
   }
+
+  return h;
 }
 
 /**
@@ -32,7 +35,7 @@ static void *invoke_chain(route_context_t *ctx, array_t *middlewares) {
  * @return void* response_t
  */
 static void *internal_server_error_handler(void *arg) {
-  route_context_t *context = arg;
+  __route_context_t *context = (__route_context_t *)arg;
   printlogf(LOG_INFO,
             "[router::internal_server_error_handler] 500 handler in effect at "
             "request path %s\n",
@@ -51,7 +54,7 @@ static void *internal_server_error_handler(void *arg) {
  * @return void* response_t
  */
 static void *default_not_found_handler(void *arg) {
-  route_context_t *context = arg;
+  __route_context_t *context = (__route_context_t *)arg;
   printlogf(
       LOG_INFO,
       "[router::default_not_found_handler] default 404 handler in effect at "
@@ -71,7 +74,7 @@ static void *default_not_found_handler(void *arg) {
  * @return void* response_t
  */
 static void *default_method_not_allowed_handler(void *arg) {
-  route_context_t *context = arg;
+  __route_context_t *context = (__route_context_t *)arg;
   printlogf(
       LOG_INFO,
       "[router::default_method_not_allowed_handler] default 405 handler in "
@@ -94,7 +97,7 @@ static void *default_method_not_allowed_handler(void *arg) {
  */
 static route_context_t *route_context_init(int client_socket, request_t *r,
                                            array_t *parameters) {
-  route_context_t *context = malloc(sizeof(route_context_t));
+  __route_context_t *context = malloc(sizeof(__route_context_t));
   if (!context) {
     free(context);
     DIE(EXIT_FAILURE, "[context::route_context_init] %s\n",
@@ -186,7 +189,7 @@ void router_register(router_t *router, const char *path,
 void router_run(__router_t *router, int client_socket, request_t *r,
                 array_t *parameters) {
   __router_t *internal_router = (__router_t *)router;
-  route_context_t *context = route_context_init(client_socket, r, parameters);
+  __route_context_t *context = route_context_init(client_socket, r, parameters);
 
   response_t *response;
   result_t *result =
@@ -202,10 +205,10 @@ void router_run(__router_t *router, int client_socket, request_t *r,
     context->parameters = result->parameters;
     response_t *(*h)(void *) = result->action->handler;
 
-    if (array_size(result->action->middlewares) > 0) {
-      context = invoke_chain(context, result->action->middlewares);
+    array_t *mws = result->action->middlewares;
+    if (mws && array_size(mws) > 0) {
+      context = invoke_chain(context, mws);
     }
-
     response = h(context);
   }
 

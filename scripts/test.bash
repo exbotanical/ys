@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 IFS=$'\n'
 
-TESTING_DIR=t
+TESTING_DIR=t/unit
 UTIL_F=util.bash
 REPO_DIR=http
 
