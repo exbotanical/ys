@@ -1,8 +1,5 @@
 #include "path.h"
 
-#include <stdio.h>
-#include <string.h>
-
 #include "tap.c/tap.h"
 
 typedef struct test_case {

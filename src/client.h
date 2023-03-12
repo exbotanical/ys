@@ -1,7 +1,7 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include <arpa/inet.h>  // TODO: check all includes and comment
+#include <arpa/inet.h>  // for socklen_t
 
 #include "router.h"
 

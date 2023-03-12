@@ -3,8 +3,8 @@
 
 #include <stdbool.h>
 
-#include "libhash/libhash.h"
-#include "libutil/libutil.h"
+#include "libhash/libhash.h"  // for hash tables impl
+#include "libutil/libutil.h"  // for array_t
 
 /**
  * @brief Initial flags state for result record.

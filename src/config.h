@@ -1,11 +1,10 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <stdbool.h>
-
 typedef struct config_t {
   short num_threads;
   int port_num;
+  // TODO: const?
   char* log_level;
   char* log_file;
 } ServerConfig;

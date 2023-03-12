@@ -1,4 +1,4 @@
-#include <stdarg.h>
+#include <stdarg.h>  // for variadic args functions
 
 #include "libhttp.h"
 

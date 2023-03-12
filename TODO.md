@@ -15,3 +15,5 @@
 - [ ] ssl
 - [ ] Use a union to store parameter values. We have enough info from the regex to determine whether the value should be an int or char*
 - [ ] JSON parsed body in context
+- [ ] pass a struct with context, req, res (maybe merge ctx and req)
+- [ ] helper ??? `#define CAST(type, name, stmt) type *name = (type *)stmt`

@@ -1,24 +1,17 @@
 
 #include "server.h"
 
-#include <errno.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <pthread.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/select.h>
-#include <unistd.h>
+#include <stdlib.h>      // for exit
+#include <string.h>      // for strlen, strdup, strtok
+#include <sys/select.h>  // for fd_set
+#include <unistd.h>      // for write, close
 
-#include "client.h"
-#include "config.h"
-#include "lib.thread/libthread.h"
+#include "client.h"                // for client_context_t
+#include "config.h"                // for server_config
+#include "lib.thread/libthread.h"  // for thread pools
 #include "libhttp.h"
 #include "logger.h"
-#include "path.h"
-#include "request.h"
+#include "request.h"  // for request_t
 #include "router.h"
 #include "util.h"
 

@@ -1,11 +1,11 @@
 #include "logger.h"
 
 #include <errno.h>
-#include <fcntl.h>
+#include <fcntl.h>   // for open and open flags
 #include <stdarg.h>  // for variadic args functions
 #include <stdlib.h>  // for exit, getenv
 #include <string.h>  // for strlen, strncmp
-#include <time.h>
+#include <time.h>    // time_t
 #include <unistd.h>  // for write
 
 #include "config.h"

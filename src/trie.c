@@ -1,12 +1,9 @@
 #include "trie.h"
 
 #include <pcre.h> /* This library relies on the ability to utilize PCRE regex. */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <string.h>  // for strcmp, strdup, strlen
 
-#include "cache.h"
-#include "libutil/libutil.h"
+#include "cache.h"  // for regex_cache_get
 #include "logger.h"
 #include "path.h"
 

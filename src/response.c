@@ -1,4 +1,4 @@
-#include <string.h>
+#include <string.h>  // for strdup
 
 #include "libhttp.h"
 

@@ -1,9 +1,8 @@
 #include "path.h"
 
 #include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <stdlib.h>  // for exit
+#include <string.h>  // strlen, strdup, strtok, strstr
 
 #include "logger.h"
 

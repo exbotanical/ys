@@ -1,9 +1,7 @@
 #include "trie.h"
 
-#include <stdio.h>
-#include <string.h>
+#include <string.h>  // for strdup
 
-#include "libhttp.h"
 #include "path.h"
 #include "router.h"
 #include "tap.c/tap.h"

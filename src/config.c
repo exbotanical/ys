@@ -1,6 +1,6 @@
 #include "config.h"
 
-#include <stdio.h>
+#include <stdio.h>   // for FILE, stderr
 #include <stdlib.h>  // for free
 #include <string.h>  // for strcmp, strcspn, strdup
 

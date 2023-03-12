@@ -1,15 +1,12 @@
 #include "router.h"
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <syslog.h>
+#include <stdarg.h>  // for variadic args functions
+#include <stdlib.h>  // for exit, malloc
+#include <string.h>  // for strdup
 
 #include "config.h"
-#include "libhttp.h"
 #include "logger.h"
-#include "server.h"
+#include "server.h"  // for send_response
 
 const char CONFIG_FILE_NAME[13] = "libhttp.conf";
 
@@ -19,7 +16,7 @@ static void setup_env() {
 }
 
 // essentially a reduce operation
-static void *invoke_chain(route_context_t *ctx, array_t *middlewares) {
+static void *invoke_chain(__route_context_t *ctx, array_t *middlewares) {
   void *h = ctx;
   for (unsigned int i = array_size(middlewares); i > 0; i--) {
     h = ((void *(*)(void *))array_get(middlewares, i - 1))(h);
@@ -36,6 +33,7 @@ static void *invoke_chain(route_context_t *ctx, array_t *middlewares) {
  */
 static void *internal_server_error_handler(void *arg) {
   __route_context_t *context = (__route_context_t *)arg;
+
   printlogf(LOG_INFO,
             "[router::internal_server_error_handler] 500 handler in effect at "
             "request path %s\n",
@@ -95,8 +93,8 @@ static void *default_method_not_allowed_handler(void *arg) {
  * @param parameters Any parameters derived from the matched route
  * @return route_context_t* Route context
  */
-static route_context_t *route_context_init(int client_socket, request_t *r,
-                                           array_t *parameters) {
+static __route_context_t *route_context_init(int client_socket, request_t *r,
+                                             array_t *parameters) {
   __route_context_t *context = malloc(sizeof(__route_context_t));
   if (!context) {
     free(context);
@@ -166,7 +164,7 @@ void router_register(router_t *router, const char *path,
   va_start(args, method);
   // TODO: deduplicate this (and use collect_methods) or similar
   // not doing this right now due to reference edge cases when doing so
-  while (method != NULL) {
+  while (method != 0) {
     if (!array_push(methods, strdup(http_method_names[method]))) {
       free(methods);
       DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
@@ -203,7 +201,8 @@ void router_run(__router_t *router, int client_socket, request_t *r,
     response = internal_router->method_not_allowed_handler(context);
   } else {
     context->parameters = result->parameters;
-    response_t *(*h)(void *) = result->action->handler;
+    response_t *(*h)(void *) =
+        (response_t * (*)(void *)) result->action->handler;
 
     array_t *mws = result->action->middlewares;
     if (mws && array_size(mws) > 0) {
@@ -227,7 +226,7 @@ array_t *collect_methods(http_method_t method, ...) {
   va_list args;
   va_start(args, method);
 
-  while (method != NULL) {
+  while (method != 0) {
     if (!array_push(methods, strdup(http_method_names[method]))) {
       free(methods);
       DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",

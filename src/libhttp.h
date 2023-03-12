@@ -1,7 +1,6 @@
 #ifndef LIBHTTP_H
 #define LIBHTTP_H
 
-#include <arpa/inet.h>
 #include <stdbool.h>
 
 #include "libutil/libutil.h"

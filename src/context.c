@@ -1,3 +1,5 @@
+#include <string.h>  // for strcmp
+
 #include "libhttp.h"
 
 parameter_t* context_get_parameter_at(route_context_t* context,

@@ -1,9 +1,6 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include <stddef.h>
-
-#include "libhash/libhash.h"
 #include "libhttp.h"
 
 #define EP(x) [x] = #x
