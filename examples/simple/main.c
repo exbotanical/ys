@@ -4,15 +4,14 @@
 
 #define PORT 9000
 
-void *handler(void *arg) {
-  response_t *response = get_response();
-  set_header(response, "Content-Type: text/plain");
-  set_header(response, "X-Powered-By: demo");
+res_t *handler(req_t *req, res_t *res) {
+  set_header(res, "Content-Type: text/plain");
+  set_header(res, "X-Powered-By: demo");
 
-  set_body(response, "Hello World!");
-  set_status(response, OK);
+  set_body(res, "Hello World!");
+  set_status(res, OK);
 
-  return response;
+  return res;
 }
 
 int main() {

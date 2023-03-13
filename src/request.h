@@ -4,7 +4,7 @@
 /**
  * @brief Request metadata collected from an inbound client request.
  */
-typedef struct request {
+typedef struct {
   char *path;
   char *method;
   char *protocol;

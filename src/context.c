@@ -2,14 +2,13 @@
 
 #include "libhttp.h"
 
-parameter_t* context_get_parameter_at(route_context_t* context,
-                                      unsigned int idx) {
-  return array_get(((__route_context_t*)context)->parameters, idx);
+parameter_t* req_get_parameter_at(req_t* req, unsigned int idx) {
+  return array_get(req->parameters, idx);
 }
 
-void* context_get_parameter(route_context_t* context, const char* key) {
-  for (unsigned int i = 0; i < context_num_parameters(context); i++) {
-    parameter_t* param = context_get_parameter_at(context, i);
+void* req_get_parameter(req_t* req, const char* key) {
+  for (unsigned int i = 0; i < req_num_parameters(req); i++) {
+    parameter_t* param = req_get_parameter_at(req, i);
     if (strcmp(param->key, key) == 0) {
       return param->value;
     }
@@ -18,11 +17,8 @@ void* context_get_parameter(route_context_t* context, const char* key) {
   return NULL;
 }
 
-bool context_num_parameters(route_context_t* context) {
-  return array_size(((__route_context_t*)context)->parameters);
-}
+bool req_num_parameters(req_t* req) { return array_size(req->parameters); }
 
-bool context_has_parameters(route_context_t* context) {
-  __route_context_t* internal_context = (__route_context_t*)context;
-  return internal_context && array_size((internal_context)->parameters) > 0;
+bool req_has_parameters(req_t* req) {
+  return req && array_size(req->parameters) > 0;
 }

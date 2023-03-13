@@ -6,13 +6,14 @@
 - [ ] Add global config (e.g. global HTTP headers)
 - [ ] HTTP request parser
 - [ ] test handlers with a mocking library
-- [ ] static
-- [ ] logging
-- [ ] error-handling
+- [x] static
+- [x] logging
+- [x] error-handling
 - [ ] documentation
 - [ ] use attr struct for fallback handlers
 - [ ] Figure out file routing. The problem here is we want the `response_t` type to be accessible to consumers without having to compile the entire library and link it.
-- [ ] ssl
+- [ ] SSL support
+- [ ] properly parse entire request (we're using a placeholder method right now!)
 - [ ] Use a union to store parameter values. We have enough info from the regex to determine whether the value should be an int or char*
 - [ ] JSON parsed body in context
 - [ ] pass a struct with context, req, res (maybe merge ctx and req)

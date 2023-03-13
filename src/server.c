@@ -22,7 +22,7 @@
  * @param response_data
  * @return buffer_t*
  */
-static buffer_t *build_response(response_t *response_data) {
+static buffer_t *build_response(res_t *response_data) {
   buffer_t *response = buffer_init(NULL);
   if (!response) {
     // TODO constant template str for malloc failures
@@ -119,8 +119,7 @@ void *client_thread_handler(void *arg) {
   LOG("[server::client_thread_handler] client request received: %s\n",
       recv_buffer);
 
-  router_run(c_ctx->router, c_ctx->client_socket, build_request(recv_buffer),
-             NULL);
+  router_run(c_ctx->router, c_ctx->client_socket, build_request(recv_buffer));
 
   return NULL;
 }
@@ -250,18 +249,7 @@ void server_free(server_t *server) {
   free(server);
 }
 
-response_t *response_init() {
-  response_t *response = malloc(sizeof(response_t));
-  if (!response) {
-    DIE(EXIT_FAILURE, "%s\n", "unable to allocate response_t");
-  }
-
-  response->headers = array_init();
-
-  return response;
-}
-
-void send_response(int socket, response_t *response_data) {
+void send_response(int socket, res_t *response_data) {
   buffer_t *response = build_response(response_data);
   write(socket, buffer_state(response), buffer_size(response));
   buffer_free(response);

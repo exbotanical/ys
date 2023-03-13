@@ -2,7 +2,7 @@
 
 #include "libhttp.h"
 
-array_t *collect_middleware(void *(*middleware)(void *), ...) {
+array_t *collect_middleware(res_t *(*middleware)(req_t *, res_t *), ...) {
   array_t *middlewares = array_init();
   if (!middlewares) {
     return NULL;

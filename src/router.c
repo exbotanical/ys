@@ -16,10 +16,10 @@ static void setup_env() {
 }
 
 // essentially a reduce operation
-static void *invoke_chain(__route_context_t *ctx, array_t *middlewares) {
-  void *h = ctx;
+static void *invoke_chain(req_t *req, res_t *res, array_t *middlewares) {
+  void *h = res;
   for (unsigned int i = array_size(middlewares); i > 0; i--) {
-    h = ((void *(*)(void *))array_get(middlewares, i - 1))(h);
+    h = ((res_t * (*)(req_t *, res_t *)) array_get(middlewares, i - 1))(req, h);
   }
 
   return h;
@@ -29,93 +29,50 @@ static void *invoke_chain(__route_context_t *ctx, array_t *middlewares) {
  * @brief Executes the internal 500 handler.
  *
  * @param arg Route context
- * @return void* response_t
  */
-static void *internal_server_error_handler(void *arg) {
-  __route_context_t *context = (__route_context_t *)arg;
-
+static void *internal_server_error_handler(req_t *req, res_t *res) {
   printlogf(LOG_INFO,
             "[router::internal_server_error_handler] 500 handler in effect at "
             "request path %s\n",
-            context->path);
+            req->path);
 
-  response_t *response = response_init();
-  response->status = INTERNAL_SERVER_ERROR;
+  res->status = INTERNAL_SERVER_ERROR;
 
-  return response;
+  return res;
 }
 
 /**
  * @brief Executes the default 404 handler.
  *
  * @param arg Route context
- * @return void* response_t
  */
-static void *default_not_found_handler(void *arg) {
-  __route_context_t *context = (__route_context_t *)arg;
+static void *default_not_found_handler(req_t *req, res_t *res) {
   printlogf(
       LOG_INFO,
       "[router::default_not_found_handler] default 404 handler in effect at "
       "request path %s\n",
-      context->path);
+      req->path);
 
-  response_t *response = response_init();
-  response->status = NOT_FOUND;
+  res->status = NOT_FOUND;
 
-  return response;
+  return res;
 }
 
 /**
  * @brief Executes the default 405 handler.
  *
  * @param arg Route context
- * @return void* response_t
  */
-static void *default_method_not_allowed_handler(void *arg) {
-  __route_context_t *context = (__route_context_t *)arg;
+static void *default_method_not_allowed_handler(req_t *req, res_t *res) {
   printlogf(
       LOG_INFO,
       "[router::default_method_not_allowed_handler] default 405 handler in "
       "effect at request path %s\n",
-      context->path);
+      req->path);
 
-  response_t *response = response_init();
-  response->status = METHOD_NOT_ALLOWED;
+  res->status = METHOD_NOT_ALLOWED;
 
-  return response;
-}
-
-/**
- * @brief Initializes an object containing request metadata for a matched route.
- *
- * @param client_socket
- * @param request
- * @param parameters Any parameters derived from the matched route
- * @return route_context_t* Route context
- */
-static __route_context_t *route_context_init(int client_socket, request_t *r,
-                                             array_t *parameters) {
-  __route_context_t *context = malloc(sizeof(__route_context_t));
-  if (!context) {
-    free(context);
-    DIE(EXIT_FAILURE, "[context::route_context_init] %s\n",
-        "failed to allocate route_context_t");
-  }
-
-  context->client_socket = client_socket;
-  context->path = r->path;
-  context->method = r->method;
-  context->protocol = r->protocol;
-  context->host = r->host;
-  context->user_agent = r->user_agent;
-  context->accept = r->accept;
-  context->content_len = r->content_len;
-  context->content_type = r->content_type;
-  context->content = r->content;
-  context->raw = r->raw;
-  context->parameters = parameters;
-
-  return context;
+  return res;
 }
 
 router_t *router_init(void *(*not_found_handler)(void *),
@@ -152,7 +109,7 @@ router_t *router_init(void *(*not_found_handler)(void *),
 }
 
 void router_register(router_t *router, const char *path,
-                     void *(*handler)(void *), array_t *middlewares,
+                     res_t *(*handler)(req_t *, res_t *), array_t *middlewares,
                      http_method_t method, ...) {
   array_t *methods = array_init();
   if (!methods) {
@@ -184,34 +141,61 @@ void router_register(router_t *router, const char *path,
               middlewares);
 }
 
-void router_run(__router_t *router, int client_socket, request_t *r,
-                array_t *parameters) {
-  __router_t *internal_router = (__router_t *)router;
-  __route_context_t *context = route_context_init(client_socket, r, parameters);
+res_t *response_init() {
+  res_t *res = malloc(sizeof(res_t));
+  if (!res) {
+    DIE(EXIT_FAILURE, "%s\n", "unable to allocate res_t");
+  }
 
-  response_t *response;
+  res->headers = array_init();
+  if (!res->headers) {
+    DIE(EXIT_FAILURE, "%s\n", "unable to allocate array_t");
+  }
+
+  return res;
+}
+
+req_t *request_init(request_t *request) {
+  req_t *req = malloc(sizeof(req_t));
+  if (!req) {
+    DIE(EXIT_FAILURE, "%s\n", "unable to allocate response_t");
+  }
+
+  req = request;
+  req->parameters = NULL;
+  return req;
+}
+
+void router_run(__router_t *router, int client_socket, request_t *request) {
+  __router_t *internal_router = (__router_t *)router;
+
   result_t *result =
-      trie_search(internal_router->trie, context->method, context->path);
+      trie_search(internal_router->trie, request->method, request->path);
+
+  req_t *req = request_init(request);
+  res_t *res = response_init();
 
   if (!result) {
-    response = internal_server_error_handler(context);
+    res = internal_server_error_handler(req, res);
   } else if ((result->flags & NOT_FOUND_MASK) == NOT_FOUND_MASK) {
-    response = internal_router->not_found_handler(context);
+    res = internal_router->not_found_handler(req, res);
   } else if ((result->flags & NOT_ALLOWED_MASK) == NOT_ALLOWED_MASK) {
-    response = internal_router->method_not_allowed_handler(context);
+    res = internal_router->method_not_allowed_handler(req, res);
   } else {
-    context->parameters = result->parameters;
-    response_t *(*h)(void *) =
-        (response_t * (*)(void *)) result->action->handler;
+    req->parameters = result->parameters;
+
+    res_t *(*h)(req_t *, res_t *) =
+        (res_t * (*)(req_t *, res_t *)) result->action->handler;
 
     array_t *mws = result->action->middlewares;
     if (mws && array_size(mws) > 0) {
-      context = invoke_chain(context, mws);
+      res = invoke_chain(req, res, mws);
     }
-    response = h(context);
+
+    res = h(req, res);
   }
 
-  send_response(context->client_socket, response);
+  send_response(client_socket, res);
 }
 
 void router_free(router_t *router) { free(router); }

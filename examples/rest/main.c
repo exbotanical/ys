@@ -14,16 +14,12 @@ typedef struct record {
   char *value;
 } record_t;
 
-record_t records[] = {
-    {.key = "1", .value = "value1"},
-    {.key = "2", .value = "value2"},
-    {.key = "3", .value = "value3"},
-};
+record_t *records = NULL;
+int num_records = 0;
 
 record_t *search_records(char *key) {
-  for (size_t i = 0; i < 3; i++) {
+  for (size_t i = 0; i < num_records; i++) {
     record_t *record = &records[i];
-    if (!record->key) continue;
     if (strcmp(record->key, key) == 0) {
       return record;
     }
@@ -32,126 +28,128 @@ record_t *search_records(char *key) {
   return NULL;
 }
 
-char *response_ok(char *data) { return fmt_str("{\"data\":\"%s\"}", data); }
+int search_records_idx(char *key) {
+  for (size_t i = 0; i < num_records; i++) {
+    record_t record = records[i];
+    if (strcmp(record.key, key) == 0) {
+      return i;
+    }
+  }
 
-char *response_err(char *errmsg) {
-  return fmt_str("{\"message\":\"%s\"}", errmsg);
+  return -1;
 }
 
-response_t *global_response() {
-  response_t *response = get_response();
-  set_header(response, "Content-Type: application/json");
-  set_header(response, "X-Powered-By: demo");
+void add_record(char *v) {
+  records = realloc(records, (num_records + 1) * sizeof(record_t));
 
-  return response;
+  records[num_records].key = strdup(v);
+  records[num_records].value = strdup(v);
+  num_records++;
 }
 
-void *handle_get(void *arg) {
-  route_context_t *context = arg;
-  response_t *response = global_response();
+bool delete_record(char *id) {
+  int idx = search_records_idx(id);
+  if (idx == -1) return false;
 
-  char *id = context_get_parameter(context, "id");
+  free(records[idx].key);
+  free(records[idx].value);
+  // Shift the remaining records to the left by one position
+  for (int i = idx; i < num_records - 1; i++) {
+    records[i] = records[i + 1];
+  }
+
+  num_records--;
+  return true;
+}
+
+char *res_ok(char *data) { return fmt_str("{\"data\":\"%s\"}", data); }
+
+char *res_err(char *errmsg) { return fmt_str("{\"message\":\"%s\"}", errmsg); }
+
+res_t *handle_get(req_t *req, res_t *res) {
+  set_header(res, "Content-Type: application/json");
+  set_header(res, "X-Powered-By: demo");
+
+  char *id = req_get_parameter(req, "id");
   if (!id) {
-    set_body(response, response_err("must provide an id"));
-    set_status(response, BAD_REQUEST);
-    return response;
+    set_body(res, res_err("must provide an id"));
+    set_status(res, BAD_REQUEST);
+    return res;
   }
 
   record_t *record = search_records(id);
   if (!record) {
-    set_body(response, response_err("no matching record"));
-    set_status(response, NOT_FOUND);
-    return response;
+    set_body(res, res_err("no matching record"));
+    set_status(res, NOT_FOUND);
+    return res;
   }
 
-  set_body(response, response_ok(fmt_str("{\"key\":\"%s\",\"value\":\"%s\"}",
-                                         record->key, record->value)));
-  set_status(response, OK);
-  return response;
+  set_body(res, res_ok(fmt_str("{\"key\":\"%s\",\"value\":\"%s\"}", record->key,
+                               record->value)));
+  set_status(res, OK);
+  return res;
 }
 
-void *handle_delete(void *arg) {
-  route_context_t *context = arg;
-  response_t *response = global_response();
+res_t *handle_delete(req_t *req, res_t *res) {
+  set_header(res, "Content-Type: application/json");
+  set_header(res, "X-Powered-By: demo");
 
-  char *id = context_get_parameter(context, "id");
+  char *id = req_get_parameter(req, "id");
   if (!id) {
-    set_body(response, response_err("must provide an id"));
-    set_status(response, BAD_REQUEST);
-    return response;
+    set_body(res, res_err("must provide an id"));
+    set_status(res, BAD_REQUEST);
+    return res;
   }
 
-  record_t *record = search_records(id);
-  if (!record || !record->value) {
-    set_body(response, response_err("no matching record"));
-    set_status(response, NOT_FOUND);
-    return response;
+  bool ok = delete_record(id);
+  if (!ok) {
+    set_body(res, res_err("no matching record"));
+    set_status(res, NOT_FOUND);
+    return res;
   }
 
-  // Flag record as deleted
-  record->key = NULL;
-  record->value = NULL;
-  set_status(response, OK);
+  set_status(res, OK);
 
-  return response;
+  return res;
 }
 
-// TODO: accept param and update record
-void *handle_put(void *arg) {
-  route_context_t *context = arg;
-  response_t *response = global_response();
+// TODO: use body
+res_t *handle_put(req_t *req, res_t *res) {}
 
-  char *id = context_get_parameter(context, "id");
+res_t *handle_post(req_t *req, res_t *res) {
+  set_header(res, "Content-Type: application/json");
+  set_header(res, "X-Powered-By: demo");
+
+  char *id = req_get_parameter(req, "id");
   if (!id) {
-    set_body(response, response_err("must provide an id"));
-    set_status(response, BAD_REQUEST);
-    return response;
-  }
-
-  record_t *record = search_records(id);
-  if (!record) {
-    set_body(response, response_err("no matching record"));
-    set_status(response, NOT_FOUND);
-    return response;
-  }
-
-  record->value = id;
-
-  set_status(response, OK);
-  return response;
-}
-
-// TODO: fix
-void *handle_post(void *arg) {
-  route_context_t *context = arg;
-  response_t *response = global_response();
-
-  char *id = context_get_parameter(context, "id");
-  if (!id) {
-    set_body(response, response_err("must provide an id"));
-    set_status(response, BAD_REQUEST);
-    return response;
+    set_body(res, res_err("must provide an id"));
+    set_status(res, BAD_REQUEST);
+    return res;
   }
 
   record_t *record = search_records(id);
   if (record) {
-    set_body(response, response_err("record exists"));
-    set_status(response, BAD_REQUEST);
-    return response;
+    set_body(res, res_err("record exists"));
+    set_status(res, BAD_REQUEST);
+    return res;
   }
 
-  set_status(response, CREATED);
+  add_record(id);
 
-  return response;
+  set_status(res, CREATED);
+
+  return res;
 }
 
 int main() {
+  records = malloc(sizeof(record_t));
+
   router_t *router = router_init(NULL, NULL);
   char *record_path = "/records/:id[^\\d+$]";
 
   router_register(router, record_path, handle_get, NULL, GET, NULL);
   router_register(router, record_path, handle_delete, NULL, DELETE, NULL);
-  router_register(router, record_path, handle_put, NULL, PUT, NULL);
+  // router_register(router, record_path, handle_put, NULL, PUT, NULL);
   router_register(router, record_path, handle_post, NULL, POST, NULL);
 
   server_t *server = server_init(router, PORT);

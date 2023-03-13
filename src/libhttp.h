@@ -109,21 +109,10 @@ typedef enum http_status {
 } http_status_t;
 
 /**
- * @brief A router object.
- */
-typedef struct {
-  trie_t *trie;
-  void *(*not_found_handler)(void *);
-  void *(*method_not_allowed_handler)(void *);
-} __router_t;
-typedef __router_t *router_t;
-
-/**
  * @brief A context object containing metadata to be passed
  * to matched route handlers.
  */
 typedef struct {
-  int client_socket;
   char *path;
   char *method;
   char *protocol;
@@ -135,17 +124,7 @@ typedef struct {
   char *content;
   char *raw;
   array_t *parameters;
-} __route_context_t;
-typedef __route_context_t *route_context_t;
-
-/**
- * @brief A server configuration object.
- */
-typedef struct {
-  __router_t *router;
-  int port;
-} __server_t;
-typedef __server_t *server_t;
+} req_t;
 
 /**
  * @brief A response object; client handlers must return this
@@ -157,16 +136,28 @@ typedef struct {
   /** HTTP headers - optional, but you should pass content-type if sending a
    * body */
   array_t *headers;
-  /** response_t body - optional; Content-length header will be set for you */
+  /** res_t body - optional; Content-length header will be set for you */
   char *body;
-} response_t;
+} res_t;
 
 /**
- * @brief Allocates the necessary memory for a `response_t`.
- *
- * @return response_t*
+ * @brief A router object.
  */
-response_t *response_init();
+typedef struct {
+  trie_t *trie;
+  res_t *(*not_found_handler)(req_t *req, res_t *res);
+  res_t *(*method_not_allowed_handler)(req_t *req, res_t *res);
+} __router_t;
+typedef __router_t *router_t;
+
+/**
+ * @brief A server configuration object.
+ */
+typedef struct {
+  __router_t *router;
+  int port;
+} __server_t;
+typedef __server_t *server_t;
 
 /**
  * @brief Sends the user-provided response and closes the socket connection.
@@ -175,17 +166,17 @@ response_t *response_init();
  * @param socket
  * @param response_data
  */
-void send_response(int socket, response_t *response_data);
+void send_response(int socket, res_t *response_data);
 
-response_t *get_response();
+res_t *get_response();
 
-bool set_header(response_t *response, char *header);
+bool set_header(res_t *response, char *header);
 
-void set_body(response_t *response, const char *body);
+void set_body(res_t *response, const char *body);
 
-void set_status(response_t *response, http_status_t status);
+void set_status(res_t *response, http_status_t status);
 
-array_t *collect_middleware(void *(*middleware)(void *), ...);
+array_t *collect_middleware(res_t *(*middleware)(req_t *, res_t *), ...);
 
 /**
  * @brief Deallocates memory for router_t `router`.
@@ -217,7 +208,7 @@ router_t *router_init(void *(*not_found_handler)(void *),
  * TODO: docs
  */
 void router_register(router_t *router, const char *path,
-                     void *(*handler)(void *), array_t *middlewares,
+                     res_t *(*handler)(req_t *, res_t *), array_t *middlewares,
                      http_method_t method, ...);
 
 /**
@@ -238,13 +229,12 @@ bool server_start(server_t *server);
 
 void server_free(server_t *server);
 
-void *context_get_parameter(route_context_t *context, const char *key);
+void *req_get_parameter(req_t *req, const char *key);
 
-parameter_t *context_get_parameter_at(route_context_t *context,
-                                      unsigned int idx);
+parameter_t *req_get_parameter_at(req_t *req, unsigned int idx);
 
-bool context_num_parameters(route_context_t *context);
+bool req_num_parameters(req_t *req);
 
-bool context_has_parameters(route_context_t *context);
+bool req_has_parameters(req_t *req);
 
 #endif /* LIBHTTP_H */
