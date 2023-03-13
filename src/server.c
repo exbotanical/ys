@@ -15,50 +15,48 @@
 #include "util.h"
 
 /**
- * @internal
- * @brief Converts a user-defined response object into a buffer.
+ * serialize_response converts a user-defined response object into a buffer that
+ * can be sent over the wire
  *
- * @param response_data
+ * @param response
  * @return buffer_t*
  */
-static buffer_t *build_response(res_t *response_data) {
-  buffer_t *response = buffer_init(NULL);
-  if (!response) {
-    // TODO constant template str for malloc failures
+static buffer_t *serialize_response(res_t *response) {
+  buffer_t *rbuf = buffer_init(NULL);
+  if (!rbuf) {
+    // TODO: constant template str for malloc failures
     DIE(EXIT_FAILURE, "%s\n", "could not allocate memory for buffer_t");
   }
 
-  // TODO constants for response_data fields for brevity
-  int status = response_data->status;
-  array_t *headers = response_data->headers;
-  char *body = response_data->body;
+  // TODO: constants for response fields for brevity
+  int status = response->status;
+  array_t *headers = response->headers;
+  char *body = response->body;
 
-  buffer_append(response,
+  buffer_append(rbuf,
                 fmt_str("HTTP/1.1 %d %s\n", status, http_status_names[status]));
 
   for (unsigned int i = 0; i < array_size(headers); i++) {
     char *header = array_get(headers, i);
 
-    buffer_append(response, header);
-    buffer_append(response, "\n");
+    buffer_append(rbuf, header);
+    buffer_append(rbuf, "\n");
   }
 
-  buffer_append(response,
+  buffer_append(rbuf,
                 fmt_str("Content-Length: %d\n\n", body ? strlen(body) : 0));
+  buffer_append(rbuf, body ? body : "");
 
-  buffer_append(response, body ? body : "");
-
-  return response;
+  return rbuf;
 }
 
 /**
- * @internal
- * @brief Extract and structure a client request.
+ * deserialize_req deserializes a raw request into a request structure
  *
  * @param buffer
  * @return req_t*
  */
-static req_t *build_request(char *buffer) {
+static req_t *deserialize_req(char *buffer) {
   char *buffer_cp = strdup(buffer);
   req_t *request = malloc(sizeof(req_t));
   request->raw = buffer;
@@ -102,10 +100,10 @@ static req_t *build_request(char *buffer) {
 }
 
 /**
- * @internal
- * @brief Handles client connections and executes the user-defined router.
- *
- * @param arg Route context
+ * client_thread_handler handles client connections and executes the
+ * user-defined router
+ * @param arg
+ * @return void*
  */
 static void *client_thread_handler(void *arg) {
   client_context_t *c_ctx = arg;
@@ -118,9 +116,16 @@ static void *client_thread_handler(void *arg) {
   LOG("[server::client_thread_handler] client request received: %s\n",
       recv_buffer);
 
-  router_run(c_ctx->router, c_ctx->client_socket, build_request(recv_buffer));
+  router_run(c_ctx->router, c_ctx->client_socket, deserialize_req(recv_buffer));
 
   return NULL;
+}
+
+void send_response(int socket, res_t *response_data) {
+  buffer_t *response = serialize_response(response_data);
+  write(socket, buffer_state(response), buffer_size(response));
+  buffer_free(response);
+  close(socket);
 }
 
 server_t *server_init(router_t *router, int port) {
@@ -246,11 +251,4 @@ bool server_start(server_t *server) {
 void server_free(server_t *server) {
   router_free((router_t *)((__server_t *)server)->router);
   free(server);
-}
-
-void send_response(int socket, res_t *response_data) {
-  buffer_t *response = build_response(response_data);
-  write(socket, buffer_state(response), buffer_size(response));
-  buffer_free(response);
-  close(socket);
 }

@@ -6,16 +6,28 @@
 
 #include "config.h"
 #include "logger.h"
-#include "server.h"  // for send_response
+#include "response.h"  // for response_init
+#include "server.h"    // for send_response
 
 const char CONFIG_FILE_NAME[13] = "libhttp.conf";
 
+/**
+ * setup_env configures the `server_config` and logger for the current runtime
+ */
 static void setup_env() {
   parse_config(CONFIG_FILE_NAME);
   setup_logging();
 }
 
-// essentially a reduce operation
+/**
+ * invoke_chain reduces the route handler and middlewares into a final response
+ * object that is then sent over the socket
+ *
+ * @param req
+ * @param res
+ * @param middlewares
+ * @return void*
+ */
 static void *invoke_chain(req_t *req, res_t *res, array_t *middlewares) {
   void *h = res;
   for (unsigned int i = array_size(middlewares); i > 0; i--) {
@@ -26,11 +38,13 @@ static void *invoke_chain(req_t *req, res_t *res, array_t *middlewares) {
 }
 
 /**
- * @brief Executes the internal 500 handler.
+ * internal_server_error_handler is the internal/default 500 handler
  *
- * @param arg Route context
+ * @param req
+ * @param res
+ * @return void*
  */
-static void *internal_server_error_handler(req_t *req, res_t *res) {
+static res_t *internal_server_error_handler(req_t *req, res_t *res) {
   printlogf(LOG_INFO,
             "[router::internal_server_error_handler] 500 handler in effect at "
             "request path %s\n",
@@ -42,11 +56,13 @@ static void *internal_server_error_handler(req_t *req, res_t *res) {
 }
 
 /**
- * @brief Executes the default 404 handler.
+ * default_not_found_handler is the internal/default 404 handler
  *
- * @param arg Route context
+ * @param req
+ * @param res
+ * @return void*
  */
-static void *default_not_found_handler(req_t *req, res_t *res) {
+static res_t *default_not_found_handler(req_t *req, res_t *res) {
   printlogf(
       LOG_INFO,
       "[router::default_not_found_handler] default 404 handler in effect at "
@@ -59,11 +75,13 @@ static void *default_not_found_handler(req_t *req, res_t *res) {
 }
 
 /**
- * @brief Executes the default 405 handler.
+ * default_method_not_allowed_handler is the internal/default 405 handler
  *
- * @param arg Route context
+ * @param req
+ * @param res
+ * @return void*
  */
-static void *default_method_not_allowed_handler(req_t *req, res_t *res) {
+static res_t *default_method_not_allowed_handler(req_t *req, res_t *res) {
   printlogf(
       LOG_INFO,
       "[router::default_method_not_allowed_handler] default 405 handler in "
@@ -75,9 +93,9 @@ static void *default_method_not_allowed_handler(req_t *req, res_t *res) {
   return res;
 }
 
-router_t *router_init(void *(*not_found_handler)(void *),
-                      void *(*method_not_allowed_handler)(void *)) {
-  // initialize config opts
+router_t *router_init(handler_t *not_found_handler,
+                      handler_t *method_not_allowed_handler) {
+  // Initialize config opts
   setup_env();
 
   __router_t *router = malloc(sizeof(__router_t));
@@ -140,20 +158,6 @@ void router_register(router_t *router, const char *path, handler_t *handler,
               middlewares);
 }
 
-res_t *response_init() {
-  res_t *res = malloc(sizeof(res_t));
-  if (!res) {
-    DIE(EXIT_FAILURE, "%s\n", "unable to allocate res_t");
-  }
-
-  res->headers = array_init();
-  if (!res->headers) {
-    DIE(EXIT_FAILURE, "%s\n", "unable to allocate array_t");
-  }
-
-  return res;
-}
-
 void router_run(__router_t *router, int client_socket, req_t *req) {
   __router_t *internal_router = (__router_t *)router;
 
@@ -183,27 +187,3 @@ void router_run(__router_t *router, int client_socket, req_t *req) {
 }
 
 void router_free(router_t *router) { free(router); }
-
-array_t *collect_methods(http_method_t method, ...) {
-  array_t *methods = array_init();
-  if (!methods) {
-    DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
-        "failed to allocate methods array via array_init");
-  }
-
-  va_list args;
-  va_start(args, method);
-
-  while (method != 0) {
-    if (!array_push(methods, strdup(http_method_names[method]))) {
-      free(methods);
-      DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
-          "failed to insert into methods array");
-    }
-    method = va_arg(args, http_method_t);
-  }
-
-  va_end(args);
-
-  return methods;
-}

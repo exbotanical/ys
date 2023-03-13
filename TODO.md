@@ -16,18 +16,17 @@
 - [ ] properly parse entire request (we're using a placeholder method right now!)
 - [ ] Use a union to store parameter values. We have enough info from the regex to determine whether the value should be an int or char*
 - [ ] JSON parsed body in context
-- [ ] pass a struct with context, req, res (maybe merge ctx and req)
+- [x] pass a struct with context, req, res (maybe merge ctx and req)
 - [ ] helper ??? `#define CAST(type, name, stmt) type *name = (type *)stmt`
 - [ ] async i/o option using epoll
 - [ ] inline functions where reasonable
+- [ ] integ tests
+- [ ] test with a real server
+- [ ] read entire request in chunks
+- [ ] send entire response in chunks
+- [ ] Evented server e.g. `onRequest`
 
 ## Style Guide
-- Use [Go Doc-style](https://tip.golang.org/doc/comment) for function comments e.g. `function_name does thing`
-  - Use Doxygen-style comment blocks for function comments e.g.
-  ```
-  /**
-   * function does a thing
-   */
-  void function();
-  ```
+- Use [Go Doc-style](https://tip.golang.org/doc/comment) for doc  comments e.g. `// function_name does thing`
+
 - comment what is used from a header where possible

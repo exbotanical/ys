@@ -5,6 +5,7 @@
 #include "path.h"
 #include "router.h"
 #include "tap.c/tap.h"
+#include "util.h"  // for collect_methods
 
 typedef struct {
   char *method;

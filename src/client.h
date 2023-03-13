@@ -5,9 +5,7 @@
 
 #include "router.h"
 
-/**
- * @brief A context object to store metadata about a client socket connection.
- */
+// A context object to store metadata about a client socket connection.
 typedef struct client_context {
   int client_socket;
   struct sockaddr *address;

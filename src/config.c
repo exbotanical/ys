@@ -4,13 +4,11 @@
 #include <stdlib.h>  // for free
 #include <string.h>  // for strcmp, strcspn, strdup
 
-/**
- * @brief Default server config
- */
-ServerConfig server_config = {.log_file = NULL,
-                              .log_level = DEFAULT_LOG_LEVEL,
-                              .num_threads = DEFAULT_NUM_THREADS,
-                              .port_num = DEFAULT_PORT_NUM};
+// Default server config
+server_config_t server_config = {.log_file = NULL,
+                                 .log_level = DEFAULT_LOG_LEVEL,
+                                 .num_threads = DEFAULT_NUM_THREADS,
+                                 .port_num = DEFAULT_PORT_NUM};
 
 void parse_config(const char* filename) {
   char line[CONFIG_MAX_LINE_LEN];

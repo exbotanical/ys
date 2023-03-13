@@ -4,11 +4,11 @@
 #include "libhttp.h"
 
 /**
- * @brief TODO:
+ * send_response writes the given response to the given socket
  *
  * @param socket
- * @param response_data
+ * @param response
  */
-void send_response(int socket, res_t *response_data);
+void send_response(int socket, res_t *response);
 
 #endif /* SERVER_H */

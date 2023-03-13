@@ -1,14 +1,15 @@
 #include "trie.h"
 
-#include <pcre.h> /* This library relies on the ability to utilize PCRE regex. */
+#include <pcre.h>    // This library relies on the ability to utilize PCRE regex
 #include <string.h>  // for strcmp, strdup, strlen
 
 #include "cache.h"  // for regex_cache_get
 #include "logger.h"
 #include "path.h"
+#include "util.h"
 
 /**
- * @brief Allocates memory for a new node, its children and action members.
+ * node_init allocates memory for a new node, its children and action members
  *
  * @return node_t*
  */
@@ -58,7 +59,7 @@ trie_t *trie_init() {
 }
 
 void trie_insert(trie_t *trie, array_t *methods, const char *path,
-                 void *(*handler)(void *), array_t *middlewares) {
+                 void *(*handler)(void *, void *), array_t *middlewares) {
   node_t *curr = trie->root;
 
   // Handle root path

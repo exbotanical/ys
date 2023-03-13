@@ -5,21 +5,14 @@
 
 #include "libutil/libutil.h"
 #include "trie.h"
-#include "util.h"
 
-/**
- * @brief HTTP status names.
- */
+// HTTP status names.
 extern const char *http_status_names[];
 
-/**
- * @brief HTTP method names.
- */
+// HTTP method names.
 extern const char *http_method_names[];
 
-/**
- * @brief HTTP methods.
- */
+// HTTP methods.
 typedef enum http_method {
   // MUST start with 1 for varargs handling e.g. collect_methods
   GET = 1,
@@ -33,9 +26,7 @@ typedef enum http_method {
   TRACE
 } http_method_t;
 
-/**
- * @brief HTTP status codes.
- */
+// HTTP status codes.
 typedef enum http_status {
   CONTINUE = 100,             // RFC 7231, 6.2.1
   SWITCHING_PROTOCOLS = 101,  // RFC 7231, 6.2.2
@@ -107,10 +98,7 @@ typedef enum http_status {
 
 } http_status_t;
 
-/**
- * @brief A context object containing metadata to be passed
- * to matched route handlers.
- */
+// A context object containing metadata to be passed to matched route handlers
 typedef struct {
   char *path;
   char *method;
@@ -125,25 +113,21 @@ typedef struct {
   array_t *parameters;
 } req_t;
 
-/**
- * @brief A response object; client handlers must return this
- * struct to be sent to the client.
- */
+// A response object; client handlers must return this struct to be sent to the
+// client.
 typedef struct {
-  /** HTTP status code - required */
+  // HTTP status code - required
   http_status_t status;
-  /** HTTP headers - optional, but you should pass content-type if sending a
-   * body */
+  // HTTP headers - optional, but you should pass content-type if sending a body
   array_t *headers;
-  /** res_t body - optional; Content-length header will be set for you */
+  // res_t body - optional; Content-length header will be set for you
   char *body;
 } res_t;
 
+// An alias type for request handlers
 typedef res_t *handler_t(req_t *, res_t *);
 
-/**
- * @brief A router object.
- */
+// A router object
 typedef struct {
   trie_t *trie;
   handler_t *not_found_handler;
@@ -151,9 +135,7 @@ typedef struct {
 } __router_t;
 typedef __router_t *router_t;
 
-/**
- * @brief A server configuration object.
- */
+// A server configuration object that stores settings for the HTTP server
 typedef struct {
   __router_t *router;
   int port;
@@ -161,58 +143,75 @@ typedef struct {
 typedef __server_t *server_t;
 
 /**
- * @brief Sends the user-provided response and closes the socket connection.
- * @internal
+ * send_response sends the user-provided response and closes the socket
+ * connection
  *
  * @param socket
  * @param response_data
  */
 void send_response(int socket, res_t *response_data);
 
-res_t *get_response();
-
+/**
+ * set_header sets the given header on the given response
+ *
+ * @param response
+ * @param header
+ * @return bool
+ */
 bool set_header(res_t *response, char *header);
 
+/**
+ * set_body sets the given body on the given response
+ *
+ * @param response
+ * @param body
+ */
 void set_body(res_t *response, const char *body);
 
+/**
+ * set_status sets the given status code on the given response
+ *
+ * @param response
+ * @param status
+ */
 void set_status(res_t *response, http_status_t status);
 
 array_t *collect_middleware(handler_t *middleware, ...);
 
 /**
- * @brief Deallocates memory for router_t `router`.
+ * router_free deallocates memory for router_t `router`
  *
- * @param router The router to deallocate
+ * @param router
  */
 void router_free(router_t *router);
 
 /**
- * @brief Allocates memory for a new router and its `trie` member;
- * sets the handlers for 404 and 405 (if none provided, defaults will be
- * used).
- *
+ * router_init allocates memory for a new router and its `trie` member;
+ * sets the handlers for 404 and 405 (if none provided, defaults will be used).
  * @param not_found_handler
  * @param method_not_allowed_handler
  * @return router_t*
  */
-router_t *router_init(void *(*not_found_handler)(void *),
-                      void *(*method_not_allowed_handler)(void *));
+router_t *router_init(handler_t *not_found_handler,
+                      handler_t *method_not_allowed_handler);
 
 /**
- * @brief Registers a new route record. Registered routes will be matched
- * against when used with `router_run`.
+ * router_register registers a new route record. Registered routes will be
+ * matched against when used with `router_run`
  *
  * @param router The router instance in which to register the route
- * @param methods Methods to associate with the route
  * @param path The path to associate with the route
  * @param handler The handler to associate with the route
- * TODO: docs
+ * @param middlewares Additional handlers that will be invoked in a chain prior
+ * to `handler`
+ * @param method
+ * @param ...Methods to associate with the route
  */
 void router_register(router_t *router, const char *path, handler_t *handler,
                      array_t *middlewares, http_method_t method, ...);
 
 /**
- * @brief Allocates the necessary memory for a `server_t`.
+ * server_init allocates the necessary memory for a `server_t`
  *
  * @param router
  * @param port
@@ -220,21 +219,55 @@ void router_register(router_t *router, const char *path, handler_t *handler,
 server_t *server_init(router_t *router, int port);
 
 /**
- * @brief Listens for client connections and executes routing.
+ * server_start listens for client connections and executes routing
  *
  * @param server
  * @returns bool indicating whether this blocking operation failed
  */
 bool server_start(server_t *server);
 
+/**
+ * Deallocates a server_t
+ *
+ * @param server
+ */
 void server_free(server_t *server);
 
+/**
+ * req_get_parameter gets parameter value matching `key`, or NULL if not extant
+ *
+ * @param req
+ * @param key
+ * @return void*
+ */
 void *req_get_parameter(req_t *req, const char *key);
 
+/**
+ * req_get_parameter_at gets a request parameter at the specified index
+ *
+ * @param req
+ * @param idx
+ * @return parameter_t*
+ */
 parameter_t *req_get_parameter_at(req_t *req, unsigned int idx);
 
+/**
+ * req_num_parameters returns the number of parameters on the given request
+ *
+ * @param req
+ * @return true
+ * @return false
+ */
 bool req_num_parameters(req_t *req);
 
+/**
+ * req_has_parameters returns a bool indicating whether the given request has
+ * any parameters
+ *
+ * @param req
+ * @return true
+ * @return false
+ */
 bool req_has_parameters(req_t *req);
 
 #endif /* LIBHTTP_H */

@@ -6,9 +6,9 @@
 #include "libhash/libhash.h"
 
 /**
- * @brief Retrieves a pre-compiled pcre regex corresponding to the given pattern
- * from a hash-table cache. If one does not exist, it will be compiled and
- * cached for subsequent retrievals.
+ * regex_cache_get retrieves a pre-compiled pcre regex corresponding to the
+ * given pattern from a hash-table cache. If one does not exist, it will be
+ * compiled and cached for subsequent retrievals.
  *
  * @param regex_cache
  * @param pattern

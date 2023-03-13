@@ -17,19 +17,36 @@ const char *log_levels[] = {"emerg",   "alert",  "crit", "err",
                             "warning", "notice", "info", "debug",
                             "panic",   "error",  "warn", NULL};
 
+// Log level to use
 short log_level = LOG_LEVEL;
 
-static void fdprintf(int fd, const char *ctl, ...) {
+/**
+ * fdprintf writes the data to a given file descriptor
+ *
+ * @param fd
+ * @param fmt
+ * @param ...
+ */
+static void fdprintf(int fd, const char *fmt, ...) {
   va_list va;
   char buf[LOG_BUFFER];
 
-  va_start(va, ctl);
-  vsnprintf(buf, sizeof(buf), ctl, va);
+  va_start(va, fmt);
+  vsnprintf(buf, sizeof(buf), fmt, va);
   write(fd, buf, strlen(buf));
   va_end(va);
 }
 
-static void vlog(int level, int fd, const char *ctl, va_list va) {
+/**
+ * vlog writes the log message to the given file descriptor conditionally, based
+ * on the specified log level
+ *
+ * @param level
+ * @param fd
+ * @param fmt
+ * @param va
+ */
+static void vlog(int level, int fd, const char *fmt, va_list va) {
   char buf[LOG_BUFFER];
 
   if (level <= log_level) {
@@ -64,7 +81,7 @@ static void vlog(int level, int fd, const char *ctl, va_list va) {
     }
 
     if ((buflen =
-             vsnprintf(buf + header_len, sizeof(buf) - header_len, ctl, va) +
+             vsnprintf(buf + header_len, sizeof(buf) - header_len, fmt, va) +
              header_len) >= sizeof(buf)) {
       buflen = sizeof(buf) - 1;
     }
@@ -79,6 +96,10 @@ static void vlog(int level, int fd, const char *ctl, va_list va) {
   }
 }
 
+/**
+ * setup_log_level configures the log level global based on the level specified
+ * in the server_config (or default if none specified)
+ */
 static void setup_log_level() {
   char *ptr = server_config.log_level;
   int j;
@@ -91,39 +112,37 @@ static void setup_log_level() {
   switch (j) {
     case 0:
     case 8:
-      /* #define	LOG_EMERG	0	[* system is unusable *] */
+      // system is unusable
       log_level = LOG_EMERG;
       break;
     case 1:
-      /* #define	LOG_ALERT	1	[* action must be taken
-       * immediately *] */
+      // action must be taken immediately *]
       log_level = LOG_ALERT;
       break;
     case 2:
-      /* #define	LOG_CRIT	2	[* critical conditions *] */
+      // critical conditions *]
       log_level = LOG_CRIT;
       break;
     case 3:
     case 9:
-      /* #define	LOG_ERR		3	[* error conditions *] */
+      // error conditions
       log_level = LOG_ERR;
       break;
     case 4:
     case 10:
-      /* #define	LOG_WARNING	4	[* warning conditions *] */
+      // warning conditions
       log_level = LOG_WARNING;
       break;
     case 5:
-      /* #define	LOG_NOTICE	5	[* normal but significant
-       * condition *] */
+      // normal but significant condition
       log_level = LOG_NOTICE;
       break;
     case 6:
-      /* #define	LOG_INFO	6	[* informational *] */
+      // informational
       log_level = LOG_INFO;
       break;
     case 7:
-      /* #define	LOG_DEBUG	7	[* debug-level messages *] */
+      // debug-level messages
       log_level = LOG_DEBUG;
       break;
   }
@@ -153,9 +172,9 @@ void setup_logging() {
   }
 }
 
-void printlogf(int level, const char *ctl, ...) {
+void printlogf(int level, const char *fmt, ...) {
   va_list va;
-  va_start(va, ctl);
-  vlog(level, 2, ctl, va);
+  va_start(va, fmt);
+  vlog(level, 2, fmt, va);
   va_end(va);
 }
