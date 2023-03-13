@@ -12,6 +12,7 @@ typedef struct client_context {
   int client_socket;
   struct sockaddr *address;
   socklen_t *addr_len;
+  // A pointer to the router so we can pass it into the client handler thread
   __router_t *router;
 } client_context_t;
 

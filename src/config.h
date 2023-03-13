@@ -12,6 +12,11 @@ typedef struct config_t {
 extern ServerConfig server_config;
 
 /**
+ * @brief Max line length for config file.
+ */
+static const int CONFIG_MAX_LINE_LEN = 256;
+
+/**
  * @brief Maximum number of queued connections allowed for server.
  */
 static const short MAX_CONN = 100;
@@ -39,6 +44,11 @@ static const char LOG_LEVEL_KEY[10] = "LOG_LEVEL";
 
 static const char LOG_FILE_KEY[9] = "LOG_FILE";
 
+/**
+ * @brief Parse the given config file at `filename` and set `server_config`.
+ *
+ * @param filename
+ */
 void parse_config(const char* filename);
 
 #endif /* CONFIG_H */

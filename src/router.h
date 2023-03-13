@@ -19,8 +19,9 @@ typedef struct route {
  *
  * @param router The router instance in which to search for routes
  * @param method The method to search for
+ * TODO:
  */
-void router_run(__router_t *router, int client_socket, request_t *r);
+void router_run(__router_t *router, int client_socket, req_t *r);
 
 /**
  * @brief Collects n methods into a character array. The variadic arguments here

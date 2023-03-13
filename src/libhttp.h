@@ -4,7 +4,6 @@
 #include <stdbool.h>
 
 #include "libutil/libutil.h"
-#include "request.h"
 #include "trie.h"
 #include "util.h"
 
@@ -140,13 +139,15 @@ typedef struct {
   char *body;
 } res_t;
 
+typedef res_t *handler_t(req_t *, res_t *);
+
 /**
  * @brief A router object.
  */
 typedef struct {
   trie_t *trie;
-  res_t *(*not_found_handler)(req_t *req, res_t *res);
-  res_t *(*method_not_allowed_handler)(req_t *req, res_t *res);
+  handler_t *not_found_handler;
+  handler_t *method_not_allowed_handler;
 } __router_t;
 typedef __router_t *router_t;
 
@@ -176,7 +177,7 @@ void set_body(res_t *response, const char *body);
 
 void set_status(res_t *response, http_status_t status);
 
-array_t *collect_middleware(res_t *(*middleware)(req_t *, res_t *), ...);
+array_t *collect_middleware(handler_t *middleware, ...);
 
 /**
  * @brief Deallocates memory for router_t `router`.
@@ -207,9 +208,8 @@ router_t *router_init(void *(*not_found_handler)(void *),
  * @param handler The handler to associate with the route
  * TODO: docs
  */
-void router_register(router_t *router, const char *path,
-                     res_t *(*handler)(req_t *, res_t *), array_t *middlewares,
-                     http_method_t method, ...);
+void router_register(router_t *router, const char *path, handler_t *handler,
+                     array_t *middlewares, http_method_t method, ...);
 
 /**
  * @brief Allocates the necessary memory for a `server_t`.

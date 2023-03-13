@@ -19,7 +19,7 @@ static void setup_env() {
 static void *invoke_chain(req_t *req, res_t *res, array_t *middlewares) {
   void *h = res;
   for (unsigned int i = array_size(middlewares); i > 0; i--) {
-    h = ((res_t * (*)(req_t *, res_t *)) array_get(middlewares, i - 1))(req, h);
+    h = ((handler_t *)array_get(middlewares, i - 1))(req, h);
   }
 
   return h;
@@ -108,9 +108,8 @@ router_t *router_init(void *(*not_found_handler)(void *),
   return (router_t *)router;
 }
 
-void router_register(router_t *router, const char *path,
-                     res_t *(*handler)(req_t *, res_t *), array_t *middlewares,
-                     http_method_t method, ...) {
+void router_register(router_t *router, const char *path, handler_t *handler,
+                     array_t *middlewares, http_method_t method, ...) {
   array_t *methods = array_init();
   if (!methods) {
     DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
@@ -155,26 +154,12 @@ res_t *response_init() {
   return res;
 }
 
-req_t *request_init(request_t *request) {
-  req_t *req = malloc(sizeof(req_t));
-  if (!req) {
-    DIE(EXIT_FAILURE, "%s\n", "unable to allocate response_t");
-  }
-
-  req = request;
-  req->parameters = NULL;
-  return req;
-}
-
-void router_run(__router_t *router, int client_socket, request_t *request) {
+void router_run(__router_t *router, int client_socket, req_t *req) {
   __router_t *internal_router = (__router_t *)router;
 
-  result_t *result =
-      trie_search(internal_router->trie, request->method, request->path);
+  result_t *result = trie_search(internal_router->trie, req->method, req->path);
 
-  req_t *req = request_init(request);
   res_t *res = response_init();
-
   if (!result) {
     res = internal_server_error_handler(req, res);
   } else if ((result->flags & NOT_FOUND_MASK) == NOT_FOUND_MASK) {
@@ -184,8 +169,7 @@ void router_run(__router_t *router, int client_socket, request_t *request) {
   } else {
     req->parameters = result->parameters;
 
-    res_t *(*h)(req_t *, res_t *) =
-        (res_t * (*)(req_t *, res_t *)) result->action->handler;
+    handler_t *h = (handler_t *)result->action->handler;
 
     array_t *mws = result->action->middlewares;
     if (mws && array_size(mws) > 0) {

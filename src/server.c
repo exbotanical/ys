@@ -11,7 +11,6 @@
 #include "lib.thread/libthread.h"  // for thread pools
 #include "libhttp.h"
 #include "logger.h"
-#include "request.h"  // for request_t
 #include "router.h"
 #include "util.h"
 
@@ -57,11 +56,11 @@ static buffer_t *build_response(res_t *response_data) {
  * @brief Extract and structure a client request.
  *
  * @param buffer
- * @return request_t*
+ * @return req_t*
  */
-static request_t *build_request(char *buffer) {
+static req_t *build_request(char *buffer) {
   char *buffer_cp = strdup(buffer);
-  request_t *request = malloc(sizeof(request_t));
+  req_t *request = malloc(sizeof(req_t));
   request->raw = buffer;
 
   // TODO: do something sensible here - this is placeholder logic
@@ -108,7 +107,7 @@ static request_t *build_request(char *buffer) {
  *
  * @param arg Route context
  */
-void *client_thread_handler(void *arg) {
+static void *client_thread_handler(void *arg) {
   client_context_t *c_ctx = arg;
   char recv_buffer[1024];  // TODO: MAJOR todo - iterate content-length until
                            // entire request is consumed
@@ -155,7 +154,7 @@ bool server_start(server_t *server) {
   }
 
   int yes = 1;
-  // lose the pesky "Address already in use" error message (thanks, beej!)
+  // avoid the "Address already in use" error message
   if (setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) ==
       -1) {
     char *message = "failed to set sock opt";

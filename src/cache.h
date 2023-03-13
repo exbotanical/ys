@@ -12,7 +12,7 @@
  *
  * @param regex_cache
  * @param pattern
- * @return pcre*
+ * @return pcre* A pre-compiled pcre regex
  */
 pcre *regex_cache_get(h_table *regex_cache, char *pattern);
 

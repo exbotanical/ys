@@ -18,3 +18,16 @@
 - [ ] JSON parsed body in context
 - [ ] pass a struct with context, req, res (maybe merge ctx and req)
 - [ ] helper ??? `#define CAST(type, name, stmt) type *name = (type *)stmt`
+- [ ] async i/o option using epoll
+- [ ] inline functions where reasonable
+
+## Style Guide
+- Use [Go Doc-style](https://tip.golang.org/doc/comment) for function comments e.g. `function_name does thing`
+  - Use Doxygen-style comment blocks for function comments e.g.
+  ```
+  /**
+   * function does a thing
+   */
+  void function();
+  ```
+- comment what is used from a header where possible

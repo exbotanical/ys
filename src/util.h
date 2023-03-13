@@ -3,7 +3,10 @@
 
 #include "libhttp.h"
 
-#define EP(x) [x] = #x
+/**
+ * Extracts the name of an enum as a string literal
+ */
+#define ENUM_NAME(x) [x] = #x
 
 static const char NULL_TERM = '\0';
 

@@ -2,7 +2,7 @@
 
 #include "libhttp.h"
 
-array_t *collect_middleware(res_t *(*middleware)(req_t *, res_t *), ...) {
+array_t *collect_middleware(handler_t *middleware, ...) {
   array_t *middlewares = array_init();
   if (!middlewares) {
     return NULL;
@@ -16,7 +16,7 @@ array_t *collect_middleware(res_t *(*middleware)(req_t *, res_t *), ...) {
       return NULL;
     }
 
-    middleware = va_arg(args, void *(*)(void *));
+    middleware = va_arg(args, handler_t *);
   }
 
   va_end(args);
