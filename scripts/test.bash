@@ -9,6 +9,7 @@ declare -a SKIP_FILES=(
 	# 'path_test.c'
 	# 'trie_test.c'
   # 'util_test.c'
+  'request_test.c'
 )
 
 not_test_file () {

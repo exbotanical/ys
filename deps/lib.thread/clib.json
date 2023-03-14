@@ -1,0 +1,29 @@
+{
+  "name": "lib.thread",
+  "version": "0.0.1",
+  "author": "Matthew Zito",
+  "repo": "exbotanical/lib.thread",
+  "license": "MIT",
+  "description": "A utility library of custom threading data structures",
+  "keywords": [
+    "thread pool",
+    "threads",
+    "multi-threading",
+    "multi-tasking",
+    "semaphore",
+    "mutex"
+  ],
+  "src": [
+    "src/libthread.h",
+
+    "src/semaphore.c",
+    "src/suspension.c",
+    "src/thread_barrier.c",
+    "src/thread_pool.c",
+    "src/thread.c",
+    "src/util.h"
+  ],
+  "dependencies": {
+    "exbotanical/lib.cartilage": "0.0.2"
+  }
+}

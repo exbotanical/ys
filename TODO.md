@@ -25,6 +25,16 @@
 - [ ] read entire request in chunks
 - [ ] send entire response in chunks
 - [ ] Evented server e.g. `onRequest`
+- [x] fix request hangups
+  - [ ] mostly fixed, happens when calling with a not allowed/found method w/body `Could not resolve host: <body>`
+- [ ] Built-in middlewares
+  - [ ] CORS middleware
+- [ ] Cookies
+- [ ] Validate Content-Type for incoming stateful requests
+- [ ] support erroneous (Request / Response)s
+- [ ] check all instances of `strcmp` and see if `strncmp` makes more sense
+- [ ] handle accept header
+
 
 ## Style Guide
 - Use [Go Doc-style](https://tip.golang.org/doc/comment) for doc  comments e.g. `// function_name does thing`
