@@ -6,7 +6,7 @@
 
 #include "config.h"
 #include "logger.h"
-#include "response.h"  // for response_init
+#include "response.h"  // for response_init, send_response
 #include "server.h"    // for send_response
 
 const char CONFIG_FILE_NAME[13] = "libhttp.conf";

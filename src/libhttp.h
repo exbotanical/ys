@@ -151,15 +151,6 @@ typedef struct {
 typedef __server_t *server_t;
 
 /**
- * send_response sends the user-provided response and closes the socket
- * connection
- *
- * @param socket
- * @param response_data
- */
-void send_response(int socket, res_t *response_data);
-
-/**
  * set_header sets the given header on the given response
  *
  * @param response

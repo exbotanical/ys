@@ -23,7 +23,7 @@
 - [ ] integ tests
 - [ ] test with a real server
 - [x] read entire request in chunks
-- [ ] send entire response in chunks
+- [x] send entire response in chunks
 - [ ] Evented server e.g. `onRequest`
 - [x] fix request hangups
   - [x] mostly fixed, happens when calling with a not allowed/found method w/body `Could not resolve host: <body>` (was non-issue; using curl wrong :|)
