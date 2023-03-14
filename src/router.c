@@ -160,7 +160,6 @@ void router_register(router_t *router, const char *path, handler_t *handler,
 
 void router_run(__router_t *router, int client_socket, req_t *req) {
   __router_t *internal_router = (__router_t *)router;
-
   result_t *result = trie_search(internal_router->trie, req->method, req->path);
 
   res_t *res = response_init();

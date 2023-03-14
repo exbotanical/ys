@@ -92,8 +92,35 @@ void test_substr_no_range_inclusive() {
      "inclusive substring sans range yields char at start index");
 }
 
+void test_safe_strcasecmp() {
+  char *s1 = "Content-Type";
+  char *s2 = "Content-Type-";
+  ok(safe_strcasecmp(s1, s2) == 0, "");
+  ok(safe_strcasecmp(s2, s1) == 0, "");
+
+  s2 = "Content-Type";
+  ok(safe_strcasecmp(s1, s2) == 1, "");
+  ok(safe_strcasecmp(s2, s1) == 1, "");
+
+  s1 = "CONTENT-TYPE";
+  ok(safe_strcasecmp(s1, s2) == 1, "");
+  ok(safe_strcasecmp(s2, s1) == 1, "");
+
+  s2 = "CoNtenT-TyPe";
+  ok(safe_strcasecmp(s1, s2) == 1, "");
+  ok(safe_strcasecmp(s2, s1) == 1, "");
+
+  s1 = "CoNtenT_TyPe";
+  ok(safe_strcasecmp(s1, s2) == 0, "");
+  ok(safe_strcasecmp(s2, s1) == 0, "");
+
+  s2 = "CoNtenT_Ty";
+  ok(safe_strcasecmp(s1, s2) == 0, "");
+  ok(safe_strcasecmp(s2, s1) == 0, "");
+}
+
 int main() {
-  plan(16);
+  plan(28);
 
   test_split_ok();
   test_split_no_match();
@@ -107,6 +134,8 @@ int main() {
   test_substr_inclusive();
   test_substr_no_range();
   test_substr_no_range_inclusive();
+
+  test_safe_strcasecmp();
 
   done_testing();
 }

@@ -165,3 +165,11 @@ char *substr(const char *str, int start, int end, bool inclusive) {
 
   return ret;
 }
+
+bool safe_strcasecmp(char *s1, char *s2) {
+  unsigned int s1l = strlen(s1);
+  unsigned int s2l = strlen(s2);
+
+  unsigned int compare_chars = s1l > s2l ? s1l : s2l;
+  return strncasecmp(s1, s2, compare_chars) == 0;
+}

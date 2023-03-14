@@ -102,16 +102,24 @@ typedef enum http_status {
 typedef struct {
   char *path;
   char *method;
-  char *protocol;
-  char *host;
-  char *user_agent;
   char *accept;
-  char *content_len;
-  char *content_type;
-  char *content;
+  char *body;
   char *raw;
+  char *host;
+  char *protocol;
+  char *user_agent;
+  char *content_type;
+  char *version;
   array_t *parameters;
+  array_t *headers;
+  int content_length;
 } req_t;
+
+// TODO: relocate + opaque
+typedef struct {
+  char *key;
+  char *value;
+} header_t;
 
 // A response object; client handlers must return this struct to be sent to the
 // client.

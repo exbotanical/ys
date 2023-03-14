@@ -63,4 +63,6 @@ int index_of(const char *str, const char *target);
  */
 char *substr(const char *str, int start, int end, bool inclusive);
 
+// TODO: docs
+bool safe_strcasecmp(char *s1, char *s2);
 #endif /* UTIL_H */

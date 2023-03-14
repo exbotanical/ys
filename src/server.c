@@ -11,6 +11,7 @@
 #include "lib.thread/libthread.h"  // for thread pools
 #include "libhttp.h"
 #include "logger.h"
+#include "request.h"  // for deserialize_req
 #include "router.h"
 #include "util.h"
 
@@ -51,55 +52,6 @@ static buffer_t *serialize_response(res_t *response) {
 }
 
 /**
- * deserialize_req deserializes a raw request into a request structure
- *
- * @param buffer
- * @return req_t*
- */
-static req_t *deserialize_req(char *buffer) {
-  char *buffer_cp = strdup(buffer);
-  req_t *request = malloc(sizeof(req_t));
-  request->raw = buffer;
-
-  // TODO: do something sensible here - this is placeholder logic
-  char *n1 = strtok(buffer_cp, "\n");
-  char *n2 = strtok(NULL, "\n");
-  char *n3 = strtok(NULL, "\n");
-  char *n4 = strtok(NULL, "\n");
-  char *n5 = strtok(NULL, "\n");
-  char *n6 = strtok(NULL, "\n");
-
-  // get the body, if any
-  buffer_t *content = buffer_init(NULL);
-  char *n7 = NULL;
-  while ((n7 = strtok(NULL, "\n")) != NULL) {
-    buffer_append(content, n7);
-  }
-  request->content = buffer_state(content);
-
-  request->method = strtok(n1, " ");
-  request->path = strtok(NULL, " ");
-  request->protocol = strtok(NULL, " ");
-
-  strtok(n2, " ");
-  request->host = strtok(NULL, " ");
-
-  strtok(n3, " ");
-  request->user_agent = strtok(NULL, " ");
-
-  strtok(n4, " ");
-  request->accept = strtok(NULL, " ");
-
-  strtok(n5, " ");
-  request->content_len = strtok(NULL, " ");
-
-  strtok(n6, " ");
-  request->content_type = strtok(NULL, " ");
-
-  return request;
-}
-
-/**
  * client_thread_handler handles client connections and executes the
  * user-defined router
  * @param arg
@@ -107,16 +59,19 @@ static req_t *deserialize_req(char *buffer) {
  */
 static void *client_thread_handler(void *arg) {
   client_context_t *c_ctx = arg;
-  char recv_buffer[1024];  // TODO: MAJOR todo - iterate content-length until
-                           // entire request is consumed
 
-  recvfrom(c_ctx->client_socket, (char *)recv_buffer, sizeof(recv_buffer), 0,
-           c_ctx->address, c_ctx->addr_len);
+  req_t *request = read_and_parse_request(c_ctx->client_socket);
 
-  LOG("[server::client_thread_handler] client request received: %s\n",
-      recv_buffer);
+  if (!request) {
+    // TODO: somehow return a pre-prepared error flag so we can 500 this
+    // we could preempt parsing into request so we dont waste computation
+    return NULL;
+  }
 
-  router_run(c_ctx->router, c_ctx->client_socket, deserialize_req(recv_buffer));
+  LOG("[server::client_thread_handler] client request received: %s %s\n",
+      request->method, request->path);
+  printf("BODY: %s\n", request->body);
+  router_run(c_ctx->router, c_ctx->client_socket, request);
 
   return NULL;
 }
