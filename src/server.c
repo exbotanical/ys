@@ -16,42 +16,6 @@
 #include "util.h"
 
 /**
- * serialize_response converts a user-defined response object into a buffer that
- * can be sent over the wire
- *
- * @param response
- * @return buffer_t*
- */
-static buffer_t *serialize_response(res_t *response) {
-  buffer_t *rbuf = buffer_init(NULL);
-  if (!rbuf) {
-    // TODO: constant template str for malloc failures
-    DIE(EXIT_FAILURE, "%s\n", "could not allocate memory for buffer_t");
-  }
-
-  // TODO: constants for response fields for brevity
-  int status = response->status;
-  array_t *headers = response->headers;
-  char *body = response->body;
-
-  buffer_append(rbuf,
-                fmt_str("HTTP/1.1 %d %s\n", status, http_status_names[status]));
-
-  for (unsigned int i = 0; i < array_size(headers); i++) {
-    char *header = array_get(headers, i);
-
-    buffer_append(rbuf, header);
-    buffer_append(rbuf, "\n");
-  }
-
-  buffer_append(rbuf,
-                fmt_str("Content-Length: %d\n\n", body ? strlen(body) : 0));
-  buffer_append(rbuf, body ? body : "");
-
-  return rbuf;
-}
-
-/**
  * client_thread_handler handles client connections and executes the
  * user-defined router
  * @param arg
@@ -70,17 +34,10 @@ static void *client_thread_handler(void *arg) {
 
   LOG("[server::client_thread_handler] client request received: %s %s\n",
       request->method, request->path);
-  printf("BODY: %s\n", request->body);
+
   router_run(c_ctx->router, c_ctx->client_socket, request);
 
   return NULL;
-}
-
-void send_response(int socket, res_t *response_data) {
-  buffer_t *response = serialize_response(response_data);
-  write(socket, buffer_state(response), buffer_size(response));
-  buffer_free(response);
-  close(socket);
 }
 
 server_t *server_init(router_t *router, int port) {
@@ -90,9 +47,7 @@ server_t *server_init(router_t *router, int port) {
 
   __server_t *server = malloc(sizeof(__server_t));
   if (!server) {
-    char *message = "failed to allocate server";
-    LOG("%s\n", message);
-    DIE(EXIT_FAILURE, "%s\n", message);
+    DIE(EXIT_FAILURE, "%s\n", "failed to allocate server");
   }
 
   server->router = (__router_t *)router;
@@ -106,9 +61,8 @@ bool server_start(server_t *server) {
   int master_socket;
 
   if ((master_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == 0) {
-    char *message =
-        fmt_str("failed to initialize server socket on port %d", port);
-    LOG("[server::start] %s\n", message);
+    LOG("[server::start] %s\n",
+        fmt_str("failed to initialize server socket on port %d", port));
     perror("socket");
     return false;
   }
@@ -117,8 +71,7 @@ bool server_start(server_t *server) {
   // avoid the "Address already in use" error message
   if (setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) ==
       -1) {
-    char *message = "failed to set sock opt";
-    LOG("[server::start] %s\n", message);
+    LOG("[server::start] %s\n", "failed to set sock opt");
     perror("setsockopt");
     return false;
   }
@@ -132,17 +85,15 @@ bool server_start(server_t *server) {
   address.sin_port = htons(port);
 
   if (bind(master_socket, (struct sockaddr *)&address, sizeof(address)) < 0) {
-    char *message = fmt_str("failed to bind server socket on %s:%d",
-                            address.sin_addr, port);
-    LOG("[server::start] %s\n", message);
+    LOG("[server::start] %s\n", fmt_str("failed to bind server socket on %s:%d",
+                                        address.sin_addr, port));
     perror("bind");
     return false;
   }
 
   if (listen(master_socket, MAX_CONN) < 0) {
-    char *message =
-        fmt_str("failed to listen on %s:%d", address.sin_addr, port);
-    LOG("[server::start] %s\n", message);
+    LOG("[server::start] %s\n",
+        fmt_str("failed to listen on %s:%d", address.sin_addr, port));
     perror("listen");
     return false;
   }
@@ -154,9 +105,7 @@ bool server_start(server_t *server) {
 
   thread_pool_t *pool = calloc(1, sizeof(thread_pool_t));
   if (!pool) {
-    char *message = "failed to initialized thread pool";
-    LOG("%s\n", message);
-    DIE(EXIT_FAILURE, "%s\n", message);
+    DIE(EXIT_FAILURE, "%s\n", "failed to initialized thread pool");
   }
 
   const int num_threads = server_config.num_threads;
@@ -193,8 +142,8 @@ bool server_start(server_t *server) {
       c_ctx->router = ((__server_t *)server)->router;
 
       if (!thread_pool_dispatch(pool, client_thread_handler, c_ctx, true)) {
-        LOG("[server::start] %s\n", "failed to dispatch thread from pool");
-        DIE(EXIT_FAILURE, "%s\n", "failed to dispatch thread from pool");
+        DIE(EXIT_FAILURE, "[server::start] %s\n",
+            "failed to dispatch thread from pool");
       }
     }
   }
