@@ -8,6 +8,15 @@
 #include "header.h"  // for get_header_value, append_header
 #include "util.h"
 
+/**
+ * match is a matcher function for comparing array values against a given value
+ * `s2`
+ *
+ * @param s1
+ * @param s2
+ * @return true
+ * @return false
+ */
 bool match(char *s1, char *s2) { return safe_strcasecmp(s1, s2); }
 
 /**
@@ -66,8 +75,7 @@ static array_t *derive_headers(req_t *req) {
  *
  * @param c
  * @param origin
- * @return true
- * @return false
+ * @return bool
  */
 static bool is_origin_allowed(cors_t *c, char *origin) {
   if (c->allow_all_origins) {
@@ -212,6 +220,14 @@ static req_t *handle_request(cors_t *c, req_t *req, res_t *res) {
   }
 }
 
+/**
+ * handle_preflight_request handles preflight requests
+ *
+ * @param c
+ * @param req
+ * @param res
+ * @return req_t*
+ */
 static req_t *handle_preflight_request(cors_t *c, req_t *req, res_t *res) {
   char *origin = get_header_value(req->headers, ORIGIN_HEADER);
 

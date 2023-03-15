@@ -4,6 +4,7 @@
 #include "libhttp.h"
 #include "libutil/libutil.h"  // for arrays
 
+// CORS configuration options
 typedef struct {
   array_t *allowed_origins;
   array_t *allowed_methods;
@@ -14,6 +15,7 @@ typedef struct {
   unsigned int max_age;
 } cors_opts_t;
 
+// CORS configurations
 typedef struct {
   array_t *allowed_origins;
   array_t *allowed_methods;
@@ -63,8 +65,24 @@ static const char ORIGIN_HEADER[] = "Origin";
 // header when deciding whether to send cached content.
 static const char VARY_HEADER[] = "Vary";
 
+/**
+ * cors_init initializes a CORS context using the user-specified settings on the
+ * given cors_opts_t `opts`
+ *
+ * @param opts
+ * @return cors_t*
+ */
 cors_t *cors_init(cors_opts_t *opts);
 
+/**
+ * cors_handler is a middleware handler that executes a spec-compliant CORS
+ * workflow
+ *
+ * @param c
+ * @param req
+ * @param res
+ * @return req_t*
+ */
 req_t *cors_handler(cors_t *c, req_t *req, res_t *res);
 
 #endif /* CORS_H */

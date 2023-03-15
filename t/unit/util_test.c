@@ -95,28 +95,40 @@ void test_substr_no_range_inclusive() {
 void test_safe_strcasecmp() {
   char *s1 = "Content-Type";
   char *s2 = "Content-Type-";
-  ok(safe_strcasecmp(s1, s2) == 0, "");
-  ok(safe_strcasecmp(s2, s1) == 0, "");
+  ok(safe_strcasecmp(s1, s2) == 0, "compare s1: '%s' and s2: '%s' is false", s1,
+     s2);
+  ok(safe_strcasecmp(s2, s1) == 0, "compare s2: '%s' and s1: '%s' is false", s2,
+     s1);
 
   s2 = "Content-Type";
-  ok(safe_strcasecmp(s1, s2) == 1, "");
-  ok(safe_strcasecmp(s2, s1) == 1, "");
+  ok(safe_strcasecmp(s1, s2) == 1, "compare s1: '%s' and s2: '%s' is true", s1,
+     s2);
+  ok(safe_strcasecmp(s2, s1) == 1, "compare s2: '%s' and s1: '%s' is true", s2,
+     s1);
 
   s1 = "CONTENT-TYPE";
-  ok(safe_strcasecmp(s1, s2) == 1, "");
-  ok(safe_strcasecmp(s2, s1) == 1, "");
+  ok(safe_strcasecmp(s1, s2) == 1, "compare s1: '%s' and s2: '%s' is true", s1,
+     s2);
+  ok(safe_strcasecmp(s2, s1) == 1, "compare s2: '%s' and s1: '%s' is true", s2,
+     s1);
 
   s2 = "CoNtenT-TyPe";
-  ok(safe_strcasecmp(s1, s2) == 1, "");
-  ok(safe_strcasecmp(s2, s1) == 1, "");
+  ok(safe_strcasecmp(s1, s2) == 1, "compare s1: '%s' and s2: '%s' is true", s1,
+     s2);
+  ok(safe_strcasecmp(s2, s1) == 1, "compare s2: '%s' and s1: '%s' is true", s2,
+     s1);
 
   s1 = "CoNtenT_TyPe";
-  ok(safe_strcasecmp(s1, s2) == 0, "");
-  ok(safe_strcasecmp(s2, s1) == 0, "");
+  ok(safe_strcasecmp(s1, s2) == 0, "compare s1: '%s' and s2: '%s' is false", s1,
+     s2);
+  ok(safe_strcasecmp(s2, s1) == 0, "compare s2: '%s' and s1: '%s' is false", s2,
+     s1);
 
   s2 = "CoNtenT_Ty";
-  ok(safe_strcasecmp(s1, s2) == 0, "");
-  ok(safe_strcasecmp(s2, s1) == 0, "");
+  ok(safe_strcasecmp(s1, s2) == 0, "compare s1: '%s' and s2: '%s' is false", s1,
+     s2);
+  ok(safe_strcasecmp(s2, s1) == 0, "compare s2: '%s' and s1: '%s' is false", s2,
+     s1);
 }
 
 void test_str_join() {
@@ -129,8 +141,20 @@ void test_str_join() {
   is(ret, "a,b,c");
 }
 
+void test_to_upper() {
+  char *expected = "HELLO";
+  char *ret = to_upper("hello");
+  is(expected, ret, "upper-cases the string");
+
+  ret = to_upper("HELLO");
+  is(expected, ret, "upper-cases an already upper-cased string");
+
+  ret = to_upper("hEllO");
+  is(expected, ret, "upper-cases a partially upper-cased str");
+}
+
 int main() {
-  plan(28);
+  plan(31);
 
   test_split_ok();
   test_split_no_match();
@@ -146,6 +170,8 @@ int main() {
   test_substr_no_range_inclusive();
 
   test_safe_strcasecmp();
+
+  test_to_upper();
 
   done_testing();
 }

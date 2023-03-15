@@ -77,8 +77,11 @@ void test_to_canonical_MIME_header_key() {
 }
 
 int main(int argc, char const *argv[]) {
+  plan(15);
+
   test_token_table();
+
   test_to_canonical_MIME_header_key();
 
-  return 0;
+  done_testing();
 }

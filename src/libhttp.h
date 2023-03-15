@@ -264,8 +264,7 @@ bool req_num_parameters(req_t *req);
  * any parameters
  *
  * @param req
- * @return true
- * @return false
+ * @return bool
  */
 bool req_has_parameters(req_t *req);
 

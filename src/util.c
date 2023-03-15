@@ -191,11 +191,17 @@ char *str_join(array_t *strarr, const char *delim) {
   return buffer_state(buf);
 }
 
-char *to_upper(char *str) {
-  size_t len = strlen(str);
-  for (size_t i = 0; i < len; i++) {
-    str[i] = toupper(str[i]);
+char *to_upper(const char *s) {
+  size_t l = strlen(s);
+
+  char *ca = malloc(l + 1);
+  strncpy(ca, s, l);
+  ca[l] = '\0';
+
+  for (size_t i = 0; i < l; i++) {
+    ca[i] = toupper(s[i]);
+    s = ca;
   }
 
-  return str;
+  return s;
 }

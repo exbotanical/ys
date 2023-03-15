@@ -63,12 +63,31 @@ int index_of(const char *str, const char *target);
  */
 char *substr(const char *str, int start, int end, bool inclusive);
 
-// TODO: docs
+/**
+ * safe_strcasecmp performs a safe case-insensitive string comparison between
+ * two strings and returns a bool indicating whether they are equal
+ *
+ * @param s1
+ * @param s2
+ * @return bool
+ */
 bool safe_strcasecmp(char *s1, char *s2);
 
-// TODO: docs
+/**
+ * str_join joins all strings stored in an array_t thereof with the delimiter
+ * `delim`. `delim` is not appended to the end of the last string
+ *
+ * @param strarr
+ * @param delim
+ * @return char*
+ */
 char *str_join(array_t *strarr, const char *delim);
 
-// TODO: docs
-char *to_upper(char *str);
+/**
+ * to_upper converts the given string `s` to uppercase
+ *
+ * @param s
+ * @return char*
+ */
+char *to_upper(const char *s);
 #endif /* UTIL_H */
