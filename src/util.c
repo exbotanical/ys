@@ -1,5 +1,6 @@
 #include "util.h"
 
+#include <ctype.h>  // for toupper
 #include <errno.h>
 #include <stdarg.h>  // for variadic args functions
 #include <stdio.h>   // for snprintf
@@ -172,4 +173,29 @@ bool safe_strcasecmp(char *s1, char *s2) {
 
   unsigned int compare_chars = s1l > s2l ? s1l : s2l;
   return strncasecmp(s1, s2, compare_chars) == 0;
+}
+
+char *str_join(array_t *strarr, const char *delim) {
+  buffer_t *buf = buffer_init(NULL);
+
+  unsigned int sz = array_size(strarr);
+  for (unsigned int i = 0; sz; i++) {
+    const char *str = array_get(strarr, i);
+    buffer_append(buf, str);
+
+    if (i == sz) {
+      buffer_append(buf, delim);
+    }
+  }
+
+  return buffer_state(buf);
+}
+
+char *to_upper(char *str) {
+  size_t len = strlen(str);
+  for (size_t i = 0; i < len; i++) {
+    str[i] = toupper(str[i]);
+  }
+
+  return str;
 }

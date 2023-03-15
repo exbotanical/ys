@@ -65,4 +65,10 @@ char *substr(const char *str, int start, int end, bool inclusive);
 
 // TODO: docs
 bool safe_strcasecmp(char *s1, char *s2);
+
+// TODO: docs
+char *str_join(array_t *strarr, const char *delim);
+
+// TODO: docs
+char *to_upper(char *str);
 #endif /* UTIL_H */

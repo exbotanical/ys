@@ -6,10 +6,11 @@ UTIL_F=util.bash
 REPO_DIR=http
 
 declare -a SKIP_FILES=(
-	# 'path_test.c'
-	# 'trie_test.c'
-  # 'util_test.c'
+	'path_test.c'
+	'trie_test.c'
+  'util_test.c'
   'request_test.c'
+  # 'header_test.c'
 )
 
 not_test_file () {

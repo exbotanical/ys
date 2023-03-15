@@ -119,6 +119,16 @@ void test_safe_strcasecmp() {
   ok(safe_strcasecmp(s2, s1) == 0, "");
 }
 
+void test_str_join() {
+  array_t *arr = array_init();
+  array_push(arr, "a");
+  array_push(arr, "b");
+  array_push(arr, "c");
+
+  char *ret = str_join(arr, ",");
+  is(ret, "a,b,c");
+}
+
 int main() {
   plan(28);
 

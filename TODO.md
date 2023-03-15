@@ -4,7 +4,7 @@
 - [x] Validate NULLs and allocated objects
 - [x] Add logging
 - [ ] Add global config (e.g. global HTTP headers)
-- [ ] HTTP request parser
+- [x] HTTP request parser
 - [ ] test handlers with a mocking library
 - [x] static
 - [x] logging
@@ -21,7 +21,7 @@
 - [ ] async i/o option using epoll
 - [ ] inline functions where reasonable
 - [ ] integ tests
-- [ ] test with a real server
+- [ ] test with a real server (E2E)
 - [x] read entire request in chunks
 - [x] send entire response in chunks
 - [ ] Evented server e.g. `onRequest`
@@ -35,6 +35,9 @@
 - [ ] check all instances of `strcmp` and see if `strncmp` makes more sense
 - [ ] handle accept header
 - [ ] replace `LOG` macro calls with new logger
+- [ ] allow middleware to exit early by sending response
+- [ ] cross-OS compatibility
+- [ ] review all `include`d functions and replace any non-standard ones
 
 ## Style Guide
 - Use [Go Doc-style](https://tip.golang.org/doc/comment) for doc  comments e.g. `// function_name does thing`
