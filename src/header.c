@@ -169,9 +169,13 @@ char* to_canonical_MIME_header_key(char* s) {
 bool match_header(header_t* h, char* s) { return strcmp(h->key, s) == 0; }
 
 char* get_header_value(array_t* headers, char* key) {
-  header_t* h = (header_t*)array_find(headers, match_header, key);
+  int idx = array_find(headers, match_header, key);
+  if (idx == -1) {
+    return NULL;
+  }
 
-  return h ? h->value : NULL;
+  header_t* h = array_get(headers, idx);
+  return h->value;
 }
 
 void append_header(array_t* headers, char* key, char* value) {

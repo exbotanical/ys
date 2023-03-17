@@ -38,6 +38,7 @@
 - [ ] allow middleware to exit early by sending response
 - [ ] cross-OS compatibility
 - [ ] review all `include`d functions and replace any non-standard ones
+- [ ] prefix all enums with `METHOD_` or `STATUS_`
 
 ## Style Guide
 - Use [Go Doc-style](https://tip.golang.org/doc/comment) for doc  comments e.g. `// function_name does thing`

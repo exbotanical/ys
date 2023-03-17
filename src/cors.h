@@ -85,4 +85,44 @@ cors_t *cors_init(cors_opts_t *opts);
  */
 req_t *cors_handler(cors_t *c, req_t *req, res_t *res);
 
+/**
+ * derive_headers extracts the headers in the value of the
+ * `Access-Control-Request-Headers` header
+ *
+ * @param req
+ * @return array_t*
+ * TODO: move to headers.h and remove enum specificity
+ */
+array_t *derive_headers(req_t *req);
+
+/**
+ * are_headers_allowed determines whether the given headers are allowed per
+ * the user-defined allow list
+ *
+ * @param c
+ * @param headers
+ * @return bool
+ */
+bool are_headers_allowed(cors_t *c, array_t *headers);
+
+/**
+ * is_method_allowed determines whether the given method is allowed per the
+ * user-defined allow list
+ *
+ * @param c
+ * @param method
+ * @return bool
+ */
+bool is_method_allowed(cors_t *c, char *method);
+
+/**
+ * is_origin_allowed determines whether the given origin is allowed per the
+ * user-defined allow list
+ *
+ * @param c
+ * @param origin
+ * @return bool
+ */
+bool is_origin_allowed(cors_t *c, char *origin);
+
 #endif /* CORS_H */

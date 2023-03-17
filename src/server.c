@@ -98,7 +98,7 @@ bool server_start(server_t *server) {
     return false;
   }
 
-  printf("Listening on port %d...\n", port);
+  printlogf(LOG_INFO, "Listening on port %d...\n", port);
 
   fd_set readfds;
   int client_socket;

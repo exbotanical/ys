@@ -179,11 +179,12 @@ char *str_join(array_t *strarr, const char *delim) {
   buffer_t *buf = buffer_init(NULL);
 
   unsigned int sz = array_size(strarr);
-  for (unsigned int i = 0; sz; i++) {
+
+  for (unsigned int i = 0; i < sz; i++) {
     const char *str = array_get(strarr, i);
     buffer_append(buf, str);
 
-    if (i == sz) {
+    if (i != sz - 1) {
       buffer_append(buf, delim);
     }
   }

@@ -89,7 +89,7 @@ static void vlog(int level, int fd, const char *fmt, va_list va) {
     if (server_config.log_file) {
       write(fd, buf, buflen);
     }
-    printf(buf);
+
     // if previous write wasn't \n-terminated, we suppress header on next
     // write
     suppress_header = (buf[buflen - 1] != '\n');

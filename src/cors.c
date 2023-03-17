@@ -20,135 +20,6 @@
 bool match(char *s1, char *s2) { return safe_strcasecmp(s1, s2); }
 
 /**
- * derive_headers extracts the headers in the value of the
- * `Access-Control-Request-Headers` header
- *
- * @param req
- * @return array_t*
- */
-static array_t *derive_headers(req_t *req) {
-  char *header_str = get_header_value(req->headers, REQUEST_HEADERS_HEADER);
-
-  array_t *headers = array_init();
-  if (strcmp(header_str, "") == 0) {
-    return headers;
-  }
-
-  unsigned int len = strlen(header_str);
-
-  array_t *tmp = array_init();
-
-  for (int i = 0; i < len; i++) {
-    char c = header_str[i];
-    if ((c >= 'a' && c <= 'z') || c == '_' || c == '-' || c == '.' ||
-        (c >= '0' && c <= '9')) {
-      array_push(tmp, c);
-    }
-
-    if (c >= 'A' && c <= 'Z') {
-      array_push(tmp, tolower(c));
-    }
-
-    if (c == ' ' || c == ',' || i == len - 1) {
-      unsigned int size = array_size(tmp);
-      if (size > 0) {
-        char *v = malloc(size + 1);
-        unsigned int i;
-        for (i = 0; i < size; i++) {
-          v[i] = tmp[i];
-        }
-        v[i + 1] = '\0';
-
-        array_push(headers, v);
-        array_free(tmp);
-        tmp = array_init();
-      }
-    }
-  }
-
-  return headers;
-}
-
-/**
- * is_origin_allowed determines whether the given origin is allowed per the
- * user-defined allow list
- *
- * @param c
- * @param origin
- * @return bool
- */
-static bool is_origin_allowed(cors_t *c, char *origin) {
-  if (c->allow_all_origins) {
-    return true;
-  }
-
-  for (int i = 0; i < array_size(c->allowed_origins); i++) {
-    char *allowed_origin = array_get(c->allowed_origins, i);
-    if (safe_strcasecmp(origin, allowed_origin)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/**
- * is_method_allowed determines whether the given method is allowed per the
- * user-defined allow list
- *
- * @param c
- * @param method
- * @return bool
- */
-static bool is_method_allowed(cors_t *c, char *method) {
-  if (array_size(c->allowed_methods) == 0) {
-    return false;
-  }
-
-  if (safe_strcasecmp(method, http_method_names[OPTIONS])) {
-    return true;
-  }
-
-  for (int i = 0; i < array_size(c->allowed_methods); i++) {
-    char *allowed_method = array_get(c->allowed_methods, i);
-    if (safe_strcasecmp(method, allowed_method)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/**
- * are_headers_allowed determines whether the given headers are allowed per
- * the user-defined allow list
- *
- * @param c
- * @param headers
- * @return bool
- */
-static bool are_headers_allowed(cors_t *c, array_t *headers) {
-  if (c->allow_all_headers || array_size(headers) == 0) {
-    return true;
-  }
-
-  for (int i = 0; i < array_size(headers); i++) {
-    char *header = to_canonical_MIME_header_key(array_get(headers, i));
-    bool allows_header = false;
-
-    if (array_includes(c->allowed_headers, match, header)) {
-      allows_header = true;
-    }
-
-    if (!allows_header) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-/**
  * isPreflightRequest determines whether the given request is a Preflight.
  * A Preflight must:
  * 1) use the OPTIONS method
@@ -181,17 +52,18 @@ static req_t *handle_request(cors_t *c, req_t *req, res_t *res) {
 
   // Set the "vary" header to prevent proxy servers from sending cached
   // responses for one client to another
-  append_header(res->headers, VARY_HEADER, "Origin");
+  append_header(res->headers, VARY_HEADER, ORIGIN_HEADER);
 
   // If no origin was specified, this is not a valid CORS request
   if (!origin || strcmp(origin, "") == 0) {
     // TODO: nope
+
     return res;
   }
 
   // If the origin is not in the allow list, deny
   // TODO: case insensitive
-  if (is_origin_allowed(c, origin)) {
+  if (!is_origin_allowed(c, origin)) {
     // TODO: 403
     return res;  // TODO: nope
   }
@@ -199,16 +71,15 @@ static req_t *handle_request(cors_t *c, req_t *req, res_t *res) {
   if (c->allow_all_origins) {
     // If all origins are allowed, use the wildcard value
     append_header(res->headers, ALLOW_ORIGINS_HEADER, "*");
-
   } else {
     // Otherwise, set the origin to the request origin
-    append_header(res->headers, ALLOW_ORIGINS_HEADER, "Origin");
+    append_header(res->headers, ALLOW_ORIGINS_HEADER, origin);
   }
 
   // If we've exposed headers, set them
   // If the consumer specified headers that are exposed by default, we'll still
   // include them - this is spec compliant
-  if (array_size(c->exposed_headers) > 0) {
+  if (c->exposed_headers && array_size(c->exposed_headers) > 0) {
     append_header(res->headers, EXPOSE_HEADERS_HEADER,
                   str_join(c->exposed_headers, ", "));
   }
@@ -233,9 +104,9 @@ static req_t *handle_preflight_request(cors_t *c, req_t *req, res_t *res) {
 
   // Set the "vary" header to prevent proxy servers from sending cached
   // responses for one client to another
-  append_header(res->headers, VARY_HEADER, ORIGIN_HEADER);
-  append_header(res->headers, VARY_HEADER, REQUEST_METHOD_HEADER);
-  append_header(res->headers, VARY_HEADER, REQUEST_HEADERS_HEADER);
+  append_header(res->headers, VARY_HEADER,
+                fmt_str("%s,%s,%s", ORIGIN_HEADER, REQUEST_METHOD_HEADER,
+                        REQUEST_HEADERS_HEADER));
 
   // If no origin was specified, this is not a valid CORS request
   if (strcmp(origin, "") == 0) {
@@ -251,7 +122,7 @@ static req_t *handle_preflight_request(cors_t *c, req_t *req, res_t *res) {
   char *req_method_header =
       get_header_value(req->headers, REQUEST_METHOD_HEADER);
 
-  if (is_method_allowed(c, req_method_header)) {
+  if (!is_method_allowed(c, req_method_header)) {
     return NULL;  // TODO: NOPE
   }
 
@@ -301,9 +172,12 @@ cors_t *cors_init(cors_opts_t *opts) {
   c->max_age = opts->max_age;
   c->exposed_headers = opts->expose_headers;
   c->use_options_passthrough = opts->use_options_passthrough;
+  c->allowed_origins = array_init();
+  c->allowed_methods = array_init();
 
   // Register origins - if no given origins, default to allow all i.e. "*"
-  if (array_size(opts->allowed_origins) == 0) {
+  // TODO: have array_size handle NULL?
+  if (!opts->allowed_origins || array_size(opts->allowed_origins) == 0) {
     c->allow_all_origins = true;
   } else {
     for (int i = 0; i < array_size(opts->allowed_origins); i++) {
@@ -315,6 +189,7 @@ cors_t *cors_init(cors_opts_t *opts) {
 
       array_push(c->allowed_origins, origin);
     }
+
     // Append "null" to allow list to support testing / requests from files,
     // redirects, etc. Note: Used for redirects because the browser should not
     // expose the origin of the new server; redirects are followed
@@ -325,14 +200,16 @@ cors_t *cors_init(cors_opts_t *opts) {
   // Register headers - if no given headers, default to those allowed per the
   // spec. Although these headers are allowed by default, we add them anyway for
   // the sake of consistency
-  if (array_size(opts->allowed_headers) == 0) {
+  if (!opts->allowed_headers || array_size(opts->allowed_headers) == 0) {
     // Default allowed headers. Defaults to the "Origin" header, though this
     // should be included automatically
     array_t *default_allowed_headers = array_init();
-    array_push(default_allowed_headers, "Origin");
+    array_push(default_allowed_headers, ORIGIN_HEADER);
 
     c->allowed_headers = default_allowed_headers;
   } else {
+    c->allowed_headers = array_init();
+
     for (int i = 0; i < array_size(opts->allowed_headers); i++) {
       char *header = array_get(opts->allowed_headers, i);
 
@@ -341,17 +218,18 @@ cors_t *cors_init(cors_opts_t *opts) {
         break;
       }
 
-      array_push(opts->allowed_headers, to_canonical_MIME_header_key(header));
+      array_push(c->allowed_headers, to_canonical_MIME_header_key(header));
     }
   }
 
-  if (array_size(opts->allowed_methods) == 0) {
+  // TODO: in fact, these should be initialized anyway
+  if (!opts->allowed_methods || array_size(opts->allowed_methods) == 0) {
     // Default allowed methods. Defaults to simple methods (those that do not
     // trigger a Preflight)
     array_t *default_allowed_methods = array_init();
-    array_push(default_allowed_methods, GET);
-    array_push(default_allowed_methods, POST);
-    array_push(default_allowed_methods, HEAD);
+    array_push(default_allowed_methods, http_method_names[GET]);
+    array_push(default_allowed_methods, http_method_names[POST]);
+    array_push(default_allowed_methods, http_method_names[HEAD]);
 
     c->allowed_methods = default_allowed_methods;
   } else {
@@ -382,4 +260,110 @@ req_t *cors_handler(cors_t *c, req_t *req, res_t *res) {
 
   // terminate
   return res;
+}
+
+bool are_headers_allowed(cors_t *c, array_t *headers) {
+  if (c->allow_all_headers || array_size(headers) == 0) {
+    return true;
+  }
+
+  // TODO: initialize values
+  if (!c->allowed_headers || array_size(c->allowed_headers) == 0) {
+    return false;
+  }
+
+  for (int i = 0; i < array_size(headers); i++) {
+    char *header = to_canonical_MIME_header_key(array_get(headers, i));
+    bool allows_header = false;
+
+    if (array_includes(c->allowed_headers, match, header)) {
+      allows_header = true;
+    }
+
+    if (!allows_header) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool is_origin_allowed(cors_t *c, char *origin) {
+  if (c->allow_all_origins) {
+    return true;
+  }
+
+  for (int i = 0; i < array_size(c->allowed_origins); i++) {
+    char *allowed_origin = array_get(c->allowed_origins, i);
+    if (safe_strcasecmp(origin, allowed_origin)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool is_method_allowed(cors_t *c, char *method) {
+  if (array_size(c->allowed_methods) == 0) {
+    return false;
+  }
+
+  if (safe_strcasecmp(method, http_method_names[OPTIONS])) {
+    return true;
+  }
+
+  for (int i = 0; i < array_size(c->allowed_methods); i++) {
+    char *allowed_method = array_get(c->allowed_methods, i);
+    if (safe_strcasecmp(method, allowed_method)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+array_t *derive_headers(req_t *req) {
+  // TODO: make more dynamic by passing in header_str
+  char *header_str = get_header_value(req->headers, REQUEST_HEADERS_HEADER);
+  array_t *headers = array_init();
+
+  if (!header_str || strcmp(header_str, "") == 0) {
+    return headers;
+  }
+
+  unsigned int len = strlen(header_str);
+  array_t *tmp = array_init();
+
+  for (int i = 0; i < len; i++) {
+    char c = header_str[i];
+
+    if ((c >= 'a' && c <= 'z') || c == '_' || c == '-' || c == '.' ||
+        (c >= '0' && c <= '9')) {
+      array_push(tmp, c);
+    }
+
+    if (c >= 'A' && c <= 'Z') {
+      array_push(tmp, tolower(c));
+    }
+
+    if (c == ' ' || c == ',' || i == len - 1) {
+      unsigned int size = array_size(tmp);
+      if (size > 0) {
+        char *v = malloc(size + 1);
+        unsigned int i;
+        for (i = 0; i < size; i++) {
+          v[i] = array_get(tmp, i);
+        }
+
+        v[i + 1] = '\0';
+
+        array_push(headers, v);
+
+        array_free(tmp);
+        tmp = array_init();
+      }
+    }
+  }
+
+  return headers;
 }

@@ -18,10 +18,7 @@ typedef struct {
   const unsigned int expected_flag;
 } test_case;
 
-void *test_handler(void *arg) {
-  // printf("RESULT %s\n", arg);
-  return NULL;
-}
+void *test_handler(void *arg) { return NULL; }
 
 void test_trie_init() {
   trie_t *trie;
