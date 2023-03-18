@@ -13,7 +13,7 @@
 - [ ] use attr struct for fallback handlers
 - [ ] Figure out file routing. The problem here is we want the `response_t` type to be accessible to consumers without having to compile the entire library and link it.
 - [ ] SSL support
-- [ ] properly parse entire request (we're using a placeholder method right now!)
+- [x] properly parse entire request (we're using a placeholder method right now!)
 - [ ] Use a union to store parameter values. We have enough info from the regex to determine whether the value should be an int or char*
 - [ ] JSON parsed body in context
 - [x] pass a struct with context, req, res (maybe merge ctx and req)
@@ -41,6 +41,8 @@
 - [ ] review all `include`d functions and replace any non-standard ones
 - [ ] prefix all enums with `METHOD_` or `STATUS_`
 - [ ] make regex cache global (instead of per-trie-node)
+- [ ] handle duplicate headers
+  - Go style: append subsequent values, but `Get` retrieves the first only. `Values` returns list of all. In response, each duplicate header is written separately
 
 ## Style Guide
 - Use [Go Doc-style](https://tip.golang.org/doc/comment) for doc  comments e.g. `// function_name does thing`
