@@ -5,7 +5,7 @@
 #include <stdlib.h>  // for malloc
 #include <string.h>  // for strlen, strcmp
 
-#include "header.h"  // for get_header_value, append_header
+#include "header.h"  // for req_header_get, res_header_append
 #include "util.h"
 
 /**
@@ -48,11 +48,10 @@ static bool is_preflight_request(req_t *req) {
  * @return req_t*
  */
 static req_t *handle_request(cors_t *c, req_t *req, res_t *res) {
-  char *origin = get_header_value(req->headers, ORIGIN_HEADER);
-
+  char *origin = req_header_get(req->headers, ORIGIN_HEADER);
   // Set the "vary" header to prevent proxy servers from sending cached
   // responses for one client to another
-  append_header(res->headers, VARY_HEADER, ORIGIN_HEADER);
+  res_header_append(res->headers, VARY_HEADER, ORIGIN_HEADER);
 
   // If no origin was specified, this is not a valid CORS request
   if (!origin || strcmp(origin, "") == 0) {
@@ -70,24 +69,24 @@ static req_t *handle_request(cors_t *c, req_t *req, res_t *res) {
 
   if (c->allow_all_origins) {
     // If all origins are allowed, use the wildcard value
-    append_header(res->headers, ALLOW_ORIGINS_HEADER, "*");
+    res_header_append(res->headers, ALLOW_ORIGINS_HEADER, "*");
   } else {
     // Otherwise, set the origin to the request origin
-    append_header(res->headers, ALLOW_ORIGINS_HEADER, origin);
+    res_header_append(res->headers, ALLOW_ORIGINS_HEADER, origin);
   }
 
   // If we've exposed headers, set them
   // If the consumer specified headers that are exposed by default, we'll still
   // include them - this is spec compliant
   if (c->exposed_headers && array_size(c->exposed_headers) > 0) {
-    append_header(res->headers, EXPOSE_HEADERS_HEADER,
-                  str_join(c->exposed_headers, ", "));
+    res_header_append(res->headers, EXPOSE_HEADERS_HEADER,
+                      str_join(c->exposed_headers, ", "));
   }
 
   // Allow the client to send credentials. If making an XHR request, the client
   // must set `withCredentials` to `true`
   if (c->allow_credentials) {
-    append_header(res->headers, ALLOW_CREDENTIALS_HEADER, "true");
+    res_header_append(res->headers, ALLOW_CREDENTIALS_HEADER, "true");
   }
 }
 
@@ -100,13 +99,13 @@ static req_t *handle_request(cors_t *c, req_t *req, res_t *res) {
  * @return req_t*
  */
 static req_t *handle_preflight_request(cors_t *c, req_t *req, res_t *res) {
-  char *origin = get_header_value(req->headers, ORIGIN_HEADER);
+  char *origin = req_header_get(req->headers, ORIGIN_HEADER);
 
   // Set the "vary" header to prevent proxy servers from sending cached
   // responses for one client to another
-  append_header(res->headers, VARY_HEADER,
-                fmt_str("%s,%s,%s", ORIGIN_HEADER, REQUEST_METHOD_HEADER,
-                        REQUEST_HEADERS_HEADER));
+  res_header_append(res->headers, VARY_HEADER,
+                    fmt_str("%s,%s,%s", ORIGIN_HEADER, REQUEST_METHOD_HEADER,
+                            REQUEST_HEADERS_HEADER));
 
   // If no origin was specified, this is not a valid CORS request
   if (strcmp(origin, "") == 0) {
@@ -119,8 +118,7 @@ static req_t *handle_preflight_request(cors_t *c, req_t *req, res_t *res) {
   }
 
   // Validate the method; this is the crux of the Preflight
-  char *req_method_header =
-      get_header_value(req->headers, REQUEST_METHOD_HEADER);
+  char *req_method_header = req_header_get(req->headers, REQUEST_METHOD_HEADER);
 
   if (!is_method_allowed(c, req_method_header)) {
     return NULL;  // TODO: NOPE
@@ -135,34 +133,34 @@ static req_t *handle_preflight_request(cors_t *c, req_t *req, res_t *res) {
 
   if (c->allow_all_origins) {
     // If all origins are allowed, use the wildcard value
-    append_header(res->headers, ALLOW_ORIGINS_HEADER, "*");
+    res_header_append(res->headers, ALLOW_ORIGINS_HEADER, "*");
   } else {
     // Otherwise, set the origin to the request origin
-    append_header(res->headers, ALLOW_ORIGINS_HEADER, origin);
+    res_header_append(res->headers, ALLOW_ORIGINS_HEADER, origin);
   }
 
   // Set the allowed methods, as a Preflight may have been sent if the client
   // included non-simple methods
-  append_header(res->headers, ALLOW_METHODS_HEADER, req_method_header);
+  res_header_append(res->headers, ALLOW_METHODS_HEADER, req_method_header);
 
   // Set the allowed headers, as a Preflight may have been sent if the client
   // included non-simple headers.
   if (array_size(reqd_headers) > 0) {
-    append_header(res->headers, ALLOW_HEADERS_HEADER,
-                  str_join(c->allowed_headers, ", "));
+    res_header_append(res->headers, ALLOW_HEADERS_HEADER,
+                      str_join(c->allowed_headers, ", "));
   }
 
   // Allow the client to send credentials. If making an XHR request, the client
   // must set `withCredentials` to `true`.
   if (c->allow_credentials) {
-    append_header(res->headers, ALLOW_CREDENTIALS_HEADER, "true");
+    res_header_append(res->headers, ALLOW_CREDENTIALS_HEADER, "true");
   }
 
   // Set the Max Age. This is only necessary for Preflights given the Max Age
   // refers to server-suggested duration, in seconds, a response should stay in
   // the browser's cache before another Preflight is made
   if (c->max_age > 0) {
-    append_header(res->headers, MAX_AGE_HEADER, fmt_str("%d", c->max_age));
+    res_header_append(res->headers, MAX_AGE_HEADER, fmt_str("%d", c->max_age));
   }
 }
 
@@ -324,7 +322,7 @@ bool is_method_allowed(cors_t *c, char *method) {
 
 array_t *derive_headers(req_t *req) {
   // TODO: make more dynamic by passing in header_str
-  char *header_str = get_header_value(req->headers, REQUEST_HEADERS_HEADER);
+  char *header_str = req_header_get(req->headers, REQUEST_HEADERS_HEADER);
   array_t *headers = array_init();
 
   if (!header_str || strcmp(header_str, "") == 0) {

@@ -1,23 +1,26 @@
 #include "header.h"
 
-#include <pthread.h>
+#include <pthread.h>  // for pthread_once
 #include <stdbool.h>
 #include <stdlib.h>  // for malloc
 #include <string.h>  // for strlen, strcmp
 
-#include "libhash/libhash.h"  // for hash sets
 #include "libhttp.h"
 
-static pthread_once_t init_once = PTHREAD_ONCE_INIT;
+static pthread_once_t init_common_headers_once = PTHREAD_ONCE_INIT;
+static pthread_once_t init_singleton_headers_once = PTHREAD_ONCE_INIT;
 
 // common_headers interns common header strings
 static const hash_set* common_headers;
+
+// singleton_headers interns common header strings
+static const hash_set* singleton_headers;
 
 // to_lower is used to convert chars to lower case
 static const int to_lower = 'a' - 'A';
 
 /**
- * init_common_headers initializes the common headers hash table
+ * init_common_headers initializes the common headers hash set
  */
 static void init_common_headers() {
   common_headers = hs_init(39);
@@ -64,16 +67,42 @@ static void init_common_headers() {
 }
 
 /**
+ * init_singleton_headers initializes the singleton headers hash set. A
+ * singleton header is a header that cannot be duplicated for a request per
+ * Section 4.2 of RFC 7230.
+ * TODO: test
+ */
+static void init_singleton_headers() {
+  singleton_headers = hs_init(2);
+
+  hs_insert(singleton_headers, "Content-Type");
+  hs_insert(singleton_headers, "Content-Length");
+}
+
+/**
  * get_common_header_set atomically initializes and retrieves the common headers
- * hash table. Initialization is guaranteed to only run once, on the first
+ * hash set. Initialization is guaranteed to only run once, on the first
  * invocation
  *
  * @return hash_set*
  */
 static hash_set* get_common_header_set() {
-  pthread_once(&init_once, init_common_headers);
+  pthread_once(&init_common_headers_once, init_common_headers);
 
   return common_headers;
+}
+
+/**
+ * get_singleton_header_set atomically initializes and retrieves the singleton
+ * headers hash set. Initialization is guaranteed to only run once, on the first
+ * invocation
+ *
+ * @return hash_set*
+ */
+static hash_set* get_singleton_header_set() {
+  pthread_once(&init_singleton_headers_once, init_singleton_headers);
+
+  return singleton_headers;
 }
 
 /**
@@ -85,6 +114,17 @@ static hash_set* get_common_header_set() {
  */
 static bool valid_header_field_byte(int b) {
   return b < sizeof(token_table) && token_table[b];
+}
+
+/**
+ * is_singleton_header returns a bool indicating whether the given header
+ * `header_key` is a singleton header
+ *
+ * @param header_key
+ * @return bool
+ */
+static bool is_singleton_header(const char* header_key) {
+  return hs_contains(get_singleton_header_set(), header_key);
 }
 
 /**
@@ -166,20 +206,48 @@ char* to_canonical_MIME_header_key(char* s) {
  */
 bool match_header(header_t* h, char* s) { return strcmp(h->key, s) == 0; }
 
-char* get_header_value(array_t* headers, char* key) {
-  int idx = array_find(headers, match_header, key);
-  if (idx == -1) {
+char* req_header_get(hash_table* headers, char* key) {
+  ht_record* header = ht_search(headers, key);
+  if (!header) {
     return NULL;
   }
 
-  header_t* h = array_get(headers, idx);
-  return h->value;
+  return array_get(header->value, 0);
 }
 
-void append_header(array_t* headers, char* key, char* value) {
+void res_header_append(array_t* headers, char* key, char* value) {
   header_t* h = malloc(sizeof(header_t));
 
   h->key = key;
   h->value = value;
   array_push(headers, h);
+}
+
+bool insert_header(hash_table* headers, const char* k, const char* v) {
+  // Check if we've already encountered this header key. Some headers cannot
+  // be duplicated e.g. Content-Type, so we'll need to handle those as well
+  ht_record* existing_headers = ht_search(headers, k);
+  if (existing_headers) {
+    // Disallow duplicates where necessary e.g. multiple Content-Type headers is
+    // a 400 This follows Section 4.2 of RFC 7230 to ensure we handle multiples
+    // of the same header correctly
+    // TODO: handle all singletons
+    if (is_singleton_header(k)) {
+      return false;
+    }
+
+    array_push(existing_headers, v);
+  } else {
+    // We haven't encountered this header before; insert into the hash table
+    // along with the first value
+    array_t* values = array_init();
+    if (!values) {
+      // TODO: die
+    }
+
+    array_push(values, v);
+    ht_insert(headers, k, values);
+  }
+
+  return true;
 }

@@ -1,6 +1,7 @@
 #ifndef HEADER_H
 #define HEADER_H
 
+#include "libhash/libhash.h"  // for hash sets and hash tables
 #include "libutil/libutil.h"  // for arrays
 
 // A 256 slot lookup table where each index corresponds to an ASCII character
@@ -35,23 +36,39 @@ static const char token_table[] =
 char* to_canonical_MIME_header_key(char* s);
 
 /**
- * get_header_value retrieves the value for a given header key from `headers`,
- * or NULL if not found
+ * req_header_get retrieves the first value for a given header key from
+ * `headers`, or NULL if not found
  *
  * @param headers
  * @param key
  * @return char*
  */
-char* get_header_value(array_t* headers, char* key);
+char* req_header_get(hash_table* headers, char* key);
 
 /**
- * append_header appends the given key/value pair as a header object in
+ * res_header_append appends the given key/value pair as a header object in
  * `headers`
  *
  * @param headers
  * @param key
  * @param value
  */
-void append_header(array_t* headers, char* key, char* value);
+void res_header_append(array_t* headers, char* key, char* value);
 
+/**
+ * insert_header inserts a key/value pair into the given hash table `headers`.
+ * It accounts for singleton headers (headers that cannot be duplicated per HTTP
+ * spec) and returns a bool indicating whether the header was successfully
+ * inserted. If false, this means the header was a duplicate of an existing
+ * singleton header.
+ *
+ * Can be used for both request and response headers, as they follow these same
+ * rules.
+ *
+ * @param headers
+ * @param k
+ * @param v
+ * @return bool
+ */
+bool insert_header(hash_table* headers, const char* k, const char* v);
 #endif /* HEADER_H */

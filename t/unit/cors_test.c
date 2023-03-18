@@ -8,6 +8,7 @@
 #include "libhttp.h"
 #include "tap.c/tap.h"
 
+// TODO: cleanup test helpers
 static const char *all_headers[] = {"Vary",
                                     "Access-Control-Allow-Origin",
                                     "Access-Control-Allow-Methods",
@@ -52,6 +53,21 @@ inline static array_t *toheaders(char *s, ...) {
   return arr;
 }
 
+void insert_headers(req_t *req, array_t *headers) {
+  for (unsigned int i = 0; i < array_size(headers); i++) {
+    header_t *h = array_get(headers, i);
+
+    // We're not using this helper for duplicate headers, so we can assume the
+    // header hasn't been inserted before
+    // TODO: use method that does this internally so we never have to worry
+    // about whether the value array_t was initialized
+    array_t *v = array_init();
+    array_push(v, h->value);
+
+    ht_insert(req->headers, h->key, v);
+  }
+}
+
 void check_status_code(res_t *res, int expected_status) {
   if (expected_status != res->status) {
     fail("expected status code to be %d but got %d. ", expected_status,
@@ -61,7 +77,7 @@ void check_status_code(res_t *res, int expected_status) {
 
 bool m(header_t *h, char *v) { return strcmp(h->key, v) == 0; }
 
-void check_headers(array_t *actual, array_t *expected) {
+void check_headers(char *test_name, array_t *actual, array_t *expected) {
   for (unsigned int i = 0; i < sizeof(all_headers) / sizeof(char *); i++) {
     char *key = all_headers[i];
 
@@ -78,7 +94,8 @@ void check_headers(array_t *actual, array_t *expected) {
 
     header_t *expected_h = array_get(expected, eidx);
     header_t *actual_h = array_get(actual, aidx);
-    is(actual_h->value, expected_h->value, "headers for key '%s' match", key);
+    is(actual_h->value, expected_h->value, "%s - headers for key '%s' match",
+       test_name, key);
   }
 }
 
@@ -248,8 +265,8 @@ void test_cors_middleware() {
        .options = make_opts(toarr("http://foo.com:443", NULL), NULL, NULL, NULL,
                             false),
        .method = GET,
-       .req_headers = toheaders("Origin", "http://foo.com:444"),
-       .res_headers = toheaders("Vary", "Origin"),
+       .req_headers = toheaders("Origin", "http://foo.com:444", NULL),
+       .res_headers = toheaders("Vary", "Origin", NULL),
        .code = OK},
       {.name = "MethodNotAllowed",
        .options = make_opts(toarr("*", NULL), NULL, NULL, NULL, false),
@@ -282,17 +299,19 @@ void test_cors_middleware() {
     req_t *req = &(req_t){
         .method = http_method_names[test.method],
     };
+    req->headers = ht_init(0);
 
     // Add headers to mock request
-    req->headers = test.req_headers;
+    insert_headers(req, test.req_headers);
 
     res_t *res = malloc(sizeof(res_t));
     res->headers = array_init();
 
     // Run CORS handler
     cors_handler(cors_init(test.options), req, res);
+
     // Evaluate resulting headers and status
-    check_headers(res->headers, test.res_headers);
+    check_headers(test.name, res->headers, test.res_headers);
 
     // check_status_code(res, (int)test.code); // TODO:
   }
@@ -300,13 +319,12 @@ void test_cors_middleware() {
 
 void test_derive_headers() {
   req_t *req = malloc(sizeof(req_t));
-  req->headers = array_init();
+  req->headers = ht_init(0);
 
-  header_t *h = malloc(sizeof(header_t));
-  h->key = REQUEST_HEADERS_HEADER;
-  h->value = "x-test-1, x-test-2, x-test-3";
+  array_t *values = array_init();
+  array_push(values, "x-test-1, x-test-2, x-test-3");
 
-  array_push(req->headers, h);
+  ht_insert(req->headers, REQUEST_HEADERS_HEADER, values);
 
   array_t *expected = toarr("x-test-1", "x-test-2", "x-test-3", NULL);
   array_t *actual = derive_headers(req);

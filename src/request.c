@@ -4,11 +4,14 @@
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <stdlib.h>  // for malloc, atoi
+#include <stdbool.h>
+#include <stdlib.h>  // for malloc
 #include <string.h>  // for strcmp
-#include <strings.h>
 #include <unistd.h>  // for read
 
+#include "header.h"
+#include "libhash/libhash.h"  // for hash sets
+#include "libhttp.h"
 #include "picohttpparser/picohttpparser.h"
 #include "request.h"
 #include "util.h"  // for safe_strcasecmp
@@ -66,6 +69,7 @@ req_t* read_and_parse_request(int sock) {
     if (pret == -2) {
       return NULL;
     }
+
     if (buflen == sizeof(buf)) {
       return NULL;  // RequestIsTooLongError
     }
@@ -78,23 +82,28 @@ req_t* read_and_parse_request(int sock) {
   request->path = fmt_str("%.*s", (int)path_len, path);
   request->version = fmt_str("1.%d\n", minor_version);
 
-  request->headers = array_init();
-  for (int i = 0; i != num_headers; ++i) {
-    header_t* header = malloc(sizeof(header_t));
+  request->headers = ht_init(0);
+  // This is where we deal with the really quite complicated mess of HTTP
+  // headers
+  for (unsigned int i = 0; i != num_headers; ++i) {
+    char* header_key =
+        fmt_str("%.*s", (int)headers[i].name_len, headers[i].name);
+    char* header_val =
+        fmt_str("%.*s", (int)headers[i].name_len, headers[i].name);
 
-    header->key = fmt_str("%.*s", (int)headers[i].name_len, headers[i].name);
-    header->value =
-        fmt_str("%.*s", (int)headers[i].value_len, headers[i].value);
-
-    if (safe_strcasecmp(header->value, "Content-Type")) {
-      request->content_type = header->value;
-    } else if (safe_strcasecmp(header->value, "Accept")) {
-      request->accept = header->value;
-    } else if (safe_strcasecmp(header->value, "User-Agent")) {
-      request->user_agent = header->value;
+    if (!insert_header(request->headers, header_key, header_val)) {
+      // TODO: 400
     }
 
-    array_push(request->headers, header);
+    // Now we handle special metadata fields on the request that we expose to
+    // the consumer for quick reference
+    if (safe_strcasecmp(header_val, "Content-Type")) {
+      request->content_type = header_val;
+    } else if (safe_strcasecmp(header_val, "Accept")) {
+      request->accept = header_val;
+    } else if (safe_strcasecmp(header_val, "User-Agent")) {
+      request->user_agent = header_val;
+    }
   }
 
   return request;

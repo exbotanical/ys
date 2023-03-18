@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+#include "libhash/libhash.h"  // for hash tables
 #include "libutil/libutil.h"
 #include "trie.h"
 
@@ -111,7 +112,7 @@ typedef struct {
   char *content_type;
   char *version;
   array_t *parameters;
-  array_t *headers;
+  hash_table *headers;
   int content_length;
 } req_t;
 
