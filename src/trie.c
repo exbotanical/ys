@@ -20,7 +20,7 @@ static node_t *node_init() {
     DIE(EXIT_FAILURE, "[trie::node_init] %s\n", "failed to allocate node");
   }
 
-  node->children = h_init_table(0);
+  node->children = ht_init(0);
   if (!node->children) {
     free(node->children);
     free(node);
@@ -28,7 +28,7 @@ static node_t *node_init() {
         "failed to initialize hash table for node children");
   }
 
-  node->actions = h_init_table(0);
+  node->actions = ht_init(0);
   if (!node->actions) {
     free(node->actions);
     free(node);
@@ -47,7 +47,7 @@ trie_t *trie_init() {
   }
 
   trie->root = node_init();
-  trie->regex_cache = h_init_table(0);
+  trie->regex_cache = ht_init(0);
   if (!trie->regex_cache) {
     free(trie->regex_cache);
     free(trie);
@@ -77,7 +77,7 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
       action->handler = handler;
       action->middlewares = middlewares;
 
-      h_insert(curr->actions, array_get(methods, i), action);
+      ht_insert(curr->actions, array_get(methods, i), action);
     }
 
     return;
@@ -86,14 +86,14 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
   array_t *paths = expand_path(path);
   for (unsigned int i = 0; i < array_size(paths); i++) {
     char *split_path = array_get(paths, i);
-    h_record *next = h_search(curr->children, split_path);
+    ht_record *next = ht_search(curr->children, split_path);
     if (next) {
       curr = next->value;
     } else {
       node_t *node = node_init();
 
       node->label = split_path;
-      h_insert(curr->children, split_path, node);
+      ht_insert(curr->children, split_path, node);
       curr = node;
     }
 
@@ -114,7 +114,7 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
         action->handler = handler;
         action->middlewares = middlewares;
 
-        h_insert(curr->actions, method, action);
+        ht_insert(curr->actions, method, action);
       }
 
       break;
@@ -143,7 +143,7 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
   for (unsigned int i = 0; i < array_size(paths); i++) {
     char *path = array_get(paths, i);
 
-    h_record *next = h_search(curr->children, path);
+    ht_record *next = ht_search(curr->children, path);
     if (next) {
       curr = next->value;
       continue;
@@ -161,7 +161,7 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
     bool is_param_match = false;
 
     for (int k = 0; k < curr->children->capacity; k++) {
-      h_record *child_record = curr->children->records[k];
+      ht_record *child_record = curr->children->records[k];
       if (!child_record) {
         continue;
       }
@@ -210,7 +210,7 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
           LOG("[trie::trie_search] %s\n", message);
         }
 
-        h_record *next = h_search(curr->children, child->label);
+        ht_record *next = ht_search(curr->children, child->label);
         if (!next) {
           LOG("[trie::trie_search] %s %s\n",
               "did not match a route but expected to, where label is",
@@ -241,7 +241,7 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
     }
   }
 
-  h_record *action_record = h_search(curr->actions, method);
+  ht_record *action_record = ht_search(curr->actions, method);
   // No matching handler
   if (action_record == NULL) {
     result->flags |= NOT_ALLOWED_MASK;

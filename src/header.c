@@ -5,13 +5,13 @@
 #include <stdlib.h>  // for malloc
 #include <string.h>  // for strlen, strcmp
 
-#include "libhash/libhash.h"
+#include "libhash/libhash.h"  // for hash sets
 #include "libhttp.h"
 
 static pthread_once_t init_once = PTHREAD_ONCE_INIT;
 
 // common_headers interns common header strings
-static const h_table* common_headers;
+static const hash_set* common_headers;
 
 // to_lower is used to convert chars to lower case
 static const int to_lower = 'a' - 'A';
@@ -20,58 +20,57 @@ static const int to_lower = 'a' - 'A';
  * init_common_headers initializes the common headers hash table
  */
 static void init_common_headers() {
-  common_headers = h_init_table(39);
+  common_headers = hs_init(39);
 
-  h_insert(common_headers, "Accept", "Accept");
-  h_insert(common_headers, "Accept-Charset", "Accept-Charset");
-  h_insert(common_headers, "Accept-Encoding", "Accept-Encoding");
-  h_insert(common_headers, "Accept-Language", "Accept-Language");
-  h_insert(common_headers, "Accept-Ranges", "Accept-Ranges");
-  h_insert(common_headers, "Cache-Control", "Cache-Control");
-  h_insert(common_headers, "Cc", "Cc");
-  h_insert(common_headers, "Connection", "Connection");
-  h_insert(common_headers, "Content-Id", "Content-Id");
-  h_insert(common_headers, "Content-Language", "Content-Language");
-  h_insert(common_headers, "Content-Length", "Content-Length");
-  h_insert(common_headers, "Content-Transfer-Encoding",
-           "Content-Transfer-Encoding");
-  h_insert(common_headers, "Content-Type", "Content-Type");
-  h_insert(common_headers, "Cookie", "Cookie");
-  h_insert(common_headers, "Date", "Date");
-  h_insert(common_headers, "Dkim-Signature", "Dkim-Signature");
-  h_insert(common_headers, "Etag", "Etag");
-  h_insert(common_headers, "Expires", "Expires");
-  h_insert(common_headers, "From", "From");
-  h_insert(common_headers, "Host", "Host");
-  h_insert(common_headers, "If-Modified-Since", "If-Modified-Since");
-  h_insert(common_headers, "If-None-Match", "If-None-Match");
-  h_insert(common_headers, "In-Reply-To", "In-Reply-To");
-  h_insert(common_headers, "Last-Modified", "Last-Modified");
-  h_insert(common_headers, "Location", "Location");
-  h_insert(common_headers, "Message-Id", "Message-Id");
-  h_insert(common_headers, "Mime-Version", "Mime-Version");
-  h_insert(common_headers, "Pragma", "Pragma");
-  h_insert(common_headers, "Received", "Received");
-  h_insert(common_headers, "Return-Path", "Return-Path");
-  h_insert(common_headers, "Server", "Server");
-  h_insert(common_headers, "Set-Cookie", "Set-Cookie");
-  h_insert(common_headers, "Subject", "Subject");
-  h_insert(common_headers, "To", "To");
-  h_insert(common_headers, "User-Agent", "User-Agent");
-  h_insert(common_headers, "Via", "Via");
-  h_insert(common_headers, "X-Forwarded-For", "X-Forwarded-For");
-  h_insert(common_headers, "X-Imforwards", "X-Imforwards");
-  h_insert(common_headers, "X-Powered-By", "X-Powered-By");
+  hs_insert(common_headers, "Accept");
+  hs_insert(common_headers, "Accept-Charset");
+  hs_insert(common_headers, "Accept-Encoding");
+  hs_insert(common_headers, "Accept-Language");
+  hs_insert(common_headers, "Accept-Ranges");
+  hs_insert(common_headers, "Cache-Control");
+  hs_insert(common_headers, "Cc");
+  hs_insert(common_headers, "Connection");
+  hs_insert(common_headers, "Content-Id");
+  hs_insert(common_headers, "Content-Language");
+  hs_insert(common_headers, "Content-Length");
+  hs_insert(common_headers, "Content-Transfer-Encoding");
+  hs_insert(common_headers, "Content-Type");
+  hs_insert(common_headers, "Cookie");
+  hs_insert(common_headers, "Date");
+  hs_insert(common_headers, "Dkim-Signature");
+  hs_insert(common_headers, "Etag");
+  hs_insert(common_headers, "Expires");
+  hs_insert(common_headers, "From");
+  hs_insert(common_headers, "Host");
+  hs_insert(common_headers, "If-Modified-Since");
+  hs_insert(common_headers, "If-None-Match");
+  hs_insert(common_headers, "In-Reply-To");
+  hs_insert(common_headers, "Last-Modified");
+  hs_insert(common_headers, "Location");
+  hs_insert(common_headers, "Message-Id");
+  hs_insert(common_headers, "Mime-Version");
+  hs_insert(common_headers, "Pragma");
+  hs_insert(common_headers, "Received");
+  hs_insert(common_headers, "Return-Path");
+  hs_insert(common_headers, "Server");
+  hs_insert(common_headers, "Set-Cookie");
+  hs_insert(common_headers, "Subject");
+  hs_insert(common_headers, "To");
+  hs_insert(common_headers, "User-Agent");
+  hs_insert(common_headers, "Via");
+  hs_insert(common_headers, "X-Forwarded-For");
+  hs_insert(common_headers, "X-Imforwards");
+  hs_insert(common_headers, "X-Powered-By");
 }
 
 /**
- * get_common_header_t atomically initializes and retrieves the common headers
+ * get_common_header_set atomically initializes and retrieves the common headers
  * hash table. Initialization is guaranteed to only run once, on the first
  * invocation
  *
- * @return h_table*
+ * @return hash_set*
  */
-static h_table* get_common_header_t() {
+static hash_set* get_common_header_set() {
   pthread_once(&init_once, init_common_headers);
 
   return common_headers;
@@ -95,6 +94,12 @@ static bool valid_header_field_byte(int b) {
  * @return char*
  */
 static char* canonical_mime_header_key(char* s) {
+  hash_set* common_headers = get_common_header_set();
+  // Avoid needless computation if we know the header is already correct
+  if (hs_contains(common_headers, s)) {
+    return s;
+  }
+
   // See if it looks like a header key; if not return it as-is
   for (unsigned int i = 0; i < strlen(s); i++) {
     char c = s[i];
@@ -124,13 +129,6 @@ static char* canonical_mime_header_key(char* s) {
     s = ca;
 
     upper = c == '-';  // for next time
-  }
-
-  h_table* common_headers = get_common_header_t();
-
-  h_record* result = h_search(common_headers, s);
-  if (result) {
-    return result->value;
   }
 
   return s;

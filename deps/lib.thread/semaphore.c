@@ -32,7 +32,8 @@ void semaphore_wait(semaphore_t* sem) {
 }
 
 /**
- * @brief Signal to the semaphore that a single thread's queue lifecycle has completed
+ * @brief Signal to the semaphore that a single thread's queue lifecycle has
+ * completed
  *
  * @param sem
  * @return void
@@ -70,6 +71,4 @@ void semaphore_destroy(semaphore_t* sem) {
  * @param sem
  * @return int
  */
-int semaphore_reveal(semaphore_t* sem) {
-  return sem->permit_counter;
-}
+int semaphore_reveal(semaphore_t* sem) { return sem->permit_counter; }

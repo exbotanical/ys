@@ -37,8 +37,10 @@
 - [ ] replace `LOG` macro calls with new logger
 - [ ] allow middleware to exit early by sending response
 - [ ] cross-OS compatibility
+  - [ ] source strdup from dep
 - [ ] review all `include`d functions and replace any non-standard ones
 - [ ] prefix all enums with `METHOD_` or `STATUS_`
+- [ ] make regex cache global (instead of per-trie-node)
 
 ## Style Guide
 - Use [Go Doc-style](https://tip.golang.org/doc/comment) for doc  comments e.g. `// function_name does thing`

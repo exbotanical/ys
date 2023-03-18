@@ -32,12 +32,12 @@
     "src/router.h",
     "src/trie.h"
   ],
-	"dependencies": {
-    "exbotanical/libhash": "0.0.3",
+  "dependencies": {
+    "exbotanical/libhash": "0.0.4",
     "exbotanical/lib.thread": "0.0.1",
     "exbotanical/libutil": "0.0.1"
   },
-	"development": {
+  "development": {
     "thlorenz/tap.c": "*"
   }
 }

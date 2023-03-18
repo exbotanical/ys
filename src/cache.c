@@ -4,8 +4,8 @@
 
 #include "logger.h"
 
-pcre *regex_cache_get(h_table *regex_cache, char *pattern) {
-  h_record *r = h_search(regex_cache, pattern);
+pcre *regex_cache_get(hash_table *regex_cache, char *pattern) {
+  ht_record *r = ht_search(regex_cache, pattern);
   if (r) {
     return r->value;
   }
@@ -21,7 +21,7 @@ pcre *regex_cache_get(h_table *regex_cache, char *pattern) {
     return NULL;
   }
 
-  h_insert(regex_cache, pattern, re);
+  ht_insert(regex_cache, pattern, re);
 
   return re;
 }

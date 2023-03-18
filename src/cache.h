@@ -14,6 +14,6 @@
  * @param pattern
  * @return pcre* A pre-compiled pcre regex
  */
-pcre *regex_cache_get(h_table *regex_cache, char *pattern);
+pcre *regex_cache_get(hash_table *regex_cache, char *pattern);
 
 #endif /* CACHE_H */

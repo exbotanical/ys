@@ -98,7 +98,7 @@ bool server_start(server_t *server) {
     return false;
   }
 
-  printlogf(LOG_INFO, "Listening on port %d...\n", port);
+  // printlogf(LOG_INFO, "Listening on port %d...\n", port);
 
   fd_set readfds;
   int client_socket;
@@ -140,7 +140,7 @@ bool server_start(server_t *server) {
       c_ctx->addr_len = &addr_len;
       c_ctx->client_socket = client_socket;
       c_ctx->router = ((__server_t *)server)->router;
-
+      // TODO: UH, why are we blocking?
       if (!thread_pool_dispatch(pool, client_thread_handler, c_ctx, true)) {
         DIE(EXIT_FAILURE, "[server::start] %s\n",
             "failed to dispatch thread from pool");

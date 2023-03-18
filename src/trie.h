@@ -17,14 +17,14 @@ static const unsigned int NOT_ALLOWED_MASK = 0x02;
 
 typedef struct node {
   char *label;
-  h_table *children;
-  h_table *actions;
+  hash_table *children;
+  hash_table *actions;
 } node_t;
 
 // A trie data structure used for routing
 typedef struct trie {
   node_t *root;
-  h_table *regex_cache;
+  hash_table *regex_cache;
 } trie_t;
 
 // Stores a route's handler and middlewares

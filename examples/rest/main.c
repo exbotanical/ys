@@ -17,7 +17,7 @@ typedef struct record {
 record_t *records = NULL;
 int num_records = 0;
 
-record_t *search_records(char *key) {
+record_t *searcht_records(char *key) {
   for (size_t i = 0; i < num_records; i++) {
     record_t *record = &records[i];
     if (strcmp(record->key, key) == 0) {
@@ -28,7 +28,7 @@ record_t *search_records(char *key) {
   return NULL;
 }
 
-int search_records_idx(char *key) {
+int searcht_records_idx(char *key) {
   for (size_t i = 0; i < num_records; i++) {
     record_t record = records[i];
     if (strcmp(record.key, key) == 0) {
@@ -48,7 +48,7 @@ void add_record(char *v) {
 }
 
 bool delete_record(char *id) {
-  int idx = search_records_idx(id);
+  int idx = searcht_records_idx(id);
   if (idx == -1) return false;
 
   free(records[idx].key);
@@ -77,7 +77,7 @@ res_t *handle_get(req_t *req, res_t *res) {
     return res;
   }
 
-  record_t *record = search_records(id);
+  record_t *record = searcht_records(id);
   if (!record) {
     set_body(res, res_err("no matching record"));
     set_status(res, NOT_FOUND);
@@ -127,7 +127,7 @@ res_t *handle_post(req_t *req, res_t *res) {
     return res;
   }
 
-  record_t *record = search_records(id);
+  record_t *record = searcht_records(id);
   if (record) {
     set_body(res, res_err("record exists"));
     set_status(res, BAD_REQUEST);
