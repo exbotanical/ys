@@ -88,6 +88,9 @@ static void vlog(int level, int fd, const char *fmt, va_list va) {
 
     if (server_config.log_file) {
       write(fd, buf, buflen);
+    } else {
+      // TODO: fix writing to stderr
+      printf(buf);
     }
 
     // if previous write wasn't \n-terminated, we suppress header on next

@@ -82,11 +82,12 @@ static res_t *default_not_found_handler(req_t *req, res_t *res) {
  * @return void*
  */
 static res_t *default_method_not_allowed_handler(req_t *req, res_t *res) {
-  printlogf(
-      LOG_INFO,
-      "[router::default_method_not_allowed_handler] default 405 handler in "
-      "effect at request path %s\n",
-      req->path);
+  // TODO: fix
+  // printlogf(
+  //     LOG_INFO,
+  //     "[router::default_method_not_allowed_handler] default 405 handler in "
+  //     "effect at request path %s\n",
+  //     req->path);
 
   res->status = METHOD_NOT_ALLOWED;
 

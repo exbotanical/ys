@@ -4,6 +4,7 @@ LDFLAGS=-shared -o
 DEBUG=-DDEBUG=1 # TODO: use opt
 
 BIN=libhttp.so
+INTEG_BIN=integ
 
 SRC=$(wildcard src/*.c)
 DEPS=$(wildcard deps/*/*.c)
@@ -19,4 +20,8 @@ test:
 	./scripts/test.bash
 	$(MAKE) clean
 
-.PHONY: test clean
+integ_test:
+	$(CC) t/integ/server.c -Isrc -Ideps -o $(INTEG_BIN) -L. -lhttp
+	shpec
+
+.PHONY: all clean test integ_test
