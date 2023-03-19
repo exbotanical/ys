@@ -197,15 +197,6 @@ char* to_canonical_MIME_header_key(char* s) {
   return s;
 }
 
-/**
- * match_header is a matcher function for header comparisons
- *
- * @param h
- * @param s
- * @return bool
- */
-bool match_header(header_t* h, char* s) { return strcmp(h->key, s) == 0; }
-
 char* req_header_get(hash_table* headers, char* key) {
   ht_record* header = ht_search(headers, key);
   if (!header) {
@@ -213,6 +204,25 @@ char* req_header_get(hash_table* headers, char* key) {
   }
 
   return array_get(header->value, 0);
+}
+
+char** req_header_values(hash_table* headers, char* key) {
+  ht_record* header = ht_search(headers, key);
+  if (!header) {
+    return NULL;
+  }
+
+  int sz = array_size(header->value);
+  char** headers_list = malloc(sz);
+  if (!headers_list) {
+    return NULL;
+  }
+
+  for (unsigned int i = 0; i < sz; i++) {
+    headers_list[i] = (char*)array_get(header->value, i);
+  }
+
+  return headers_list;
 }
 
 void res_header_append(array_t* headers, char* key, char* value) {

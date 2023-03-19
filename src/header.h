@@ -46,6 +46,16 @@ char* to_canonical_MIME_header_key(char* s);
 char* req_header_get(hash_table* headers, char* key);
 
 /**
+ * req_header_values returns a char array of all values for the given header key
+ * `key`. Returns NULL if the header does not exist
+ *
+ * @param headers
+ * @param key
+ * @return char**
+ */
+char** req_header_values(hash_table* headers, char* key);
+
+/**
  * res_header_append appends the given key/value pair as a header object in
  * `headers`
  *

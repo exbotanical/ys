@@ -142,6 +142,12 @@ int hs_contains(hash_set *hs, const char *key) {
     idx = h_resolve_hash(key, hs->capacity, i);
     current_key = hs->keys[idx];
     i++;
+
+    // If the capacity was set to the exact number of keys, we need to break
+    // once we've checked all of them - there won't be any NULL keys
+    if (i == hs->count + 1) {
+      break;
+    }
   }
 
   return 0;

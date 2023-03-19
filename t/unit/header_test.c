@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 
+#include "libhash/libhash.h"
 #include "tap.c/tap.h"
 
 typedef struct {
@@ -76,12 +77,79 @@ void test_to_canonical_MIME_header_key() {
   }
 }
 
+void test_req_header_get() {
+  const char *k1 = "k1";
+  const char *v1 = "v1";
+  const char *v2 = "v2";
+  const char *v3 = "v3";
+
+  hash_table *ht = ht_init(0);
+  array_t *arr = array_init();
+
+  array_push(arr, v1);
+  array_push(arr, v2);
+  array_push(arr, v3);
+
+  ht_insert(ht, k1, arr);
+
+  is(req_header_get(ht, k1), v1, "retrieves the first header value");
+  is(req_header_get(ht, v1), NULL,
+     "returns NULL if the header key does not exist");
+}
+
+void test_req_header_values() {
+  const char *k1 = "k1";
+  const char *v1 = "v1";
+  const char *v2 = "v2";
+  const char *v3 = "v3";
+
+  hash_table *ht = ht_init(0);
+  array_t *arr = array_init();
+
+  array_push(arr, v1);
+  array_push(arr, v2);
+  array_push(arr, v3);
+
+  ht_insert(ht, k1, arr);
+
+  is(req_header_values(ht, k1)[0], v1,
+     "returns a char array containing all header values");
+  is(req_header_values(ht, k1)[1], v2,
+     "returns a char array containing all header values");
+  is(req_header_values(ht, k1)[2], v3,
+     "returns a char array containing all header values");
+
+  is(req_header_values(ht, v1), NULL,
+     "returns NULL if the header key does not exist");
+}
+
+void test_insert_header() {
+  const char *k1 = "k1";
+  const char *v1 = "v1";
+  const char *singleton = "Content-Length";
+
+  hash_table *ht = ht_init(0);
+
+  ok(insert_header(ht, k1, v1) == 1,
+     "successfully inserts the header into the headers hash table");
+  is(ht_get(ht, k1), v1, "gets the header value that was just inserted");
+
+  ok(insert_header(ht, singleton, v1) == 1,
+     "successfully inserts the header into the headers hash table");
+  is(ht_get(ht, singleton), v1, "gets the header value that was just inserted");
+
+  ok(insert_header(ht, singleton, v1) == 0,
+     "fails to insert duplicate header of singleton type");
+}
+
 int main(int argc, char const *argv[]) {
-  plan(15);
+  plan(21);
 
   test_token_table();
-
   test_to_canonical_MIME_header_key();
+
+  test_req_header_get();
+  test_req_header_values();
 
   done_testing();
 }

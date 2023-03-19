@@ -153,8 +153,25 @@ void test_to_upper() {
   is(expected, ret, "upper-cases a partially upper-cased str");
 }
 
+test_collect() {
+  const char *v1 = "v1";
+  const char *v2 = "v2";
+  const char *v3 = "v3";
+  const char *v4 = "v4";
+
+  const char *values[] = {v1, v2, v3, v4};
+
+  array_t *arr = collect(v1, v2, v3, v4, NULL);
+  ok(4 == array_size(arr), "collects only the values provided");
+
+  for (unsigned int i = 0; i < array_size(arr); i++) {
+    char *v = (char *)array_get(arr, i);
+    is(v, values[i], "collects the correct values");
+  }
+}
+
 int main() {
-  plan(31);
+  plan(36);
 
   test_split_ok();
   test_split_no_match();
@@ -172,6 +189,8 @@ int main() {
   test_safe_strcasecmp();
 
   test_to_upper();
+
+  test_collect();
 
   done_testing();
 }

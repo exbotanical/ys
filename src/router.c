@@ -131,18 +131,18 @@ void router_register(router_t *router, const char *path, handler_t *handler,
                      array_t *middlewares, http_method_t method, ...) {
   array_t *methods = array_init();
   if (!methods) {
-    DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
+    DIE(EXIT_FAILURE, "[router::router_register] %s\n",
         "failed to allocate methods array via array_init");
   }
 
   va_list args;
   va_start(args, method);
-  // TODO: deduplicate this (and use collect_methods) or similar
+  // TODO: deduplicate this (and use collect) or similar
   // not doing this right now due to reference edge cases when doing so
   while (method != 0) {
     if (!array_push(methods, strdup(http_method_names[method]))) {
       free(methods);
-      DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
+      DIE(EXIT_FAILURE, "[router::router_register] %s\n",
           "failed to insert into methods array");
     }
     method = va_arg(args, http_method_t);

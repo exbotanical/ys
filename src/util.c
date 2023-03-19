@@ -206,3 +206,27 @@ char *to_upper(const char *s) {
 
   return s;
 }
+
+array_t *collect(void *item, ...) {
+  array_t *items = array_init();
+  if (!items) {
+    DIE(EXIT_FAILURE, "[utils::collect] %s\n",
+        "failed to allocate collect array via array_init");
+  }
+
+  va_list args;
+  va_start(args, item);
+
+  while (item != NULL) {
+    if (!array_push(items, item)) {
+      DIE(EXIT_FAILURE, "[utils::collect] %s\n",
+          "failed to push into collect array");
+    }
+
+    item = va_arg(args, void *);
+  }
+
+  va_end(args);
+
+  return items;
+}

@@ -43,7 +43,9 @@
 - [ ] make regex cache global (instead of per-trie-node)
 - [ ] handle duplicate headers
   - Go style: append subsequent values, but `Get` retrieves the first only. `Values` returns list of all. In response, each duplicate header is written separately
-  - specific int types
+- [ ] specific int types
+- [ ] xmalloc that dies
+- [ ] use a better regex engine than pcre
 
 ## Style Guide
 - Use [Go Doc-style](https://tip.golang.org/doc/comment) for doc  comments e.g. `// function_name does thing`

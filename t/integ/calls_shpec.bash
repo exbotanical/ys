@@ -48,4 +48,9 @@ describe 'libhttp integration tests'
     actual="$(curl -s -w "%{http_code}" "$SERVER_ADDR/invalid")"
     assert equal '404' "$actual"
   ti
+
+  it 'handles a request with duplicate headers'
+    actual="$(curl -s -w "%{http_code}" -o /dev/null "$SERVER_ADDR" -H 'header:v' -H 'header:v2')"
+    assert equal '200' "$actual"
+  ti
 end_describe

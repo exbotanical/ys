@@ -182,7 +182,7 @@ result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
           return NULL;  // 500
         }
 
-        int ovecsize = 30;
+        int ovecsize = 30;  // TODO: size
         int ovector[ovecsize];
 
         if (pcre_exec(re, NULL, path, strlen(path), 0, 0, ovector, ovecsize) <
