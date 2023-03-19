@@ -38,12 +38,13 @@ char* to_canonical_MIME_header_key(char* s);
 /**
  * req_header_get retrieves the first value for a given header key from
  * `headers`, or NULL if not found
+ * TODO: pub
  *
  * @param headers
  * @param key
  * @return char*
  */
-char* req_header_get(hash_table* headers, char* key);
+char* req_header_get(hash_table* headers, const char* key);
 
 /**
  * req_header_values returns a char array of all values for the given header key
@@ -53,7 +54,7 @@ char* req_header_get(hash_table* headers, char* key);
  * @param key
  * @return char**
  */
-char** req_header_values(hash_table* headers, char* key);
+char** req_header_values(hash_table* headers, const char* key);
 
 /**
  * res_header_append appends the given key/value pair as a header object in
@@ -63,7 +64,7 @@ char** req_header_values(hash_table* headers, char* key);
  * @param key
  * @param value
  */
-void res_header_append(array_t* headers, char* key, char* value);
+void res_header_append(array_t* headers, const char* key, const char* value);
 
 /**
  * insert_header inserts a key/value pair into the given hash table `headers`.

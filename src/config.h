@@ -5,8 +5,8 @@ typedef struct {
   short num_threads;
   int port_num;
   // TODO: const?
-  char* log_level;
-  char* log_file;
+  const char* log_level;
+  const char* log_file;
 } server_config_t;
 
 extern server_config_t server_config;

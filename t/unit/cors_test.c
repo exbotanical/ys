@@ -62,7 +62,7 @@ void insert_headers(req_t *req, array_t *headers) {
     // TODO: use method that does this internally so we never have to worry
     // about whether the value array_t was initialized
     array_t *v = array_init();
-    array_push(v, h->value);
+    array_push(v, (void *)h->value);
 
     ht_insert(req->headers, h->key, v);
   }
@@ -75,11 +75,13 @@ void check_status_code(res_t *res, int expected_status) {
   }
 }
 
-bool m(header_t *h, char *v) { return strcmp(h->key, v) == 0; }
+bool m(void *h, void *v) {
+  return strcmp(((header_t *)h)->key, (char *)v) == 0;
+}
 
 void check_headers(char *test_name, array_t *actual, array_t *expected) {
   for (unsigned int i = 0; i < sizeof(all_headers) / sizeof(char *); i++) {
-    char *key = all_headers[i];
+    const char *key = all_headers[i];
 
     int eidx = array_find(expected, m, key);
     int aidx = array_find(actual, m, key);
@@ -346,7 +348,7 @@ void test_are_headers_allowed() {
   typedef struct {
     char *name;
     cors_t *cors;
-    test_case *cases;
+    array_t *cases;
   } test;
 
   test tests[] = {
@@ -395,7 +397,7 @@ void test_is_method_allowed() {
   typedef struct {
     char *name;
     cors_t *cors;
-    test_case *cases;
+    array_t *cases;
   } test;
 
   test tests[] = {
@@ -433,7 +435,7 @@ void test_origin_is_allowed() {
   typedef struct {
     char *name;
     cors_t *cors;
-    test_case *cases;
+    array_t *cases;
   } test;
 
   test tests[] = {

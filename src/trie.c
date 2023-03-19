@@ -122,7 +122,8 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
   }
 }
 
-result_t *trie_search(trie_t *trie, char *method, const char *search_path) {
+result_t *trie_search(trie_t *trie, const char *method,
+                      const char *search_path) {
   result_t *result = malloc(sizeof(result_t));
   if (!result) {
     free(result);

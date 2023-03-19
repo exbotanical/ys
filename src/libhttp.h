@@ -101,16 +101,16 @@ typedef enum http_status {
 
 // A context object containing metadata to be passed to matched route handlers
 typedef struct {
-  char *path;
-  char *method;
-  char *accept;
-  char *body;
-  char *raw;
-  char *host;
-  char *protocol;
-  char *user_agent;
-  char *content_type;
-  char *version;
+  const char *path;
+  const char *method;
+  const char *accept;
+  const char *body;
+  const char *raw;
+  const char *host;
+  const char *protocol;
+  const char *user_agent;
+  const char *content_type;
+  const char *version;
   array_t *parameters;
   hash_table *headers;
   int content_length;
@@ -118,8 +118,8 @@ typedef struct {
 
 // TODO: relocate + opaque
 typedef struct {
-  char *key;
-  char *value;
+  const char *key;
+  const char *value;
 } header_t;
 
 // A response object; client handlers must return this struct to be sent to the

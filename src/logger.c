@@ -74,7 +74,7 @@ static void vlog(int level, int fd, const char *fmt, va_list va) {
         // snprintf null-terminates, even when truncating
         // retval >= size means result was truncated
         if ((header_len = snprintf(buf, sizeof(header), header, host_name)) >=
-            sizeof(header)) {
+            (int)sizeof(header)) {
           header_len = sizeof(header) - 1;
         }
       }
@@ -82,7 +82,7 @@ static void vlog(int level, int fd, const char *fmt, va_list va) {
 
     if ((buflen =
              vsnprintf(buf + header_len, sizeof(buf) - header_len, fmt, va) +
-             header_len) >= sizeof(buf)) {
+             header_len) >= (int)sizeof(buf)) {
       buflen = sizeof(buf) - 1;
     }
 
@@ -104,7 +104,7 @@ static void vlog(int level, int fd, const char *fmt, va_list va) {
  * in the server_config (or default if none specified)
  */
 static void setup_log_level() {
-  char *ptr = server_config.log_level;
+  const char *ptr = server_config.log_level;
   int j;
   for (j = 0; log_levels[j]; ++j) {
     if (strncmp(ptr, log_levels[j], strlen(log_levels[j])) == 0) {

@@ -18,7 +18,7 @@ void sanity_test_regex_cache_get() {
 }
 
 int main(int argc, char const *argv[]) {
-  plan(1);
+  plan(2);
   sanity_test_regex_cache_get();
   done_testing();
 

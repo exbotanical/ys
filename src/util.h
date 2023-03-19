@@ -17,17 +17,6 @@ static const char NULL_TERM = '\0';
 char *safe_itoa(int x);
 
 /**
- * collect_methods collects n methods into a character array
- * NOTE: The variadic arguments here use the sentinel variant; the list must
- * be punctuated with NULL
- *
- * @param method
- * @param ...
- * @return array_t*
- */
-array_t *collect_methods(http_method_t method, ...);
-
-/**
  * split splits a string on all instances of a delimiter. Sets errno if
  * provided null or otherwise invalid argument(s).
  *
@@ -71,7 +60,7 @@ char *substr(const char *str, int start, int end, bool inclusive);
  * @param s2
  * @return bool
  */
-bool safe_strcasecmp(char *s1, char *s2);
+bool safe_strcasecmp(const char *s1, const char *s2);
 
 /**
  * str_join joins all strings stored in an array_t thereof with the delimiter

@@ -5,20 +5,34 @@
 #include "path.h"
 #include "router.h"
 #include "tap.c/tap.h"
-#include "util.h"  // for collect_methods
 
 typedef struct {
-  char *method;
-  char *path;
+  const char *method;
+  const char *path;
 } search_query;
 
 typedef struct {
-  char *name;
+  const char *name;
   search_query search;
   const unsigned int expected_flag;
 } test_case;
 
-void *test_handler(void *arg) { return NULL; }
+array_t *collect_methods(http_method_t method, ...) {
+  array_t *methods = array_init();
+  va_list args;
+  va_start(args, method);
+
+  while (method != 0) {
+    array_push(methods, strdup(http_method_names[method]));
+    method = va_arg(args, http_method_t);
+  }
+
+  va_end(args);
+
+  return methods;
+}
+
+void *test_handler(void *a, void *b) { return NULL; }
 
 void test_trie_init() {
   trie_t *trie;
@@ -128,7 +142,7 @@ void test_trie_search_ok() {
 
     result_t *result = trie_search(trie, test.search.method, test.search.path);
 
-    void *(*h)(void *);
+    void *(*h)(void *, void *);
 
     lives_ok({ h = result->action->handler; },
              "%s test - accessible handler with %s", test.name,
@@ -136,7 +150,7 @@ void test_trie_search_ok() {
 
     lives_ok(
         {
-          h("TEST");  // TODO: pass route context and test
+          h("TEST", "TEST");  // TODO: pass route context and test
         },
         "%s test - callable handler", test.name);
   }

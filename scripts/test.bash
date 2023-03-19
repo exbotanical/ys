@@ -6,13 +6,13 @@ UTIL_F=util.bash
 REPO_DIR=http
 
 declare -a SKIP_FILES=(
-	'path_test.c'
-	'trie_test.c'
+	# 'path_test.c'
+	# 'trie_test.c'
   # 'util_test.c'
-  'request_test.c'
-  'header_test.c'
-  'cors_test.c'
-  'cache_test.c'
+  # 'request_test.c'
+  # 'header_test.c'
+  # 'cors_test.c'
+  # 'cache_test.c'
 )
 
 not_test_file () {
@@ -29,23 +29,11 @@ not_test_file () {
 	return $ret
 }
 
-LD_FLAGS='-lm'
-set_ldflags () {
-  local test_name="$1"
-
-  if [[ "$test_name" == "cache_test.c" ]]; then
-    echo "here"
-    LD_FLAGS='-lm -lpcre'
-  fi
-}
-
 run_test () {
 	local file_name="$1"
 
-  set_ldflags "$file_name"
 	gcc -D debug -Ideps -Isrc -c "$TESTING_DIR/$file_name" -o main.o
-	gcc -D debug -o main main.o -L./ -l$REPO_DIR "$LD_FLAGS"
-  LD_FLAGS=''
+	gcc -D debug -o main main.o -L./ -l$REPO_DIR -lm -lpcre
 
 	export LD_LIBRARY_PATH=$(pwd)/src/:$(pwd)/include/:$LD_LIBRARY_PATH
 	green "\n[+] Running test $file_name...\n\n"

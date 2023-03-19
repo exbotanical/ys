@@ -74,7 +74,8 @@ static void load_route(const char *file_path) {
   }
 
   for (http_method_t i = GET; i <= OPTIONS; i++) {
-    void *(*fn)(void *) = dlsym(h, http_method_names[i]);
+    handler_t *fn;
+    *(void **)(&fn) = dlsym(h, http_method_names[i]);
     if (!fn) {
       continue;
     }

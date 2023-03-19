@@ -73,6 +73,7 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
  * @param search_path A path to search against
  * @return result_t* A result object, or NULL if not found
  */
-result_t *trie_search(trie_t *trie, char *method, const char *search_path);
+result_t *trie_search(trie_t *trie, const char *method,
+                      const char *search_path);
 
 #endif /* TRIE_H */

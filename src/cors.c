@@ -17,7 +17,9 @@
  * @return true
  * @return false
  */
-bool match(char *s1, char *s2) { return safe_strcasecmp(s1, s2); }
+bool match(void *s1, void *s2) {
+  return safe_strcasecmp((char *)s1, (char *)s2);
+}
 
 /**
  * isPreflightRequest determines whether the given request is a Preflight.
@@ -45,9 +47,9 @@ static bool is_preflight_request(req_t *req) {
  *
  * @param request
  * @param response
- * @return req_t*
+ * @return res_t*
  */
-static req_t *handle_request(cors_t *c, req_t *req, res_t *res) {
+static res_t *handle_request(cors_t *c, req_t *req, res_t *res) {
   char *origin = req_header_get(req->headers, ORIGIN_HEADER);
   // Set the "vary" header to prevent proxy servers from sending cached
   // responses for one client to another
@@ -88,6 +90,8 @@ static req_t *handle_request(cors_t *c, req_t *req, res_t *res) {
   if (c->allow_credentials) {
     res_header_append(res->headers, ALLOW_CREDENTIALS_HEADER, "true");
   }
+
+  return res;
 }
 
 /**
@@ -96,9 +100,9 @@ static req_t *handle_request(cors_t *c, req_t *req, res_t *res) {
  * @param c
  * @param req
  * @param res
- * @return req_t*
+ * @return res_t*
  */
-static req_t *handle_preflight_request(cors_t *c, req_t *req, res_t *res) {
+static res_t *handle_preflight_request(cors_t *c, req_t *req, res_t *res) {
   char *origin = req_header_get(req->headers, ORIGIN_HEADER);
 
   // Set the "vary" header to prevent proxy servers from sending cached
@@ -162,6 +166,8 @@ static req_t *handle_preflight_request(cors_t *c, req_t *req, res_t *res) {
   if (c->max_age > 0) {
     res_header_append(res->headers, MAX_AGE_HEADER, fmt_str("%d", c->max_age));
   }
+
+  return res;
 }
 
 cors_t *cors_init(cors_opts_t *opts) {
@@ -178,7 +184,7 @@ cors_t *cors_init(cors_opts_t *opts) {
   if (!opts->allowed_origins || array_size(opts->allowed_origins) == 0) {
     c->allow_all_origins = true;
   } else {
-    for (int i = 0; i < array_size(opts->allowed_origins); i++) {
+    for (unsigned int i = 0; i < array_size(opts->allowed_origins); i++) {
       char *origin = array_get(opts->allowed_origins, i);
       if (strcmp("*", origin) == 0) {
         c->allow_all_origins = true;
@@ -202,13 +208,13 @@ cors_t *cors_init(cors_opts_t *opts) {
     // Default allowed headers. Defaults to the "Origin" header, though this
     // should be included automatically
     array_t *default_allowed_headers = array_init();
-    array_push(default_allowed_headers, ORIGIN_HEADER);
+    array_push(default_allowed_headers, (void *)ORIGIN_HEADER);
 
     c->allowed_headers = default_allowed_headers;
   } else {
     c->allowed_headers = array_init();
 
-    for (int i = 0; i < array_size(opts->allowed_headers); i++) {
+    for (unsigned int i = 0; i < array_size(opts->allowed_headers); i++) {
       char *header = array_get(opts->allowed_headers, i);
 
       if (strcmp("*", header) == 0) {
@@ -225,13 +231,13 @@ cors_t *cors_init(cors_opts_t *opts) {
     // Default allowed methods. Defaults to simple methods (those that do not
     // trigger a Preflight)
     array_t *default_allowed_methods = array_init();
-    array_push(default_allowed_methods, http_method_names[GET]);
-    array_push(default_allowed_methods, http_method_names[POST]);
-    array_push(default_allowed_methods, http_method_names[HEAD]);
+    array_push(default_allowed_methods, (void *)http_method_names[GET]);
+    array_push(default_allowed_methods, (void *)http_method_names[POST]);
+    array_push(default_allowed_methods, (void *)http_method_names[HEAD]);
 
     c->allowed_methods = default_allowed_methods;
   } else {
-    for (int i = 0; i < array_size(opts->allowed_methods); i++) {
+    for (unsigned int i = 0; i < array_size(opts->allowed_methods); i++) {
       char *method = array_get(opts->allowed_methods, i);
       array_push(c->allowed_methods, to_upper(method));
     }
@@ -241,7 +247,7 @@ cors_t *cors_init(cors_opts_t *opts) {
 }
 
 // TODO: handle
-req_t *cors_handler(cors_t *c, req_t *req, res_t *res) {
+res_t *cors_handler(cors_t *c, req_t *req, res_t *res) {
   if (is_preflight_request(req)) {
     handle_preflight_request(c, req, res);
 
@@ -270,7 +276,7 @@ bool are_headers_allowed(cors_t *c, array_t *headers) {
     return false;
   }
 
-  for (int i = 0; i < array_size(headers); i++) {
+  for (unsigned int i = 0; i < array_size(headers); i++) {
     char *header = to_canonical_MIME_header_key(array_get(headers, i));
     bool allows_header = false;
 
@@ -291,7 +297,7 @@ bool is_origin_allowed(cors_t *c, char *origin) {
     return true;
   }
 
-  for (int i = 0; i < array_size(c->allowed_origins); i++) {
+  for (unsigned int i = 0; i < array_size(c->allowed_origins); i++) {
     char *allowed_origin = array_get(c->allowed_origins, i);
     if (safe_strcasecmp(origin, allowed_origin)) {
       return true;
@@ -310,7 +316,7 @@ bool is_method_allowed(cors_t *c, char *method) {
     return true;
   }
 
-  for (int i = 0; i < array_size(c->allowed_methods); i++) {
+  for (unsigned int i = 0; i < array_size(c->allowed_methods); i++) {
     char *allowed_method = array_get(c->allowed_methods, i);
     if (safe_strcasecmp(method, allowed_method)) {
       return true;
@@ -332,7 +338,7 @@ array_t *derive_headers(req_t *req) {
   unsigned int len = strlen(header_str);
   array_t *tmp = array_init();
 
-  for (int i = 0; i < len; i++) {
+  for (unsigned int i = 0; i < len; i++) {
     char c = header_str[i];
 
     if ((c >= 'a' && c <= 'z') || c == '_' || c == '-' || c == '.' ||

@@ -17,30 +17,6 @@ char *safe_itoa(int x) {
   return str;
 }
 
-array_t *collect_methods(http_method_t method, ...) {
-  array_t *methods = array_init();
-  if (!methods) {
-    DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
-        "failed to allocate methods array via array_init");
-  }
-
-  va_list args;
-  va_start(args, method);
-
-  while (method != 0) {
-    if (!array_push(methods, strdup(http_method_names[method]))) {
-      free(methods);
-      DIE(EXIT_FAILURE, "[router::collect_methods] %s\n",
-          "failed to insert into methods array");
-    }
-    method = va_arg(args, http_method_t);
-  }
-
-  va_end(args);
-
-  return methods;
-}
-
 array_t *split(const char *str, const char *delimiter) {
   if (str == NULL || delimiter == NULL) {
     LOG("[path::split] invariant violation - null arguments(s), \
@@ -167,7 +143,7 @@ char *substr(const char *str, int start, int end, bool inclusive) {
   return ret;
 }
 
-bool safe_strcasecmp(char *s1, char *s2) {
+bool safe_strcasecmp(const char *s1, const char *s2) {
   unsigned int s1l = strlen(s1);
   unsigned int s2l = strlen(s2);
 
@@ -201,32 +177,7 @@ char *to_upper(const char *s) {
 
   for (size_t i = 0; i < l; i++) {
     ca[i] = toupper(s[i]);
-    s = ca;
   }
 
-  return s;
-}
-
-array_t *collect(void *item, ...) {
-  array_t *items = array_init();
-  if (!items) {
-    DIE(EXIT_FAILURE, "[utils::collect] %s\n",
-        "failed to allocate collect array via array_init");
-  }
-
-  va_list args;
-  va_start(args, item);
-
-  while (item != NULL) {
-    if (!array_push(items, item)) {
-      DIE(EXIT_FAILURE, "[utils::collect] %s\n",
-          "failed to push into collect array");
-    }
-
-    item = va_arg(args, void *);
-  }
-
-  va_end(args);
-
-  return items;
+  return ca;
 }

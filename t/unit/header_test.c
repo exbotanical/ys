@@ -86,9 +86,9 @@ void test_req_header_get() {
   hash_table *ht = ht_init(0);
   array_t *arr = array_init();
 
-  array_push(arr, v1);
-  array_push(arr, v2);
-  array_push(arr, v3);
+  array_push(arr, (char *)v1);
+  array_push(arr, (char *)v2);
+  array_push(arr, (char *)v3);
 
   ht_insert(ht, k1, arr);
 
@@ -106,9 +106,9 @@ void test_req_header_values() {
   hash_table *ht = ht_init(0);
   array_t *arr = array_init();
 
-  array_push(arr, v1);
-  array_push(arr, v2);
-  array_push(arr, v3);
+  array_push(arr, (char *)v1);
+  array_push(arr, (char *)v2);
+  array_push(arr, (char *)v3);
 
   ht_insert(ht, k1, arr);
 

@@ -8,7 +8,7 @@
 typedef struct route {
   array_t *methods;
   char *path;
-  void *(*handler)(void *);
+  void *(*handler)(void *, void *);
 } route_t;
 
 /**

@@ -81,9 +81,9 @@ cors_t *cors_init(cors_opts_t *opts);
  * @param c
  * @param req
  * @param res
- * @return req_t*
+ * @return res_t*
  */
-req_t *cors_handler(cors_t *c, req_t *req, res_t *res);
+res_t *cors_handler(cors_t *c, req_t *req, res_t *res);
 
 /**
  * derive_headers extracts the headers in the value of the

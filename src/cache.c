@@ -4,7 +4,7 @@
 
 #include "logger.h"
 
-pcre *regex_cache_get(hash_table *regex_cache, char *pattern) {
+pcre *regex_cache_get(hash_table *regex_cache, const char *pattern) {
   ht_record *r = ht_search(regex_cache, pattern);
   if (r) {
     return r->value;

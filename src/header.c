@@ -11,10 +11,10 @@ static pthread_once_t init_common_headers_once = PTHREAD_ONCE_INIT;
 static pthread_once_t init_singleton_headers_once = PTHREAD_ONCE_INIT;
 
 // common_headers interns common header strings
-static const hash_set* common_headers;
+static hash_set* common_headers;
 
 // singleton_headers interns common header strings
-static const hash_set* singleton_headers;
+static hash_set* singleton_headers;
 
 // to_lower is used to convert chars to lower case
 static const int to_lower = 'a' - 'A';
@@ -197,7 +197,7 @@ char* to_canonical_MIME_header_key(char* s) {
   return s;
 }
 
-char* req_header_get(hash_table* headers, char* key) {
+char* req_header_get(hash_table* headers, const char* key) {
   ht_record* header = ht_search(headers, key);
   if (!header) {
     return NULL;
@@ -206,13 +206,13 @@ char* req_header_get(hash_table* headers, char* key) {
   return array_get(header->value, 0);
 }
 
-char** req_header_values(hash_table* headers, char* key) {
+char** req_header_values(hash_table* headers, const char* key) {
   ht_record* header = ht_search(headers, key);
   if (!header) {
     return NULL;
   }
 
-  int sz = array_size(header->value);
+  unsigned int sz = array_size(header->value);
   char** headers_list = malloc(sz);
   if (!headers_list) {
     return NULL;
@@ -225,7 +225,7 @@ char** req_header_values(hash_table* headers, char* key) {
   return headers_list;
 }
 
-void res_header_append(array_t* headers, char* key, char* value) {
+void res_header_append(array_t* headers, const char* key, const char* value) {
   header_t* h = malloc(sizeof(header_t));
 
   h->key = key;
@@ -246,7 +246,8 @@ bool insert_header(hash_table* headers, const char* k, const char* v) {
       return false;
     }
 
-    array_push(existing_headers, v);
+    // TODO: test
+    array_push(existing_headers->value, (void*)v);
   } else {
     // We haven't encountered this header before; insert into the hash table
     // along with the first value
@@ -255,7 +256,7 @@ bool insert_header(hash_table* headers, const char* k, const char* v) {
       // TODO: die
     }
 
-    array_push(values, v);
+    array_push(values, (void*)v);
     ht_insert(headers, k, values);
   }
 

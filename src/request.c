@@ -39,7 +39,8 @@ bool req_has_parameters(req_t* req) {
 
 // TODO: break up into two functions
 req_t* read_and_parse_request(int sock) {
-  char buf[REQ_BUFFER_SIZE], *method, *path;
+  const char *method, *path;
+  char buf[REQ_BUFFER_SIZE];
   int pret, minor_version;
   struct phr_header headers[100];
   size_t buflen = 0, prevbuflen = 0, method_len, path_len, num_headers;
