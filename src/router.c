@@ -183,7 +183,7 @@ void router_run(__router_t *router, int client_socket, req_t *req) {
     res = h(req, res);
   }
 
-  send_response(client_socket, res);
+  send_response(client_socket, serialize_response(req, res));
 }
 
 void router_free(router_t *router) { free(router); }

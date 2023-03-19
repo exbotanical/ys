@@ -7,7 +7,6 @@
 - [x] HTTP request parser
 - [ ] test handlers with a mocking library
 - [x] static
-- [x] logging
 - [x] error-handling
 - [ ] documentation
 - [ ] use attr struct for fallback handlers
@@ -35,19 +34,42 @@
 - [ ] check all instances of `strcmp` and see if `strncmp` makes more sense
 - [ ] handle accept header
 - [ ] replace `LOG` macro calls with new logger
+  - [ ] fix log to stderr
+  - [ ] use function name macro instead of explicit string literals
 - [ ] allow middleware to exit early by sending response
 - [ ] cross-OS compatibility
   - [ ] source strdup from dep
 - [ ] review all `include`d functions and replace any non-standard ones
 - [ ] prefix all enums with `METHOD_` or `STATUS_`
 - [ ] make regex cache global (instead of per-trie-node)
-- [ ] handle duplicate headers
+- [x] handle duplicate request headers
   - Go style: append subsequent values, but `Get` retrieves the first only. `Values` returns list of all. In response, each duplicate header is written separately
+- [ ] handle duplicate response headers
 - [ ] specific int types
 - [ ] xmalloc that dies
 - [ ] use a better regex engine than pcre
 
+
 ## Style Guide
 - Use [Go Doc-style](https://tip.golang.org/doc/comment) for doc  comments e.g. `// function_name does thing`
 
-- comment what is used from a header where possible
+- comment what is used from an include header where possible
+
+
+## Desired API
+- Router
+  - `router_init(router_attr_t*)`
+  - `router_set_400_handler(router_attr_t*, handler_t*)`
+  - `router_set_400_handler(router_attr_t*, handler_t*)`
+  - `router_set_405_handler(router_attr_t*, handler_t*)`
+  - `router_set_500_handler(router_attr_t*, handler_t*)`
+  - `router_register`
+- Server
+  - `server_init(router_t*, int)`
+  - `server_start(server_t*)`
+  - `server_free(server_t*)`
+- Request
+  - `get_request_header(req_t*, const char*)`
+- Response
+  - `set_response_header(req_t*, const char*, const char*)`
+  - `insert_response_header(req_t*, const char*, const char*)`

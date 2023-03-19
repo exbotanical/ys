@@ -69,14 +69,16 @@ static void init_common_headers() {
 /**
  * init_singleton_headers initializes the singleton headers hash set. A
  * singleton header is a header that cannot be duplicated for a request per
- * Section 4.2 of RFC 7230.
- * TODO: test
+ * RFC 7230.
+ * TODO: fix + test
+ * TODO: case sensitive?
  */
 static void init_singleton_headers() {
-  singleton_headers = hs_init(2);
+  singleton_headers = hs_init(3);
 
   hs_insert(singleton_headers, "Content-Type");
   hs_insert(singleton_headers, "Content-Length");
+  hs_insert(singleton_headers, "Host");
 }
 
 /**
