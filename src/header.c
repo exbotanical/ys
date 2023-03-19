@@ -3,7 +3,7 @@
 #include <pthread.h>  // for pthread_once
 #include <stdbool.h>
 #include <stdlib.h>  // for malloc
-#include <string.h>  // for strlen, strcmp
+#include <string.h>  // for strlen
 
 #include "libhttp.h"
 
@@ -108,13 +108,13 @@ static hash_set* get_singleton_header_set() {
 }
 
 /**
- * valid_header_field_byte returns a bool indicating whether the given byte is a
- * valid header char
+ * is_valid_header_field_byte returns a bool indicating whether the given byte
+ * is a valid header char
  *
  * @param b
  * @return bool
  */
-static bool valid_header_field_byte(int b) {
+static bool is_valid_header_field_byte(int b) {
   return b < sizeof(token_table) && token_table[b];
 }
 
@@ -145,7 +145,7 @@ static char* canonical_mime_header_key(char* s) {
   // See if it looks like a header key; if not return it as-is
   for (unsigned int i = 0; i < strlen(s); i++) {
     char c = s[i];
-    if (valid_header_field_byte(c)) {
+    if (is_valid_header_field_byte(c)) {
       continue;
     }
 
@@ -181,7 +181,7 @@ char* to_canonical_MIME_header_key(char* s) {
   bool upper = true;
   for (unsigned int i = 0; i < strlen(s); i++) {
     char c = s[i];
-    if (!valid_header_field_byte(c)) {
+    if (!is_valid_header_field_byte(c)) {
       return s;
     }
 

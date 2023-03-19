@@ -2,7 +2,7 @@
 
 #include "libhttp.h"
 
-// TODO: replace with a generic `collect_x`
+// TODO: replace with an attr object
 array_t *collect_middleware(handler_t *middleware, ...) {
   array_t *middlewares = array_init();
   if (!middlewares) {

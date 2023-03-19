@@ -9,7 +9,7 @@
 #include "response.h"  // for response_init, send_response
 #include "server.h"    // for send_response
 
-const char CONFIG_FILE_NAME[13] = "libhttp.conf";
+static const char CONFIG_FILE_NAME[13] = "libhttp.conf";
 
 /**
  * setup_env configures the `server_config` and logger for the current runtime

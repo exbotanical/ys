@@ -46,7 +46,7 @@ array_t *split(const char *str, const char *delimiter) {
   }
 
   // If the input *is* the delimiter, just return the empty array
-  if (strcmp(input, delimiter) == 0) {
+  if (str_equals(input, delimiter)) {
     return tokens;
   }
 
@@ -181,3 +181,5 @@ char *to_upper(const char *s) {
 
   return ca;
 }
+
+bool str_equals(const char *s1, const char *s2) { return strcmp(s1, s2) == 0; }

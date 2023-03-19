@@ -4,7 +4,6 @@
 typedef struct {
   short num_threads;
   int port_num;
-  // TODO: const?
   const char* log_level;
   const char* log_file;
 } server_config_t;

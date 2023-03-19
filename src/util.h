@@ -79,4 +79,15 @@ char *str_join(array_t *strarr, const char *delim);
  * @return char*
  */
 char *to_upper(const char *s);
+
+/**
+ * str_equals returns a bool indicating whether strings s1 and s2 are completely
+ * equal (case-sensitive)
+ *
+ * @param s1
+ * @param s2
+ * @return bool
+ */
+bool str_equals(const char *s1, const char *s2);
+
 #endif /* UTIL_H */

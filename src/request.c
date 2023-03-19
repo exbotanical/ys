@@ -6,7 +6,6 @@
 #include <fcntl.h>
 #include <stdbool.h>
 #include <stdlib.h>  // for malloc
-#include <string.h>  // for strcmp
 #include <unistd.h>  // for read
 
 #include "header.h"
@@ -14,7 +13,7 @@
 #include "libhttp.h"
 #include "picohttpparser/picohttpparser.h"
 #include "request.h"
-#include "util.h"  // for safe_strcasecmp
+#include "util.h"  // for safe_strcasecmp, str_equals
 
 parameter_t* req_get_parameter_at(req_t* req, unsigned int idx) {
   return array_get(req->parameters, idx);
@@ -23,7 +22,7 @@ parameter_t* req_get_parameter_at(req_t* req, unsigned int idx) {
 void* req_get_parameter(req_t* req, const char* key) {
   for (unsigned int i = 0; i < req_num_parameters(req); i++) {
     parameter_t* param = req_get_parameter_at(req, i);
-    if (strcmp(param->key, key) == 0) {
+    if (str_equals(param->key, key)) {
       return param->value;
     }
   }

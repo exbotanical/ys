@@ -3,7 +3,7 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>  // for malloc
-#include <string.h>  // for strlen, strcmp
+#include <string.h>  // for strlen
 
 #include "header.h"  // for req_header_get, res_header_append
 #include "util.h"
@@ -33,7 +33,7 @@ bool match(void *s1, void *s2) {
  * @return false
  */
 static bool is_preflight_request(req_t *req) {
-  bool is_options_req = strcmp(req->method, "OPTIONS") == 0;
+  bool is_options_req = str_equals(req->method, "OPTIONS");
   bool has_origin_header = true;   // TODO:
   bool has_request_method = true;  // TODO:
 
@@ -56,7 +56,7 @@ static res_t *handle_request(cors_t *c, req_t *req, res_t *res) {
   res_header_append(res->headers, VARY_HEADER, ORIGIN_HEADER);
 
   // If no origin was specified, this is not a valid CORS request
-  if (!origin || strcmp(origin, "") == 0) {
+  if (!origin || str_equals(origin, "")) {
     // TODO: nope
 
     return res;
@@ -112,7 +112,7 @@ static res_t *handle_preflight_request(cors_t *c, req_t *req, res_t *res) {
                             REQUEST_HEADERS_HEADER));
 
   // If no origin was specified, this is not a valid CORS request
-  if (strcmp(origin, "") == 0) {
+  if (str_equals(origin, "")) {
     return NULL;  // TODO: NOPE
   }
 
@@ -186,7 +186,7 @@ cors_t *cors_init(cors_opts_t *opts) {
   } else {
     for (unsigned int i = 0; i < array_size(opts->allowed_origins); i++) {
       char *origin = array_get(opts->allowed_origins, i);
-      if (strcmp("*", origin) == 0) {
+      if (str_equals("*", origin)) {
         c->allow_all_origins = true;
         break;
       }
@@ -217,7 +217,7 @@ cors_t *cors_init(cors_opts_t *opts) {
     for (unsigned int i = 0; i < array_size(opts->allowed_headers); i++) {
       char *header = array_get(opts->allowed_headers, i);
 
-      if (strcmp("*", header) == 0) {
+      if (str_equals("*", header)) {
         c->allow_all_headers = true;
         break;
       }
@@ -331,7 +331,7 @@ array_t *derive_headers(req_t *req) {
   char *header_str = req_header_get(req->headers, REQUEST_HEADERS_HEADER);
   array_t *headers = array_init();
 
-  if (!header_str || strcmp(header_str, "") == 0) {
+  if (!header_str || str_equals(header_str, "")) {
     return headers;
   }
 

@@ -7,12 +7,13 @@
 #include <unistd.h>  // for ssize_t
 
 #include "logger.h"  // for DIE
+#include "util.h"    // for str_equals
 
 static const char MESSAGE_BODY_SEP[3] = "\n\n";
 
 static bool is_2xx_connect(req_t *req, res_t *res) {
   return (res->status >= 200 && res->status < 300) &&
-         strcmp(req->method, http_method_names[CONNECT]) == 0;
+         str_equals(req->method, http_method_names[CONNECT]);
 }
 
 static bool is_informational(res_t *res) {

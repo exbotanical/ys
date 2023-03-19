@@ -2,7 +2,7 @@
 
 #include <stdio.h>   // for FILE, stderr
 #include <stdlib.h>  // for free
-#include <string.h>  // for strcmp, strcspn, strdup
+#include <string.h>  // for strcspn, strdup
 
 // Default server config
 server_config_t server_config = {.log_file = NULL,
@@ -27,13 +27,13 @@ void parse_config(const char* filename) {
     if (name && value) {
       value[strcspn(value, "\r\n")] = '\0';  // remove trailing newline
 
-      if (strcmp(name, SERVER_PORT_KEY) == 0) {
+      if (str_equals(name, SERVER_PORT_KEY)) {
         server_config.port_num = atoi(value);
-      } else if (strcmp(name, NUM_THREADS_KEY) == 0) {
+      } else if (str_equals(name, NUM_THREADS_KEY)) {
         server_config.num_threads = atoi(value);
-      } else if (strcmp(name, LOG_LEVEL_KEY) == 0) {
+      } else if (str_equals(name, LOG_LEVEL_KEY)) {
         server_config.log_level = strdup(value);
-      } else if (strcmp(name, LOG_FILE_KEY) == 0) {
+      } else if (str_equals(name, LOG_FILE_KEY)) {
         server_config.log_file = strdup(value);
       } else {
         fprintf(stderr, "Unknown option '%s' in config file\n", name);

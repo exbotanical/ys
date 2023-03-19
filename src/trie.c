@@ -1,7 +1,7 @@
 #include "trie.h"
 
 #include <pcre.h>    // This library relies on the ability to utilize PCRE regex
-#include <string.h>  // for strcmp, strdup, strlen
+#include <string.h>  // for strdup, strlen
 
 #include "cache.h"  // for regex_cache_get
 #include "logger.h"
@@ -63,7 +63,7 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
   node_t *curr = trie->root;
 
   // Handle root path
-  if (strcmp(path, PATH_ROOT) == 0) {
+  if (str_equals(path, PATH_ROOT)) {
     curr->label = strdup(path);
 
     for (unsigned int i = 0; i < array_size(methods); i++) {
@@ -151,7 +151,7 @@ result_t *trie_search(trie_t *trie, const char *method,
     }
 
     if (curr->children->count == 0) {
-      if (strcmp(curr->label, path) != 0) {
+      if (!str_equals(curr->label, path)) {
         // No matching route result found
         result->flags |= NOT_FOUND_MASK;
         return result;
@@ -234,7 +234,7 @@ result_t *trie_search(trie_t *trie, const char *method,
     }
   }
 
-  if (strcmp(search_path, PATH_ROOT) == 0) {
+  if (str_equals(search_path, PATH_ROOT)) {
     // No matching handler
     if (curr->actions->count == 0) {
       result->flags |= NOT_FOUND_MASK;
