@@ -8,6 +8,7 @@
 
 #include "logger.h"  // for DIE
 #include "util.h"    // for str_equals
+#include "xmalloc.h"
 
 static const char MESSAGE_BODY_SEP[3] = "\n\n";
 
@@ -109,10 +110,7 @@ done:
 }
 
 res_t *response_init() {
-  res_t *res = malloc(sizeof(res_t));
-  if (!res) {
-    DIE(EXIT_FAILURE, "%s\n", "unable to allocate res_t");
-  }
+  res_t *res = xmalloc(sizeof(res_t));
 
   res->headers = array_init();
   if (!res->headers) {

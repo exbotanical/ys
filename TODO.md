@@ -46,7 +46,7 @@
   - Go style: append subsequent values, but `Get` retrieves the first only. `Values` returns list of all. In response, each duplicate header is written separately
 - [ ] handle duplicate response headers
 - [ ] specific int types
-- [ ] xmalloc that dies
+- [x] xmalloc that dies
 - [ ] use a better regex engine than pcre
 
 

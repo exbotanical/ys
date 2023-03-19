@@ -11,6 +11,7 @@
 
 #include "libutil/libutil.h"
 #include "logger.h"
+#include "xmalloc.h"
 
 static router_t *router;
 // TODO: make atomic
@@ -22,7 +23,7 @@ char *create_temp_file(char *filename_template) {
 
   // Copy filename template to a buffer we can modify
   size_t template_len = strlen(filename_template);
-  char *template_copy = malloc(template_len + 1);
+  char *template_copy = xmalloc(template_len + 1);
   strcpy(template_copy, filename_template);
 
   // Call mkstemp to create a unique filename
@@ -36,7 +37,7 @@ char *create_temp_file(char *filename_template) {
   close(fd);
 
   // Allocate memory for the final filename and copy it
-  temp_filename = malloc(template_len + 1);
+  temp_filename = xmalloc(template_len + 1);
   strcpy(temp_filename, template_copy);
 
   // Rename the temporary file to the final filename

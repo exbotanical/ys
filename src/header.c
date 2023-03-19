@@ -2,10 +2,10 @@
 
 #include <pthread.h>  // for pthread_once
 #include <stdbool.h>
-#include <stdlib.h>  // for malloc
 #include <string.h>  // for strlen
 
 #include "libhttp.h"
+#include "xmalloc.h"
 
 static pthread_once_t init_common_headers_once = PTHREAD_ONCE_INIT;
 static pthread_once_t init_singleton_headers_once = PTHREAD_ONCE_INIT;
@@ -164,7 +164,7 @@ static char* canonical_mime_header_key(char* s) {
     }
 
     // TODO: fix ... ugh this is disgusting
-    char* ca = malloc(strlen(s) + 1);
+    char* ca = xmalloc(strlen(s) + 1);
     strncpy(ca, s, strlen(s));
     ca[strlen(s)] = '\0';
     ca[i] = c;
@@ -215,10 +215,7 @@ char** req_header_values(hash_table* headers, const char* key) {
   }
 
   unsigned int sz = array_size(header->value);
-  char** headers_list = malloc(sz);
-  if (!headers_list) {
-    return NULL;
-  }
+  char** headers_list = xmalloc(sz);
 
   for (unsigned int i = 0; i < sz; i++) {
     headers_list[i] = (char*)array_get(header->value, i);
@@ -228,7 +225,7 @@ char** req_header_values(hash_table* headers, const char* key) {
 }
 
 void res_header_append(array_t* headers, const char* key, const char* value) {
-  header_t* h = malloc(sizeof(header_t));
+  header_t* h = xmalloc(sizeof(header_t));
 
   h->key = key;
   h->value = value;

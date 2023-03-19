@@ -14,6 +14,7 @@
 #include "picohttpparser/picohttpparser.h"
 #include "request.h"
 #include "util.h"  // for safe_strcasecmp, str_equals
+#include "xmalloc.h"
 
 parameter_t* req_get_parameter_at(req_t* req, unsigned int idx) {
   return array_get(req->parameters, idx);
@@ -75,7 +76,7 @@ req_t* read_and_parse_request(int sock) {
     }
   }
 
-  req_t* request = malloc(sizeof(req_t));
+  req_t* request = xmalloc(sizeof(req_t));
   request->raw = buf;
   request->content_length = pret;
   request->method = fmt_str("%.*s", (int)method_len, method);

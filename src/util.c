@@ -4,14 +4,14 @@
 #include <errno.h>
 #include <stdarg.h>  // for variadic args functions
 #include <stdio.h>   // for snprintf
-#include <stdlib.h>  // for malloc
 #include <string.h>  // for strdup
 
 #include "logger.h"  // for DIE
+#include "xmalloc.h"
 
 char *safe_itoa(int x) {
   int length = snprintf(NULL, 0, "%d", x);
-  char *str = malloc(length + 1);
+  char *str = xmalloc(length + 1);
   snprintf(str, length + 1, "%d", x);
 
   return str;
@@ -123,14 +123,7 @@ char *substr(const char *str, int start, int end, bool inclusive) {
   }
 
   int size_multiplier = end - start;
-  char *ret = malloc(sizeof(char) * size_multiplier);
-  if (ret == NULL) {
-    free(ret);
-    DIE(EXIT_FAILURE,
-        "[path::substr] failed to allocate char* with `malloc`, where \
-			size multiplier was %d\n",
-        size_multiplier);
-  }
+  char *ret = xmalloc(sizeof(char) * size_multiplier);
 
   int i = 0;
   int j = 0;
@@ -171,7 +164,7 @@ char *str_join(array_t *strarr, const char *delim) {
 char *to_upper(const char *s) {
   size_t l = strlen(s);
 
-  char *ca = malloc(l + 1);
+  char *ca = xmalloc(l + 1);
   strncpy(ca, s, l);
   ca[l] = '\0';
 

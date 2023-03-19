@@ -1,13 +1,13 @@
 #include "router.h"
 
 #include <stdarg.h>  // for variadic args functions
-#include <stdlib.h>  // for exit, malloc
 #include <string.h>  // for strdup
 
 #include "config.h"
 #include "logger.h"
 #include "response.h"  // for response_init, send_response
 #include "server.h"    // for send_response
+#include "xmalloc.h"
 
 static const char CONFIG_FILE_NAME[13] = "libhttp.conf";
 
@@ -99,12 +99,7 @@ router_t *router_init(handler_t *not_found_handler,
   // Initialize config opts
   setup_env();
 
-  __router_t *router = malloc(sizeof(__router_t));
-  if (!router) {
-    router_free((router_t *)router);
-    DIE(EXIT_FAILURE, "[router::router_init] %s\n",
-        "failed to allocate router_t");
-  }
+  __router_t *router = xmalloc(sizeof(__router_t));
 
   router->trie = trie_init();
 

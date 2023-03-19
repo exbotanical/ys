@@ -7,6 +7,7 @@
 #include "logger.h"
 #include "path.h"
 #include "util.h"
+#include "xmalloc.h"
 
 /**
  * node_init allocates memory for a new node, its children and action members
@@ -14,11 +15,7 @@
  * @return node_t*
  */
 static node_t *node_init() {
-  node_t *node = malloc(sizeof(node_t));
-  if (!node) {
-    free(node);
-    DIE(EXIT_FAILURE, "[trie::node_init] %s\n", "failed to allocate node");
-  }
+  node_t *node = xmalloc(sizeof(node_t));
 
   node->children = ht_init(0);
   if (!node->children) {
@@ -40,11 +37,7 @@ static node_t *node_init() {
 }
 
 trie_t *trie_init() {
-  trie_t *trie = malloc(sizeof(trie_t));
-  if (trie == NULL) {
-    free(trie);
-    DIE(EXIT_FAILURE, "[trie::trie_init] %s\n", "failed to allocate trie_t");
-  }
+  trie_t *trie = xmalloc(sizeof(trie_t));
 
   trie->root = node_init();
   trie->regex_cache = ht_init(0);
@@ -67,12 +60,7 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
     curr->label = strdup(path);
 
     for (unsigned int i = 0; i < array_size(methods); i++) {
-      action_t *action = malloc(sizeof(action_t));
-      if (!action) {
-        free(action);
-        DIE(EXIT_FAILURE, "[trie::trie_insert] %s\n",
-            "failed to allocate action");
-      }
+      action_t *action = xmalloc(sizeof(action_t));
 
       action->handler = handler;
       action->middlewares = middlewares;
@@ -104,12 +92,7 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
       for (unsigned int k = 0; k < array_size(methods); k++) {
         char *method = array_get(methods, k);
 
-        action_t *action = malloc(sizeof(action_t));
-        if (!action) {
-          free(action);
-          DIE(EXIT_FAILURE, "[trie::trie_insert] %s\n",
-              "failed to allocate action");
-        }
+        action_t *action = xmalloc(sizeof(action_t));
 
         action->handler = handler;
         action->middlewares = middlewares;
@@ -124,11 +107,7 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
 
 result_t *trie_search(trie_t *trie, const char *method,
                       const char *search_path) {
-  result_t *result = malloc(sizeof(result_t));
-  if (!result) {
-    free(result);
-    DIE(EXIT_FAILURE, "[trie::trie_search] %s\n", "failed to allocate result");
-  }
+  result_t *result = xmalloc(sizeof(result_t));
 
   result->parameters = array_init();
   if (!result->parameters) {
@@ -195,12 +174,7 @@ result_t *trie_search(trie_t *trie, const char *method,
 
         char *param_key = derive_parameter_key(child->label);
 
-        parameter_t *param = malloc(sizeof(parameter_t));
-        if (!param) {
-          free(param);
-          DIE(EXIT_FAILURE, "[trie::trie_search] %s\n",
-              "failed to allocate param");
-        }
+        parameter_t *param = xmalloc(sizeof(parameter_t));
 
         param->key = param_key;
         param->value = path;

@@ -14,6 +14,7 @@
 #include "request.h"  // for deserialize_req
 #include "router.h"
 #include "util.h"
+#include "xmalloc.h"
 
 /**
  * client_thread_handler handles client connections and executes the
@@ -45,10 +46,7 @@ server_t *server_init(router_t *router, int port) {
     port = server_config.port_num;
   }
 
-  __server_t *server = malloc(sizeof(__server_t));
-  if (!server) {
-    DIE(EXIT_FAILURE, "%s\n", "failed to allocate server");
-  }
+  __server_t *server = xmalloc(sizeof(__server_t));
 
   server->router = (__router_t *)router;
   server->port = port;
@@ -135,7 +133,7 @@ bool server_start(server_t *server) {
       LOG("[server::start] %s\n",
           "accepted connection from new client; spawning handler thread...");
 
-      client_context_t *c_ctx = malloc(sizeof(client_context_t));
+      client_context_t *c_ctx = xmalloc(sizeof(client_context_t));
       c_ctx->address = (struct sockaddr *)&address;
       c_ctx->addr_len = &addr_len;
       c_ctx->client_socket = client_socket;

@@ -2,11 +2,11 @@
 
 #include <ctype.h>
 #include <stdbool.h>
-#include <stdlib.h>  // for malloc
 #include <string.h>  // for strlen
 
 #include "header.h"  // for req_header_get, res_header_append
 #include "util.h"
+#include "xmalloc.h"
 
 /**
  * match is a matcher function for comparing array values against a given value
@@ -171,7 +171,7 @@ static res_t *handle_preflight_request(cors_t *c, req_t *req, res_t *res) {
 }
 
 cors_t *cors_init(cors_opts_t *opts) {
-  cors_t *c = malloc(sizeof(cors_t));
+  cors_t *c = xmalloc(sizeof(cors_t));
   c->allow_credentials = opts->allow_credentials;
   c->max_age = opts->max_age;
   c->exposed_headers = opts->expose_headers;
@@ -353,7 +353,7 @@ array_t *derive_headers(req_t *req) {
     if (c == ' ' || c == ',' || i == len - 1) {
       unsigned int size = array_size(tmp);
       if (size > 0) {
-        char *v = malloc(size + 1);
+        char *v = xmalloc(size + 1);
         unsigned int i;
         for (i = 0; i < size; i++) {
           v[i] = array_get(tmp, i);
