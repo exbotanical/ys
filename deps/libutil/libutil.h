@@ -8,6 +8,10 @@ extern "C" {
 #include <stdbool.h>
 #include <stddef.h>
 
+#define foreach(arr, i) for (unsigned int i = 0; i < array_size(arr); i++)
+#define foreach_i(arr, i, start) \
+  for (unsigned int i = start; i < array_size(arr); i++)
+
 typedef struct {
   void **state;
   unsigned int len;

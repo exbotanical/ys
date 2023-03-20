@@ -54,7 +54,7 @@ inline static array_t *toheaders(char *s, ...) {
 }
 
 void insert_headers(req_t *req, array_t *headers) {
-  for (unsigned int i = 0; i < array_size(headers); i++) {
+  foreach (headers, i) {
     header_t *h = array_get(headers, i);
 
     // We're not using this helper for duplicate headers, so we can assume the
@@ -331,7 +331,7 @@ void test_derive_headers() {
   array_t *expected = toarr("x-test-1", "x-test-2", "x-test-3", NULL);
   array_t *actual = derive_headers(req);
 
-  for (unsigned int i = 0; i < array_size(expected); i++) {
+  foreach (expected, i) {
     char *e = array_get(expected, i);
     char *a = array_get(actual, i);
 
@@ -378,7 +378,7 @@ void test_are_headers_allowed() {
 
   for (unsigned int i = 0; i < sizeof(tests) / sizeof(test); i++) {
     test t = tests[i];
-    for (unsigned int j = 0; j < array_size(t.cases); j++) {
+    foreach (t.cases, j) {
       test_case *c = (test_case *)array_get(t.cases, j);
 
       bool actual = are_headers_allowed(t.cors, c->test_headers);
@@ -416,7 +416,7 @@ void test_is_method_allowed() {
 
   for (unsigned int i = 0; i < sizeof(tests) / sizeof(test); i++) {
     test t = tests[i];
-    for (unsigned int j = 0; j < array_size(t.cases); j++) {
+    foreach (t.cases, j) {
       test_case *c = (test_case *)array_get(t.cases, j);
 
       bool actual = is_method_allowed(t.cors, c->method);
@@ -466,7 +466,7 @@ void test_origin_is_allowed() {
 
   for (unsigned int i = 0; i < sizeof(tests) / sizeof(test); i++) {
     test t = tests[i];
-    for (unsigned int j = 0; j < array_size(t.cases); j++) {
+    foreach (t.cases, j) {
       test_case *c = (test_case *)array_get(t.cases, j);
 
       bool actual = is_origin_allowed(t.cors, c->origin);

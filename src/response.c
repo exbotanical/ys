@@ -52,7 +52,7 @@ buffer_t *serialize_response(req_t *req, res_t *res) {
   buffer_append(rbuf,
                 fmt_str("HTTP/1.1 %d %s\n", status, http_status_names[status]));
 
-  for (unsigned int i = 0; i < array_size(headers); i++) {
+  foreach (headers, i) {
     char *header = array_get(headers, i);
 
     buffer_append(rbuf, header);

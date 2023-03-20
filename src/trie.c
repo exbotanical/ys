@@ -59,7 +59,7 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
   if (str_equals(path, PATH_ROOT)) {
     curr->label = strdup(path);
 
-    for (unsigned int i = 0; i < array_size(methods); i++) {
+    foreach (methods, i) {
       action_t *action = xmalloc(sizeof(action_t));
 
       action->handler = handler;
@@ -72,7 +72,7 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
   }
 
   array_t *paths = expand_path(path);
-  for (unsigned int i = 0; i < array_size(paths); i++) {
+  foreach (paths, i) {
     char *split_path = array_get(paths, i);
     ht_record *next = ht_search(curr->children, split_path);
     if (next) {
@@ -89,7 +89,7 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
     if (i == array_size(paths) - 1) {
       curr->label = split_path;
 
-      for (unsigned int k = 0; k < array_size(methods); k++) {
+      foreach (methods, k) {
         char *method = array_get(methods, k);
 
         action_t *action = xmalloc(sizeof(action_t));
@@ -120,7 +120,7 @@ result_t *trie_search(trie_t *trie, const char *method,
   node_t *curr = trie->root;
 
   array_t *paths = expand_path(search_path);
-  for (unsigned int i = 0; i < array_size(paths); i++) {
+  foreach (paths, i) {
     char *path = array_get(paths, i);
 
     ht_record *next = ht_search(curr->children, path);

@@ -184,7 +184,7 @@ cors_t *cors_init(cors_opts_t *opts) {
   if (!opts->allowed_origins || array_size(opts->allowed_origins) == 0) {
     c->allow_all_origins = true;
   } else {
-    for (unsigned int i = 0; i < array_size(opts->allowed_origins); i++) {
+    foreach (opts->allowed_origins, i) {
       char *origin = array_get(opts->allowed_origins, i);
       if (str_equals("*", origin)) {
         c->allow_all_origins = true;
@@ -214,7 +214,7 @@ cors_t *cors_init(cors_opts_t *opts) {
   } else {
     c->allowed_headers = array_init();
 
-    for (unsigned int i = 0; i < array_size(opts->allowed_headers); i++) {
+    foreach (opts->allowed_headers, i) {
       char *header = array_get(opts->allowed_headers, i);
 
       if (str_equals("*", header)) {
@@ -237,7 +237,7 @@ cors_t *cors_init(cors_opts_t *opts) {
 
     c->allowed_methods = default_allowed_methods;
   } else {
-    for (unsigned int i = 0; i < array_size(opts->allowed_methods); i++) {
+    foreach (opts->allowed_methods, i) {
       char *method = array_get(opts->allowed_methods, i);
       array_push(c->allowed_methods, to_upper(method));
     }
@@ -276,7 +276,7 @@ bool are_headers_allowed(cors_t *c, array_t *headers) {
     return false;
   }
 
-  for (unsigned int i = 0; i < array_size(headers); i++) {
+  foreach (headers, i) {
     char *header = to_canonical_MIME_header_key(array_get(headers, i));
     bool allows_header = false;
 
@@ -297,7 +297,7 @@ bool is_origin_allowed(cors_t *c, char *origin) {
     return true;
   }
 
-  for (unsigned int i = 0; i < array_size(c->allowed_origins); i++) {
+  foreach (c->allowed_origins, i) {
     char *allowed_origin = array_get(c->allowed_origins, i);
     if (safe_strcasecmp(origin, allowed_origin)) {
       return true;
@@ -316,7 +316,7 @@ bool is_method_allowed(cors_t *c, char *method) {
     return true;
   }
 
-  for (unsigned int i = 0; i < array_size(c->allowed_methods); i++) {
+  foreach (c->allowed_methods, i) {
     char *allowed_method = array_get(c->allowed_methods, i);
     if (safe_strcasecmp(method, allowed_method)) {
       return true;

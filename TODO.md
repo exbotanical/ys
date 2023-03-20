@@ -60,6 +60,7 @@
   - [ ] fix log to stderr
   - [ ] use function name macro instead of explicit string literals
 - [ ] inline functions where reasonable
+- [ ] Change middleware chaining to use `next`, the next middleware in the chain. This will allow a current handler to *not* invoke `next`, thus ending the chain.
 
 ## DX
 - [ ] helper ??? `#define CAST(type, name, stmt) type *name = (type *)stmt`

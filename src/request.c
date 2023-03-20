@@ -31,7 +31,9 @@ void* req_get_parameter(req_t* req, const char* key) {
   return NULL;
 }
 
-bool req_num_parameters(req_t* req) { return array_size(req->parameters); }
+unsigned int req_num_parameters(req_t* req) {
+  return array_size(req->parameters);
+}
 
 bool req_has_parameters(req_t* req) {
   return req && array_size(req->parameters) > 0;

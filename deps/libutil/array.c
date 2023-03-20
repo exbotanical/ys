@@ -60,6 +60,7 @@ bool array_includes(array_t *array, comparator_function_t *comparator,
 int array_find(array_t *array, comparator_function_t *comparator,
                void *compare_to) {
   __array_t *internal = (__array_t *)array;
+
   for (unsigned int i = 0; i < internal->len; i++) {
     if (comparator(internal->state[i], compare_to)) {
       return i;

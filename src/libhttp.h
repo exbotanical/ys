@@ -256,10 +256,9 @@ parameter_t *req_get_parameter_at(req_t *req, unsigned int idx);
  * req_num_parameters returns the number of parameters on the given request
  *
  * @param req
- * @return true
- * @return false
+ * @return unsigned int
  */
-bool req_num_parameters(req_t *req);
+unsigned int req_num_parameters(req_t *req);
 
 /**
  * req_has_parameters returns a bool indicating whether the given request has
