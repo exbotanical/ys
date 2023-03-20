@@ -21,7 +21,9 @@ static bool is_informational(res_t *res) {
   return res->status >= 100 && res->status < 200;
 }
 
-static bool is_nocontent(res_t *res) { return res->status == NO_CONTENT; }
+static bool is_nocontent(res_t *res) {
+  return res->status == STATUS_NO_CONTENT;
+}
 
 static bool should_set_content_len(req_t *req, res_t *res) {
   return !is_nocontent(res) && !is_informational(res) &&

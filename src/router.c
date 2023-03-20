@@ -50,7 +50,7 @@ static res_t *internal_server_error_handler(req_t *req, res_t *res) {
             "request path %s\n",
             req->path);
 
-  res->status = INTERNAL_SERVER_ERROR;
+  res->status = STATUS_INTERNAL_SERVER_ERROR;
 
   return res;
 }
@@ -69,7 +69,7 @@ static res_t *default_not_found_handler(req_t *req, res_t *res) {
       "request path %s\n",
       req->path);
 
-  res->status = NOT_FOUND;
+  res->status = STATUS_NOT_FOUND;
 
   return res;
 }
@@ -89,7 +89,7 @@ static res_t *default_method_not_allowed_handler(req_t *req, res_t *res) {
   //     "effect at request path %s\n",
   //     req->path);
 
-  res->status = METHOD_NOT_ALLOWED;
+  res->status = STATUS_METHOD_NOT_ALLOWED;
 
   return res;
 }

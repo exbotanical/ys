@@ -73,20 +73,20 @@ res_t *handle_get(req_t *req, res_t *res) {
   char *id = req_get_parameter(req, "id");
   if (!id) {
     set_body(res, res_err("must provide an id"));
-    set_status(res, BAD_REQUEST);
+    set_status(res, STATUS_BAD_REQUEST);
     return res;
   }
 
   record_t *record = searcht_records(id);
   if (!record) {
     set_body(res, res_err("no matching record"));
-    set_status(res, NOT_FOUND);
+    set_status(res, STATUS_NOT_FOUND);
     return res;
   }
 
   set_body(res, res_ok(fmt_str("{\"key\":\"%s\",\"value\":\"%s\"}", record->key,
                                record->value)));
-  set_status(res, OK);
+  set_status(res, STATUS_OK);
   return res;
 }
 
@@ -97,18 +97,18 @@ res_t *handle_delete(req_t *req, res_t *res) {
   char *id = req_get_parameter(req, "id");
   if (!id) {
     set_body(res, res_err("must provide an id"));
-    set_status(res, BAD_REQUEST);
+    set_status(res, STATUS_BAD_REQUEST);
     return res;
   }
 
   bool ok = delete_record(id);
   if (!ok) {
     set_body(res, res_err("no matching record"));
-    set_status(res, NOT_FOUND);
+    set_status(res, STATUS_NOT_FOUND);
     return res;
   }
 
-  set_status(res, OK);
+  set_status(res, STATUS_OK);
 
   return res;
 }
@@ -123,20 +123,20 @@ res_t *handle_post(req_t *req, res_t *res) {
   char *id = req_get_parameter(req, "id");
   if (!id) {
     set_body(res, res_err("must provide an id"));
-    set_status(res, BAD_REQUEST);
+    set_status(res, STATUS_BAD_REQUEST);
     return res;
   }
 
   record_t *record = searcht_records(id);
   if (record) {
     set_body(res, res_err("record exists"));
-    set_status(res, BAD_REQUEST);
+    set_status(res, STATUS_BAD_REQUEST);
     return res;
   }
 
   add_record(id);
 
-  set_status(res, CREATED);
+  set_status(res, STATUS_CREATED);
 
   return res;
 }

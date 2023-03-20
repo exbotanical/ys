@@ -254,7 +254,7 @@ res_t *cors_handler(cors_t *c, req_t *req, res_t *res) {
     if (c->use_options_passthrough) {
       // pass to next handler
     } else {
-      set_status(res, NO_CONTENT);
+      set_status(res, STATUS_NO_CONTENT);
       // terminate
     }
   } else {

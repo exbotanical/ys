@@ -40,7 +40,7 @@
 - [ ] cross-OS compatibility
   - [ ] source strdup from dep
 - [ ] review all `include`d functions and replace any non-standard ones
-- [ ] prefix all enums with `METHOD_` or `STATUS_`
+- [x] prefix all enums with `METHOD_` or `STATUS_`
 - [ ] make regex cache global (instead of per-trie-node)
 - [x] handle duplicate request headers
   - Go style: append subsequent values, but `Get` retrieves the first only. `Values` returns list of all. In response, each duplicate header is written separately
