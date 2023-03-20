@@ -125,6 +125,10 @@ typedef struct {
 // A response object; client handlers must return this struct to be sent to the
 // client.
 typedef struct {
+  // A flag used by middleware - setting this to true will stop the middleware
+  // chain and prevent subsequent middlewares from being run
+  bool done;
+
   // HTTP status code - required
   http_status_t status;
   // HTTP headers - optional, but you should pass content-type if sending a body

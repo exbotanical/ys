@@ -12,6 +12,8 @@ extern "C" {
 #define foreach_i(arr, i, start) \
   for (unsigned int i = start; i < array_size(arr); i++)
 
+#define has_elements(arr) arr != NULL &&array_size(arr) > 0
+
 typedef struct {
   void **state;
   unsigned int len;

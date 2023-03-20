@@ -14,8 +14,7 @@
  *
  * @param s1
  * @param s2
- * @return true
- * @return false
+ * @return bool
  */
 bool match(void *s1, void *s2) {
   return safe_strcasecmp((char *)s1, (char *)s2);
@@ -29,8 +28,7 @@ bool match(void *s1, void *s2) {
  * 3) Include an Access-Control-Request-Method header
  *
  * @param req
- * @return true
- * @return false
+ * @return bool
  */
 static bool is_preflight_request(req_t *req) {
   bool is_options_req = str_equals(req->method, "OPTIONS");
@@ -47,9 +45,8 @@ static bool is_preflight_request(req_t *req) {
  *
  * @param request
  * @param response
- * @return res_t*
  */
-static res_t *handle_request(cors_t *c, req_t *req, res_t *res) {
+static void handle_request(cors_t *c, req_t *req, res_t *res) {
   char *origin = req_header_get(req->headers, ORIGIN_HEADER);
   // Set the "vary" header to prevent proxy servers from sending cached
   // responses for one client to another
@@ -57,16 +54,15 @@ static res_t *handle_request(cors_t *c, req_t *req, res_t *res) {
 
   // If no origin was specified, this is not a valid CORS request
   if (!origin || str_equals(origin, "")) {
-    // TODO: nope
-
-    return res;
+    res->done = true;
+    return;
   }
 
   // If the origin is not in the allow list, deny
-  // TODO: case insensitive
   if (!is_origin_allowed(c, origin)) {
     // TODO: 403
-    return res;  // TODO: nope
+    res->done = true;
+    return;
   }
 
   if (c->allow_all_origins) {
@@ -90,19 +86,15 @@ static res_t *handle_request(cors_t *c, req_t *req, res_t *res) {
   if (c->allow_credentials) {
     res_header_append(res->headers, ALLOW_CREDENTIALS_HEADER, "true");
   }
-
-  return res;
 }
 
 /**
  * handle_preflight_request handles preflight requests
- *
  * @param c
  * @param req
  * @param res
- * @return res_t*
  */
-static res_t *handle_preflight_request(cors_t *c, req_t *req, res_t *res) {
+static void handle_preflight_request(cors_t *c, req_t *req, res_t *res) {
   char *origin = req_header_get(req->headers, ORIGIN_HEADER);
 
   // Set the "vary" header to prevent proxy servers from sending cached
@@ -113,26 +105,30 @@ static res_t *handle_preflight_request(cors_t *c, req_t *req, res_t *res) {
 
   // If no origin was specified, this is not a valid CORS request
   if (str_equals(origin, "")) {
-    return NULL;  // TODO: NOPE
+    res->done = true;
+    return;
   }
 
   // If the origin is not in the allow list, deny
   if (!is_origin_allowed(c, origin)) {
-    return NULL;  // TODO: NOPE
+    res->done = true;
+    return;
   }
 
   // Validate the method; this is the crux of the Preflight
   char *req_method_header = req_header_get(req->headers, REQUEST_METHOD_HEADER);
 
   if (!is_method_allowed(c, req_method_header)) {
-    return NULL;  // TODO: NOPE
+    res->done = true;
+    return;
   }
 
   // Validate request headers. Preflights are also used when
   // requests include additional headers from the client
   array_t *reqd_headers = derive_headers(req);
   if (!are_headers_allowed(c, reqd_headers)) {
-    return NULL;  // TODO: NOPE
+    res->done = true;
+    return;
   }
 
   if (c->allow_all_origins) {
@@ -166,10 +162,9 @@ static res_t *handle_preflight_request(cors_t *c, req_t *req, res_t *res) {
   if (c->max_age > 0) {
     res_header_append(res->headers, MAX_AGE_HEADER, fmt_str("%d", c->max_age));
   }
-
-  return res;
 }
 
+// TODO: initialize opts object
 cors_t *cors_init(cors_opts_t *opts) {
   cors_t *c = xmalloc(sizeof(cors_t));
   c->allow_credentials = opts->allow_credentials;
@@ -226,7 +221,6 @@ cors_t *cors_init(cors_opts_t *opts) {
     }
   }
 
-  // TODO: in fact, these should be initialized anyway
   if (!opts->allowed_methods || array_size(opts->allowed_methods) == 0) {
     // Default allowed methods. Defaults to simple methods (those that do not
     // trigger a Preflight)
@@ -246,23 +240,22 @@ cors_t *cors_init(cors_opts_t *opts) {
   return c;
 }
 
-// TODO: handle
 res_t *cors_handler(cors_t *c, req_t *req, res_t *res) {
   if (is_preflight_request(req)) {
     handle_preflight_request(c, req, res);
 
     if (c->use_options_passthrough) {
-      // pass to next handler
+      // Do nothing i.e. allow next handler to run
     } else {
       set_status(res, STATUS_NO_CONTENT);
-      // terminate
+      // We're done
+      res->done = true;
     }
   } else {
     handle_request(c, req, res);
-    // pass to next handler
+    // Do nothing i.e. allow next handler to run
   }
 
-  // terminate
   return res;
 }
 

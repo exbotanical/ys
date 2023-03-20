@@ -61,11 +61,12 @@
   - [ ] fix log to stderr
   - [ ] use function name macro instead of explicit string literals
 - [ ] inline functions where reasonable
-- [ ] Change middleware chaining to use `next`, the next middleware in the chain. This will allow a current handler to *not* invoke `next`, thus ending the chain.
+- [ ] Change middleware chaining to use `next`, the next middleware in the chain. This will allow a current handler to *not* invoke `next`, thus ending the chain. Note: Figuring this out is going to be a challenge
 
 ## DX
 - [ ] helper ??? `#define CAST(type, name, stmt) type *name = (type *)stmt`
 - [x] Setup linter that uses Google's C/C++ style guide
+- [ ] `@return` doc for `true` and `false` cases instead of just `bool`
 
 # Style Guide
 - Use [Go Doc-style](https://tip.golang.org/doc/comment) for doc  comments e.g. `// function_name does thing`

@@ -29,12 +29,12 @@ static void setup_env() {
  * @return void* The response pointer
  */
 static void *invoke_chain(req_t *req, res_t *res, array_t *middlewares) {
-  void *h = res;
   for (unsigned int i = array_size(middlewares); i > 0; i--) {
-    h = ((handler_t *)array_get(middlewares, i - 1))(req, h);
+    res = ((handler_t *)array_get(middlewares, i - 1))(req, res);
+    if (res->done) break;
   }
 
-  return h;
+  return res;
 }
 
 /**
@@ -164,6 +164,7 @@ void router_run(__router_t *router, int client_socket, req_t *req) {
   result_t *result = trie_search(internal_router->trie, req->method, req->path);
 
   res_t *res = response_init();
+
   if (!result) {
     res = internal_router->internal_error_handler(req, res);
   } else if ((result->flags & NOT_FOUND_MASK) == NOT_FOUND_MASK) {
