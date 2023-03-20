@@ -76,7 +76,7 @@ static void handle_request(cors_t *c, req_t *req, res_t *res) {
   // If we've exposed headers, set them
   // If the consumer specified headers that are exposed by default, we'll still
   // include them - this is spec compliant
-  if (c->exposed_headers && array_size(c->exposed_headers) > 0) {
+  if (has_elements(c->exposed_headers)) {
     res_header_append(res->headers, EXPOSE_HEADERS_HEADER,
                       str_join(c->exposed_headers, ", "));
   }
@@ -145,7 +145,7 @@ static void handle_preflight_request(cors_t *c, req_t *req, res_t *res) {
 
   // Set the allowed headers, as a Preflight may have been sent if the client
   // included non-simple headers.
-  if (array_size(reqd_headers) > 0) {
+  if (has_elements(reqd_headers)) {
     res_header_append(res->headers, ALLOW_HEADERS_HEADER,
                       str_join(c->allowed_headers, ", "));
   }
@@ -175,8 +175,7 @@ cors_t *cors_init(cors_opts_t *opts) {
   c->allowed_methods = array_init();
 
   // Register origins - if no given origins, default to allow all i.e. "*"
-  // TODO: have array_size handle NULL?
-  if (!opts->allowed_origins || array_size(opts->allowed_origins) == 0) {
+  if (!has_elements(opts->allowed_origins)) {
     c->allow_all_origins = true;
   } else {
     foreach (opts->allowed_origins, i) {
@@ -199,7 +198,7 @@ cors_t *cors_init(cors_opts_t *opts) {
   // Register headers - if no given headers, default to those allowed per the
   // spec. Although these headers are allowed by default, we add them anyway for
   // the sake of consistency
-  if (!opts->allowed_headers || array_size(opts->allowed_headers) == 0) {
+  if (!has_elements(opts->allowed_headers)) {
     // Default allowed headers. Defaults to the "Origin" header, though this
     // should be included automatically
     array_t *default_allowed_headers = array_init();
@@ -221,7 +220,7 @@ cors_t *cors_init(cors_opts_t *opts) {
     }
   }
 
-  if (!opts->allowed_methods || array_size(opts->allowed_methods) == 0) {
+  if (!has_elements(opts->allowed_methods)) {
     // Default allowed methods. Defaults to simple methods (those that do not
     // trigger a Preflight)
     array_t *default_allowed_methods = array_init();
@@ -260,12 +259,11 @@ res_t *cors_handler(cors_t *c, req_t *req, res_t *res) {
 }
 
 bool are_headers_allowed(cors_t *c, array_t *headers) {
-  if (c->allow_all_headers || array_size(headers) == 0) {
+  if (c->allow_all_headers || !has_elements(headers)) {
     return true;
   }
 
-  // TODO: initialize values
-  if (!c->allowed_headers || array_size(c->allowed_headers) == 0) {
+  if (!has_elements(c->allowed_headers)) {
     return false;
   }
 
@@ -301,7 +299,7 @@ bool is_origin_allowed(cors_t *c, char *origin) {
 }
 
 bool is_method_allowed(cors_t *c, char *method) {
-  if (array_size(c->allowed_methods) == 0) {
+  if (!has_elements(c->allowed_methods)) {
     return false;
   }
 
