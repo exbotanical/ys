@@ -3,6 +3,7 @@
 
 #include "libhttp.h"
 #include "libutil/libutil.h"
+#include "request.h"
 
 /**
  * response_init initializes a new response object
@@ -29,5 +30,7 @@ buffer_t *serialize_response(req_t *req, res_t *res);
  * @param response
  */
 void send_response(int socket, buffer_t *response);
+
+void send_preemptive_err(int socket, read_error_t err);
 
 #endif /* RESPONSE_H */

@@ -3,60 +3,74 @@
 - [x] Clean up all objects w/ free where necessary
 - [x] Validate NULLs and allocated objects
 - [x] Add logging
-- [ ] Add global config (e.g. global HTTP headers)
 - [x] HTTP request parser
-- [ ] test handlers with a mocking library
 - [x] static
 - [x] error-handling
-- [ ] documentation
-- [ ] use attr struct for fallback handlers
-- [ ] Figure out file routing. The problem here is we want the `response_t` type to be accessible to consumers without having to compile the entire library and link it.
-- [ ] SSL support
 - [x] properly parse entire request (we're using a placeholder method right now!)
-- [ ] Use a union to store parameter values. We have enough info from the regex to determine whether the value should be an int or char*
-- [ ] JSON parsed body in context
+- [x] ~~Use a union to store parameter values. We have enough info from the regex to determine whether the value should be an int or char*~~ - this would be a pain for users
 - [x] pass a struct with context, req, res (maybe merge ctx and req)
-- [ ] helper ??? `#define CAST(type, name, stmt) type *name = (type *)stmt`
-- [ ] async i/o option using epoll
-- [ ] inline functions where reasonable
-- [ ] integ tests
-- [ ] test with a real server (E2E)
+- [x] integ tests
 - [x] read entire request in chunks
 - [x] send entire response in chunks
-- [ ] Evented server e.g. `onRequest`
 - [x] fix request hangups
   - [x] mostly fixed, happens when calling with a not allowed/found method w/body `Could not resolve host: <body>` (was non-issue; using curl wrong :|)
-- [ ] Built-in middlewares
-  - [ ] CORS middleware
-- [ ] Cookies
-- [ ] Validate Content-Type for incoming stateful requests
-- [ ] support erroneous (Request / Response)s
-- [ ] check all instances of `strcmp` and see if `strncmp` makes more sense
-- [ ] handle accept header
-- [ ] replace `LOG` macro calls with new logger
-  - [ ] fix log to stderr
-  - [ ] use function name macro instead of explicit string literals
-- [ ] allow middleware to exit early by sending response
+- [x] prefix all enums with `METHOD_` or `STATUS_`
+- [x] handle duplicate request headers
+  - Go style: append subsequent values, but `Get` retrieves the first only. `Values` returns list of all. In response, each duplicate header is written separately
+- [x] xmalloc that dies
+
+## Testing
+- [ ] test handlers with a mocking library
+- [ ] test with a real server (E2E)
+
+## UX
 - [ ] cross-OS compatibility
   - [ ] source strdup from dep
 - [ ] review all `include`d functions and replace any non-standard ones
-- [x] prefix all enums with `METHOD_` or `STATUS_`
-- [ ] make regex cache global (instead of per-trie-node)
-- [x] handle duplicate request headers
-  - Go style: append subsequent values, but `Get` retrieves the first only. `Values` returns list of all. In response, each duplicate header is written separately
-- [ ] handle duplicate response headers
+- [ ] documentation
+
+## New Features
+- [ ] global hooks/interceptors (e.g. global HTTP headers)
+- [ ] allow middleware to exit early by sending response
+- [ ] Built-in middlewares
+  - [ ] CORS middleware
+- [ ] Cookies
+- [ ] support erroneous (Request / Response)s
+- [ ] use attr struct for fallback handlers
+- [ ] Figure out file routing. The problem here is we want the `response_t` type to be accessible to consumers without having to compile the entire library and link it.
+- [ ] SSL support
+- [ ] JSON parsed body in context
+- [ ] async i/o option using epoll
+  - [ ] Evented server e.g. `onRequest`
+
+## Best Practices
 - [ ] specific int types
-- [x] xmalloc that dies
+- [ ] check all instances of `strcmp` and see if `strncmp` makes more sense
+
+## Spec Compliance
+- [ ] handle duplicate response headers
+- [ ] Validate Content-Type for incoming stateful requests
+- [ ] handle accept header
+- [ ] Full RFC compliance
+
+## Misc Improvements
 - [ ] use a better regex engine than pcre
+- [ ] make regex cache global (instead of per-trie-node)
+- [ ] replace `LOG` macro calls with new logger
+  - [ ] fix log to stderr
+  - [ ] use function name macro instead of explicit string literals
+- [ ] inline functions where reasonable
 
+## DX
+- [ ] helper ??? `#define CAST(type, name, stmt) type *name = (type *)stmt`
 
-## Style Guide
+# Style Guide
 - Use [Go Doc-style](https://tip.golang.org/doc/comment) for doc  comments e.g. `// function_name does thing`
 
 - comment what is used from an include header where possible
 
 
-## Desired API
+# Desired API
 - Router
   - `router_init(router_attr_t*)`
   - `router_set_400_handler(router_attr_t*, handler_t*)`

@@ -65,7 +65,7 @@ buffer_t *serialize_response(req_t *req, res_t *res) {
   // server MUST NOT send a Content-Length header field in any 2xx
   // (Successful) response to a METHOD_CONNECT request (Section 4.3.6 of
   // [RFC7231]).
-  if (should_set_content_len(req, res)) {
+  if (req && should_set_content_len(req, res)) {
     buffer_append(rbuf, fmt_str("Content-Length: %d", body ? strlen(body) : 0));
   }
 
@@ -109,6 +109,28 @@ void send_response(int socket, buffer_t *response) {
 done:
   buffer_free(response);
   close(socket);
+}
+
+void send_preemptive_err(int socket, read_error_t err) {
+  res_t *res = xmalloc(sizeof(res_t));
+  res->headers = array_init();
+
+  switch (err) {
+    case IO_ERR:
+    case PARSE_ERR:
+      res->status = STATUS_INTERNAL_SERVER_ERROR;
+      break;
+    case DUP_HDR:
+      res->status = STATUS_BAD_REQUEST;
+      break;
+    case REQ_TOO_LONG:
+      res->status = STATUS_REQUEST_ENTITY_TOO_LARGE;
+      break;
+    default:
+      res->status = STATUS_INTERNAL_SERVER_ERROR;
+  }
+
+  send_response(socket, serialize_response(NULL, res));
 }
 
 res_t *response_init() {

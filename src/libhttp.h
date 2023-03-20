@@ -141,6 +141,7 @@ typedef struct {
   trie_t *trie;
   handler_t *not_found_handler;
   handler_t *method_not_allowed_handler;
+  handler_t *internal_error_handler;
 } __router_t;
 typedef __router_t *router_t;
 

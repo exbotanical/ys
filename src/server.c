@@ -12,6 +12,7 @@
 #include "libhttp.h"
 #include "logger.h"
 #include "request.h"  // for deserialize_req
+#include "response.h"
 #include "router.h"
 #include "util.h"
 #include "xmalloc.h"
@@ -25,18 +26,19 @@
 static void *client_thread_handler(void *arg) {
   client_context_t *c_ctx = arg;
 
-  req_t *request = read_and_parse_request(c_ctx->client_socket);
+  req_meta_t maybe_req = read_and_parse_request(c_ctx->client_socket);
 
-  if (!request) {
-    // TODO: somehow return a pre-prepared error flag so we can 500 this
-    // we could preempt parsing into request so we dont waste computation
+  if (maybe_req.err.code < 0) {  // TODO: test
+    send_preemptive_err(c_ctx->client_socket, maybe_req.err.code);
     return NULL;
   }
 
-  LOG("[server::client_thread_handler] client request received: %s %s\n",
-      request->method, request->path);
+  req_t *req = maybe_req.req;
 
-  router_run(c_ctx->router, c_ctx->client_socket, request);
+  LOG("[server::client_thread_handler] client request received: %s %s\n",
+      req->method, req->path);
+
+  router_run(c_ctx->router, c_ctx->client_socket, req);
 
   return NULL;
 }
@@ -138,6 +140,7 @@ bool server_start(server_t *server) {
       c_ctx->addr_len = &addr_len;
       c_ctx->client_socket = client_socket;
       c_ctx->router = ((__server_t *)server)->router;
+
       // TODO: UH, why are we blocking?
       if (!thread_pool_dispatch(pool, client_thread_handler, c_ctx, true)) {
         DIE(EXIT_FAILURE, "[server::start] %s\n",

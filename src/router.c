@@ -38,15 +38,15 @@ static void *invoke_chain(req_t *req, res_t *res, array_t *middlewares) {
 }
 
 /**
- * internal_server_error_handler is the internal/default 500 handler
+ * default_internal_error_handler is the internal/default 500 handler
  *
  * @param req
  * @param res
  * @return void*
  */
-static res_t *internal_server_error_handler(req_t *req, res_t *res) {
+static res_t *default_internal_error_handler(req_t *req, res_t *res) {
   printlogf(LOG_INFO,
-            "[router::internal_server_error_handler] 500 handler in effect at "
+            "[router::default_internal_error_handler] 500 handler in effect at "
             "request path %s\n",
             req->path);
 
@@ -119,6 +119,11 @@ router_t *router_init(handler_t *not_found_handler,
     router->method_not_allowed_handler = method_not_allowed_handler;
   }
 
+  // TODO:
+  if (true) {
+    router->internal_error_handler = default_internal_error_handler;
+  }
+
   return (router_t *)router;
 }
 
@@ -160,7 +165,7 @@ void router_run(__router_t *router, int client_socket, req_t *req) {
 
   res_t *res = response_init();
   if (!result) {
-    res = internal_server_error_handler(req, res);
+    res = internal_router->internal_error_handler(req, res);
   } else if ((result->flags & NOT_FOUND_MASK) == NOT_FOUND_MASK) {
     res = internal_router->not_found_handler(req, res);
   } else if ((result->flags & NOT_ALLOWED_MASK) == NOT_ALLOWED_MASK) {

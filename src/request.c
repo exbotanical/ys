@@ -38,7 +38,7 @@ bool req_has_parameters(req_t* req) {
 }
 
 // TODO: break up into two functions
-req_t* read_and_parse_request(int sock) {
+req_meta_t read_and_parse_request(int sock) {
   const char *method, *path;
   char buf[REQ_BUFFER_SIZE];
   int pret, minor_version;
@@ -46,13 +46,16 @@ req_t* read_and_parse_request(int sock) {
   size_t buflen = 0, prevbuflen = 0, method_len, path_len, num_headers;
   ssize_t rret;
 
-  while (1) {
+  while (true) {
     while ((rret = read(sock, buf + buflen, sizeof(buf) - buflen)) == -1 &&
            errno == EINTR)
       ;
+
     if (rret <= 0) {
-      return NULL;  // IOError
+      req_meta_t meta = {.err = IO_ERR};
+      return meta;
     }
+
     prevbuflen = buflen;
     buflen += rret;
 
@@ -62,17 +65,21 @@ req_t* read_and_parse_request(int sock) {
                           &minor_version, headers, &num_headers, prevbuflen);
     if (pret > 0) {
       break;  // successfully parsed the request
-    } else if (pret == -1) {
-      return NULL;  // ParseError
     }
 
-    // request is incomplete, continue the loop
+    if (pret == -1) {
+      req_meta_t meta = {.err = PARSE_ERR};
+      return meta;
+    }
+
+    // request is incomplete
     if (pret == -2) {
-      return NULL;
+      continue;
     }
 
     if (buflen == sizeof(buf)) {
-      return NULL;  // RequestIsTooLongError
+      req_meta_t meta = {.err = REQ_TOO_LONG};
+      return meta;
     }
   }
 
@@ -93,7 +100,8 @@ req_t* read_and_parse_request(int sock) {
         fmt_str("%.*s", (int)headers[i].name_len, headers[i].name);
 
     if (!insert_header(request->headers, header_key, header_val)) {
-      // TODO: 400
+      req_meta_t meta = {.err = DUP_HDR};
+      return meta;
     }
 
     // Now we handle special metadata fields on the request that we expose to
@@ -107,5 +115,6 @@ req_t* read_and_parse_request(int sock) {
     }
   }
 
-  return request;
+  req_meta_t meta = {.req = request};
+  return meta;
 }
