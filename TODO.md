@@ -56,7 +56,7 @@
 
 ## Misc Improvements
 - [ ] use a better regex engine than pcre
-- [ ] make regex cache global (instead of per-trie-node)
+- [ ] ~~make regex cache global (instead of per-trie-node)~~ bad idea
 - [ ] replace `LOG` macro calls with new logger
   - [ ] fix log to stderr
   - [ ] use function name macro instead of explicit string literals

@@ -310,7 +310,8 @@ void test_cors_middleware() {
     res->headers = array_init();
 
     // Run CORS handler
-    cors_handler(cors_init(test.options), req, res);
+    cors_init(test.options);
+    cors_handler(req, res);
 
     // Evaluate resulting headers and status
     check_headers(test.name, res->headers, test.res_headers);

@@ -78,12 +78,11 @@ cors_t *cors_init(cors_opts_t *opts);
  * cors_handler is a middleware handler that executes a spec-compliant CORS
  * workflow
  *
- * @param c
  * @param req
  * @param res
  * @return res_t*
  */
-res_t *cors_handler(cors_t *c, req_t *req, res_t *res);
+res_t *cors_handler(req_t *req, res_t *res);
 
 /**
  * derive_headers extracts the headers in the value of the

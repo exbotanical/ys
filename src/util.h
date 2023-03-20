@@ -90,4 +90,6 @@ char *to_upper(const char *s);
  */
 bool str_equals(const char *s1, const char *s2);
 
+// TODO: doc + test
+bool str_nullish(const char *s);
 #endif /* UTIL_H */
