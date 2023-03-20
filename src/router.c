@@ -26,7 +26,7 @@ static void setup_env() {
  * @param req
  * @param res
  * @param middlewares
- * @return void*
+ * @return void* The response pointer
  */
 static void *invoke_chain(req_t *req, res_t *res, array_t *middlewares) {
   void *h = res;
