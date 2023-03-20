@@ -14,7 +14,7 @@ static const char MESSAGE_BODY_SEP[3] = "\n\n";
 
 static bool is_2xx_connect(req_t *req, res_t *res) {
   return (res->status >= 200 && res->status < 300) &&
-         str_equals(req->method, http_method_names[CONNECT]);
+         str_equals(req->method, http_method_names[METHOD_CONNECT]);
 }
 
 static bool is_informational(res_t *res) {
@@ -61,7 +61,7 @@ buffer_t *serialize_response(req_t *req, res_t *res) {
   // A server MUST NOT send a Content-Length header field in any response
   // with a status code of 1xx (Informational) or 204 (No Content).  A
   // server MUST NOT send a Content-Length header field in any 2xx
-  // (Successful) response to a CONNECT request (Section 4.3.6 of
+  // (Successful) response to a METHOD_CONNECT request (Section 4.3.6 of
   // [RFC7231]).
   if (should_set_content_len(req, res)) {
     buffer_append(rbuf, fmt_str("Content-Length: %d", body ? strlen(body) : 0));

@@ -31,8 +31,8 @@ res_t *middleware2(req_t *req, res_t *res) {
 int main() {
   router_t *router = router_init(NULL, NULL);
   router_register(router, "/:key[^\\d+$]", handler,
-                  collect_middleware(middleware1, middleware2, NULL), GET,
-                  NULL);
+                  collect_middleware(middleware1, middleware2, NULL),
+                  METHOD_GET, NULL);
 
   server_t *server = server_init(router, PORT);
   if (!server_start(server)) {

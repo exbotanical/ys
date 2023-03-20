@@ -17,11 +17,15 @@ clean:
 	rm -f $(SRC:.c=.o) $(BIN) main*
 
 test:
+	$(MAKE) unit_test
+	$(MAKE) integ_test
+
+unit_test:
 	./scripts/test.bash
 	$(MAKE) clean
 
-integ_test:
+integ_test: all
 	$(CC) t/integ/server.c -Isrc -Ideps -o $(INTEG_BIN) -L. -lhttp
 	shpec
 
-.PHONY: all clean test integ_test
+.PHONY: all clean test unit_test integ_test

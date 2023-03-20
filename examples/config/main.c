@@ -14,7 +14,7 @@ res_t *handler(req_t *req, res_t *res) {
 
 int main() {
   router_t *router = router_init(NULL, NULL);
-  router_register(router, "/", handler, NULL, GET, NULL);
+  router_register(router, "/", handler, NULL, METHOD_GET, NULL);
 
   server_t *server = server_init(router, -1);
   if (!server_start(server)) {

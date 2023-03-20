@@ -1,6 +1,8 @@
 #include "libhttp.h"
 #include "util.h"
 
+#define X(a) [a] = #a + 7
+
 // Mapping of HTTP status codes to stringified names.
 const char* http_status_names[] = {
     ENUM_NAME(CONTINUE),
@@ -74,6 +76,6 @@ const char* http_status_names[] = {
 
 // Mapping of HTTP method name enums to stringified names.
 const char* http_method_names[] = {
-    ENUM_NAME(GET),     ENUM_NAME(HEAD),    ENUM_NAME(POST),
-    ENUM_NAME(PUT),     ENUM_NAME(PATCH),   ENUM_NAME(DELETE),
-    ENUM_NAME(CONNECT), ENUM_NAME(OPTIONS), ENUM_NAME(TRACE)};
+    X(METHOD_GET),     X(METHOD_HEAD),    X(METHOD_POST),
+    X(METHOD_PUT),     X(METHOD_PATCH),   X(METHOD_DELETE),
+    X(METHOD_CONNECT), X(METHOD_OPTIONS), X(METHOD_TRACE)};

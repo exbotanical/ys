@@ -16,15 +16,15 @@ extern const char *http_method_names[];
 // HTTP methods.
 typedef enum http_method {
   // MUST start with 1 for varargs handling e.g. collect
-  GET = 1,
-  POST,
-  PUT,
-  PATCH,  // RFC 5789
-  DELETE,
-  OPTIONS,
-  HEAD,
-  CONNECT,
-  TRACE
+  METHOD_GET = 1,
+  METHOD_POST,
+  METHOD_PUT,
+  METHOD_PATCH,  // RFC 5789
+  METHOD_DELETE,
+  METHOD_OPTIONS,
+  METHOD_HEAD,
+  METHOD_CONNECT,
+  METHOD_TRACE
 } http_method_t;
 
 // HTTP status codes.

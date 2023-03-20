@@ -231,9 +231,9 @@ cors_t *cors_init(cors_opts_t *opts) {
     // Default allowed methods. Defaults to simple methods (those that do not
     // trigger a Preflight)
     array_t *default_allowed_methods = array_init();
-    array_push(default_allowed_methods, (void *)http_method_names[GET]);
-    array_push(default_allowed_methods, (void *)http_method_names[POST]);
-    array_push(default_allowed_methods, (void *)http_method_names[HEAD]);
+    array_push(default_allowed_methods, (void *)http_method_names[METHOD_GET]);
+    array_push(default_allowed_methods, (void *)http_method_names[METHOD_POST]);
+    array_push(default_allowed_methods, (void *)http_method_names[METHOD_HEAD]);
 
     c->allowed_methods = default_allowed_methods;
   } else {
@@ -312,7 +312,7 @@ bool is_method_allowed(cors_t *c, char *method) {
     return false;
   }
 
-  if (safe_strcasecmp(method, http_method_names[OPTIONS])) {
+  if (safe_strcasecmp(method, http_method_names[METHOD_OPTIONS])) {
     return true;
   }
 
