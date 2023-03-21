@@ -57,16 +57,6 @@ char* req_header_get(hash_table* headers, const char* key);
 char** req_header_values(hash_table* headers, const char* key);
 
 /**
- * res_header_append appends the given key/value pair as a header object in
- * `headers`
- *
- * @param headers
- * @param key
- * @param value
- */
-void res_header_append(array_t* headers, const char* key, const char* value);
-
-/**
  * insert_header inserts a key/value pair into the given hash table `headers`.
  * It accounts for singleton headers (headers that cannot be duplicated per HTTP
  * spec) and returns a bool indicating whether the header was successfully

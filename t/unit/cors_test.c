@@ -1,4 +1,4 @@
-#include "cors.h"
+#include "cors.c"
 
 #include <stdarg.h>
 #include <stdlib.h>  // for malloc
@@ -35,6 +35,21 @@ inline static array_t *toheaders(char *s, ...) {
 
   va_end(args);
   return arr;
+}
+
+req_t *toreq(http_method_t method, array_t *headers) {
+  hash_table *ht = ht_init(0);
+  foreach (headers, i) {
+    header_t *h = array_get(headers, i);
+
+    ht_insert(ht, h->key, array_collect(h->value));
+  }
+
+  req_t *req = malloc(sizeof(req_t));
+  req->method = http_method_names[method];
+  req->headers = ht;
+
+  return req;
 }
 
 void insert_headers(req_t *req, array_t *headers) {
@@ -185,13 +200,13 @@ void test_cors_middleware() {
            "Origin", "http://foo.com", "Access-Control-Request-Method",
            http_method_names[METHOD_GET], "Access-Control-Request-Headers",
            "X-Testing", NULL),
-       .res_headers = toheaders("Vary",
-                                "Origin,Access-Control-Request-Method,"
-                                "Access-Control-Request-Headers",
-                                "Access-Control-Allow-Origin", "*",
-                                "Access-Control-Allow-Headers", "X-Testing",
-                                "Access-Control-Allow-Methods",
-                                http_method_names[METHOD_GET], NULL),
+       .res_headers = toheaders(
+           "Vary",
+           "Origin,Access-Control-Request-Method,"
+           "Access-Control-Request-Headers",
+           "Access-Control-Allow-Origin", "*", "Access-Control-Allow-Headers",
+           "X-Testing, Origin", "Access-Control-Allow-Methods",
+           http_method_names[METHOD_GET], NULL),
        .code = STATUS_NO_CONTENT},
       {.name = "HeadersAllowedMultiple",
        .options =
@@ -208,7 +223,7 @@ void test_cors_middleware() {
            "Origin,Access-Control-Request-Method,"
            "Access-Control-Request-Headers",
            "Access-Control-Allow-Origin", "*", "Access-Control-Allow-Headers",
-           "X-Testing, X-Testing-2, X-Testing-3",
+           "X-Testing, X-Testing-2, X-Testing-3, Origin",
            "Access-Control-Allow-Methods", http_method_names[METHOD_GET], NULL),
        .code = STATUS_NO_CONTENT},
       {.name = "CredentialsAllowed",
@@ -445,13 +460,48 @@ void test_origin_is_allowed() {
   }
 }
 
+void test_is_preflight_request() {
+  typedef struct {
+    const char *name;
+    req_t *req;
+    bool is_preflight;
+  } test_case;
+
+  test_case tests[] = {
+      {.name = "ValidCORSRequest",
+       .is_preflight = true,
+       .req = toreq(METHOD_OPTIONS,
+                    toheaders("Origin", "https://test.com",
+                              "Access-Control-Request-Method", "POST", NULL))},
+      {.name = "MissingOriginHeader",
+       .is_preflight = false,
+       .req = toreq(METHOD_OPTIONS,
+                    toheaders("Access-Control-Request-Method", "POST", NULL))},
+      {.name = "MissingRequestMethodHeader",
+       .is_preflight = false,
+       .req = toreq(METHOD_OPTIONS,
+                    toheaders("Origin", "https://test.com", NULL))},
+      {.name = "NotOPTIONSRequest",
+       .is_preflight = false,
+       .req = toreq(METHOD_GET,
+                    toheaders("Origin", "https://test.com",
+                              "Access-Control-Request-Method", "POST", NULL))}};
+
+  for (unsigned int i = 0; i < sizeof(tests) / sizeof(test_case); i++) {
+    test_case t = tests[i];
+    ok(is_preflight_request(t.req) == t.is_preflight,
+       "%s - is%sa preflight request", t.name, t.is_preflight ? " " : " not ");
+  }
+}
+
 int main(int argc, char const *argv[]) {
-  plan(59);
+  plan(63);
 
   test_cors_middleware();
   test_are_headers_allowed();
   test_is_method_allowed();
   test_origin_is_allowed();
+  test_is_preflight_request();
 
   done_testing();
 }

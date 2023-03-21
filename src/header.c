@@ -224,12 +224,12 @@ char** req_header_values(hash_table* headers, const char* key) {
   return headers_list;
 }
 
-void res_header_append(array_t* headers, const char* key, const char* value) {
-  header_t* h = xmalloc(sizeof(header_t));
+bool set_header(res_t* res, const char* key, const char* value) {
+  header_t* header = xmalloc(sizeof(header_t));
+  header->key = key;
+  header->value = value;
 
-  h->key = key;
-  h->value = value;
-  array_push(headers, h);
+  return array_push(res->headers, header);
 }
 
 bool insert_header(hash_table* headers, const char* k, const char* v) {
@@ -260,4 +260,48 @@ bool insert_header(hash_table* headers, const char* k, const char* v) {
   }
 
   return true;
+}
+
+array_t* derive_headers(const char* header_str) {
+  array_t* headers = array_init();
+
+  if (!header_str || str_equals(header_str, "")) {
+    return headers;
+  }
+
+  unsigned int len = strlen(header_str);
+  array_t* tmp = array_init();
+
+  for (unsigned int i = 0; i < len; i++) {
+    char c = header_str[i];
+
+    if ((c >= 'a' && c <= 'z') || c == '_' || c == '-' || c == '.' ||
+        (c >= '0' && c <= '9')) {
+      array_push(tmp, c);
+    }
+
+    if (c >= 'A' && c <= 'Z') {
+      array_push(tmp, tolower(c));
+    }
+
+    if (c == ' ' || c == ',' || i == len - 1) {
+      unsigned int size = array_size(tmp);
+      if (size > 0) {
+        char* v = xmalloc(size + 1);
+        unsigned int i;
+        for (i = 0; i < size; i++) {
+          v[i] = array_get(tmp, i);
+        }
+
+        v[i + 1] = '\0';
+
+        array_push(headers, v);
+
+        array_free(tmp);
+        tmp = array_init();
+      }
+    }
+  }
+
+  return headers;
 }

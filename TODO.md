@@ -70,6 +70,9 @@
 - [ ] `@return` doc for `true` and `false` cases instead of just `bool`
 - [ ] pick a style for struct types
 
+## Fixes
+- [ ] Allow OPTIONS requests by default in router when CORS enabled
+
 # Style Guide
 - Use [Go Doc-style](https://tip.golang.org/doc/comment) for doc  comments e.g. `// function_name does thing`
 

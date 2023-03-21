@@ -130,7 +130,7 @@ router_t *router_init(router_attr_t attr) {
 }
 
 void router_register(router_t *router, const char *path, handler_t *handler,
-                     array_t *middlewares, http_method_t method, ...) {
+                     middlewares_t *middlewares, http_method_t method, ...) {
   array_t *methods = array_init();
   if (!methods) {
     DIE(EXIT_FAILURE, "[router::router_register] %s\n",
@@ -157,8 +157,9 @@ void router_register(router_t *router, const char *path, handler_t *handler,
         "invariant violation - router_register arguments cannot be NULL");
   }
 
-  trie_insert(((__router_t *)router)->trie, methods, path, handler,
-              middlewares);
+  array_t *ms =
+      middlewares ? ((__middlewares_t *)middlewares)->middlewares : NULL;
+  trie_insert(((__router_t *)router)->trie, methods, path, handler, ms);
 }
 
 void router_run(__router_t *router, int client_socket, req_t *req) {

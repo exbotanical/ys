@@ -4,17 +4,6 @@
 #include "libhttp.h"
 #include "libutil/libutil.h"  // for arrays
 
-// CORS configuration options
-typedef struct {
-  array_t *allowed_origins;
-  array_t *allowed_methods;
-  array_t *allowed_headers;
-  array_t *expose_headers;
-  bool allow_credentials;
-  bool use_options_passthrough;
-  unsigned int max_age;
-} cors_opts_t;
-
 // CORS configurations
 typedef struct {
   array_t *allowed_origins;
@@ -83,35 +72,5 @@ cors_t *cors_init(cors_opts_t *opts);
  * @return res_t*
  */
 res_t *cors_handler(req_t *req, res_t *res);
-
-/**
- * are_headers_allowed determines whether the given headers are allowed per
- * the user-defined allow list
- *
- * @param c
- * @param headers
- * @return bool
- */
-bool are_headers_allowed(cors_t *c, array_t *headers);
-
-/**
- * is_method_allowed determines whether the given method is allowed per the
- * user-defined allow list
- *
- * @param c
- * @param method
- * @return bool
- */
-bool is_method_allowed(cors_t *c, char *method);
-
-/**
- * is_origin_allowed determines whether the given origin is allowed per the
- * user-defined allow list
- *
- * @param c
- * @param origin
- * @return bool
- */
-bool is_origin_allowed(cors_t *c, char *origin);
 
 #endif /* CORS_H */

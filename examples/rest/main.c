@@ -67,8 +67,8 @@ char *res_ok(char *data) { return fmt_str("{\"data\":\"%s\"}", data); }
 char *res_err(char *errmsg) { return fmt_str("{\"message\":\"%s\"}", errmsg); }
 
 res_t *handle_get(req_t *req, res_t *res) {
-  set_header(res, "Content-Type: application/json");
-  set_header(res, "X-Powered-By: demo");
+  set_header(res, "Content-Type", "application/json");
+  set_header(res, "X-Powered-By", "demo");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {
@@ -91,8 +91,8 @@ res_t *handle_get(req_t *req, res_t *res) {
 }
 
 res_t *handle_delete(req_t *req, res_t *res) {
-  set_header(res, "Content-Type: application/json");
-  set_header(res, "X-Powered-By: demo");
+  set_header(res, "Content-Type", "application/json");
+  set_header(res, "X-Powered-By", "demo");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {
@@ -117,8 +117,8 @@ res_t *handle_delete(req_t *req, res_t *res) {
 res_t *handle_put(req_t *req, res_t *res) {}
 
 res_t *handle_post(req_t *req, res_t *res) {
-  set_header(res, "Content-Type: application/json");
-  set_header(res, "X-Powered-By: demo");
+  set_header(res, "Content-Type", "application/json");
+  set_header(res, "X-Powered-By", "demo");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {

@@ -53,9 +53,9 @@ buffer_t *serialize_response(req_t *req, res_t *res) {
                 fmt_str("HTTP/1.1 %d %s\n", status, http_status_names[status]));
 
   foreach (headers, i) {
-    char *header = array_get(headers, i);
+    header_t *header = array_get(headers, i);
 
-    buffer_append(rbuf, header);
+    buffer_append(rbuf, fmt_str("%s: %s", header->key, header->value));
     buffer_append(rbuf, "\n");
   }
 
@@ -143,10 +143,6 @@ res_t *response_init() {
 
   // res->done = false;
   return res;
-}
-
-bool set_header(res_t *response, char *header) {
-  return array_push(response->headers, header);
 }
 
 void set_body(res_t *response, const char *body) {

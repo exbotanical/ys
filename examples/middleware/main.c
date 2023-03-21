@@ -9,8 +9,8 @@
 res_t *handler(req_t *req, res_t *res) {
   printf("handler\n");
 
-  set_header(res, "Content-Type: text/plain");
-  set_header(res, "X-Powered-By: demo");
+  set_header(res, "Content-Type", "text/plain");
+  set_header(res, "X-Powered-By", "demo");
 
   set_body(res, "Hello World!");
   set_status(res, STATUS_OK);
@@ -34,8 +34,7 @@ int main() {
   router_attr_t attr = ROUTE_ATTR_INITIALIZER;
   router_t *router = router_init(attr);
   router_register(router, "/:key[^\\d+$]", handler,
-                  collect_middleware(middleware1, middleware2, NULL),
-                  METHOD_GET, NULL);
+                  middlewares(middleware1, middleware2), METHOD_GET, NULL);
 
   server_t *server = server_init(router, PORT);
   if (!server_start(server)) {

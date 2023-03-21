@@ -5,7 +5,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdbool.h>
-#include <stdlib.h>  // for malloc
 #include <unistd.h>  // for read
 
 #include "header.h"

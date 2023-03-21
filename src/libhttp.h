@@ -140,6 +140,40 @@ typedef struct {
 // An alias type for request handlers
 typedef res_t *handler_t(req_t *, res_t *);
 
+typedef struct {
+  array_t *middlewares;
+} __middlewares_t;
+typedef __middlewares_t middlewares_t;
+
+void add_middleware(middlewares_t *m, handler_t *h);
+
+// TODO: t + d
+#define middlewares(...) __middlewares(__VA_ARGS__, NULL)
+middlewares_t *__middlewares(handler_t *middleware, ...);
+
+// CORS configuration options
+typedef struct {
+  array_t *allowed_origins;
+  array_t *allowed_methods;
+  array_t *allowed_headers;
+  array_t *expose_headers;
+  bool allow_credentials;
+  bool use_options_passthrough;
+  unsigned int max_age;
+} __cors_opts_t;
+typedef __cors_opts_t cors_opts_t;
+
+void set_allowed_origins(cors_opts_t *c, const char *origin, ...);
+void set_allowed_methods(cors_opts_t *c, const char *method, ...);
+void set_allowed_headers(cors_opts_t *c, const char *header, ...);
+void set_allow_credentials(cors_opts_t *c, bool allow);
+void set_use_options_passthrough(cors_opts_t *c, bool use);
+void set_max_age(cors_opts_t *c, int max_age);
+cors_opts_t *cors_allow_all();
+
+// TODO: t + d
+handler_t *use_cors(cors_opts_t *opts);
+
 // A router object
 typedef struct {
   trie_t *trie;
@@ -166,13 +200,15 @@ typedef struct {
 typedef __server_t *server_t;
 
 /**
- * set_header sets the given header on the given response
+ * set_header appends the given key/value pair as a header object in
+ * `headers`
  *
- * @param response
- * @param header
+ * @param res
+ * @param key
+ * @param value
  * @return bool
  */
-bool set_header(res_t *response, char *header);
+bool set_header(res_t *res, const char *key, const char *value);
 
 /**
  * set_body sets the given body on the given response
@@ -189,8 +225,6 @@ void set_body(res_t *response, const char *body);
  * @param status
  */
 void set_status(res_t *response, http_status_t status);
-
-array_t *collect_middleware(handler_t *middleware, ...);
 
 /**
  * router_free deallocates memory for router_t `router`
@@ -220,7 +254,7 @@ router_t *router_init(router_attr_t attr);
  * @param ...Methods to associate with the route
  */
 void router_register(router_t *router, const char *path, handler_t *handler,
-                     array_t *middlewares, http_method_t method, ...);
+                     middlewares_t *middlewares, http_method_t method, ...);
 
 /**
  * server_init allocates the necessary memory for a `server_t`
