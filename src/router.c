@@ -94,8 +94,7 @@ static res_t *default_method_not_allowed_handler(req_t *req, res_t *res) {
   return res;
 }
 
-router_t *router_init(handler_t *not_found_handler,
-                      handler_t *method_not_allowed_handler) {
+router_t *router_init(router_attr_t attr) {
   // Initialize config opts
   setup_env();
 
@@ -103,25 +102,28 @@ router_t *router_init(handler_t *not_found_handler,
 
   router->trie = trie_init();
 
-  if (!not_found_handler) {
+  if (!attr.not_found_handler) {
     LOG("[router::router_init] %s\n",
         "not_found_handler is NULL, registering fallback handler");
     router->not_found_handler = default_not_found_handler;
   } else {
-    router->not_found_handler = not_found_handler;
+    router->not_found_handler = attr.not_found_handler;
   }
 
-  if (!method_not_allowed_handler) {
+  if (!attr.method_not_allowed_handler) {
     LOG("[router::router_init] %s\n",
         "method_not_allowed_handler is NULL, registering fallback handler");
     router->method_not_allowed_handler = default_method_not_allowed_handler;
   } else {
-    router->method_not_allowed_handler = method_not_allowed_handler;
+    router->method_not_allowed_handler = attr.method_not_allowed_handler;
   }
 
-  // TODO:
-  if (true) {
+  if (!attr.internal_error_handler) {
+    LOG("[router::router_init] %s\n",
+        "internal_error_handler is NULL, registering fallback handler");
     router->internal_error_handler = default_internal_error_handler;
+  } else {
+    router->internal_error_handler = attr.internal_error_handler;
   }
 
   return (router_t *)router;

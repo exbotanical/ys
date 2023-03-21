@@ -36,12 +36,13 @@
   - [ ] CORS middleware
 - [ ] Cookies
 - [ ] support erroneous (Request / Response)s
-- [ ] use attr struct for fallback handlers
+- [x] use attr struct for fallback handlers
 - [ ] Figure out file routing. The problem here is we want the `response_t` type to be accessible to consumers without having to compile the entire library and link it.
 - [ ] SSL support
 - [ ] JSON parsed body in context
 - [ ] async i/o option using epoll
   - [ ] Evented server e.g. `onRequest`
+- [ ] global middlewares
 
 ## Best Practices
 - [ ] specific int types
@@ -67,6 +68,7 @@
 - [ ] helper ??? `#define CAST(type, name, stmt) type *name = (type *)stmt`
 - [x] Setup linter that uses Google's C/C++ style guide
 - [ ] `@return` doc for `true` and `false` cases instead of just `bool`
+- [ ] pick a style for struct types
 
 # Style Guide
 - Use [Go Doc-style](https://tip.golang.org/doc/comment) for doc  comments e.g. `// function_name does thing`

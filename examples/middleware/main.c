@@ -7,6 +7,8 @@
 #define PORT 9000
 
 res_t *handler(req_t *req, res_t *res) {
+  printf("handler\n");
+
   set_header(res, "Content-Type: text/plain");
   set_header(res, "X-Powered-By: demo");
 
@@ -29,7 +31,8 @@ res_t *middleware2(req_t *req, res_t *res) {
 }
 
 int main() {
-  router_t *router = router_init(NULL, NULL);
+  router_attr_t attr = ROUTE_ATTR_INITIALIZER;
+  router_t *router = router_init(attr);
   router_register(router, "/:key[^\\d+$]", handler,
                   collect_middleware(middleware1, middleware2, NULL),
                   METHOD_GET, NULL);

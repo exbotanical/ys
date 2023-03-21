@@ -149,6 +149,15 @@ typedef struct {
 } __router_t;
 typedef __router_t *router_t;
 
+typedef struct {
+  handler_t *not_found_handler;
+  handler_t *internal_error_handler;
+  handler_t *method_not_allowed_handler;
+} router_attr_t;
+
+#define ROUTE_ATTR_INITIALIZER \
+  { NULL, NULL, NULL }
+
 // A server configuration object that stores settings for the HTTP server
 typedef struct {
   __router_t *router;
@@ -193,12 +202,10 @@ void router_free(router_t *router);
 /**
  * router_init allocates memory for a new router and its `trie` member;
  * sets the handlers for 404 and 405 (if none provided, defaults will be used).
- * @param not_found_handler
- * @param method_not_allowed_handler
+ * @param router_attr_t TODO:
  * @return router_t*
  */
-router_t *router_init(handler_t *not_found_handler,
-                      handler_t *method_not_allowed_handler);
+router_t *router_init(router_attr_t attr);
 
 /**
  * router_register registers a new route record. Registered routes will be
