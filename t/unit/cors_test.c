@@ -18,22 +18,6 @@ static const char *all_headers[] = {"Vary",
                                     "Access-Control-Max-Age",
                                     "Access-Control-Expose-Headers"};
 
-static array_t *toarr(void *s, ...) {
-  array_t *arr = array_init();
-
-  va_list args;
-  va_start(args, s);
-
-  array_push(arr, s);
-  while ((s = va_arg(args, void *))) {
-    array_push(arr, s);
-  }
-
-  va_end(args);
-
-  return arr;
-}
-
 inline static array_t *toheaders(char *s, ...) {
   array_t *arr = array_init();
   va_list args;
@@ -127,7 +111,7 @@ void test_cors_middleware() {
   test_case tests[] = {
       {
           .name = "AllOriginAllowed",
-          .options = make_opts(toarr("*"), NULL, NULL, NULL, false),
+          .options = make_opts(array_collect("*"), NULL, NULL, NULL, false),
           .method = METHOD_GET,
           .req_headers = toheaders("Origin", "http://foo.com", NULL),
           .res_headers = toheaders("Vary", "Origin",
@@ -136,8 +120,8 @@ void test_cors_middleware() {
       },
       {
           .name = "OriginAllowed",
-          .options =
-              make_opts(toarr("http://foo.com"), NULL, NULL, NULL, false),
+          .options = make_opts(array_collect("http://foo.com"), NULL, NULL,
+                               NULL, false),
           .method = METHOD_GET,
           .req_headers = toheaders("Origin", "http://foo.com", NULL),
           .res_headers =
@@ -146,29 +130,32 @@ void test_cors_middleware() {
           .code = STATUS_OK,
       },
       {.name = "OriginAllowedMultipleProvided",
-       .options = make_opts(toarr("http://foo.com", "http://bar.com"), NULL,
-                            NULL, NULL, false),
+       .options = make_opts(array_collect("http://foo.com", "http://bar.com"),
+                            NULL, NULL, NULL, false),
        .method = METHOD_GET,
        .req_headers = toheaders("Origin", "http://bar.com", NULL),
        .res_headers = toheaders("Vary", "Origin", "Access-Control-Allow-Origin",
                                 "http://bar.com", NULL),
        .code = STATUS_OK},
       {.name = "GETMethodAllowedDefault",
-       .options = make_opts(toarr("http://foo.com"), NULL, NULL, NULL, false),
+       .options =
+           make_opts(array_collect("http://foo.com"), NULL, NULL, NULL, false),
        .method = METHOD_GET,
        .req_headers = toheaders("Origin", "http://foo.com", NULL),
        .res_headers = toheaders("Vary", "Origin", "Access-Control-Allow-Origin",
                                 "http://foo.com", NULL),
        .code = STATUS_OK},
       {.name = "POSTMethodAllowedDefault",
-       .options = make_opts(toarr("http://foo.com"), NULL, NULL, NULL, false),
+       .options =
+           make_opts(array_collect("http://foo.com"), NULL, NULL, NULL, false),
        .method = METHOD_POST,
        .req_headers = toheaders("Origin", "http://foo.com", NULL),
        .res_headers = toheaders("Vary", "Origin", "Access-Control-Allow-Origin",
                                 "http://foo.com", NULL),
        .code = STATUS_OK},
       {.name = "HEADMethodAllowedDefault",
-       .options = make_opts(toarr("http://foo.com"), NULL, NULL, NULL, false),
+       .options =
+           make_opts(array_collect("http://foo.com"), NULL, NULL, NULL, false),
        .method = METHOD_HEAD,
        .req_headers = toheaders("Origin", "http://foo.com", NULL),
        .res_headers = toheaders("Vary", "Origin", "Access-Control-Allow-Origin",
@@ -176,7 +163,8 @@ void test_cors_middleware() {
        .code = STATUS_OK},
       {.name = "MethodAllowed",
        // TODO: allow just enum
-       .options = make_opts(toarr("*"), toarr(http_method_names[METHOD_DELETE]),
+       .options = make_opts(array_collect("*"),
+                            array_collect(http_method_names[METHOD_DELETE]),
                             NULL, NULL, false),
        .method = METHOD_OPTIONS,
        .req_headers = toheaders("Origin", "http://foo.com",
@@ -190,8 +178,8 @@ void test_cors_middleware() {
                                 http_method_names[METHOD_DELETE], NULL),
        .code = STATUS_NO_CONTENT},
       {.name = "HeadersAllowed",
-       .options = make_opts(toarr("*", NULL), NULL, toarr("X-Testing", NULL),
-                            NULL, false),
+       .options = make_opts(array_collect("*"), NULL,
+                            array_collect("X-Testing"), NULL, false),
        .method = METHOD_OPTIONS,
        .req_headers = toheaders(
            "Origin", "http://foo.com", "Access-Control-Request-Method",
@@ -206,9 +194,10 @@ void test_cors_middleware() {
                                 http_method_names[METHOD_GET], NULL),
        .code = STATUS_NO_CONTENT},
       {.name = "HeadersAllowedMultiple",
-       .options = make_opts(
-           toarr("*", NULL), NULL,
-           toarr("X-Testing", "X-Testing-2", "X-Testing-3", NULL), NULL, false),
+       .options =
+           make_opts(array_collect("*"), NULL,
+                     array_collect("X-Testing", "X-Testing-2", "X-Testing-3"),
+                     NULL, false),
        .method = METHOD_OPTIONS,
        .req_headers = toheaders(
            "Origin", "http://foo.com", "Access-Control-Request-Method",
@@ -223,7 +212,7 @@ void test_cors_middleware() {
            "Access-Control-Allow-Methods", http_method_names[METHOD_GET], NULL),
        .code = STATUS_NO_CONTENT},
       {.name = "CredentialsAllowed",
-       .options = make_opts(toarr("*", NULL), NULL, NULL, NULL, true),
+       .options = make_opts(array_collect("*"), NULL, NULL, NULL, true),
        .method = METHOD_OPTIONS,
        .req_headers = toheaders("Origin", "http://foo.com",
                                 "Access-Control-Request-Method",
@@ -237,8 +226,8 @@ void test_cors_middleware() {
                                 http_method_names[METHOD_GET], NULL),
        .code = STATUS_NO_CONTENT},
       {.name = "ExposeHeaders",
-       .options = make_opts(toarr("http://foo.com", NULL), NULL, NULL,
-                            toarr("x-test", NULL), false),
+       .options = make_opts(array_collect("http://foo.com"), NULL, NULL,
+                            array_collect("x-test"), false),
        .method = METHOD_POST,
        .req_headers = toheaders("Origin", "http://foo.com", NULL),
        .res_headers = toheaders(
@@ -246,8 +235,8 @@ void test_cors_middleware() {
            "Access-Control-Expose-Headers", "x-test", NULL),
        .code = STATUS_OK},
       {.name = "ExposeHeadersMultiple",
-       .options = make_opts(toarr("http://foo.com", NULL), NULL, NULL,
-                            toarr("x-test-1", "x-test-2", NULL), false),
+       .options = make_opts(array_collect("http://foo.com"), NULL, NULL,
+                            array_collect("x-test-1", "x-test-2"), false),
        .method = METHOD_POST,
        .req_headers = toheaders("Origin", "http://foo.com", NULL),
        .res_headers = toheaders(
@@ -258,20 +247,20 @@ void test_cors_middleware() {
       // CORS Rejections
       {.name = "OriginNotAllowed",
        .options =
-           make_opts(toarr("http://foo.com", NULL), NULL, NULL, NULL, false),
+           make_opts(array_collect("http://foo.com"), NULL, NULL, NULL, false),
        .method = METHOD_GET,
        .req_headers = toheaders("Origin", "http://bar.com", NULL),
        .res_headers = toheaders("Vary", "Origin", NULL),
        .code = STATUS_OK},
       {.name = "OriginNotAllowedPortMismatch",
-       .options = make_opts(toarr("http://foo.com:443", NULL), NULL, NULL, NULL,
-                            false),
+       .options = make_opts(array_collect("http://foo.com:443"), NULL, NULL,
+                            NULL, false),
        .method = METHOD_GET,
        .req_headers = toheaders("Origin", "http://foo.com:444", NULL),
        .res_headers = toheaders("Vary", "Origin", NULL),
        .code = STATUS_OK},
       {.name = "MethodNotAllowed",
-       .options = make_opts(toarr("*", NULL), NULL, NULL, NULL, false),
+       .options = make_opts(array_collect("*"), NULL, NULL, NULL, false),
        .method = METHOD_OPTIONS,
        .req_headers = toheaders("Origin", "http://foo.com",
                                 "Access-Control-Request-Method",
@@ -282,7 +271,7 @@ void test_cors_middleware() {
                                 NULL),
        .code = STATUS_NO_CONTENT},
       {.name = "HeadersNotAllowed",
-       .options = make_opts(toarr("*", NULL), NULL, NULL, NULL, false),
+       .options = make_opts(array_collect("*"), NULL, NULL, NULL, false),
        .method = METHOD_OPTIONS,
        .req_headers = toheaders(
            "Origin", "http://foo.com", "Access-Control-Request-Method",
@@ -320,26 +309,6 @@ void test_cors_middleware() {
   }
 }
 
-void test_derive_headers() {
-  req_t *req = malloc(sizeof(req_t));
-  req->headers = ht_init(0);
-
-  array_t *values = array_init();
-  array_push(values, "x-test-1, x-test-2, x-test-3");
-
-  ht_insert(req->headers, REQUEST_HEADERS_HEADER, values);
-
-  array_t *expected = toarr("x-test-1", "x-test-2", "x-test-3", NULL);
-  array_t *actual = derive_headers(req);
-
-  foreach (expected, i) {
-    char *e = array_get(expected, i);
-    char *a = array_get(actual, i);
-
-    is(e, a, "derive_headers - expected %s to equal %s", e, a);
-  }
-}
-
 void test_are_headers_allowed() {
   typedef struct {
     array_t *test_headers;
@@ -354,28 +323,28 @@ void test_are_headers_allowed() {
 
   test tests[] = {
       {.name = "ExplicitHeaders",
-       .cors = cors_init(make_opts(toarr("*", NULL), NULL,
-                                   toarr("x-test-1", "x-test-2", NULL), NULL,
+       .cors = cors_init(make_opts(array_collect("*"), NULL,
+                                   array_collect("x-test-1", "x-test-2"), NULL,
                                    false)),
-       .cases = toarr(
-           &(test_case){.test_headers = toarr("x-test-1", "x-test-2", NULL),
+       .cases = array_collect(
+           &(test_case){.test_headers = array_collect("x-test-1", "x-test-2"),
                         .is_allowed = true},
            &(test_case){
-               .test_headers = toarr("x-test", "x-test-1", "x-test-2", NULL),
+               .test_headers = array_collect("x-test", "x-test-1", "x-test-2"),
                .is_allowed = false},
-           &(test_case){.test_headers = toarr("", NULL), .is_allowed = false},
-           NULL)},
+           &(test_case){.test_headers = array_collect(""),
+                        .is_allowed = false})},
       {.name = "WildcardHeaders",
-       .cors = cors_init(
-           make_opts(toarr("*", NULL), NULL, toarr("*", NULL), NULL, false)),
-       .cases = toarr(
-           &(test_case){.test_headers = toarr("x-test-1", "x-test-2", NULL),
+       .cors = cors_init(make_opts(array_collect("*"), NULL, array_collect("*"),
+                                   NULL, false)),
+       .cases = array_collect(
+           &(test_case){.test_headers = array_collect("x-test-1", "x-test-2"),
                         .is_allowed = true},
            &(test_case){
-               .test_headers = toarr("x-test", "x-test-1", "x-test-2", NULL),
+               .test_headers = array_collect("x-test", "x-test-1", "x-test-2"),
                .is_allowed = true},
-           &(test_case){.test_headers = toarr("", NULL), .is_allowed = true},
-           NULL)}};
+           &(test_case){.test_headers = array_collect(""),
+                        .is_allowed = true})}};
 
   for (unsigned int i = 0; i < sizeof(tests) / sizeof(test); i++) {
     test t = tests[i];
@@ -401,19 +370,19 @@ void test_is_method_allowed() {
     array_t *cases;
   } test;
 
-  test tests[] = {
-      {.name = "ExplicitMethod",
-       .cors = cors_init(make_opts(toarr("*", NULL),
-                                   toarr(http_method_names[METHOD_DELETE],
-                                         http_method_names[METHOD_PUT], NULL),
-                                   NULL, NULL, false)),
-       .cases = toarr(&(test_case){.method = http_method_names[METHOD_DELETE],
-                                   .is_allowed = true},
-                      &(test_case){.method = http_method_names[METHOD_PUT],
-                                   .is_allowed = true},
-                      &(test_case){.method = http_method_names[METHOD_PATCH],
-                                   .is_allowed = false},
-                      NULL)}};
+  test tests[] = {{.name = "ExplicitMethod",
+                   .cors = cors_init(
+                       make_opts(array_collect("*"),
+                                 array_collect(http_method_names[METHOD_DELETE],
+                                               http_method_names[METHOD_PUT]),
+                                 NULL, NULL, false)),
+                   .cases = array_collect(
+                       &(test_case){.method = http_method_names[METHOD_DELETE],
+                                    .is_allowed = true},
+                       &(test_case){.method = http_method_names[METHOD_PUT],
+                                    .is_allowed = true},
+                       &(test_case){.method = http_method_names[METHOD_PATCH],
+                                    .is_allowed = false})}};
 
   for (unsigned int i = 0; i < sizeof(tests) / sizeof(test); i++) {
     test t = tests[i];
@@ -441,29 +410,28 @@ void test_origin_is_allowed() {
 
   test tests[] = {
       {.name = "ExplicitOrigin",
-       .cors = cors_init(
-           make_opts(toarr("http://foo.com", "http://bar.com", "baz.com", NULL),
-                     NULL, NULL, NULL, false)),
-       .cases =
-           toarr(&(test_case){.origin = "http://foo.com", .is_allowed = true},
-                 &(test_case){.origin = "http://bar.com", .is_allowed = true},
-                 &(test_case){.origin = "baz.com", .is_allowed = true},
-                 &(test_case){.origin = "http://foo.com/", .is_allowed = false},
-                 &(test_case){.origin = "https://bar.com", .is_allowed = false},
-                 &(test_case){.origin = "http://baz.com", .is_allowed = false},
-                 &(test_case){.origin = "null",  // file redirect
-                              .is_allowed = true},
-                 NULL)},
+       .cors = cors_init(make_opts(
+           array_collect("http://foo.com", "http://bar.com", "baz.com"), NULL,
+           NULL, NULL, false)),
+       .cases = array_collect(
+           &(test_case){.origin = "http://foo.com", .is_allowed = true},
+           &(test_case){.origin = "http://bar.com", .is_allowed = true},
+           &(test_case){.origin = "baz.com", .is_allowed = true},
+           &(test_case){.origin = "http://foo.com/", .is_allowed = false},
+           &(test_case){.origin = "https://bar.com", .is_allowed = false},
+           &(test_case){.origin = "http://baz.com", .is_allowed = false},
+           &(test_case){.origin = "null",  // file redirect
+                        .is_allowed = true})},
       {.name = "WildcardOrigin",
-       .cors = cors_init(make_opts(toarr("*", NULL), NULL, NULL, NULL, false)),
-       .cases =
-           toarr(&(test_case){.origin = "http://foo.com", .is_allowed = true},
-                 &(test_case){.origin = "http://bar.com", .is_allowed = true},
-                 &(test_case){.origin = "baz.com", .is_allowed = true},
-                 &(test_case){.origin = "http://foo.com/", .is_allowed = true},
-                 &(test_case){.origin = "https://bar.com", .is_allowed = true},
-                 &(test_case){.origin = "http://baz.com", .is_allowed = true},
-                 NULL)}};
+       .cors =
+           cors_init(make_opts(array_collect("*"), NULL, NULL, NULL, false)),
+       .cases = array_collect(
+           &(test_case){.origin = "http://foo.com", .is_allowed = true},
+           &(test_case){.origin = "http://bar.com", .is_allowed = true},
+           &(test_case){.origin = "baz.com", .is_allowed = true},
+           &(test_case){.origin = "http://foo.com/", .is_allowed = true},
+           &(test_case){.origin = "https://bar.com", .is_allowed = true},
+           &(test_case){.origin = "http://baz.com", .is_allowed = true})}};
 
   for (unsigned int i = 0; i < sizeof(tests) / sizeof(test); i++) {
     test t = tests[i];
@@ -478,10 +446,9 @@ void test_origin_is_allowed() {
 }
 
 int main(int argc, char const *argv[]) {
-  plan(62);
+  plan(59);
 
   test_cors_middleware();
-  test_derive_headers();
   test_are_headers_allowed();
   test_is_method_allowed();
   test_origin_is_allowed();

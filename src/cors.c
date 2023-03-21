@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <string.h>  // for strlen
 
-#include "header.h"  // for req_header_get, res_header_append
+#include "header.h"  // for req_header_get, res_header_append, derive_headers
 #include "util.h"
 #include "xmalloc.h"
 
@@ -129,7 +129,8 @@ static void handle_preflight_request(req_t *req, res_t *res) {
 
   // Validate request headers. Preflights are also used when
   // requests include additional headers from the client
-  array_t *reqd_headers = derive_headers(req);
+  char *header_str = req_header_get(req->headers, REQUEST_HEADERS_HEADER);
+  array_t *reqd_headers = derive_headers(header_str);
   if (!are_headers_allowed(cors_config, reqd_headers)) {
     res->done = true;
     return;
@@ -322,9 +323,7 @@ bool is_method_allowed(cors_t *c, char *method) {
   return false;
 }
 
-array_t *derive_headers(req_t *req) {
-  // TODO: make more dynamic by passing in header_str
-  char *header_str = req_header_get(req->headers, REQUEST_HEADERS_HEADER);
+array_t *derive_headers(const char *header_str) {
   array_t *headers = array_init();
 
   if (!header_str || str_equals(header_str, "")) {

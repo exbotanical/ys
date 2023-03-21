@@ -14,6 +14,8 @@ extern "C" {
 
 #define has_elements(arr) (arr != NULL && array_size(arr) > 0)
 
+#define array_collect(...) __array_collect(__VA_ARGS__, NULL)
+
 typedef struct {
   void **state;
   unsigned int len;
@@ -58,6 +60,8 @@ void array_foreach(array_t *array, callback_function_t *callback);
 void array_free(array_t *array);
 
 unsigned int array_size(array_t *array);
+
+array_t *__array_collect(void *v, ...);
 
 /**
  * @brief A dynamic string buffer.

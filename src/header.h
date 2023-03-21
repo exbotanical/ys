@@ -82,4 +82,13 @@ void res_header_append(array_t* headers, const char* key, const char* value);
  * @return bool
  */
 bool insert_header(hash_table* headers, const char* k, const char* v);
+
+/**
+ * derive_headers extracts the comma-delimited headers in the value of the
+ * given header
+ *
+ * @param header_str
+ * @return array_t*
+ */
+array_t* derive_headers(const char* header_str);
 #endif /* HEADER_H */

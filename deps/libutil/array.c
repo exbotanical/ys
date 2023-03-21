@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <malloc.h>
+#include <stdarg.h>
 #include <stdlib.h>
 
 #include "libutil.h"
@@ -42,6 +43,22 @@ array_t *array_init() {
   internal->len = 0;
 
   return array;
+}
+
+array_t *__array_collect(void *v, ...) {
+  array_t *arr = array_init();
+
+  va_list args;
+  va_start(args, v);
+
+  array_push(arr, v);
+  while ((v = va_arg(args, void *))) {
+    array_push(arr, v);
+  }
+
+  va_end(args);
+
+  return arr;
 }
 
 bool array_includes(array_t *array, comparator_function_t *comparator,

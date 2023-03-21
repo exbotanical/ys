@@ -142,14 +142,29 @@ void test_insert_header() {
      "fails to insert duplicate header of singleton type");
 }
 
+void test_derive_headers() {
+  const char *header_str = "x-test-1, x-test-2, x-test-3";
+
+  array_t *expected = array_collect("x-test-1", "x-test-2", "x-test-3");
+  array_t *actual = derive_headers(header_str);
+
+  foreach (expected, i) {
+    char *e = array_get(expected, i);
+    char *a = array_get(actual, i);
+
+    is(e, a, "derive_headers - expected %s to equal %s", e, a);
+  }
+}
+
 int main(int argc, char const *argv[]) {
-  plan(21);
+  plan(24);
 
   test_token_table();
   test_to_canonical_MIME_header_key();
 
   test_req_header_get();
   test_req_header_values();
+  test_derive_headers();
 
   done_testing();
 }

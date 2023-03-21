@@ -85,16 +85,6 @@ cors_t *cors_init(cors_opts_t *opts);
 res_t *cors_handler(req_t *req, res_t *res);
 
 /**
- * derive_headers extracts the headers in the value of the
- * `Access-Control-Request-Headers` header
- *
- * @param req
- * @return array_t*
- * TODO: move to headers.h and remove enum specificity
- */
-array_t *derive_headers(req_t *req);
-
-/**
  * are_headers_allowed determines whether the given headers are allowed per
  * the user-defined allow list
  *

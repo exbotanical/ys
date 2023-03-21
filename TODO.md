@@ -31,7 +31,7 @@
 
 ## New Features
 - [ ] global hooks/interceptors (e.g. global HTTP headers)
-- [ ] allow middleware to exit early by sending response
+- [x] allow middleware to exit early by sending response
 - [ ] Built-in middlewares
   - [ ] CORS middleware
 - [ ] Cookies
