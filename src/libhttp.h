@@ -140,17 +140,6 @@ typedef struct {
 // An alias type for request handlers
 typedef res_t *handler_t(req_t *, res_t *);
 
-typedef struct {
-  array_t *middlewares;
-} __middlewares_t;
-typedef __middlewares_t middlewares_t;
-
-void add_middleware(middlewares_t *m, handler_t *h);
-
-// TODO: t + d
-#define middlewares(...) __middlewares(__VA_ARGS__, NULL)
-middlewares_t *__middlewares(handler_t *middleware, ...);
-
 // CORS configuration options
 typedef struct {
   array_t *allowed_origins;
@@ -180,6 +169,7 @@ typedef struct {
   handler_t *not_found_handler;
   handler_t *method_not_allowed_handler;
   handler_t *internal_error_handler;
+  array_t *global_middlewares;
 } __router_t;
 typedef __router_t *router_t;
 
@@ -198,6 +188,8 @@ typedef struct {
   int port;
 } __server_t;
 typedef __server_t *server_t;
+
+typedef array_t *middlewares_t;
 
 /**
  * set_header appends the given key/value pair as a header object in
@@ -313,5 +305,14 @@ unsigned int req_num_parameters(req_t *req);
  * @return bool
  */
 bool req_has_parameters(req_t *req);
+
+// TODO: d
+#define middlewares(...) __middlewares(__VA_ARGS__, NULL)
+#define gmiddlewares(r, ...) __gmiddlewares(r, __VA_ARGS__, NULL)
+
+middlewares_t *__middlewares(handler_t *mw, ...);
+void __gmiddlewares(router_t *r, handler_t *mw, ...);
+void add_gmiddleware(router_t *r, handler_t *mw);
+void add_middleware(middlewares_t *mws, handler_t *mw);
 
 #endif /* LIBHTTP_H */

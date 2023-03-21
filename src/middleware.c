@@ -4,34 +4,54 @@
 #include "libhttp.h"
 #include "xmalloc.h"
 
-void add_middleware(middlewares_t *m, handler_t *h) {
-  array_push((__middlewares_t *)m->middlewares, h);
+void add_middleware(middlewares_t *mws, handler_t *mw) { array_push(mws, mw); }
+
+void add_gmiddleware(router_t *r, handler_t *mw) {
+  array_push(((__router_t *)r)->global_middlewares, mw);
 }
 
-// TODO: replace with an attr object (pthread_once?)
-middlewares_t *__middlewares(handler_t *middleware, ...) {
-  array_t *middlewares = array_init();
-  if (!middlewares) {
+middlewares_t *__middlewares(handler_t *mw, ...) {
+  array_t *mws = array_init();
+  if (!mws) {
     return NULL;
   }
 
   va_list args;
-  va_start(args, middleware);
+  va_start(args, mw);
 
-  while (middleware != NULL) {
-    if (!array_push(middlewares, (void *)middleware)) {
+  while (mw != NULL) {
+    if (!array_push(mws, mw)) {
       return NULL;
     }
 
-    middleware = va_arg(args, handler_t *);
+    mw = va_arg(args, handler_t *);
   }
 
   va_end(args);
 
-  __middlewares_t *m = xmalloc(sizeof(__middlewares_t));
-  m->middlewares = middlewares;
+  return mws;
+}
 
-  return (middlewares_t *)m;
+void __gmiddlewares(router_t *r, handler_t *mw, ...) {
+  array_t *mws = array_init();
+  if (!mws) {
+    return NULL;
+  }
+
+  va_list args;
+  va_start(args, mw);
+
+  while (mw != NULL) {
+    if (!array_push(mws, mw)) {
+      return NULL;
+    }
+
+    mw = va_arg(args, handler_t *);
+  }
+
+  va_end(args);
+
+  ((__router_t *)r)->global_middlewares = mws;
 }
 
 handler_t *use_cors(cors_opts_t *opts) {

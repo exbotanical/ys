@@ -14,6 +14,7 @@ declare -a SKIP_FILES=(
   # 'request_test.c'
 	# 'trie_test.c'
   # 'util_test.c'
+  # 'middleware_test.c'
 )
 
 not_test_file () {

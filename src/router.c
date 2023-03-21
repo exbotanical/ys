@@ -101,6 +101,7 @@ router_t *router_init(router_attr_t attr) {
   __router_t *router = xmalloc(sizeof(__router_t));
 
   router->trie = trie_init();
+  router->global_middlewares = array_init();
 
   if (!attr.not_found_handler) {
     LOG("[router::router_init] %s\n",
@@ -157,9 +158,8 @@ void router_register(router_t *router, const char *path, handler_t *handler,
         "invariant violation - router_register arguments cannot be NULL");
   }
 
-  array_t *ms =
-      middlewares ? ((__middlewares_t *)middlewares)->middlewares : NULL;
-  trie_insert(((__router_t *)router)->trie, methods, path, handler, ms);
+  trie_insert(((__router_t *)router)->trie, methods, path, handler,
+              (array_t *)middlewares);
 }
 
 void router_run(__router_t *router, int client_socket, req_t *req) {
@@ -179,7 +179,7 @@ void router_run(__router_t *router, int client_socket, req_t *req) {
 
     handler_t *h = (handler_t *)result->action->handler;
 
-    array_t *mws = result->action->middlewares;
+    array_t *mws = router->global_middlewares;
     if (mws && array_size(mws) > 0) {
       res = invoke_chain(req, res, mws);
     }
