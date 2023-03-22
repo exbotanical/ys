@@ -52,16 +52,16 @@
 
 ## Spec Compliance
 - [ ] handle duplicate response headers
-- [ ] Validate Content-Type for incoming stateful requests
-- [ ] handle accept header
 - [ ] Full RFC compliance
+  - [ ] handle accept header
+  - [ ] Validate Content-Type for incoming stateful requests
 
 ## Misc Improvements
 - [ ] use a better regex engine than pcre
 - [ ] ~~make regex cache global (instead of per-trie-node)~~ bad idea
-- [ ] replace `LOG` macro calls with new logger
-  - [ ] fix log to stderr
-  - [ ] use function name macro instead of explicit string literals
+- [x] replace `LOG` macro calls with new logger
+  - [x] fix log to stderr
+  - [x] use function name macro instead of explicit string literals
 - [ ] inline functions where reasonable
 - [x] ~~Change middleware chaining to use `next`, the next middleware in the chain. This will allow a current handler to *not* invoke `next`, thus ending the chain. Note: Figuring this out is going to be a challenge~~
 

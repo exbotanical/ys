@@ -35,8 +35,8 @@ static void *client_thread_handler(void *arg) {
 
   req_t *req = maybe_req.req;
 
-  LOG("[server::client_thread_handler] client request received: %s %s\n",
-      req->method, req->path);
+  printlogf(LOG_INFO, "[server::%s] client request received: %s %s\n", __func__,
+            req->method, req->path);
 
   router_run(c_ctx->router, c_ctx->client_socket, req);
 
@@ -61,8 +61,9 @@ bool server_start(server_t *server) {
   int master_socket;
 
   if ((master_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == 0) {
-    LOG("[server::start] %s\n",
-        fmt_str("failed to initialize server socket on port %d", port));
+    printlogf(LOG_INFO,
+              "[server::%s] failed to initialize server socket on port %d\n",
+              __func__, port);
     perror("socket");
     return false;
   }
@@ -71,7 +72,7 @@ bool server_start(server_t *server) {
   // avoid the "Address already in use" error message
   if (setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) ==
       -1) {
-    LOG("[server::start] %s\n", "failed to set sock opt");
+    printlogf(LOG_INFO, "[server::%s] failed to set sock opt\n", __func__);
     perror("setsockopt");
     return false;
   }
@@ -85,27 +86,27 @@ bool server_start(server_t *server) {
   address.sin_port = htons(port);
 
   if (bind(master_socket, (struct sockaddr *)&address, sizeof(address)) < 0) {
-    LOG("[server::start] %s\n", fmt_str("failed to bind server socket on %s:%d",
-                                        address.sin_addr, port));
+    printlogf(LOG_INFO, "[server::%s] failed to bind server socket on %s:%d\n",
+              __func__, address.sin_addr, port);
     perror("bind");
     return false;
   }
 
   if (listen(master_socket, MAX_CONN) < 0) {
-    LOG("[server::start] %s\n",
-        fmt_str("failed to listen on %s:%d", address.sin_addr, port));
+    printlogf(LOG_INFO, "[server::%s] failed to listen on %s:%d\n", __func__,
+              address.sin_addr, port);
     perror("listen");
     return false;
   }
 
-  // printlogf(LOG_INFO, "Listening on port %d...\n", port);
-  printf("Listening on port %d...\n", port);
+  printlogf(LOG_INFO, "[server::%s] Listening on port %d...\n", __func__, port);
   fd_set readfds;
   int client_socket;
 
   thread_pool_t *pool = calloc(1, sizeof(thread_pool_t));
   if (!pool) {
-    DIE(EXIT_FAILURE, "%s\n", "failed to initialized thread pool");
+    DIE(EXIT_FAILURE, "[server::%s] failed to initialized thread pool\n",
+        __func__);
   }
 
   const int num_threads = server_config.num_threads;
@@ -122,18 +123,21 @@ bool server_start(server_t *server) {
     FD_SET(master_socket, &readfds);
 
     select(master_socket + 1, &readfds, NULL, NULL, NULL);
+
     if (FD_ISSET(master_socket, &readfds)) {
       if ((client_socket = accept(master_socket, (struct sockaddr *)&address,
                                   &addr_len)) < 0) {
-        char *message = fmt_str("failed to accept client socket on %s:%d",
-                                address.sin_addr, port);
-        LOG("[server::start] %s\n", message);
+        printlogf(LOG_INFO,
+                  "[server::%s] failed to accept client socket on %s:%d\n",
+                  __func__, address.sin_addr, port);
         perror("accept");
         return false;
       }
 
-      LOG("[server::start] %s\n",
-          "accepted connection from new client; spawning handler thread...");
+      printlogf(LOG_DEBUG,
+                "[server::%s] accepted connection from new client; spawning "
+                "handler thread...\n",
+                __func__);
 
       client_context_t *c_ctx = xmalloc(sizeof(client_context_t));
       c_ctx->address = (struct sockaddr *)&address;
@@ -143,8 +147,8 @@ bool server_start(server_t *server) {
 
       // TODO: UH, why are we blocking?
       if (!thread_pool_dispatch(pool, client_thread_handler, c_ctx, true)) {
-        DIE(EXIT_FAILURE, "[server::start] %s\n",
-            "failed to dispatch thread from pool");
+        DIE(EXIT_FAILURE, "[server::%s] failed to dispatch thread from pool\n",
+            __func__);
       }
     }
   }

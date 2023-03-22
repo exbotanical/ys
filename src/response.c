@@ -41,7 +41,8 @@ buffer_t *serialize_response(req_t *req, res_t *res) {
   const buffer_t *rbuf = buffer_init(NULL);
   if (!rbuf) {
     // TODO: constant template str for malloc failures
-    DIE(EXIT_FAILURE, "%s\n", "could not allocate memory for buffer_t");
+    DIE(EXIT_FAILURE, "[response::%s] could not allocate memory for buffer_t\n",
+        __func__);
   }
 
   const int status = res->status;
@@ -90,13 +91,11 @@ void send_response(int socket, buffer_t *response) {
         // Try again later
         continue;
       } else {
-        printlogf(
-            LOG_INFO,
-            "[response::send_response] failed to send response on socket %d",
-            socket);
-        printlogf(LOG_DEBUG,
-                  "[response::send_response] full response body: %s\n",
-                  buffer_state(response));
+        printlogf(LOG_INFO,
+                  "[response::%s] failed to send response on socket %d",
+                  __func__, socket);
+        printlogf(LOG_DEBUG, "[response::%s] full response body: %s\n",
+                  __func__, buffer_state(response));
         goto done;
         return;
       }
@@ -139,7 +138,7 @@ res_t *response_init() {
 
   res->headers = array_init();
   if (!res->headers) {
-    DIE(EXIT_FAILURE, "%s\n", "unable to allocate array_t");
+    DIE(EXIT_FAILURE, "[response::%s] unable to allocate array_t\n", __func__);
   }
 
   res->body = NULL;

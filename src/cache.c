@@ -16,8 +16,10 @@ pcre *regex_cache_get(hash_table *regex_cache, const char *pattern) {
   pcre *re = pcre_compile(pattern, 0, &error, &erroffset, NULL);
   if (re == NULL) {
     free(re);
-    LOG("[cache::regex_cache_get] %s %d: %s; errno: %d\n",
-        "PCRE compilation failed at offset", erroffset, error, errno);
+    printlogf(
+        LOG_INFO,
+        "[cache::%s] PCRE compilation failed at offset %d: %s; errno: %d\n",
+        __func__, erroffset, error, errno);
     return NULL;
   }
 

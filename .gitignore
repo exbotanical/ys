@@ -4,3 +4,4 @@ main
 *.o
 *.so
 .vscode
+scratchpad.c

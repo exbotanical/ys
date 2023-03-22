@@ -8,14 +8,9 @@
 #endif /* fprintf */
 
 /**
- * Debug stderr logger
- */
-#define LOG(fmt, ...) fprintf(stderr, fmt, __VA_ARGS__)
-
-/**
  * Logs a user-facing error to stderr and exits with return code `rc`.
  */
-#define DIE(rc, fmt, ...) LOG(fmt, __VA_ARGS__), exit(rc)
+#define DIE(rc, fmt, ...) printlogf(LOG_INFO, fmt, __VA_ARGS__), exit(rc)
 
 #define LOG_BUFFER 2048  /* max size of log line */
 #define SMALL_BUFFER 256 /* small buffer size */

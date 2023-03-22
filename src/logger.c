@@ -9,6 +9,7 @@
 #include <unistd.h>  // for write
 
 #include "config.h"
+#include "libutil/libutil.h"
 
 const char *log_header = LOG_HEADER;
 
@@ -19,6 +20,72 @@ const char *log_levels[] = {"emerg",   "alert",  "crit", "err",
 
 // Log level to use
 short log_level = LOG_LEVEL;
+#define TIMESTAMP_FORMAT "%04d-%02d-%02dT%02d:%02d:%02dZ"
+#define TIMESTAMP_SIZE sizeof("YYYY-MM-DDTHH:MM:SSZ")
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define TIMESTAMP_FORMAT "%04d-%02d-%02dT%02d:%02d:%02dZ"
+#define TIMESTAMP_SIZE sizeof("YYYY-MM-DDTHH:MM:SSZ")
+
+char *gen_timestamp(void) {
+  time_t utc_time = time(NULL);
+  if (utc_time == ((time_t)-1)) {
+    return NULL;  // Error: Unable to get UTC time
+  }
+
+  struct tm utc_tm;
+  memset(&utc_tm, 0, sizeof(struct tm));
+  int leap_years = 0;
+  int days_in_month[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+
+  int seconds = (int)utc_time;
+  utc_tm.tm_sec = seconds % 60;
+  utc_tm.tm_min = (seconds / 60) % 60;
+  utc_tm.tm_hour = (seconds / 3600) % 24;
+
+  int days = seconds / 86400;
+  int year = 1970;
+  int month = 0;
+  int day = 0;
+  while (days >= 365 + leap_years) {
+    if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
+      leap_years++;
+    }
+    days -= 365 + leap_years;
+    year++;
+  }
+  utc_tm.tm_year = year - 1900;
+
+  while (month < 12 &&
+         days >= days_in_month[month] +
+                     ((month == 1 && (year % 4 == 0 && year % 100 != 0) ||
+                       year % 400 == 0))) {
+    days -=
+        days_in_month[month] +
+        ((month == 1 && (year % 4 == 0 && year % 100 != 0) || year % 400 == 0));
+    month++;
+  }
+  utc_tm.tm_mon = month;
+  utc_tm.tm_mday = days + 1;
+
+  char *timestamp = malloc(TIMESTAMP_SIZE);
+  if (!timestamp) {
+    return NULL;  // Error: Unable to allocate memory for timestamp string
+  }
+
+  int len = snprintf(timestamp, TIMESTAMP_SIZE, TIMESTAMP_FORMAT,
+                     utc_tm.tm_year + 1900, utc_tm.tm_mon + 1, utc_tm.tm_mday,
+                     utc_tm.tm_hour, utc_tm.tm_min, utc_tm.tm_sec);
+  if (len < 0 || len >= TIMESTAMP_SIZE) {
+    free(timestamp);
+    return NULL;  // Error: Unable to create timestamp string
+  }
+
+  return timestamp;
+}
 
 /**
  * fdprintf writes the data to a given file descriptor
@@ -47,37 +114,30 @@ static void fdprintf(int fd, const char *fmt, ...) {
  * @param va
  */
 static void vlog(int level, int fd, const char *fmt, va_list va) {
-  char buf[LOG_BUFFER];
-
   if (level <= log_level) {
     char host_name[SMALL_BUFFER];
-    static short suppress_header = 0;
 
-    time_t t = time(NULL);
-    struct tm *tp = localtime(&t);
+    if (gethostname(host_name, sizeof(host_name)) == 0) {
+      // gethostname successful
+      // result will be \0-terminated except gethostname doesn't promise
+      // to do so if it has to truncate
+      host_name[sizeof(host_name) - 1] = 0;
+    } else {
+      host_name[0] = 0;  // gethostname() call failed
+    }
+
+    char *header = fmt_str("%s %s %s\t", gen_timestamp(), host_name, LOG_IDENT);
+
+    char buf[LOG_BUFFER];
+
     int buflen, header_len = 0;
     buf[0] = 0;  // in case suppress_header or strftime fails
 
-    if (!suppress_header) {
-      char header[SMALL_BUFFER];
-      // strftime returns strlen of result, provided that result plus a \0
-      // fit into buf of size
-      if (strftime(header, sizeof(header), log_header, tp)) {
-        if (gethostname(host_name, sizeof(host_name)) == 0) {
-          // gethostname successful
-          // result will be \0-terminated except gethostname doesn't promise
-          // to do so if it has to truncate
-          host_name[sizeof(host_name) - 1] = 0;
-        } else {
-          host_name[0] = 0;  // gethostname() call failed
-        }
-        // snprintf null-terminates, even when truncating
-        // retval >= size means result was truncated
-        if ((header_len = snprintf(buf, sizeof(header), header, host_name)) >=
-            (int)sizeof(header)) {
-          header_len = sizeof(header) - 1;
-        }
-      }
+    // snprintf null-terminates, even when truncating
+    // retval >= size means result was truncated
+    if ((header_len = snprintf(buf, strlen(header), header)) >=
+        (int)strlen(header)) {
+      header_len = strlen(header) - 1;
     }
 
     if ((buflen =
@@ -89,13 +149,8 @@ static void vlog(int level, int fd, const char *fmt, va_list va) {
     if (server_config.log_file) {
       write(fd, buf, buflen);
     } else {
-      // TODO: fix writing to stderr
-      printf(buf);
+      fprintf(stderr, buf);
     }
-
-    // if previous write wasn't \n-terminated, we suppress header on next
-    // write
-    suppress_header = (buf[buflen - 1] != '\n');
   }
 }
 
@@ -170,7 +225,7 @@ void setup_logging() {
       int n = errno;
       fdprintf(2, "failed to open logfile '%s', reason: %s",
                server_config.log_file, strerror(n));
-      exit(n);  // TODO: die
+      // TODO: ???
     }
   }
 }

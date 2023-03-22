@@ -49,9 +49,8 @@ static bool invoke_chain(req_t *req, res_t *res, array_t *middlewares) {
  * @return void*
  */
 static res_t *default_internal_error_handler(req_t *req, res_t *res) {
-  // printlogf(LOG_INFO,
-  //           "[router::default_internal_error_handler] 500 handler in effect
-  //           at " "request path %s\n", req->path);
+  printlogf(LOG_INFO, "[router::%s] 500 handler in effect at request path %s\n",
+            __func__, req->path);
 
   res->status = STATUS_INTERNAL_SERVER_ERROR;
 
@@ -67,9 +66,9 @@ static res_t *default_internal_error_handler(req_t *req, res_t *res) {
  */
 static res_t *default_not_found_handler(req_t *req, res_t *res) {
   printlogf(LOG_INFO,
-            "[router::default_not_found_handler] default 404 handler in effect "
+            "[router::%s] default 404 handler in effect "
             "at request path %s\n",
-            req->path);
+            __func__, req->path);
 
   res->status = STATUS_NOT_FOUND;
   res->body = NULL;
@@ -84,11 +83,10 @@ static res_t *default_not_found_handler(req_t *req, res_t *res) {
  * @return void*
  */
 static res_t *default_method_not_allowed_handler(req_t *req, res_t *res) {
-  printlogf(
-      LOG_INFO,
-      "[router::default_method_not_allowed_handler] default 405 handler in "
-      "effect at request path %s\n",
-      req->path);
+  printlogf(LOG_INFO,
+            "[router::%s] default 405 handler in "
+            "effect at request path %s\n",
+            __func__, req->path);
 
   res->status = STATUS_METHOD_NOT_ALLOWED;
 
@@ -106,25 +104,30 @@ router_t *router_init(router_attr_t attr) {
   router->use_cors = attr.use_cors;
 
   if (!attr.not_found_handler) {
-    printlogf(LOG_DEBUG, "[router::router_init] %s\n",
-              "not_found_handler is NULL, registering fallback handler");
+    printlogf(LOG_DEBUG,
+              "[router::%s] not_found_handler is NULL, registering fallback "
+              "handler\n",
+              __func__);
     router->not_found_handler = default_not_found_handler;
   } else {
     router->not_found_handler = attr.not_found_handler;
   }
 
   if (!attr.method_not_allowed_handler) {
-    printlogf(
-        LOG_DEBUG, "[router::router_init] %s\n",
-        "method_not_allowed_handler is NULL, registering fallback handler");
+    printlogf(LOG_DEBUG,
+              "[router::%s] method_not_allowed_handler is NULL, registering "
+              "fallback handler\n",
+              __func__);
     router->method_not_allowed_handler = default_method_not_allowed_handler;
   } else {
     router->method_not_allowed_handler = attr.method_not_allowed_handler;
   }
 
   if (!attr.internal_error_handler) {
-    printlogf(LOG_DEBUG, "[router::router_init] %s\n",
-              "internal_error_handler is NULL, registering fallback handler");
+    printlogf(LOG_DEBUG,
+              "[router::%s] internal_error_handler is NULL, registering "
+              "fallback handler\n",
+              __func__);
     router->internal_error_handler = default_internal_error_handler;
   } else {
     router->internal_error_handler = attr.internal_error_handler;
@@ -138,8 +141,9 @@ void router_register(router_t *router, const char *path, handler_t *handler,
                      http_method_t method, ...) {
   array_t *methods = array_init();
   if (!methods) {
-    DIE(EXIT_FAILURE, "[router::router_register] %s\n",
-        "failed to allocate methods array via array_init");
+    DIE(EXIT_FAILURE,
+        "[router::%s] failed to allocate methods array via array_init\n",
+        __func__);
   }
 
   va_list args;
@@ -149,8 +153,8 @@ void router_register(router_t *router, const char *path, handler_t *handler,
   while (method != 0) {
     if (!array_push(methods, strdup(http_method_names[method]))) {
       free(methods);
-      DIE(EXIT_FAILURE, "[router::router_register] %s\n",
-          "failed to insert into methods array");
+      DIE(EXIT_FAILURE, "[router::%s] failed to insert into methods array\n",
+          __func__);
     }
     method = va_arg(args, http_method_t);
   }
@@ -158,8 +162,10 @@ void router_register(router_t *router, const char *path, handler_t *handler,
   va_end(args);
 
   if (!router || !methods || !path || !handler) {
-    DIE(EXIT_FAILURE, "%s\n",
-        "invariant violation - router_register arguments cannot be NULL");
+    DIE(EXIT_FAILURE,
+        "[router::%s] invariant violation - router_register arguments cannot "
+        "be NULL\n",
+        __func__);
   }
 
   // OPTIONS should always be allowed if we're using CORS

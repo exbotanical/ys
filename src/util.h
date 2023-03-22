@@ -17,8 +17,7 @@ static const char NULL_TERM = '\0';
 char *safe_itoa(int x);
 
 /**
- * split splits a string on all instances of a delimiter. Sets errno if
- * provided null or otherwise invalid argument(s).
+ * split splits a string on all instances of a delimiter.
  *
  * @param str The string to split
  * @param delimiter The delimiter on which to split `str`
@@ -29,7 +28,6 @@ array_t *split(const char *str, const char *delimiter);
 /**
  * index_of returns the index of a character `target`
  * as it exists in a character array `str`.
- * Sets errno if provided null or otherwise invalid argument(s).
  *
  * @param str The character array, or "haystack"
  * @param target The target, or "needle"
@@ -40,8 +38,7 @@ int index_of(const char *str, const char *target);
 
 /**
  * substr finds and returns the substring between
- * indices `start` and `end` for a given string `str`. Sets errno if provided
- * null or otherwise invalid argument(s).
+ * indices `start` and `end` for a given string `str`.
  *
  * @param str The string in which to find a substring
  * @param start The starting index, always inclusive

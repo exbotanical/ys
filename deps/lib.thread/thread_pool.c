@@ -110,7 +110,6 @@ bool thread_pool_dispatch(thread_pool_t* pool, void* (*thread_routine)(void*),
 
     thread->semaphore = NULL;
   }
-
   return true;
 }
 

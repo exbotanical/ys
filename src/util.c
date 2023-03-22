@@ -1,7 +1,6 @@
 #include "util.h"
 
-#include <ctype.h>  // for toupper
-#include <errno.h>
+#include <ctype.h>   // for toupper
 #include <stdarg.h>  // for variadic args functions
 #include <stdio.h>   // for snprintf
 #include <string.h>  // for strdup
@@ -19,10 +18,10 @@ char *safe_itoa(int x) {
 
 array_t *split(const char *str, const char *delimiter) {
   if (str == NULL || delimiter == NULL) {
-    LOG("[path::split] invariant violation - null arguments(s), \
-			where str was %s and delimiter was %s\n",
-        str, delimiter);
-    errno = EINVAL;
+    printlogf(LOG_INFO,
+              "[path::%s] invariant violation - null arguments(s), where str "
+              "was %s and delimiter was %s\n",
+              __func__, str, delimiter);
 
     return NULL;
   }
@@ -35,8 +34,8 @@ array_t *split(const char *str, const char *delimiter) {
   array_t *tokens = array_init();
   if (tokens == NULL) {
     free(tokens);
-    DIE(EXIT_FAILURE, "[path::split] %s\n",
-        "failed to allocate array_t `tokens`");
+    DIE(EXIT_FAILURE, "[path::%s] failed to allocate array_t `tokens`\n",
+        __func__);
   }
 
   // If the input doesn't even contain the delimiter, return early and avoid
@@ -52,12 +51,11 @@ array_t *split(const char *str, const char *delimiter) {
 
   char *token = strtok(input, delimiter);
   if (token == NULL) {
-    LOG(
-        // TODO: Fix other log strings with tab chars being inadvertently
-        // inserted
-        "[path::split] `strtok` returned NULL for its initial token; this is likely a bug \
-because the input contains the delimiter. input was %s and delimiter was %s\n",
-        input, delimiter);
+    printlogf(LOG_INFO,
+              "[path::%s] `strtok` returned NULL for its initial token; "
+              "this is likely a bug because the input contains the delimiter. "
+              "input was %s and delimiter was %s\n",
+              __func__, input, delimiter);
 
     return tokens;
   }
@@ -74,10 +72,10 @@ because the input contains the delimiter. input was %s and delimiter was %s\n",
 
 int index_of(const char *str, const char *target) {
   if (str == NULL || target == NULL) {
-    LOG("[path::index_of] invariant violation - null arguments(s), \
-			where str was %s and target was %s\n",
-        str, target);
-    errno = EINVAL;
+    printlogf(LOG_INFO,
+              "[path::%s] invariant violation - null arguments(s), where str "
+              "was %s and target was %s\n",
+              __func__, str, target);
 
     return -1;
   }
@@ -94,30 +92,32 @@ char *substr(const char *str, int start, int end, bool inclusive) {
   end = inclusive ? end : end - 1;
 
   if (start > end) {
-    LOG("[path::substr] invariant violation - start index greater than end, \
-			where str was %s, start was %d, end was %d, and inclusive flag was %s\n",
-        str, start, end, inclusive ? "set" : "not set");
-    errno = EINVAL;
+    printlogf(
+        LOG_INFO,
+        "[path::%s] invariant violation - start index greater than end, where "
+        "str was %s, start was %d, end was %d, and inclusive flag was %s\n",
+        __func__, str, start, end, inclusive ? "set" : "not set");
 
     return NULL;
   }
 
   int len = strlen(str);
   if (start < 0 || start > len) {
-    LOG("[path::substr] invariant violation - \
-			start index less than zero or greater than str length, \
-			where str was %s, start was %d, end was %d, and inclusive flag was %s\n",
-        str, start, end, inclusive ? "set" : "not set");
-    errno = EINVAL;
+    printlogf(LOG_INFO,
+              "[path::%s] invariant violation - start index less than zero or "
+              "greater than str length, where str was %s, start was %d, end "
+              "was %d, and inclusive flag was %s\n",
+              __func__, str, start, end, inclusive ? "set" : "not set");
 
     return NULL;
   }
 
   if (end > len) {
-    LOG("[path::substr] invariant violation - end index was greater than str length, \
-			where str was %s, start was %d, end was %d, and inclusive flag was %s\n",
-        str, start, end, inclusive ? "set" : "not set");
-    errno = EINVAL;
+    printlogf(LOG_INFO,
+              "[path::%s] invariant violation - end index was greater than str "
+              "length, where str was %s, start was %d, end was %d, and "
+              "inclusive flag was %s\n",
+              __func__, str, start, end, inclusive ? "set" : "not set");
 
     return NULL;
   }

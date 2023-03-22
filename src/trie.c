@@ -21,16 +21,18 @@ static node_t *node_init() {
   if (!node->children) {
     free(node->children);
     free(node);
-    DIE(EXIT_FAILURE, "[trie::node_init] %s\n",
-        "failed to initialize hash table for node children");
+    DIE(EXIT_FAILURE,
+        "[trie::%s] failed to initialize hash table for node children\n",
+        __func__);
   }
 
   node->actions = ht_init(0);
   if (!node->actions) {
     free(node->actions);
     free(node);
-    DIE(EXIT_FAILURE, "[trie::node_init] %s\n",
-        "failed to initialize hash table for node actions");
+    DIE(EXIT_FAILURE,
+        "[trie::%s] failed to initialize hash table for node actions\n",
+        __func__);
   }
 
   return node;
@@ -44,8 +46,9 @@ trie_t *trie_init() {
   if (!trie->regex_cache) {
     free(trie->regex_cache);
     free(trie);
-    DIE(EXIT_FAILURE, "[trie::trie_init] %s\n",
-        "failed to initialize hash table for trie regex cache");
+    DIE(EXIT_FAILURE,
+        "[trie::%s] failed to initialize hash table for trie regex cache\n",
+        __func__);
   }
 
   return trie;
@@ -110,8 +113,9 @@ result_t *trie_search(trie_t *trie, const char *method,
   result->parameters = array_init();
   if (!result->parameters) {
     free(result->parameters);
-    DIE(EXIT_FAILURE, "[trie::trie_search] %s\n",
-        "failed to allocate result->parameters via array_init");
+    DIE(EXIT_FAILURE,
+        "[trie::%s] failed to allocate result->parameters via array_init\n",
+        __func__);
   }
   result->flags = INITIAL_FLAG_STATE;
 
@@ -156,7 +160,7 @@ result_t *trie_search(trie_t *trie, const char *method,
 
         pcre *re = regex_cache_get(trie->regex_cache, pattern);
         if (!re) {
-          LOG("[trie::trie_search] %s\n", "regex was NULL");
+          printlogf(LOG_INFO, "[trie::%s] regex was NULL\n", __func__);
           return NULL;  // 500
         }
 
@@ -178,16 +182,18 @@ result_t *trie_search(trie_t *trie, const char *method,
         param->value = path;
 
         if (!array_push(result->parameters, param)) {
-          char *message =
-              "failed to insert parameter record in result->parameters";
-          LOG("[trie::trie_search] %s\n", message);
+          printlogf(LOG_INFO,
+                    "[trie::%s] failed to insert parameter record in "
+                    "result->parameters\n",
+                    __func__);
         }
 
         ht_record *next = ht_search(curr->children, child->label);
         if (!next) {
-          LOG("[trie::trie_search] %s %s\n",
-              "did not match a route but expected to, where label is",
-              child->label);
+          printlogf(LOG_INFO,
+                    "[trie::%s] did not match a route but expected "
+                    "to, where label is %s\n",
+                    __func__, child->label);
 
           return NULL;  // 500
         }
