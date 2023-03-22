@@ -7,6 +7,7 @@
 #include "logger.h"
 #include "response.h"  // for response_init, send_response
 #include "server.h"    // for send_response
+#include "util.h"
 #include "xmalloc.h"
 
 static const char CONFIG_FILE_NAME[13] = "libhttp.conf";
@@ -28,13 +29,16 @@ static void setup_env() {
  * @param middlewares
  * @return void* The response pointer
  */
-static void *invoke_chain(req_t *req, res_t *res, array_t *middlewares) {
+static bool invoke_chain(req_t *req, res_t *res, array_t *middlewares) {
   for (unsigned int i = array_size(middlewares); i > 0; i--) {
-    res = ((handler_t *)array_get(middlewares, i - 1))(req, res);
-    if (res->done) break;
+    ((handler_t *)array_get(middlewares, i - 1))(req, res);
+
+    if (res->done) {
+      return true;
+    }
   }
 
-  return res;
+  return false;
 }
 
 /**
@@ -45,10 +49,9 @@ static void *invoke_chain(req_t *req, res_t *res, array_t *middlewares) {
  * @return void*
  */
 static res_t *default_internal_error_handler(req_t *req, res_t *res) {
-  printlogf(LOG_INFO,
-            "[router::default_internal_error_handler] 500 handler in effect at "
-            "request path %s\n",
-            req->path);
+  // printlogf(LOG_INFO,
+  //           "[router::default_internal_error_handler] 500 handler in effect
+  //           at " "request path %s\n", req->path);
 
   res->status = STATUS_INTERNAL_SERVER_ERROR;
 
@@ -63,11 +66,11 @@ static res_t *default_internal_error_handler(req_t *req, res_t *res) {
  * @return void*
  */
 static res_t *default_not_found_handler(req_t *req, res_t *res) {
-  printlogf(
-      LOG_INFO,
-      "[router::default_not_found_handler] default 404 handler in effect at "
-      "request path %s\n",
-      req->path);
+  // printlogf(
+  //     LOG_INFO,
+  //     "[router::default_not_found_handler] default 404 handler in effect at "
+  //     "request path %s\n",
+  //     req->path);
 
   res->status = STATUS_NOT_FOUND;
 
@@ -101,7 +104,8 @@ router_t *router_init(router_attr_t attr) {
   __router_t *router = xmalloc(sizeof(__router_t));
 
   router->trie = trie_init();
-  router->global_middlewares = array_init();
+  router->middlewares = attr.middlewares;
+  router->use_cors = attr.use_cors;
 
   if (!attr.not_found_handler) {
     LOG("[router::router_init] %s\n",
@@ -130,8 +134,9 @@ router_t *router_init(router_attr_t attr) {
   return (router_t *)router;
 }
 
+bool has(char *s, char *cmp) { return str_equals(s, cmp); }
 void router_register(router_t *router, const char *path, handler_t *handler,
-                     middlewares_t *middlewares, http_method_t method, ...) {
+                     http_method_t method, ...) {
   array_t *methods = array_init();
   if (!methods) {
     DIE(EXIT_FAILURE, "[router::router_register] %s\n",
@@ -158,8 +163,14 @@ void router_register(router_t *router, const char *path, handler_t *handler,
         "invariant violation - router_register arguments cannot be NULL");
   }
 
-  trie_insert(((__router_t *)router)->trie, methods, path, handler,
-              (array_t *)middlewares);
+  // OPTIONS should always be allowed if we're using CORS
+  const char *options = http_method_names[METHOD_OPTIONS];
+  if (((__router_t *)router)->use_cors &&
+      !array_includes(methods, has, options)) {
+    array_push(methods, strdup(options));
+  }
+
+  trie_insert(((__router_t *)router)->trie, methods, path, handler);
 }
 
 void router_run(__router_t *router, int client_socket, req_t *req) {
@@ -179,12 +190,16 @@ void router_run(__router_t *router, int client_socket, req_t *req) {
 
     handler_t *h = (handler_t *)result->action->handler;
 
-    array_t *mws = router->global_middlewares;
+    // TODO: wrap other handlers?
+    bool done = false;
+    array_t *mws = router->middlewares;
     if (mws && array_size(mws) > 0) {
-      res = invoke_chain(req, res, mws);
+      done = invoke_chain(req, res, mws);
     }
 
-    res = h(req, res);
+    if (!done) {
+      res = h(req, res);
+    }
   }
 
   send_response(client_socket, serialize_response(req, res));

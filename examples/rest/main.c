@@ -148,11 +148,10 @@ int main() {
   router_t *router = router_init(attr);
   char *record_path = "/records/:id[^\\d+$]";
 
-  router_register(router, record_path, handle_get, NULL, METHOD_GET, NULL);
-  router_register(router, record_path, handle_delete, NULL, METHOD_DELETE,
-                  NULL);
-  // router_register(router, record_path, handle_put, NULL, METHOD_PUT, NULL);
-  router_register(router, record_path, handle_post, NULL, METHOD_POST, NULL);
+  router_register(router, record_path, handle_get, METHOD_GET, NULL);
+  router_register(router, record_path, handle_delete, METHOD_DELETE, NULL);
+  // router_register(router, record_path, handle_put, METHOD_PUT, NULL);
+  router_register(router, record_path, handle_post, METHOD_POST, NULL);
 
   server_t *server = server_init(router, PORT);
   if (!server_start(server)) {

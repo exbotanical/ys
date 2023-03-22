@@ -152,35 +152,27 @@ typedef struct {
 } __cors_opts_t;
 typedef __cors_opts_t cors_opts_t;
 
-void set_allowed_origins(cors_opts_t *c, const char *origin, ...);
-void set_allowed_methods(cors_opts_t *c, const char *method, ...);
-void set_allowed_headers(cors_opts_t *c, const char *header, ...);
-void set_allow_credentials(cors_opts_t *c, bool allow);
-void set_use_options_passthrough(cors_opts_t *c, bool use);
-void set_max_age(cors_opts_t *c, int max_age);
-cors_opts_t *cors_allow_all();
-
-// TODO: t + d
-handler_t *use_cors(cors_opts_t *opts);
-
 // A router object
 typedef struct {
+  bool use_cors;  // TODO:
   trie_t *trie;
   handler_t *not_found_handler;
   handler_t *method_not_allowed_handler;
   handler_t *internal_error_handler;
-  array_t *global_middlewares;
+  array_t *middlewares;
 } __router_t;
 typedef __router_t *router_t;
 
 typedef struct {
+  bool use_cors;
   handler_t *not_found_handler;
   handler_t *internal_error_handler;
   handler_t *method_not_allowed_handler;
+  array_t *middlewares;
 } router_attr_t;
 
 #define ROUTE_ATTR_INITIALIZER \
-  { NULL, NULL, NULL }
+  { NULL, NULL, NULL, NULL }
 
 // A server configuration object that stores settings for the HTTP server
 typedef struct {
@@ -240,13 +232,11 @@ router_t *router_init(router_attr_t attr);
  * @param router The router instance in which to register the route
  * @param path The path to associate with the route
  * @param handler The handler to associate with the route
- * @param middlewares Additional handlers that will be invoked in a chain prior
- * to `handler`
  * @param method
  * @param ...Methods to associate with the route
  */
 void router_register(router_t *router, const char *path, handler_t *handler,
-                     middlewares_t *middlewares, http_method_t method, ...);
+                     http_method_t method, ...);
 
 /**
  * server_init allocates the necessary memory for a `server_t`
@@ -307,12 +297,20 @@ unsigned int req_num_parameters(req_t *req);
 bool req_has_parameters(req_t *req);
 
 // TODO: d
-#define middlewares(...) __middlewares(__VA_ARGS__, NULL)
-#define gmiddlewares(r, ...) __gmiddlewares(r, __VA_ARGS__, NULL)
+#define middlewares(r, ...) __middlewares(r, __VA_ARGS__, NULL)
 
-middlewares_t *__middlewares(handler_t *mw, ...);
-void __gmiddlewares(router_t *r, handler_t *mw, ...);
-void add_gmiddleware(router_t *r, handler_t *mw);
-void add_middleware(middlewares_t *mws, handler_t *mw);
+void __middlewares(router_attr_t *r, handler_t *mw, ...);
+void add_middleware(router_attr_t *r, handler_t *mw);
+
+void set_allowed_origins(cors_opts_t *c, const char *origin, ...);
+void set_allowed_methods(cors_opts_t *c, const char *method, ...);
+void set_allowed_headers(cors_opts_t *c, const char *header, ...);
+void set_allow_credentials(cors_opts_t *c, bool allow);
+void set_use_options_passthrough(cors_opts_t *c, bool use);
+void set_max_age(cors_opts_t *c, int max_age);
+cors_opts_t *cors_allow_all();
+
+// TODO: t + d
+void use_cors(router_attr_t *r, cors_opts_t *opts);
 
 #endif /* LIBHTTP_H */

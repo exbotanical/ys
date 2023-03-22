@@ -73,6 +73,7 @@
 
 ## Fixes
 - [ ] Allow OPTIONS requests by default in router when CORS enabled
+- [ ] Urls with `-` segfault e.g. `/feed_meta/index-0.json`
 
 # Style Guide
 - Use [Go Doc-style](https://tip.golang.org/doc/comment) for doc  comments e.g. `// function_name does thing`

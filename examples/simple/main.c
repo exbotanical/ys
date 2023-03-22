@@ -17,7 +17,7 @@ res_t *handler(req_t *req, res_t *res) {
 int main() {
   router_attr_t attr = ROUTE_ATTR_INITIALIZER;
   router_t *router = router_init(attr);
-  router_register(router, "/", handler, NULL, METHOD_GET, NULL);
+  router_register(router, "/", handler, METHOD_GET, NULL);
 
   // passing PORT explicitly overrides config value if there is one
   server_t *server = server_init(router, PORT);

@@ -27,10 +27,9 @@ typedef struct trie {
   hash_table *regex_cache;
 } trie_t;
 
-// Stores a route's handler and middlewares
+// Stores a route's handler
 typedef struct action {
   void *(*handler)(void *, void *);
-  array_t *middlewares;
 } action_t;
 
 // Parameter collected from a route match
@@ -60,10 +59,9 @@ trie_t *trie_init();
  * @param methods The methods on which to create a node
  * @param path The path on which to create a node
  * @param handler The handler to be associated with the inserted node
- * @param middlewares Middlewares to be run before the handler is invoked
  */
 void trie_insert(trie_t *trie, array_t *methods, const char *path,
-                 void *(*handler)(void *, void *), array_t *middlewares);
+                 void *(*handler)(void *, void *));
 
 /**
  * Searches a trie for a node matching the given method and path

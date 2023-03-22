@@ -16,9 +16,10 @@ res_t *handler(req_t *req, res_t *res) {
 
 int main() {
   router_attr_t attr = ROUTE_ATTR_INITIALIZER;
+  use_cors(&attr, cors_allow_all());
+
   router_t *router = router_init(attr);
-  router_register(router, "/", handler, middlewares(use_cors(cors_allow_all())),
-                  METHOD_GET, METHOD_OPTIONS, NULL);
+  router_register(router, "/", handler, METHOD_GET, NULL);
 
   server_t *server = server_init(router, PORT);
   if (!server_start(server)) {

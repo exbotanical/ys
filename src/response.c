@@ -10,7 +10,7 @@
 #include "util.h"    // for str_equals
 #include "xmalloc.h"
 
-static const char MESSAGE_BODY_SEP[3] = "\n\n";
+static const char CRLF[3] = "\r\n";
 
 static bool is_2xx_connect(req_t *req, res_t *res) {
   return (res->status >= 200 && res->status < 300) &&
@@ -38,25 +38,25 @@ static bool should_set_content_len(req_t *req, res_t *res) {
  * @return buffer_t*
  */
 buffer_t *serialize_response(req_t *req, res_t *res) {
-  buffer_t *rbuf = buffer_init(NULL);
+  const buffer_t *rbuf = buffer_init(NULL);
   if (!rbuf) {
     // TODO: constant template str for malloc failures
     DIE(EXIT_FAILURE, "%s\n", "could not allocate memory for buffer_t");
   }
 
-  // TODO: constants for res fields for brevity
-  int status = res->status;
-  array_t *headers = res->headers;
-  char *body = res->body;
+  const int status = res->status;
+  const array_t *headers = res->headers;
+  const char *body = res->body;
 
   buffer_append(rbuf,
-                fmt_str("HTTP/1.1 %d %s\n", status, http_status_names[status]));
+                fmt_str("HTTP/1.1 %d %s", status, http_status_names[status]));
+  buffer_append(rbuf, CRLF);
 
   foreach (headers, i) {
     header_t *header = array_get(headers, i);
 
     buffer_append(rbuf, fmt_str("%s: %s", header->key, header->value));
-    buffer_append(rbuf, "\n");
+    buffer_append(rbuf, CRLF);
   }
 
   // TODO: test
@@ -67,9 +67,10 @@ buffer_t *serialize_response(req_t *req, res_t *res) {
   // [RFC7231]).
   if (req && should_set_content_len(req, res)) {
     buffer_append(rbuf, fmt_str("Content-Length: %d", body ? strlen(body) : 0));
+    buffer_append(rbuf, CRLF);
   }
 
-  buffer_append(rbuf, MESSAGE_BODY_SEP);
+  buffer_append(rbuf, CRLF);
 
   if (body) {
     buffer_append(rbuf, body);

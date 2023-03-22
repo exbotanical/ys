@@ -52,7 +52,7 @@ trie_t *trie_init() {
 }
 
 void trie_insert(trie_t *trie, array_t *methods, const char *path,
-                 void *(*handler)(void *, void *), array_t *middlewares) {
+                 void *(*handler)(void *, void *)) {
   node_t *curr = trie->root;
 
   // Handle root path
@@ -63,7 +63,6 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
       action_t *action = xmalloc(sizeof(action_t));
 
       action->handler = handler;
-      action->middlewares = middlewares;
 
       ht_insert(curr->actions, array_get(methods, i), action);
     }
@@ -95,7 +94,6 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
         action_t *action = xmalloc(sizeof(action_t));
 
         action->handler = handler;
-        action->middlewares = middlewares;
 
         ht_insert(curr->actions, method, action);
       }

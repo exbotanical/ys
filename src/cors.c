@@ -140,14 +140,12 @@ static void handle_request(req_t *req, res_t *res) {
 
   // If no origin was specified, this is not a valid CORS request
   if (!origin || str_equals(origin, "")) {
-    res->done = true;
     return;
   }
 
   // If the origin is not in the allow list, deny
   if (!is_origin_allowed(cors_config, origin)) {
     // TODO: 403
-    res->done = true;
     return;
   }
 
@@ -190,30 +188,27 @@ static void handle_preflight_request(req_t *req, res_t *res) {
 
   // If no origin was specified, this is not a valid CORS request
   if (str_nullish(origin)) {
-    res->done = true;
     return;
   }
 
   // If the origin is not in the allow list, deny
   if (!is_origin_allowed(cors_config, origin)) {
-    res->done = true;
     return;
   }
 
   // Validate the method; this is the crux of the Preflight
   char *req_method_header = req_header_get(req->headers, REQUEST_METHOD_HEADER);
 
-  if (!is_method_allowed(cors_config, req_method_header)) {
-    res->done = true;
+  if (!is_method_allowed(cors_config, req_method_header)) {  // TODO: nullcheck
     return;
   }
 
   // Validate request headers. Preflights are also used when
   // requests include additional headers from the client
   char *header_str = req_header_get(req->headers, REQUEST_HEADERS_HEADER);
+
   array_t *reqd_headers = derive_headers(header_str);
   if (!are_headers_allowed(cors_config, reqd_headers)) {
-    res->done = true;
     return;
   }
 

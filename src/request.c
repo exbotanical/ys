@@ -98,7 +98,7 @@ req_meta_t read_and_parse_request(int sock) {
     char* header_key =
         fmt_str("%.*s", (int)headers[i].name_len, headers[i].name);
     char* header_val =
-        fmt_str("%.*s", (int)headers[i].name_len, headers[i].name);
+        fmt_str("%.*s", (int)headers[i].value_len, headers[i].value);
 
     if (!insert_header(request->headers, header_key, header_val)) {
       req_meta_t meta = {.err = DUP_HDR};

@@ -32,9 +32,10 @@ res_t *middleware2(req_t *req, res_t *res) {
 
 int main() {
   router_attr_t attr = ROUTE_ATTR_INITIALIZER;
+  middlewares(&attr, middleware1, middleware2);
   router_t *router = router_init(attr);
-  router_register(router, "/:key[^\\d+$]", handler,
-                  middlewares(middleware1, middleware2), METHOD_GET, NULL);
+
+  router_register(router, "/:key[^\\d+$]", handler, METHOD_GET, NULL);
 
   server_t *server = server_init(router, PORT);
   if (!server_start(server)) {
