@@ -4,6 +4,8 @@
 #include <stdlib.h>  // for free
 #include <string.h>  // for strcspn, strdup
 
+#include "util.h"  // for str_equals
+
 // Default server config
 server_config_t server_config = {.log_file = NULL,
                                  .log_level = DEFAULT_LOG_LEVEL,

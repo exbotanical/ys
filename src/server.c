@@ -99,7 +99,7 @@ bool server_start(server_t *server) {
   }
 
   // printlogf(LOG_INFO, "Listening on port %d...\n", port);
-
+  printf("Listening on port %d...\n", port);
   fd_set readfds;
   int client_socket;
 

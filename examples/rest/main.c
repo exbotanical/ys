@@ -160,3 +160,12 @@ int main() {
 
   return EXIT_SUCCESS;
 }
+
+/*
+curl localhost:9000/records/2 -v -X POST -d '{"key": "2" }' -H 'Content-Type:
+application/json'
+
+curl localhost:9000/records/2 -v
+
+curl localhost:9000/records/2 -v -X DELETE
+*/

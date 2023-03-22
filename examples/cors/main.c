@@ -30,3 +30,9 @@ int main() {
 
   return EXIT_SUCCESS;
 }
+
+/*
+curl localhost:9000 -H 'Access-Control-Request-Method: DELETE' -H
+'Access-Control-Request-Headers: X-Test-Header' -H 'Origin: test.com' -X
+OPTIONS -v
+*/
