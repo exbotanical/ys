@@ -142,7 +142,7 @@ res_t *response_init() {
     DIE(EXIT_FAILURE, "%s\n", "unable to allocate array_t");
   }
 
-  // res->done = false;
+  res->body = NULL;
   return res;
 }
 

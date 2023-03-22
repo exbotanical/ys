@@ -3,3 +3,5 @@ Mar  8 20:32:28 eve libhttp: [router::default_not_found_handler] default 404 han
 Mar 12 20:53:44 eve libhttp: [router::default_not_found_handler] default 404 handler in effect at request path /ee
 Mar 12 20:53:48 eve libhttp: [router::default_not_found_handler] default 404 handler in effect at request path /ee
 Mar 12 22:11:59 eve libhttp: [router::default_not_found_handler] default 404 handler in effect at request path /ee
+Mar 22 00:06:47 eve libhttp: [router::default_not_found_handler] default 404 handler in effect at request path /333
+Mar 22 00:06:54 eve libhttp: [router::default_not_found_handler] default 404 handler in effect at request path /333d

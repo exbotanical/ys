@@ -32,8 +32,8 @@
 ## New Features
 - [ ] global hooks/interceptors (e.g. global HTTP headers)
 - [x] allow middleware to exit early by sending response
-- [ ] Built-in middlewares
-  - [ ] CORS middleware
+- [x] Built-in middlewares
+  - [x] CORS middleware
 - [ ] Cookies
 - [ ] support erroneous (Request / Response)s
 - [x] use attr struct for fallback handlers
@@ -42,7 +42,7 @@
 - [ ] JSON parsed body in context
 - [ ] async i/o option using epoll
   - [ ] Evented server e.g. `onRequest`
-- [ ] global middlewares
+- [x] global middlewares
 - [ ] multiple routers
 
 ## Best Practices
@@ -63,7 +63,7 @@
   - [ ] fix log to stderr
   - [ ] use function name macro instead of explicit string literals
 - [ ] inline functions where reasonable
-- [ ] Change middleware chaining to use `next`, the next middleware in the chain. This will allow a current handler to *not* invoke `next`, thus ending the chain. Note: Figuring this out is going to be a challenge
+- [x] ~~Change middleware chaining to use `next`, the next middleware in the chain. This will allow a current handler to *not* invoke `next`, thus ending the chain. Note: Figuring this out is going to be a challenge~~
 
 ## DX
 - [ ] helper ??? `#define CAST(type, name, stmt) type *name = (type *)stmt`
@@ -72,7 +72,7 @@
 - [ ] pick a style for struct types
 
 ## Fixes
-- [ ] Allow OPTIONS requests by default in router when CORS enabled
+- [x] Allow OPTIONS requests by default in router when CORS enabled
 - [ ] Urls with `-` segfault e.g. `/feed_meta/index-0.json`
 
 # Style Guide

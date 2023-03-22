@@ -66,14 +66,13 @@ static res_t *default_internal_error_handler(req_t *req, res_t *res) {
  * @return void*
  */
 static res_t *default_not_found_handler(req_t *req, res_t *res) {
-  // printlogf(
-  //     LOG_INFO,
-  //     "[router::default_not_found_handler] default 404 handler in effect at "
-  //     "request path %s\n",
-  //     req->path);
+  printlogf(LOG_INFO,
+            "[router::default_not_found_handler] default 404 handler in effect "
+            "at request path %s\n",
+            req->path);
 
   res->status = STATUS_NOT_FOUND;
-
+  res->body = NULL;
   return res;
 }
 
@@ -85,12 +84,11 @@ static res_t *default_not_found_handler(req_t *req, res_t *res) {
  * @return void*
  */
 static res_t *default_method_not_allowed_handler(req_t *req, res_t *res) {
-  // TODO: fix
-  // printlogf(
-  //     LOG_INFO,
-  //     "[router::default_method_not_allowed_handler] default 405 handler in "
-  //     "effect at request path %s\n",
-  //     req->path);
+  printlogf(
+      LOG_INFO,
+      "[router::default_method_not_allowed_handler] default 405 handler in "
+      "effect at request path %s\n",
+      req->path);
 
   res->status = STATUS_METHOD_NOT_ALLOWED;
 
@@ -108,15 +106,16 @@ router_t *router_init(router_attr_t attr) {
   router->use_cors = attr.use_cors;
 
   if (!attr.not_found_handler) {
-    LOG("[router::router_init] %s\n",
-        "not_found_handler is NULL, registering fallback handler");
+    printlogf(LOG_DEBUG, "[router::router_init] %s\n",
+              "not_found_handler is NULL, registering fallback handler");
     router->not_found_handler = default_not_found_handler;
   } else {
     router->not_found_handler = attr.not_found_handler;
   }
 
   if (!attr.method_not_allowed_handler) {
-    LOG("[router::router_init] %s\n",
+    printlogf(
+        LOG_DEBUG, "[router::router_init] %s\n",
         "method_not_allowed_handler is NULL, registering fallback handler");
     router->method_not_allowed_handler = default_method_not_allowed_handler;
   } else {
@@ -124,8 +123,8 @@ router_t *router_init(router_attr_t attr) {
   }
 
   if (!attr.internal_error_handler) {
-    LOG("[router::router_init] %s\n",
-        "internal_error_handler is NULL, registering fallback handler");
+    printlogf(LOG_DEBUG, "[router::router_init] %s\n",
+              "internal_error_handler is NULL, registering fallback handler");
     router->internal_error_handler = default_internal_error_handler;
   } else {
     router->internal_error_handler = attr.internal_error_handler;
