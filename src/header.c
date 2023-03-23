@@ -6,6 +6,7 @@
 #include <string.h>  // for strlen
 
 #include "libhttp.h"
+#include "libutil/libutil.h"  // for s_equals
 #include "util.h"
 #include "xmalloc.h"
 
@@ -267,7 +268,7 @@ bool insert_header(hash_table* headers, const char* k, const char* v) {
 array_t* derive_headers(const char* header_str) {
   array_t* headers = array_init();
 
-  if (!header_str || str_equals(header_str, "")) {
+  if (!header_str || s_equals(header_str, "")) {
     return headers;
   }
 

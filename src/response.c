@@ -6,16 +6,15 @@
 #include <string.h>  // for strlen
 #include <unistd.h>  // for ssize_t
 
-#include "logger.h"  // for DIE
-#include "strdup/strdup.h"
-#include "util.h"  // for str_equals
+#include "libutil/libutil.h"  // for s_equals, s_copy
+#include "logger.h"           // for DIE
 #include "xmalloc.h"
 
 static const char CRLF[3] = "\r\n";
 
 static bool is_2xx_connect(req_t *req, res_t *res) {
   return (res->status >= 200 && res->status < 300) &&
-         str_equals(req->method, http_method_names[METHOD_CONNECT]);
+         s_equals(req->method, http_method_names[METHOD_CONNECT]);
 }
 
 static bool is_informational(res_t *res) {
@@ -147,7 +146,7 @@ res_t *response_init() {
 }
 
 void set_body(res_t *response, const char *body) {
-  response->body = strdup(body);
+  response->body = s_copy(body);
 }
 
 void set_status(res_t *response, http_status_t status) {

@@ -25,7 +25,7 @@
 
 ## UX
 - [ ] cross-OS compatibility
-  - [ ] source strdup from dep
+  - [x] source strdup from dep
 - [ ] review all `include`d functions and replace any non-standard ones
 - [ ] documentation
 

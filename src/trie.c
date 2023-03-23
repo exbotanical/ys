@@ -3,10 +3,10 @@
 #include <pcre.h>    // This library relies on the ability to utilize PCRE regex
 #include <string.h>  // for strlen
 
-#include "cache.h"  // for regex_cache_get
+#include "cache.h"            // for regex_cache_get
+#include "libutil/libutil.h"  // for s_copy, s_equals
 #include "logger.h"
 #include "path.h"
-#include "strdup/strdup.h"
 #include "util.h"
 #include "xmalloc.h"
 
@@ -60,8 +60,8 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
   node_t *curr = trie->root;
 
   // Handle root path
-  if (str_equals(path, PATH_ROOT)) {
-    curr->label = strdup(path);
+  if (s_equals(path, PATH_ROOT)) {
+    curr->label = s_copy(path);
 
     foreach (methods, i) {
       action_t *action = xmalloc(sizeof(action_t));
@@ -133,7 +133,7 @@ result_t *trie_search(trie_t *trie, const char *method,
     }
 
     if (curr->children->count == 0) {
-      if (!str_equals(curr->label, path)) {
+      if (!s_equals(curr->label, path)) {
         // No matching route result found
         result->flags |= NOT_FOUND_MASK;
         return result;
@@ -213,7 +213,7 @@ result_t *trie_search(trie_t *trie, const char *method,
     }
   }
 
-  if (str_equals(search_path, PATH_ROOT)) {
+  if (s_equals(search_path, PATH_ROOT)) {
     // No matching handler
     if (curr->actions->count == 0) {
       result->flags |= NOT_FOUND_MASK;

@@ -5,8 +5,9 @@
 #include <stdbool.h>
 #include <string.h>  // for strlen
 
-#include "header.h"  // for req_header_get, set_header, derive_headers
-#include "util.h"
+#include "header.h"           // for req_header_get, set_header, derive_headers
+#include "libutil/libutil.h"  // for s_*
+#include "util.h"             // for str_join
 #include "xmalloc.h"
 
 static cors_t *cors_config;
@@ -19,9 +20,7 @@ static cors_t *cors_config;
  * @param s2
  * @return bool
  */
-bool match(void *s1, void *s2) {
-  return safe_strcasecmp((char *)s1, (char *)s2);
-}
+bool match(void *s1, void *s2) { return s_casecmp((char *)s1, (char *)s2); }
 
 /**
  * is_origin_allowed determines whether the given origin is allowed per the
@@ -38,7 +37,7 @@ static bool is_origin_allowed(cors_t *c, char *origin) {
 
   foreach (c->allowed_origins, i) {
     char *allowed_origin = array_get(c->allowed_origins, i);
-    if (safe_strcasecmp(origin, allowed_origin)) {
+    if (s_casecmp(origin, allowed_origin)) {
       return true;
     }
   }
@@ -60,13 +59,13 @@ static bool is_method_allowed(cors_t *c, char *method) {
   }
 
   // Always allow preflight requests
-  if (safe_strcasecmp(method, http_method_names[METHOD_OPTIONS])) {
+  if (s_casecmp(method, http_method_names[METHOD_OPTIONS])) {
     return true;
   }
 
   foreach (c->allowed_methods, i) {
     char *allowed_method = array_get(c->allowed_methods, i);
-    if (safe_strcasecmp(method, allowed_method)) {
+    if (s_casecmp(method, allowed_method)) {
       return true;
     }
   }
@@ -115,11 +114,11 @@ static bool are_headers_allowed(cors_t *c, array_t *headers) {
  */
 static bool is_preflight_request(req_t *req) {
   bool is_options_req =
-      str_equals(req->method, http_method_names[METHOD_OPTIONS]);
+      s_equals(req->method, http_method_names[METHOD_OPTIONS]);
   bool has_origin_header =
-      !str_nullish(req_header_get(req->headers, ORIGIN_HEADER));
+      !s_nullish(req_header_get(req->headers, ORIGIN_HEADER));
   bool has_request_method =
-      !str_nullish(req_header_get(req->headers, REQUEST_METHOD_HEADER));
+      !s_nullish(req_header_get(req->headers, REQUEST_METHOD_HEADER));
 
   return is_options_req && has_origin_header && has_request_method;
 }
@@ -139,7 +138,7 @@ static void handle_request(req_t *req, res_t *res) {
   set_header(res, VARY_HEADER, ORIGIN_HEADER);
 
   // If no origin was specified, this is not a valid CORS request
-  if (!origin || str_equals(origin, "")) {
+  if (!origin || s_equals(origin, "")) {
     return;
   }
 
@@ -187,7 +186,7 @@ static void handle_preflight_request(req_t *req, res_t *res) {
                      REQUEST_HEADERS_HEADER));
 
   // If no origin was specified, this is not a valid CORS request
-  if (str_nullish(origin)) {
+  if (s_nullish(origin)) {
     return;
   }
 
@@ -260,7 +259,7 @@ cors_t *cors_init(cors_opts_t *opts) {
   } else {
     foreach (opts->allowed_origins, i) {
       char *origin = array_get(opts->allowed_origins, i);
-      if (str_equals("*", origin)) {
+      if (s_equals("*", origin)) {
         cors_config->allow_all_origins = true;
         break;
       }
@@ -283,7 +282,7 @@ cors_t *cors_init(cors_opts_t *opts) {
     foreach (opts->allowed_headers, i) {
       char *header = array_get(opts->allowed_headers, i);
 
-      if (str_equals("*", header)) {
+      if (s_equals("*", header)) {
         cors_config->allow_all_headers = true;
         break;
       }
@@ -299,15 +298,15 @@ cors_t *cors_init(cors_opts_t *opts) {
     // Default allowed methods. Defaults to simple methods (those that do not
     // trigger a Preflight)
     array_t *default_allowed_methods =
-        array_collect(strdup(http_method_names[METHOD_GET]),
-                      strdup(http_method_names[METHOD_POST]),
-                      strdup(http_method_names[METHOD_HEAD]));
+        array_collect(s_copy(http_method_names[METHOD_GET]),
+                      s_copy(http_method_names[METHOD_POST]),
+                      s_copy(http_method_names[METHOD_HEAD]));
 
     cors_config->allowed_methods = default_allowed_methods;
   } else {
     foreach (opts->allowed_methods, i) {
       char *method = array_get(opts->allowed_methods, i);
-      array_push(cors_config->allowed_methods, to_upper(method));
+      array_push(cors_config->allowed_methods, s_upper(method));
     }
   }
 
@@ -317,12 +316,12 @@ cors_t *cors_init(cors_opts_t *opts) {
 cors_opts_t *cors_allow_all() {
   cors_opts_t *c = xmalloc(sizeof(cors_opts_t));
   c->allowed_origins = array_collect("*");
-  c->allowed_methods = array_collect(strdup(http_method_names[METHOD_HEAD]),
-                                     strdup(http_method_names[METHOD_GET]),
-                                     strdup(http_method_names[METHOD_POST]),
-                                     strdup(http_method_names[METHOD_PATCH]),
-                                     strdup(http_method_names[METHOD_PUT]),
-                                     strdup(http_method_names[METHOD_DELETE]));
+  c->allowed_methods = array_collect(s_copy(http_method_names[METHOD_HEAD]),
+                                     s_copy(http_method_names[METHOD_GET]),
+                                     s_copy(http_method_names[METHOD_POST]),
+                                     s_copy(http_method_names[METHOD_PATCH]),
+                                     s_copy(http_method_names[METHOD_PUT]),
+                                     s_copy(http_method_names[METHOD_DELETE]));
   c->allowed_headers = array_collect("*");
   c->allow_credentials = false;
 

@@ -114,9 +114,92 @@ void buffer_free(buffer_t *buf);
 
 char *fmt_str(char *fmt, ...);
 
-char *str_truncate(const char *s, int n);
+/**
+ * s_truncate truncates the given string `s` by `n` characters
+ *
+ * @param s
+ * @param n
+ * @return char*
+ */
+char *s_truncate(const char *s, int n);
 
-char *str_concat(const char *s1, const char *s2);
+/**
+ * s_concat concatenates two strings `s1` and `s2` in that order
+ *
+ * @param s1
+ * @param s2
+ * @return char*
+ */
+char *s_concat(const char *s1, const char *s2);
+
+/**
+ * s_copy returns a copy of given string `str`. Compare to strdup
+ *
+ * @param s
+ * @return char*
+ */
+char *s_copy(const char *s);
+
+/**
+ * s_indexof returns the index of a character `target`
+ * as it exists in a character array `str`.
+ *
+ * @param str The character array, or "haystack"
+ * @param target The target, or "needle"
+ *
+ * @return int The index of `target` qua `str`, or -1 if not extant
+ */
+int s_indexof(const char *str, const char *target);
+
+/**
+ * s_substr finds and returns the substring between
+ * indices `start` and `end` for a given string `str`.
+ *
+ * @param s The string in which to find a substring
+ * @param start The starting index, always inclusive
+ * @param end The ending index, only inclusive if specified
+ * @param inclusive A flag indicating whether the substring match should be
+ * end-inclusive
+ * @return char* The matching substring, or NULL if erroneous
+ */
+char *s_substr(const char *s, int start, int end, bool inclusive);
+
+/**
+ * s_casecmp performs a safe case-insensitive string comparison between
+ * two strings and returns a bool indicating whether they are equal
+ *
+ * @param s1
+ * @param s2
+ * @return bool
+ */
+bool s_casecmp(const char *s1, const char *s2);
+
+/**
+ * s_upper converts the given string `s` to uppercase
+ *
+ * @param s
+ * @return char*
+ */
+char *s_upper(const char *s);
+
+/**
+ * s_equals returns a bool indicating whether strings s1 and s2 are completely
+ * equal (case-sensitive)
+ *
+ * @param s1
+ * @param s2
+ * @return bool
+ */
+bool s_equals(const char *s1, const char *s2);
+
+/**
+ * s_nullish tests whether a given string `s` is NULL or empty i.e. ""
+ *
+ * @param s
+ * @return true
+ * @return false
+ */
+bool s_nullish(const char *s);
 
 #ifdef __cplusplus
 }

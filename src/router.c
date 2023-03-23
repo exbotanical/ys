@@ -3,11 +3,10 @@
 #include <stdarg.h>  // for variadic args functions
 
 #include "config.h"
+#include "libutil/libutil.h"  // for s_copy, s_equals
 #include "logger.h"
 #include "response.h"  // for response_init, send_response
 #include "server.h"    // for send_response
-#include "strdup/strdup.h"
-#include "util.h"
 #include "xmalloc.h"
 
 static const char CONFIG_FILE_NAME[13] = "libhttp.conf";
@@ -136,7 +135,7 @@ router_t *router_init(router_attr_t attr) {
   return (router_t *)router;
 }
 
-bool has(void *s, void *cmp) { return str_equals((char *)s, (char *)cmp); }
+bool has(void *s, void *cmp) { return s_equals((char *)s, (char *)cmp); }
 void router_register(router_t *router, const char *path, handler_t *handler,
                      http_method_t method, ...) {
   array_t *methods = array_init();
@@ -151,7 +150,7 @@ void router_register(router_t *router, const char *path, handler_t *handler,
   // TODO: deduplicate this (and use collect) or similar
   // not doing this right now due to reference edge cases when doing so
   while (method != 0) {
-    if (!array_push(methods, strdup(http_method_names[method]))) {
+    if (!array_push(methods, s_copy(http_method_names[method]))) {
       free(methods);
       DIE(EXIT_FAILURE, "[router::%s] failed to insert into methods array\n",
           __func__);
@@ -169,7 +168,7 @@ void router_register(router_t *router, const char *path, handler_t *handler,
   }
 
   // OPTIONS should always be allowed if we're using CORS
-  char *options = strdup(http_method_names[METHOD_OPTIONS]);
+  char *options = s_copy(http_method_names[METHOD_OPTIONS]);
   if (((__router_t *)router)->use_cors &&
       !array_includes(methods, has, options)) {
     array_push(methods, options);

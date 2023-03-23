@@ -10,9 +10,9 @@
 #include "header.h"
 #include "libhash/libhash.h"  // for hash sets
 #include "libhttp.h"
+#include "libutil/libutil.h"  // for s_casecmp, s_equals, fmt_str
 #include "picohttpparser/picohttpparser.h"
 #include "request.h"
-#include "util.h"  // for safe_strcasecmp, str_equals
 #include "xmalloc.h"
 
 /**
@@ -22,7 +22,7 @@
  * @param header
  */
 static void fix_pragma_cache_control(hash_table* headers) {
-  if (str_equals(ht_get(headers, "Pragma"), "no-cache")) {
+  if (s_equals(ht_get(headers, "Pragma"), "no-cache")) {
     if (!ht_search(headers, "Cache-Control")) {
       insert_header(headers, "Cache-Control", "no-cache");
     }
@@ -99,11 +99,11 @@ req_meta_t read_and_parse_request(int sock) {
 
     // Now we handle special metadata fields on the request that we expose to
     // the consumer for quick reference
-    if (safe_strcasecmp(header_val, "Content-Type")) {
+    if (s_casecmp(header_val, "Content-Type")) {
       request->content_type = header_val;
-    } else if (safe_strcasecmp(header_val, "Accept")) {
+    } else if (s_casecmp(header_val, "Accept")) {
       request->accept = header_val;
-    } else if (safe_strcasecmp(header_val, "User-Agent")) {
+    } else if (s_casecmp(header_val, "User-Agent")) {
       request->user_agent = header_val;
     }
   }
@@ -121,7 +121,7 @@ parameter_t* req_get_parameter_at(req_t* req, unsigned int idx) {
 void* req_get_parameter(req_t* req, const char* key) {
   for (unsigned int i = 0; i < req_num_parameters(req); i++) {
     parameter_t* param = req_get_parameter_at(req, i);
-    if (str_equals(param->key, key)) {
+    if (s_equals(param->key, key)) {
       return param->value;
     }
   }

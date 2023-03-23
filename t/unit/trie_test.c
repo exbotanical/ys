@@ -1,8 +1,8 @@
 #include "trie.h"
 
+#include "libutil/libutil.h"  // for s_copy
 #include "path.h"
 #include "router.h"
-#include "strdup/strdup.h"
 #include "tap.c/tap.h"
 
 typedef struct {
@@ -22,7 +22,7 @@ array_t *collect_methods(http_method_t method, ...) {
   va_start(args, method);
 
   while (method != 0) {
-    array_push(methods, strdup(http_method_names[method]));
+    array_push(methods, s_copy(http_method_names[method]));
     method = va_arg(args, http_method_t);
   }
 
@@ -43,10 +43,10 @@ void test_trie_init() {
 
 void test_trie_insert() {
   route_t records[] = {
-      {.path = strdup(PATH_ROOT),
+      {.path = s_copy(PATH_ROOT),
        .methods = collect_methods(METHOD_GET, NULL),
        .handler = test_handler},
-      {.path = strdup(PATH_ROOT),
+      {.path = s_copy(PATH_ROOT),
        .methods = collect_methods(METHOD_GET, METHOD_POST, NULL),
        .handler = test_handler},
       {.path = "/test",
@@ -77,7 +77,7 @@ void test_trie_insert() {
 }
 
 void test_trie_search_ok() {
-  route_t records[] = {{.path = strdup(PATH_ROOT),
+  route_t records[] = {{.path = s_copy(PATH_ROOT),
                         .methods = collect_methods(METHOD_GET, NULL),
                         .handler = test_handler},
                        {.path = "/test",
@@ -158,10 +158,10 @@ void test_trie_search_ok() {
 
 void test_trie_search_no_match() {
   route_t records[] = {
-      {.path = strdup(PATH_ROOT),
+      {.path = s_copy(PATH_ROOT),
        .methods = collect_methods(METHOD_GET, NULL),
        .handler = test_handler},
-      {.path = strdup(PATH_ROOT),
+      {.path = s_copy(PATH_ROOT),
        .methods = collect_methods(METHOD_GET, METHOD_POST, NULL),
        .handler = test_handler},
       {.path = "/test",
