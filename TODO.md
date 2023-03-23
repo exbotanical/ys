@@ -46,7 +46,7 @@
 - [ ] multiple routers
 
 ## Best Practices
-- [ ] specific int types
+- [x] ~~specific int types~~
 - [ ] check all instances of `strcmp` and see if `strncmp` makes more sense
 - [ ] Determine where we actually need to be passing by reference (currently, this is done everywhere)
 
@@ -55,6 +55,9 @@
 - [ ] Full RFC compliance
   - [ ] handle accept header
   - [ ] Validate Content-Type for incoming stateful requests
+  - [ ] keep-alive
+  - [ ] cache-control
+  - [ ] transfer-encoding
 
 ## Misc Improvements
 - [ ] use a better regex engine than pcre
@@ -79,7 +82,6 @@
 - Use [Go Doc-style](https://tip.golang.org/doc/comment) for doc  comments e.g. `// function_name does thing`
 
 - comment what is used from an include header where possible
-
 
 # Desired API
 - Router

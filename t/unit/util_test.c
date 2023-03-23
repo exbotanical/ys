@@ -153,6 +153,10 @@ void test_to_upper() {
   is(expected, ret, "upper-cases a partially upper-cased str");
 }
 
+void test_str_equals() {
+  // TODO:
+}
+
 int main() {
   plan(31);
 

@@ -15,27 +15,18 @@
 #include "util.h"  // for safe_strcasecmp, str_equals
 #include "xmalloc.h"
 
-parameter_t* req_get_parameter_at(req_t* req, unsigned int idx) {
-  return array_get(req->parameters, idx);
-}
-
-void* req_get_parameter(req_t* req, const char* key) {
-  for (unsigned int i = 0; i < req_num_parameters(req); i++) {
-    parameter_t* param = req_get_parameter_at(req, i);
-    if (str_equals(param->key, key)) {
-      return param->value;
+/**
+ * fix_pragma_cache_control implements RFC 7234, section 5.4:
+ * Should treat Pragma: no-cache like Cache-Control: no-cache
+ * TODO: test
+ * @param header
+ */
+static void fix_pragma_cache_control(hash_table* headers) {
+  if (str_equals(ht_get(headers, "Pragma"), "no-cache")) {
+    if (!ht_search(headers, "Cache-Control")) {
+      insert_header(headers, "Cache-Control", "no-cache");
     }
   }
-
-  return NULL;
-}
-
-unsigned int req_num_parameters(req_t* req) {
-  return array_size(req->parameters);
-}
-
-bool req_has_parameters(req_t* req) {
-  return req && array_size(req->parameters) > 0;
 }
 
 // TODO: break up into two functions
@@ -91,9 +82,10 @@ req_meta_t read_and_parse_request(int sock) {
   request->path = fmt_str("%.*s", (int)path_len, path);
   request->version = fmt_str("1.%d\n", minor_version);
 
-  request->headers = ht_init(0);
   // This is where we deal with the really quite complicated mess of HTTP
   // headers
+  request->headers = ht_init(0);
+
   for (unsigned int i = 0; i != num_headers; ++i) {
     char* header_key =
         fmt_str("%.*s", (int)headers[i].name_len, headers[i].name);
@@ -116,6 +108,31 @@ req_meta_t read_and_parse_request(int sock) {
     }
   }
 
+  fix_pragma_cache_control(request->headers);
+
   req_meta_t meta = {.req = request};
   return meta;
+}
+
+parameter_t* req_get_parameter_at(req_t* req, unsigned int idx) {
+  return array_get(req->parameters, idx);
+}
+
+void* req_get_parameter(req_t* req, const char* key) {
+  for (unsigned int i = 0; i < req_num_parameters(req); i++) {
+    parameter_t* param = req_get_parameter_at(req, i);
+    if (str_equals(param->key, key)) {
+      return param->value;
+    }
+  }
+
+  return NULL;
+}
+
+unsigned int req_num_parameters(req_t* req) {
+  return array_size(req->parameters);
+}
+
+bool req_has_parameters(req_t* req) {
+  return req && array_size(req->parameters) > 0;
 }
