@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -g -fPIC -Ideps -lm -lpcre -Wall -Wextra -pedantic -pthread
+CFLAGS := -g -fPIC -Wall -Wextra -pedantic -Wno-missing-braces -Ideps -lm -lpcre -pthread
 LDFLAGS := -shared -o
 DEBUG := -DDEBUG=1 # TODO: use opt
 

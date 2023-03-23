@@ -172,7 +172,7 @@ typedef struct {
 } router_attr_t;
 
 #define ROUTE_ATTR_INITIALIZER \
-  { NULL, NULL, NULL, NULL }
+  { false, NULL, NULL, NULL, NULL, }
 
 // A server configuration object that stores settings for the HTTP server
 typedef struct {

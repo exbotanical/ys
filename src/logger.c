@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <fcntl.h>   // for open and open flags
 #include <stdarg.h>  // for variadic args functions
+#include <stdio.h>
 #include <stdlib.h>  // for exit, getenv
 #include <string.h>  // for strlen, strncmp
 #include <time.h>    // time_t
@@ -11,8 +12,6 @@
 #include "config.h"
 #include "libutil/libutil.h"
 
-const char *log_header = LOG_HEADER;
-
 // Standard syslog log levels
 const char *log_levels[] = {"emerg",   "alert",  "crit", "err",
                             "warning", "notice", "info", "debug",
@@ -20,68 +19,36 @@ const char *log_levels[] = {"emerg",   "alert",  "crit", "err",
 
 // Log level to use
 short log_level = LOG_LEVEL;
-#define TIMESTAMP_FORMAT "%04d-%02d-%02dT%02d:%02d:%02dZ"
-#define TIMESTAMP_SIZE sizeof("YYYY-MM-DDTHH:MM:SSZ")
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-
-#define TIMESTAMP_FORMAT "%04d-%02d-%02dT%02d:%02d:%02dZ"
-#define TIMESTAMP_SIZE sizeof("YYYY-MM-DDTHH:MM:SSZ")
 
 char *gen_timestamp(void) {
-  time_t utc_time = time(NULL);
-  if (utc_time == ((time_t)-1)) {
-    return NULL;  // Error: Unable to get UTC time
+  static char timestamp[sizeof("YYYY-MM-DD HH:MM:SS")];
+
+  time_t now = time(NULL);
+  if (now == (time_t)-1) {
+    return NULL;  // Error: unable to get the current time
   }
 
-  struct tm utc_tm;
-  memset(&utc_tm, 0, sizeof(struct tm));
-  int leap_years = 0;
-  int days_in_month[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+  struct tm tm_utc;
+  const int seconds_per_day = 24 * 60 * 60;
+  int days_since_epoch = (int)(now / seconds_per_day);
+  int seconds_today = (int)(now % seconds_per_day);
+  int leap_years = (days_since_epoch - 4) / 1461;
+  int year = 1970 + 4 * leap_years;
+  int day_of_year = days_since_epoch - leap_years * 1461;
 
-  int seconds = (int)utc_time;
-  utc_tm.tm_sec = seconds % 60;
-  utc_tm.tm_min = (seconds / 60) % 60;
-  utc_tm.tm_hour = (seconds / 3600) % 24;
-
-  int days = seconds / 86400;
-  int year = 1970;
-  int month = 0;
-  int day = 0;
-  while (days >= 365 + leap_years) {
-    if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0) {
-      leap_years++;
-    }
-    days -= 365 + leap_years;
-    year++;
+  if (day_of_year >= 366) {
+    leap_years = (year - 1968) / 4;
+    day_of_year -= 366;
+    year += leap_years;
   }
-  utc_tm.tm_year = year - 1900;
+  tm_utc.tm_year = year - 1900;
+  tm_utc.tm_yday = day_of_year;
+  tm_utc.tm_hour = seconds_today / 3600;
+  tm_utc.tm_min = (seconds_today % 3600) / 60;
+  tm_utc.tm_sec = seconds_today % 60;
 
-  while (month < 12 &&
-         days >= days_in_month[month] +
-                     ((month == 1 && (year % 4 == 0 && year % 100 != 0) ||
-                       year % 400 == 0))) {
-    days -=
-        days_in_month[month] +
-        ((month == 1 && (year % 4 == 0 && year % 100 != 0) || year % 400 == 0));
-    month++;
-  }
-  utc_tm.tm_mon = month;
-  utc_tm.tm_mday = days + 1;
-
-  char *timestamp = malloc(TIMESTAMP_SIZE);
-  if (!timestamp) {
-    return NULL;  // Error: Unable to allocate memory for timestamp string
-  }
-
-  int len = snprintf(timestamp, TIMESTAMP_SIZE, TIMESTAMP_FORMAT,
-                     utc_tm.tm_year + 1900, utc_tm.tm_mon + 1, utc_tm.tm_mday,
-                     utc_tm.tm_hour, utc_tm.tm_min, utc_tm.tm_sec);
-  if (len < 0 || len >= TIMESTAMP_SIZE) {
-    free(timestamp);
-    return NULL;  // Error: Unable to create timestamp string
+  if (strftime(timestamp, sizeof(timestamp), TIMESTAMP_FORMAT, &tm_utc) == 0) {
+    return NULL;  // Error: unable to format the timestamp
   }
 
   return timestamp;
@@ -208,10 +175,6 @@ static void setup_log_level() {
 
 void setup_logging() {
   setup_log_level();
-
-  if (getenv("LC_TIME") != NULL) {
-    log_header = LOCALE_LOG_HEADER;
-  }
 
   // TODO: stdout opt
   if (server_config.log_file) {

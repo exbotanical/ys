@@ -1,10 +1,12 @@
 #include "header.h"
 
+#include <ctype.h>    // for tolower
 #include <pthread.h>  // for pthread_once
 #include <stdbool.h>
 #include <string.h>  // for strlen
 
 #include "libhttp.h"
+#include "util.h"
 #include "xmalloc.h"
 
 static pthread_once_t init_common_headers_once = PTHREAD_ONCE_INIT;

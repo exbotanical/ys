@@ -1,9 +1,10 @@
 #include "path.h"
 
 #include <stdlib.h>  // for exit
-#include <string.h>  // strlen, strdup, strtok, strstr
+#include <string.h>  // strlen, strtok, strstr
 
 #include "logger.h"
+#include "strdup/strdup.h"
 #include "util.h"
 
 const char *PATH_ROOT = "/";

@@ -2,8 +2,9 @@
 
 #include <stdio.h>   // for FILE, stderr
 #include <stdlib.h>  // for free
-#include <string.h>  // for strcspn, strdup
+#include <string.h>  // for strcspn
 
+#include "strdup/strdup.h"
 #include "util.h"  // for str_equals
 
 // Default server config

@@ -1,11 +1,12 @@
 #include "trie.h"
 
 #include <pcre.h>    // This library relies on the ability to utilize PCRE regex
-#include <string.h>  // for strdup, strlen
+#include <string.h>  // for strlen
 
 #include "cache.h"  // for regex_cache_get
 #include "logger.h"
 #include "path.h"
+#include "strdup/strdup.h"
 #include "util.h"
 #include "xmalloc.h"
 

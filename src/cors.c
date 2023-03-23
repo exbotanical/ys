@@ -298,9 +298,10 @@ cors_t *cors_init(cors_opts_t *opts) {
   if (!has_elements(opts->allowed_methods)) {
     // Default allowed methods. Defaults to simple methods (those that do not
     // trigger a Preflight)
-    array_t *default_allowed_methods = array_collect(
-        http_method_names[METHOD_GET], http_method_names[METHOD_POST],
-        http_method_names[METHOD_HEAD]);
+    array_t *default_allowed_methods =
+        array_collect(strdup(http_method_names[METHOD_GET]),
+                      strdup(http_method_names[METHOD_POST]),
+                      strdup(http_method_names[METHOD_HEAD]));
 
     cors_config->allowed_methods = default_allowed_methods;
   } else {
@@ -316,10 +317,12 @@ cors_t *cors_init(cors_opts_t *opts) {
 cors_opts_t *cors_allow_all() {
   cors_opts_t *c = xmalloc(sizeof(cors_opts_t));
   c->allowed_origins = array_collect("*");
-  c->allowed_methods = array_collect(
-      http_method_names[METHOD_HEAD], http_method_names[METHOD_GET],
-      http_method_names[METHOD_POST], http_method_names[METHOD_PATCH],
-      http_method_names[METHOD_PUT], http_method_names[METHOD_DELETE]);
+  c->allowed_methods = array_collect(strdup(http_method_names[METHOD_HEAD]),
+                                     strdup(http_method_names[METHOD_GET]),
+                                     strdup(http_method_names[METHOD_POST]),
+                                     strdup(http_method_names[METHOD_PATCH]),
+                                     strdup(http_method_names[METHOD_PUT]),
+                                     strdup(http_method_names[METHOD_DELETE]));
   c->allowed_headers = array_collect("*");
   c->allow_credentials = false;
 
@@ -348,21 +351,21 @@ res_t *cors_handler(req_t *req, res_t *res) {
 void set_allowed_origins(cors_opts_t *c, const char *origin, ...) {
   va_list args;
   va_start(args, origin);
-  c->allowed_origins = array_collect(origin, args);
+  c->allowed_origins = array_collect((void *)origin, args);
   va_end(args);
 }
 
 void set_allowed_methods(cors_opts_t *c, const char *method, ...) {
   va_list args;
   va_start(args, method);
-  c->allowed_methods = array_collect(method, args);
+  c->allowed_methods = array_collect((void *)method, args);
   va_end(args);
 }
 
 void set_allowed_headers(cors_opts_t *c, const char *header, ...) {
   va_list args;
   va_start(args, header);
-  c->allowed_headers = array_collect(header, args);
+  c->allowed_headers = array_collect((void *)header, args);
   va_end(args);
 }
 

@@ -1,8 +1,9 @@
 
 #include "server.h"
 
+#include <stdio.h>       // for perror
 #include <stdlib.h>      // for exit
-#include <string.h>      // for strlen, strdup, strtok
+#include <string.h>      // for strlen, strtok
 #include <sys/select.h>  // for fd_set
 #include <unistd.h>      // for write, close
 

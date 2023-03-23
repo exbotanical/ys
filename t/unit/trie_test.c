@@ -1,9 +1,8 @@
 #include "trie.h"
 
-#include <string.h>  // for strdup
-
 #include "path.h"
 #include "router.h"
+#include "strdup/strdup.h"
 #include "tap.c/tap.h"
 
 typedef struct {

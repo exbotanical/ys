@@ -3,9 +3,10 @@
 #include <ctype.h>   // for toupper
 #include <stdarg.h>  // for variadic args functions
 #include <stdio.h>   // for snprintf
-#include <string.h>  // for strdup
+#include <string.h>  // for strcmp, strncpy, strlen, strncasecmp
 
 #include "logger.h"  // for DIE
+#include "strdup/strdup.h"
 #include "xmalloc.h"
 
 char *safe_itoa(int x) {

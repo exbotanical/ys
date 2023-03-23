@@ -3,11 +3,12 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <stdlib.h>  // for EXIT_FAILURE
-#include <string.h>  // for strdup
+#include <string.h>  // for strlen
 #include <unistd.h>  // for ssize_t
 
 #include "logger.h"  // for DIE
-#include "util.h"    // for str_equals
+#include "strdup/strdup.h"
+#include "util.h"  // for str_equals
 #include "xmalloc.h"
 
 static const char CRLF[3] = "\r\n";
@@ -38,15 +39,15 @@ static bool should_set_content_len(req_t *req, res_t *res) {
  * @return buffer_t*
  */
 buffer_t *serialize_response(req_t *req, res_t *res) {
-  const buffer_t *rbuf = buffer_init(NULL);
+  buffer_t *rbuf = buffer_init(NULL);
   if (!rbuf) {
     // TODO: constant template str for malloc failures
     DIE(EXIT_FAILURE, "[response::%s] could not allocate memory for buffer_t\n",
         __func__);
   }
 
+  array_t *headers = res->headers;
   const int status = res->status;
-  const array_t *headers = res->headers;
   const char *body = res->body;
 
   buffer_append(rbuf,

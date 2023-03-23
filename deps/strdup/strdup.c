@@ -8,15 +8,15 @@
 
 #ifndef HAVE_STRDUP
 
+#include "strdup.h"
+
 #include <stdlib.h>
 #include <string.h>
-#include "strdup.h"
 
 #ifndef strdup
 
-char *
-strdup(const char *str) {
-  if (NULL == (char *) str) {
+char *strdup(const char *str) {
+  if (NULL == (char *)str) {
     return NULL;
   }
 

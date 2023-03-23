@@ -12,7 +12,7 @@ void add_middleware(router_attr_t *r, handler_t *mw) {
 void __middlewares(router_attr_t *r, handler_t *mw, ...) {
   array_t *mws = array_init();
   if (!mws) {
-    return NULL;
+    return;
   }
 
   va_list args;
@@ -20,7 +20,7 @@ void __middlewares(router_attr_t *r, handler_t *mw, ...) {
 
   while (mw != NULL) {
     if (!array_push(mws, mw)) {
-      return NULL;
+      return;
     }
 
     mw = va_arg(args, handler_t *);

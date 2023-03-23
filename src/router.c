@@ -1,12 +1,12 @@
 #include "router.h"
 
 #include <stdarg.h>  // for variadic args functions
-#include <string.h>  // for strdup
 
 #include "config.h"
 #include "logger.h"
 #include "response.h"  // for response_init, send_response
 #include "server.h"    // for send_response
+#include "strdup/strdup.h"
 #include "util.h"
 #include "xmalloc.h"
 
@@ -136,7 +136,7 @@ router_t *router_init(router_attr_t attr) {
   return (router_t *)router;
 }
 
-bool has(char *s, char *cmp) { return str_equals(s, cmp); }
+bool has(void *s, void *cmp) { return str_equals((char *)s, (char *)cmp); }
 void router_register(router_t *router, const char *path, handler_t *handler,
                      http_method_t method, ...) {
   array_t *methods = array_init();
@@ -169,10 +169,10 @@ void router_register(router_t *router, const char *path, handler_t *handler,
   }
 
   // OPTIONS should always be allowed if we're using CORS
-  const char *options = http_method_names[METHOD_OPTIONS];
+  char *options = strdup(http_method_names[METHOD_OPTIONS]);
   if (((__router_t *)router)->use_cors &&
       !array_includes(methods, has, options)) {
-    array_push(methods, strdup(options));
+    array_push(methods, options);
   }
 
   trie_insert(((__router_t *)router)->trie, methods, path, handler);
