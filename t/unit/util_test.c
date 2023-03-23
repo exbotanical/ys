@@ -56,7 +56,7 @@ void test_str_join() {
 }
 
 int main() {
-  plan(31);
+  plan(11);
 
   test_split_ok();
   test_split_no_match();

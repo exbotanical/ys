@@ -1,11 +1,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <stdbool.h>
+
 typedef struct {
   short num_threads;
   int port_num;
-  const char* log_level;
-  const char* log_file;
+  char* log_level;
+  char* log_file;
 } server_config_t;
 
 extern server_config_t server_config;
@@ -37,7 +39,9 @@ static const char LOG_FILE_KEY[9] = "LOG_FILE";
  * `server_config`
  *
  * @param filename
+ * @return true
+ * @return false
  */
-void parse_config(const char* filename);
+bool parse_config(const char* filename);
 
 #endif /* CONFIG_H */

@@ -15,7 +15,10 @@ static const char CONFIG_FILE_NAME[13] = "libhttp.conf";
  * setup_env configures the `server_config` and logger for the current runtime
  */
 static void setup_env() {
-  parse_config(CONFIG_FILE_NAME);
+  if (!parse_config(CONFIG_FILE_NAME)) {
+    DIE(EXIT_FAILURE, "%s\n", "Invalid config file");
+  }
+
   setup_logging();
 }
 
