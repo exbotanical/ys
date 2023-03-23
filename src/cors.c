@@ -123,11 +123,11 @@ static bool is_preflight_request(req_t *req) {
   return is_options_req && has_origin_header && has_request_method;
 }
 
-// TODO: Use hash table for headers and parameters
 /**
  * handleRequest handles actual HTTP requests subsequent to or standalone from
  * Preflight requests
- *
+ * TODO: Use hash table for headers and parameters
+ * TODO: test
  * @param req
  * @param res
  */
@@ -144,7 +144,7 @@ static void handle_request(req_t *req, res_t *res) {
 
   // If the origin is not in the allow list, deny
   if (!is_origin_allowed(cors_config, origin)) {
-    // TODO: 403
+    // TODO: 403?
     return;
   }
 
@@ -173,6 +173,7 @@ static void handle_request(req_t *req, res_t *res) {
 
 /**
  * handle_preflight_request handles preflight requests
+ * TODO: test
  * @param req
  * @param res
  */
@@ -244,6 +245,13 @@ static void handle_preflight_request(req_t *req, res_t *res) {
   }
 }
 
+cors_opts_t *cors_opts_init() {
+  cors_opts_t *o = xmalloc(sizeof(cors_opts_t));
+  o->allow_credentials = false;
+  o->max_age = 0;
+  o->use_options_passthrough = false;
+}
+
 cors_t *cors_init(cors_opts_t *opts) {
   cors_config = xmalloc(sizeof(cors_t));
   cors_config->allow_credentials = opts->allow_credentials;
@@ -263,7 +271,6 @@ cors_t *cors_init(cors_opts_t *opts) {
         cors_config->allow_all_origins = true;
         break;
       }
-
       array_push(cors_config->allowed_origins, origin);
     }
 
@@ -345,27 +352,6 @@ res_t *cors_handler(req_t *req, res_t *res) {
   }
 
   return res;
-}
-
-void set_allowed_origins(cors_opts_t *c, const char *origin, ...) {
-  va_list args;
-  va_start(args, origin);
-  c->allowed_origins = array_collect((void *)origin, args);
-  va_end(args);
-}
-
-void set_allowed_methods(cors_opts_t *c, const char *method, ...) {
-  va_list args;
-  va_start(args, method);
-  c->allowed_methods = array_collect((void *)method, args);
-  va_end(args);
-}
-
-void set_allowed_headers(cors_opts_t *c, const char *header, ...) {
-  va_list args;
-  va_start(args, header);
-  c->allowed_headers = array_collect((void *)header, args);
-  va_end(args);
 }
 
 void set_allow_credentials(cors_opts_t *c, bool allow) {

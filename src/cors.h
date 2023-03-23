@@ -6,15 +6,15 @@
 
 // CORS configurations
 typedef struct {
-  array_t *allowed_origins;
-  array_t *allowed_methods;
-  array_t *allowed_headers;
-  array_t *exposed_headers;
+  unsigned int max_age;
   bool allow_credentials;
-  bool allow_all_origins;
   bool allow_all_headers;
   bool use_options_passthrough;
-  unsigned int max_age;
+  bool allow_all_origins;
+  array_t *allowed_methods;
+  array_t *allowed_origins;
+  array_t *allowed_headers;
+  array_t *exposed_headers;
 } cors_t;
 
 // Set by server and specifies the allowed origin. Must be a single value, or a

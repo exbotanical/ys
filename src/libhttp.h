@@ -14,7 +14,8 @@ extern const char *http_status_names[];
 extern const char *http_method_names[];
 
 // HTTP methods.
-typedef enum http_method {
+typedef enum {
+
   // MUST start with 1 for varargs handling e.g. collect
   METHOD_GET = 1,
   METHOD_POST,
@@ -28,7 +29,7 @@ typedef enum http_method {
 } http_method_t;
 
 // HTTP status codes.
-typedef enum http_status {
+typedef enum {
   STATUS_CONTINUE = 100,             // RFC 7231, 6.2.1
   STATUS_SWITCHING_PROTOCOLS = 101,  // RFC 7231, 6.2.2
   STATUS_PROCESSING = 102,           // RFC 2518, 10.1
@@ -96,7 +97,6 @@ typedef enum http_status {
   STATUS_LOOP_DETECTED = 508,                    // RFC 5842, 7.2
   STATUS_NOT_EXTENDED = 510,                     // RFC 2774, 7
   STATUS_NETWORK_AUTHENTICATION_REQUIRED = 511,  // RFC 6585, 6
-
 } http_status_t;
 
 // A context object containing metadata to be passed to matched route handlers
@@ -142,19 +142,19 @@ typedef res_t *handler_t(req_t *, res_t *);
 
 // CORS configuration options
 typedef struct {
+  bool allow_credentials;
+  bool use_options_passthrough;
+  unsigned int max_age;
   array_t *allowed_origins;
   array_t *allowed_methods;
   array_t *allowed_headers;
   array_t *expose_headers;
-  bool allow_credentials;
-  bool use_options_passthrough;
-  unsigned int max_age;
 } __cors_opts_t;
 typedef __cors_opts_t cors_opts_t;
 
 // A router object
 typedef struct {
-  bool use_cors;  // TODO:
+  bool use_cors;
   trie_t *trie;
   handler_t *not_found_handler;
   handler_t *method_not_allowed_handler;
@@ -296,21 +296,87 @@ unsigned int req_num_parameters(req_t *req);
  */
 bool req_has_parameters(req_t *req);
 
-// TODO: d
+/**
+ * middlewares binds n middleware handlers to the router attributes instance
+ *
+ * @param router_attr_t*
+ * @param handler_t*[]
+ */
 #define middlewares(r, ...) __middlewares(r, __VA_ARGS__, NULL)
 
 void __middlewares(router_attr_t *r, handler_t *mw, ...);
 void add_middleware(router_attr_t *r, handler_t *mw);
 
-void set_allowed_origins(cors_opts_t *c, const char *origin, ...);
-void set_allowed_methods(cors_opts_t *c, const char *method, ...);
-void set_allowed_headers(cors_opts_t *c, const char *header, ...);
+/**
+ * set_allowed_origins sets the cors_opts_t allowed origins
+ * @param o cors_opts_t*
+ * @param ... char*[]
+ */
+#define set_allowed_origins(c, ...) \
+  c->allowed_origins = array_collect(__VA_ARGS__)
+
+/**
+ * set_allowed_methods sets the cors_opts_t allowed methods
+ * @param o cors_opts_t*
+ * @param ... char*[]
+ */
+#define set_allowed_methods(c, ...) \
+  c->allowed_methods = array_collect(__VA_ARGS__)
+
+/**
+ * set_allowed_headers sets the cors_opts_t allowed headers
+ * @param o cors_opts_t*
+ * @param ... char*[]
+ */
+#define set_allowed_headers(o, ...) \
+  o->allowed_headers = array_collect(__VA_ARGS__)
+
+/**
+ * cors_opts_init initializes a new CORS options object
+ *
+ * @return cors_opts_t*
+ */
+cors_opts_t *cors_opts_init();
+
+/**
+ * set_allow_credentials sets the cors_opts_t allowed_credentials option
+ *
+ * @param c
+ * @param allow
+ */
 void set_allow_credentials(cors_opts_t *c, bool allow);
+
+/**
+ * set_use_options_passthrough sets the cors_opts_t use_options_passthrough
+ * option
+ *
+ * @param c
+ * @param use
+ */
 void set_use_options_passthrough(cors_opts_t *c, bool use);
+
+/**
+ * set_max_age sets the cors_opts_t max age option
+ *
+ * @param c
+ * @param max_age
+ */
 void set_max_age(cors_opts_t *c, int max_age);
+
+/**
+ * cors_allow_all initializes a new CORS options object with sensible, lax
+ * defaults
+ *
+ * @return cors_opts_t*
+ */
 cors_opts_t *cors_allow_all();
 
-// TODO: t + d
+/**
+ * use_cors binds the CORS global middleware to the router attributes instance
+ * TODO: test
+ * @param r
+ * @param opts
+ */
 void use_cors(router_attr_t *r, cors_opts_t *opts);
 
 #endif /* LIBHTTP_H */

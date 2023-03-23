@@ -494,14 +494,95 @@ void test_is_preflight_request() {
   }
 }
 
+void test_cors_allow_all() {
+  cors_opts_t *o = cors_allow_all();
+  cors_t *c = cors_init(o);
+
+  ok(c->allow_all_origins == true, "cors_allow_all allows all origins");
+  ok(c->allow_all_headers == true, "cors_allow_all allows all headers");
+  ok(c->allow_credentials == false,
+     "cors_allow_all does not allow credentials");
+  ok(array_size(c->allowed_methods) == 6,
+     "cors_allow_all allows all common methods");
+}
+
+void test_set_helpers() {
+  cors_opts_t *o = cors_opts_init();
+
+  const char *o1 = "o1";
+  const char *o2 = "o2";
+  const char *o3 = "o3";
+  set_allowed_origins(o, o1, o2, o3);  // TODO: internal to omit NULL
+
+  set_allowed_methods(o, "GET", "PUT", "DELETE");
+
+  const char *h1 = "h1";
+  const char *h2 = "h2";
+  const char *h3 = "h3";
+  set_allowed_headers(o, h1, h2, h3, NULL);
+
+  const int m = 3600;
+  set_max_age(o, m);
+  ok(o->max_age == 3600, "max_age is 0 by default");
+
+  cors_t *c = cors_init(o);
+
+  ok(c->allow_credentials == false, "allow_credentials is false by default");
+
+  set_allow_credentials(o, true);
+  ok(o->allow_credentials == true,
+     "set_allow_credentials(o, true) sets allow_credentials to true");
+
+  set_allow_credentials(o, false);
+  ok(o->allow_credentials == false,
+     "set_allow_credentials(o, false) sets allow_credentials to false");
+
+  ok(o->use_options_passthrough == false,
+     "use_options_passthrough is false by default");
+
+  set_use_options_passthrough(o, true);
+  ok(o->use_options_passthrough == true,
+     "set_use_options_passthrough(o, true) sets use_options_passthrough to "
+     "true");
+
+  set_use_options_passthrough(o, false);
+  ok(o->use_options_passthrough == false,
+     "set_use_options_passthrough(o, false) sets use_options_passthrough to "
+     "false");
+
+  ok(c->max_age == m, "set_max_age(o, n) sets max_age to n");
+
+  ok(is_origin_allowed(c, "o4") == false,
+     "set_allowed_origins functions properly");
+  ok(is_origin_allowed(c, o1) == true, "set_allowed_origins allows the origin");
+  ok(is_origin_allowed(c, o2) == true, "set_allowed_origins allows the origin");
+  ok(is_origin_allowed(c, o3) == true, "set_allowed_origins allows the origin");
+
+  ok(is_method_allowed(c, "PATCH") == false,
+     "set_allowed_methods functions properly");
+  ok(is_method_allowed(c, "GET") == true,
+     "set_allowed_methods allows the method");
+  ok(is_method_allowed(c, "PUT") == true,
+     "set_allowed_methods allows the method");
+  ok(is_method_allowed(c, "DELETE") == true,
+     "set_allowed_methods allows the method");
+
+  ok(are_headers_allowed(c, array_collect("h4")) == false,
+     "set_allowed_headers functions properly");
+  ok(are_headers_allowed(c, array_collect(h1, h2, h3)) == true,
+     "set_allowed_headers allows the headers");
+}
+
 int main(int argc, char const *argv[]) {
-  plan(63);
+  plan(85);
 
   test_cors_middleware();
   test_are_headers_allowed();
   test_is_method_allowed();
   test_origin_is_allowed();
   test_is_preflight_request();
+  test_cors_allow_all();
+  test_set_helpers();
 
   done_testing();
 }

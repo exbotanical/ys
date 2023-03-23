@@ -7,6 +7,7 @@ REPO_DIR=http
 
 declare -a SKIP_FILES=(
   # 'cache_test.c'
+  # 'config_test.c'
   # 'cors_test.c'
   # 'enum_test.c'
   # 'header_test.c'
@@ -15,7 +16,6 @@ declare -a SKIP_FILES=(
 	# 'trie_test.c'
   # 'util_test.c'
   # 'middleware_test.c'
-  # 'config_test.c'
 )
 
 not_test_file () {
