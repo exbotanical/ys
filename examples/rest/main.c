@@ -144,7 +144,7 @@ res_t *handle_post(req_t *req, res_t *res) {
 int main() {
   records = malloc(sizeof(record_t));
 
-  router_attr_t attr = ROUTE_ATTR_INITIALIZER;
+  router_attr_t *attr = router_attr_init();
   router_t *router = router_init(attr);
   char *record_path = "/records/:id[^\\d+$]";
 

@@ -16,5 +16,5 @@ typedef union {
   req_t* req;
 } req_meta_t;
 
-req_meta_t read_and_parse_request(int sock);
+req_meta_t req_read_and_parse(int sock);
 #endif /* REQUEST_H */

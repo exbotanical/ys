@@ -31,8 +31,8 @@ res_t *middleware2(req_t *req, res_t *res) {
 }
 
 int main() {
-  router_attr_t attr = ROUTE_ATTR_INITIALIZER;
-  middlewares(&attr, middleware1, middleware2);
+  router_attr_t *attr = router_attr_init();
+  middlewares(attr, middleware1, middleware2);
   router_t *router = router_init(attr);
 
   router_register(router, "/:key[^\\d+$]", handler, METHOD_GET, NULL);

@@ -94,44 +94,51 @@ static res_t *default_method_not_allowed_handler(req_t *req, res_t *res) {
   return res;
 }
 
-router_t *router_init(router_attr_t attr) {
+router_attr_t *router_attr_init() {
+  router_attr_t *attr = malloc(sizeof(router_attr_t));
+  attr->use_cors = false;
+  attr->middlewares = NULL;
+  return attr;
+}
+
+router_t *router_init(router_attr_t *attr) {
   // Initialize config opts
   setup_env();
 
   __router_t *router = xmalloc(sizeof(__router_t));
 
   router->trie = trie_init();
-  router->middlewares = attr.middlewares;
-  router->use_cors = attr.use_cors;
+  router->middlewares = attr->middlewares;
+  router->use_cors = attr->use_cors;
 
-  if (!attr.not_found_handler) {
+  if (!attr->not_found_handler) {
     printlogf(LOG_DEBUG,
               "[router::%s] not_found_handler is NULL, registering fallback "
               "handler\n",
               __func__);
     router->not_found_handler = default_not_found_handler;
   } else {
-    router->not_found_handler = attr.not_found_handler;
+    router->not_found_handler = attr->not_found_handler;
   }
 
-  if (!attr.method_not_allowed_handler) {
+  if (!attr->method_not_allowed_handler) {
     printlogf(LOG_DEBUG,
               "[router::%s] method_not_allowed_handler is NULL, registering "
               "fallback handler\n",
               __func__);
     router->method_not_allowed_handler = default_method_not_allowed_handler;
   } else {
-    router->method_not_allowed_handler = attr.method_not_allowed_handler;
+    router->method_not_allowed_handler = attr->method_not_allowed_handler;
   }
 
-  if (!attr.internal_error_handler) {
+  if (!attr->internal_error_handler) {
     printlogf(LOG_DEBUG,
               "[router::%s] internal_error_handler is NULL, registering "
               "fallback handler\n",
               __func__);
     router->internal_error_handler = default_internal_error_handler;
   } else {
-    router->internal_error_handler = attr.internal_error_handler;
+    router->internal_error_handler = attr->internal_error_handler;
   }
 
   return (router_t *)router;

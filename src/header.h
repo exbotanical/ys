@@ -4,6 +4,12 @@
 #include "libhash/libhash.h"  // for hash sets and hash tables
 #include "libutil/libutil.h"  // for arrays
 
+// A key/value pair for response headers
+typedef struct {
+  const char* key;
+  const char* value;
+} header_t;
+
 // A 256 slot lookup table where each index corresponds to an ASCII character
 // and indicates whether that character is a valid header byte
 // see: https://httpwg.github.io/specs/rfc7230.html#rule.token.separators
@@ -21,9 +27,9 @@ static const char token_table[] =
     "\0\0\0\0\0\0\0\0\0\0\0";
 
 /**
- * CanonicalMIMEHeaderKey returns the canonical format of the MIME header key s.
- * The canonicalization converts the first letter and any letter following a
- * hyphen to upper case; the rest are converted to lowercase.
+ * to_canonical_MIME_header_key returns the canonical format of the MIME header
+ * key s. The canonicalization converts the first letter and any letter
+ * following a hyphen to upper case; the rest are converted to lowercase.
  *
  * MIME header keys are assumed to be ASCII only.
  *

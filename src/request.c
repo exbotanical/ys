@@ -18,11 +18,10 @@
 /**
  * fix_pragma_cache_control implements RFC 7234, section 5.4:
  * Should treat Pragma: no-cache like Cache-Control: no-cache
- * TODO: test
  * @param header
  */
 static void fix_pragma_cache_control(hash_table* headers) {
-  if (s_equals(ht_get(headers, "Pragma"), "no-cache")) {
+  if (s_equals(req_header_get(headers, "Pragma"), "no-cache")) {
     if (!ht_search(headers, "Cache-Control")) {
       insert_header(headers, "Cache-Control", "no-cache");
     }
@@ -30,7 +29,7 @@ static void fix_pragma_cache_control(hash_table* headers) {
 }
 
 // TODO: break up into two functions
-req_meta_t read_and_parse_request(int sock) {
+req_meta_t req_read_and_parse(int sock) {
   const char *method, *path;
   char buf[REQ_BUFFER_SIZE];
   int pret, minor_version;
@@ -115,10 +114,12 @@ req_meta_t read_and_parse_request(int sock) {
 }
 
 parameter_t* req_get_parameter_at(req_t* req, unsigned int idx) {
+  if (!req->parameters) return NULL;
   return array_get(req->parameters, idx);
 }
 
 void* req_get_parameter(req_t* req, const char* key) {
+  if (!req->parameters) return NULL;
   for (unsigned int i = 0; i < req_num_parameters(req); i++) {
     parameter_t* param = req_get_parameter_at(req, i);
     if (s_equals(param->key, key)) {
@@ -130,9 +131,10 @@ void* req_get_parameter(req_t* req, const char* key) {
 }
 
 unsigned int req_num_parameters(req_t* req) {
+  if (!req->parameters) return 0;
   return array_size(req->parameters);
 }
 
 bool req_has_parameters(req_t* req) {
-  return req && array_size(req->parameters) > 0;
+  return req && req->parameters && array_size(req->parameters) > 0;
 }

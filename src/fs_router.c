@@ -126,7 +126,7 @@ static void traverse_dir(const char *dir_path) {
 
 router_t *sync_file_router(const char *dir_path) {
   if (!router) {
-    router_attr_t attr = ROUTE_ATTR_INITIALIZER;
+    router_attr_t *attr = router_attr_init();
     router = router_init(attr);
   }
 

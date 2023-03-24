@@ -10,6 +10,13 @@
 #include "util.h"
 #include "xmalloc.h"
 
+static parameter_t *parameter_init(const char *k, const char *v) {
+  parameter_t *p = xmalloc(sizeof(parameter_t));
+  p->key = k;
+  p->value = v;
+  return p;
+}
+
 /**
  * node_init allocates memory for a new node, its children and action members
  *
@@ -177,10 +184,7 @@ result_t *trie_search(trie_t *trie, const char *method,
 
         char *param_key = derive_parameter_key(child->label);
 
-        parameter_t *param = xmalloc(sizeof(parameter_t));
-
-        param->key = param_key;
-        param->value = path;
+        parameter_t *param = parameter_init(param_key, path);
 
         if (!array_push(result->parameters, param)) {
           printlogf(LOG_INFO,

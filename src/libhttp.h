@@ -15,7 +15,6 @@ extern const char *http_method_names[];
 
 // HTTP methods.
 typedef enum {
-
   // MUST start with 1 for varargs handling e.g. collect
   METHOD_GET = 1,
   METHOD_POST,
@@ -116,12 +115,6 @@ typedef struct {
   int content_length;
 } req_t;
 
-// TODO: relocate + opaque
-typedef struct {
-  const char *key;
-  const char *value;
-} header_t;
-
 // A response object; client handlers must return this struct to be sent to the
 // client.
 typedef struct {
@@ -171,9 +164,6 @@ typedef struct {
   array_t *middlewares;
 } router_attr_t;
 
-#define ROUTE_ATTR_INITIALIZER \
-  { false, NULL, NULL, NULL, NULL, }
-
 // A server configuration object that stores settings for the HTTP server
 typedef struct {
   __router_t *router;
@@ -184,7 +174,7 @@ typedef __server_t *server_t;
 typedef array_t *middlewares_t;
 
 /**
- * set_header appends the given key/value pair as a header object in
+ * res_setheader appends the given key/value pair as a header object in
  * `headers`
  *
  * @param res
@@ -192,7 +182,7 @@ typedef array_t *middlewares_t;
  * @param value
  * @return bool
  */
-bool set_header(res_t *res, const char *key, const char *value);
+bool res_setheader(res_t *res, const char *key, const char *value);
 
 /**
  * res_setbody sets the given body on the given response
@@ -218,12 +208,20 @@ void res_setstatus(res_t *response, http_status_t status);
 void router_free(router_t *router);
 
 /**
+ * Initialize a router attributes object
+ *
+ * @return router_attr_t*
+ */
+router_attr_t *router_attr_init();
+
+/**
  * router_init allocates memory for a new router and its `trie` member;
- * sets the handlers for 404 and 405 (if none provided, defaults will be used).
- * @param router_attr_t TODO:
+ * sets the handlers for 404 and 405 (if none provided, defaults will be
+ * used).
+ * @param router_attr_t* TODO:
  * @return router_t*
  */
-router_t *router_init(router_attr_t attr);
+router_t *router_init(router_attr_t *attr);
 
 /**
  * router_register registers a new route record. Registered routes will be
@@ -304,7 +302,21 @@ bool req_has_parameters(req_t *req);
  */
 #define middlewares(r, ...) __middlewares(r, __VA_ARGS__, NULL)
 
+/**
+ * @internal
+ *
+ * @param r
+ * @param mw
+ * @param ...
+ */
 void __middlewares(router_attr_t *r, handler_t *mw, ...);
+
+/**
+ * add_middleware appends a new middleware to the routes attributes object
+ *
+ * @param r
+ * @param mw
+ */
 void add_middleware(router_attr_t *r, handler_t *mw);
 
 /**

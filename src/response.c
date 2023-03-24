@@ -6,6 +6,7 @@
 #include <string.h>  // for strlen
 #include <unistd.h>  // for ssize_t
 
+#include "header.h"
 #include "libutil/libutil.h"  // for s_equals, s_copy
 #include "logger.h"           // for DIE
 #include "xmalloc.h"

@@ -5,7 +5,10 @@
 #include "xmalloc.h"
 
 void add_middleware(router_attr_t *r, handler_t *mw) {
-  if (!r->middlewares) r->middlewares = array_init();
+  if (!has_elements(r->middlewares)) {
+    r->middlewares = array_init();
+  }
+
   array_push(r->middlewares, mw);
 }
 

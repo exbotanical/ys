@@ -28,6 +28,7 @@
   - [x] source strdup from dep
 - [ ] review all `include`d functions and replace any non-standard ones
 - [ ] documentation
+- [ ] make all public structs opaque
 
 ## New Features
 - [ ] global hooks/interceptors (e.g. global HTTP headers)

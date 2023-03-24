@@ -22,6 +22,10 @@ not_test_file () {
 	local test=$1
 	local ret=0
 
+  if [[ $test != *_test.c ]]; then
+     return 1;
+  fi
+
 	for (( i=0; i < ${#SKIP_FILES[@]}; i++ )); do
 		if [[ $test == ${SKIP_FILES[i]} ]]; then
 			ret=1

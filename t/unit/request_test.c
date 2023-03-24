@@ -1,36 +1,146 @@
-#include "request.h"
+#include "request.c"
 
 #include <stdio.h>
 
 #include "libhttp.h"
+#include "tap.c/tap.h"
 
-int main(int argc, char const *argv[]) {
-  char request_str[] =
-      "POST /api/users HTTP/1.1\r\n"
-      "Host: example.com\r\n"
-      "User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:59.0) "
-      "Gecko/20100101 Firefox/59.0\r\n"
-      "Content-Type: application/json\r\n"
-      "Content-Length: 29\r\n"
-      "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;"
-      "Accept-Language: en-US,en;q=0.5\r\n"
-      "Accept-Encoding: gzip, deflate\r\n"
-      "Connection: keep-alive\r\n"
-      "Upgrade-Insecure-Requests: 1\r\n"
-      "\r\n"
-      "{\"username\":\"alice\",\"password\":\"secret\"}";
+static parameter_t *parameter_init(const char *k, const char *v) {
+  parameter_t *p = xmalloc(sizeof(parameter_t));
+  p->key = k;
+  p->value = v;
+  return p;
+}
 
-  // req_t *r = parse_request(request_str);
+static req_t *make_req() {
+  req_t *req = malloc(sizeof(req_t));
+  req->parameters = array_init();
 
-  // printf("accept: %s\n", r->accept);
-  // printf("body: %s\n", r->body);
-  // printf("content_length: %d\n", r->content_length);
-  // printf("content_type: %s\n", r->content_type);
-  // printf("host: %s\n", r->host);
-  // printf("method: %s\n", r->method);
-  // printf("path: %s\n", r->path);
-  // printf("protocol: %s\n", r->protocol);
-  // printf("version: %s\n", r->version);
+  array_push(req->parameters, parameter_init("k1", "v1"));
+  array_push(req->parameters, parameter_init("k2", "v2"));
+  return req;
+}
 
-  // printf("raw: %s\n", r->raw);
+void test_fix_pragma_cache_control() {
+  hash_table *headers = ht_init(0);
+
+  insert_header(headers, "Pragma", "no-cache");
+  fix_pragma_cache_control(headers);
+
+  is(req_header_get(headers, "Cache-Control"), "no-cache",
+     "sets the Cache-Control header to no-cache if Pragma: no-cache and no "
+     "Cache-Control header present");
+
+  is(req_header_get(headers, "Pragma"), "no-cache",
+     "keeps the Pragma: no-cache header");
+
+  ok(headers->count == 2, "has two header keys");
+
+  // TODO: ADD CACHE_CONTROL AND TEST
+}
+
+void test_fix_pragma_cache_control_has_cache_control() {
+  hash_table *headers = ht_init(0);
+
+  insert_header(headers, "Pragma", "no-cache");
+  insert_header(headers, "Cache-Control", "whatever");
+
+  fix_pragma_cache_control(headers);
+
+  is(req_header_get(headers, "Cache-Control"), "whatever",
+     "leaves the Cache-Control header as-is");
+
+  is(req_header_get(headers, "Pragma"), "no-cache",
+     "keeps the Pragma: no-cache header");
+
+  ok(headers->count == 2, "has two header keys");
+}
+
+void test_fix_pragma_cache_control_no_pragma() {
+  hash_table *headers = ht_init(0);
+
+  fix_pragma_cache_control(headers);
+
+  is(req_header_get(headers, "Pragma"), NULL, "does not modify the headers");
+
+  ok(headers->count == 0, "has no header keys");
+}
+
+void test_req_get_parameter_at() {
+  req_t *req = make_req();
+
+  is(req_get_parameter_at(req, 0)->key, "k1", "returns the correct parameter");
+  is(req_get_parameter_at(req, 0)->value, "v1",
+     "returns the correct parameter");
+  is(req_get_parameter_at(req, 1)->key, "k2", "returns the correct parameter");
+  is(req_get_parameter_at(req, 1)->value, "v2",
+     "returns the correct parameter");
+}
+
+void test_req_get_parameter_at_no_param() {
+  req_t *req = malloc(sizeof(req_t));
+
+  is(req_get_parameter_at(req, 0), NULL, "returns NULL if no parameters");
+  is(req_get_parameter_at(req, 100), NULL,
+     "returns NULL if no parameters no matter the index");
+}
+
+void test_req_get_parameter() {
+  req_t *req = make_req();
+
+  is(req_get_parameter(req, "k1"), "v1", "returns the correct parameter value");
+  is(req_get_parameter(req, "k2"), "v2", "returns the correct parameter value");
+  is(req_get_parameter(req, "k3"), NULL,
+     "returns the NULL if parameter value not found");
+}
+
+void test_req_get_parameter_no_param() {
+  req_t *req = malloc(sizeof(req_t));
+
+  is(req_get_parameter(req, "k1"), NULL, "returns NULL if no parameters");
+}
+
+void test_req_num_parameters() {
+  req_t *req = make_req();
+
+  ok(req_num_parameters(req) == 2, "returns the correct number of parameters");
+}
+
+void test_req_num_parameters_no_param() {
+  req_t *req = malloc(sizeof(req_t));
+
+  ok(req_num_parameters(req) == 0, "returns the correct number of parameters");
+}
+
+void test_req_has_parameters() {
+  req_t *req = make_req();
+
+  ok(req_has_parameters(req) == true,
+     "returns true if the request has parameters");
+
+  req_t *req2 = malloc(sizeof(req_t));
+
+  ok(req_has_parameters(req2) == false,
+     "returns false if the request has no parameters");
+}
+
+int main() {
+  plan(22);
+
+  test_fix_pragma_cache_control();
+  test_fix_pragma_cache_control_has_cache_control();
+  test_fix_pragma_cache_control_no_pragma();
+
+  test_req_get_parameter_at();
+  test_req_get_parameter_at_no_param();
+
+  test_req_get_parameter();
+  test_req_get_parameter_no_param();
+
+  test_req_num_parameters();
+  test_req_num_parameters_no_param();
+
+  test_req_has_parameters();
+
+  done_testing();
 }

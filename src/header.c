@@ -227,7 +227,7 @@ char** req_header_values(hash_table* headers, const char* key) {
   return headers_list;
 }
 
-bool set_header(res_t* res, const char* key, const char* value) {
+bool res_setheader(res_t* res, const char* key, const char* value) {
   header_t* header = xmalloc(sizeof(header_t));
   header->key = key;
   header->value = value;

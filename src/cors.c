@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <string.h>  // for strlen
 
-#include "header.h"           // for req_header_get, set_header, derive_headers
+#include "header.h"  // for req_header_get, res_setheader, derive_headers
 #include "libutil/libutil.h"  // for s_*
 #include "util.h"             // for str_join
 #include "xmalloc.h"
@@ -134,7 +134,7 @@ static void handle_request(req_t *req, res_t *res) {
   char *origin = req_header_get(req->headers, ORIGIN_HEADER);
   // Set the "vary" header to prevent proxy servers from sending cached
   // responses for one client to another
-  set_header(res, VARY_HEADER, ORIGIN_HEADER);
+  res_setheader(res, VARY_HEADER, ORIGIN_HEADER);
 
   // If no origin was specified, this is not a valid CORS request
   if (!origin || s_equals(origin, "")) {
@@ -149,24 +149,24 @@ static void handle_request(req_t *req, res_t *res) {
 
   if (cors_config->allow_all_origins) {
     // If all origins are allowed, use the wildcard value
-    set_header(res, ALLOW_ORIGINS_HEADER, "*");
+    res_setheader(res, ALLOW_ORIGINS_HEADER, "*");
   } else {
     // Otherwise, set the origin to the request origin
-    set_header(res, ALLOW_ORIGINS_HEADER, origin);
+    res_setheader(res, ALLOW_ORIGINS_HEADER, origin);
   }
 
   // If we've exposed headers, set them
   // If the consumer specified headers that are exposed by default, we'll still
   // include them - this is spec compliant
   if (has_elements(cors_config->exposed_headers)) {
-    set_header(res, EXPOSE_HEADERS_HEADER,
-               str_join(cors_config->exposed_headers, ", "));
+    res_setheader(res, EXPOSE_HEADERS_HEADER,
+                  str_join(cors_config->exposed_headers, ", "));
   }
 
   // Allow the client to send credentials. If making an XHR request, the client
   // must set `withCredentials` to `true`
   if (cors_config->allow_credentials) {
-    set_header(res, ALLOW_CREDENTIALS_HEADER, "true");
+    res_setheader(res, ALLOW_CREDENTIALS_HEADER, "true");
   }
 }
 
@@ -181,9 +181,9 @@ static void handle_preflight_request(req_t *req, res_t *res) {
 
   // Set the "vary" header to prevent proxy servers from sending cached
   // responses for one client to another
-  set_header(res, VARY_HEADER,
-             fmt_str("%s,%s,%s", ORIGIN_HEADER, REQUEST_METHOD_HEADER,
-                     REQUEST_HEADERS_HEADER));
+  res_setheader(res, VARY_HEADER,
+                fmt_str("%s,%s,%s", ORIGIN_HEADER, REQUEST_METHOD_HEADER,
+                        REQUEST_HEADERS_HEADER));
 
   // If no origin was specified, this is not a valid CORS request
   if (s_nullish(origin)) {
@@ -215,34 +215,34 @@ static void handle_preflight_request(req_t *req, res_t *res) {
 
   if (cors_config->allow_all_origins) {
     // If all origins are allowed, use the wildcard value
-    set_header(res, ALLOW_ORIGINS_HEADER, "*");
+    res_setheader(res, ALLOW_ORIGINS_HEADER, "*");
   } else {
     // Otherwise, set the origin to the request origin
-    set_header(res, ALLOW_ORIGINS_HEADER, origin);
+    res_setheader(res, ALLOW_ORIGINS_HEADER, origin);
   }
 
   // Set the allowed methods, as a Preflight may have been sent if the client
   // included non-simple methods
-  set_header(res, ALLOW_METHODS_HEADER, req_method_header);
+  res_setheader(res, ALLOW_METHODS_HEADER, req_method_header);
 
   // Set the allowed headers, as a Preflight may have been sent if the client
   // included non-simple headers.
   if (has_elements(reqd_headers)) {
-    set_header(res, ALLOW_HEADERS_HEADER,
-               str_join(cors_config->allowed_headers, ", "));
+    res_setheader(res, ALLOW_HEADERS_HEADER,
+                  str_join(cors_config->allowed_headers, ", "));
   }
 
   // Allow the client to send credentials. If making an XHR request, the client
   // must set `withCredentials` to `true`.
   if (cors_config->allow_credentials) {
-    set_header(res, ALLOW_CREDENTIALS_HEADER, "true");
+    res_setheader(res, ALLOW_CREDENTIALS_HEADER, "true");
   }
 
   // Set the Max Age. This is only necessary for Preflights given the Max Age
   // refers to server-suggested duration, in seconds, a response should stay in
   // the browser's cache before another Preflight is made
   if (cors_config->max_age > 0) {
-    set_header(res, MAX_AGE_HEADER, fmt_str("%d", cors_config->max_age));
+    res_setheader(res, MAX_AGE_HEADER, fmt_str("%d", cors_config->max_age));
   }
 }
 

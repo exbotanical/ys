@@ -26,7 +26,7 @@
 static void *client_thread_handler(void *arg) {
   client_context_t *c_ctx = arg;
 
-  req_meta_t maybe_req = read_and_parse_request(c_ctx->client_socket);
+  req_meta_t maybe_req = req_read_and_parse(c_ctx->client_socket);
 
   // TODO: test
   if (maybe_req.err.code < 0) {
