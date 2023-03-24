@@ -5,8 +5,7 @@
 #include "config.h"
 #include "libutil/libutil.h"  // for s_copy, s_equals
 #include "logger.h"
-#include "response.h"  // for response_init, send_response
-#include "server.h"    // for send_response
+#include "response.h"  // for res_init, res_send
 #include "xmalloc.h"
 
 static const char CONFIG_FILE_NAME[13] = "libhttp.conf";
@@ -150,8 +149,6 @@ void router_register(router_t *router, const char *path, handler_t *handler,
 
   va_list args;
   va_start(args, method);
-  // TODO: deduplicate this (and use collect) or similar
-  // not doing this right now due to reference edge cases when doing so
   while (method != 0) {
     if (!array_push(methods, s_copy(http_method_names[method]))) {
       free(methods);
@@ -184,7 +181,7 @@ void router_run(__router_t *router, int client_socket, req_t *req) {
   __router_t *internal_router = (__router_t *)router;
   result_t *result = trie_search(internal_router->trie, req->method, req->path);
 
-  res_t *res = response_init();
+  res_t *res = res_init();
 
   if (!result) {
     res = internal_router->internal_error_handler(req, res);
@@ -197,7 +194,8 @@ void router_run(__router_t *router, int client_socket, req_t *req) {
 
     handler_t *h = (handler_t *)result->action->handler;
 
-    // TODO: wrap other handlers?
+    // TODO: wrap other handlers - for example, if auth or CORS err, caller
+    // should not see 404 and 405
     bool done = false;
     array_t *mws = router->middlewares;
     if (mws && array_size(mws) > 0) {
@@ -209,7 +207,7 @@ void router_run(__router_t *router, int client_socket, req_t *req) {
     }
   }
 
-  send_response(client_socket, serialize_response(req, res));
+  res_send(client_socket, res_serialize(req, res));
 }
 
 void router_free(router_t *router) { free(router); }

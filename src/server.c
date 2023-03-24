@@ -1,5 +1,4 @@
 
-#include "server.h"
 
 #include <stdio.h>       // for perror
 #include <stdlib.h>      // for exit
@@ -29,8 +28,9 @@ static void *client_thread_handler(void *arg) {
 
   req_meta_t maybe_req = read_and_parse_request(c_ctx->client_socket);
 
-  if (maybe_req.err.code < 0) {  // TODO: test
-    send_preemptive_err(c_ctx->client_socket, maybe_req.err.code);
+  // TODO: test
+  if (maybe_req.err.code < 0) {
+    res_preempterr(c_ctx->client_socket, maybe_req.err.code);
     return NULL;
   }
 

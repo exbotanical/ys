@@ -44,6 +44,7 @@
   - [ ] Evented server e.g. `onRequest`
 - [x] global middlewares
 - [ ] multiple routers
+- [ ] handle signals for graceful shutdown
 
 ## Best Practices
 - [x] ~~specific int types~~

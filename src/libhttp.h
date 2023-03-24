@@ -195,20 +195,20 @@ typedef array_t *middlewares_t;
 bool set_header(res_t *res, const char *key, const char *value);
 
 /**
- * set_body sets the given body on the given response
+ * res_setbody sets the given body on the given response
  *
  * @param response
  * @param body
  */
-void set_body(res_t *response, const char *body);
+void res_setbody(res_t *response, const char *body);
 
 /**
- * set_status sets the given status code on the given response
+ * res_setstatus sets the given status code on the given response
  *
  * @param response
  * @param status
  */
-void set_status(res_t *response, http_status_t status);
+void res_setstatus(res_t *response, http_status_t status);
 
 /**
  * router_free deallocates memory for router_t `router`

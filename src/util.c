@@ -27,8 +27,7 @@ array_t *split(const char *str, const char *delimiter) {
     return NULL;
   }
 
-  // Maintain immutability
-  // @see
+  // see:
   // https://wiki.sei.cmu.edu/confluence/display/c/STR06-C.+Do+not+assume+that+strtok%28%29+leaves+the+parse+string+unchanged
   char *input = s_copy(str);
 

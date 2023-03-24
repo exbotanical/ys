@@ -31,13 +31,13 @@ static bool should_set_content_len(req_t *req, res_t *res) {
 }
 
 /**
- * serialize_response converts a user-defined response object into a buffer that
+ * res_serialize converts a user-defined response object into a buffer that
  * can be sent over the wire
  * TODO: test
  * @param response
  * @return buffer_t*
  */
-buffer_t *serialize_response(req_t *req, res_t *res) {
+buffer_t *res_serialize(req_t *req, res_t *res) {
   buffer_t *rbuf = buffer_init(NULL);
   if (!rbuf) {
     // TODO: constant template str for malloc failures
@@ -80,7 +80,7 @@ buffer_t *serialize_response(req_t *req, res_t *res) {
   return rbuf;
 }
 
-void send_response(int socket, buffer_t *response) {
+void res_send(int socket, buffer_t *response) {
   ssize_t total_sent = 0;
 
   while (total_sent < buffer_size(response)) {
@@ -111,7 +111,7 @@ done:
   close(socket);
 }
 
-void send_preemptive_err(int socket, read_error_t err) {
+void res_preempterr(int socket, read_error_t err) {
   res_t *res = xmalloc(sizeof(res_t));
   res->headers = array_init();
 
@@ -130,10 +130,10 @@ void send_preemptive_err(int socket, read_error_t err) {
       res->status = STATUS_INTERNAL_SERVER_ERROR;
   }
 
-  send_response(socket, serialize_response(NULL, res));
+  res_send(socket, res_serialize(NULL, res));
 }
 
-res_t *response_init() {
+res_t *res_init() {
   res_t *res = xmalloc(sizeof(res_t));
 
   res->headers = array_init();
@@ -145,10 +145,10 @@ res_t *response_init() {
   return res;
 }
 
-void set_body(res_t *response, const char *body) {
+void res_setbody(res_t *response, const char *body) {
   response->body = s_copy(body);
 }
 
-void set_status(res_t *response, http_status_t status) {
+void res_setstatus(res_t *response, http_status_t status) {
   response->status = status;
 }

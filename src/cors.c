@@ -126,7 +126,6 @@ static bool is_preflight_request(req_t *req) {
 /**
  * handleRequest handles actual HTTP requests subsequent to or standalone from
  * Preflight requests
- * TODO: Use hash table for headers and parameters
  * TODO: test
  * @param req
  * @param res
@@ -144,7 +143,7 @@ static void handle_request(req_t *req, res_t *res) {
 
   // If the origin is not in the allow list, deny
   if (!is_origin_allowed(cors_config, origin)) {
-    // TODO: 403?
+    res_setstatus(res, STATUS_FORBIDDEN);
     return;
   }
 
@@ -193,6 +192,8 @@ static void handle_preflight_request(req_t *req, res_t *res) {
 
   // If the origin is not in the allow list, deny
   if (!is_origin_allowed(cors_config, origin)) {
+    res_setstatus(res, STATUS_FORBIDDEN);
+
     return;
   }
 
@@ -342,7 +343,7 @@ res_t *cors_handler(req_t *req, res_t *res) {
     if (cors_config->use_options_passthrough) {
       // Do nothing i.e. allow next handler to run
     } else {
-      set_status(res, STATUS_NO_CONTENT);
+      res_setstatus(res, STATUS_NO_CONTENT);
       // We're done
       res->done = true;
     }

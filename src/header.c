@@ -73,7 +73,7 @@ static void init_common_headers() {
  * init_singleton_headers initializes the singleton headers hash set. A
  * singleton header is a header that cannot be duplicated for a request per
  * RFC 7230.
- * TODO: fix + test
+ * TODO: test
  * TODO: case sensitive?
  */
 static void init_singleton_headers() {
@@ -243,19 +243,17 @@ bool insert_header(hash_table* headers, const char* k, const char* v) {
     // Disallow duplicates where necessary e.g. multiple Content-Type headers is
     // a 400 This follows Section 4.2 of RFC 7230 to ensure we handle multiples
     // of the same header correctly
-    // TODO: handle all singletons
     if (is_singleton_header(k)) {
       return false;
     }
 
-    // TODO: test
     array_push(existing_headers->value, (void*)v);
   } else {
     // We haven't encountered this header before; insert into the hash table
     // along with the first value
     array_t* values = array_init();
     if (!values) {
-      // TODO: die
+      DIE(EXIT_FAILURE, "[header::%s] failed to allocate array\n", __func__);
     }
 
     array_push(values, (void*)v);

@@ -9,8 +9,8 @@ res_t *handler(req_t *req, res_t *res) {
   set_header(res, "X-Powered-By", "integ-test");
   set_header(res, "X-Not-Exposed", "integ-test");
 
-  set_body(res, "Hello World!");
-  set_status(res, STATUS_OK);
+  res_setbody(res, "Hello World!");
+  res_setstatus(res, STATUS_OK);
 
   return res;
 }
