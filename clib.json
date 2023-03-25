@@ -21,6 +21,7 @@
     "src/config.h",
     "src/cors.c",
     "src/cors.h",
+    "src/file.c",
     "src/fs_router.c",
     "src/fs_router.h",
     "src/header.c",

@@ -12,6 +12,11 @@ SRC := $(wildcard src/*.c)
 DEPS := $(wildcard deps/*/*.c)
 TESTS := $(wildcard t/*/*.c)
 
+ifndef USE_JSON
+SRC := $(filter-out src/json.%, $(SRC))
+DEPS := $(filter-out deps/yyjson%, $(DEPS))
+endif
+
 all:
 	$(CC) $(DEBUG) $(CFLAGS) $(DEPS) $(SRC) $(LDFLAGS) $(BIN)
 

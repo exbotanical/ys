@@ -11,6 +11,7 @@ declare -a SKIP_FILES=(
   # 'cors_test.c'
   # 'enum_test.c'
   # 'header_test.c'
+  # 'json_test.c'
 	# 'path_test.c'
   # 'request_test.c'
 	# 'trie_test.c'
@@ -51,11 +52,14 @@ run_test () {
 }
 
 main () {
+  export USE_JSON=1
 	make
 
 	declare -a tests=($(ls $TESTING_DIR | filter not_test_file))
 
 	for_each run_test ${tests[*]}
+
+  unset USE_JSON
 }
 
 . "$(dirname "$(readlink -f "$BASH_SOURCE")")"/$UTIL_F

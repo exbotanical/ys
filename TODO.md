@@ -46,6 +46,7 @@
 - [x] global middlewares
 - [ ] multiple routers
 - [ ] handle signals for graceful shutdown
+- [ ] query strings
 
 ## Best Practices
 - [x] ~~specific int types~~

@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdbool.h>
+#include <stdio.h>   // TODO: rm
 #include <unistd.h>  // for read
 
 #include "header.h"
@@ -75,7 +76,8 @@ req_meta_t req_read_and_parse(int sock) {
   }
 
   req_t* request = xmalloc(sizeof(req_t));
-  request->raw = buf;
+  request->raw = buf;  // TODO: full req
+  request->body = strdup(buf + pret);
   request->content_length = pret;
   request->method = fmt_str("%.*s", (int)method_len, method);
   request->path = fmt_str("%.*s", (int)path_len, path);

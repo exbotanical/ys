@@ -28,8 +28,9 @@ static void *client_thread_handler(void *arg) {
 
   req_meta_t maybe_req = req_read_and_parse(c_ctx->client_socket);
 
-  // TODO: test
-  if (maybe_req.err.code < 0) {
+  // TODO: test + fix
+  if (maybe_req.err.code == IO_ERR || maybe_req.err.code == PARSE_ERR ||
+      maybe_req.err.code == REQ_TOO_LONG || maybe_req.err.code == DUP_HDR) {
     res_preempterr(c_ctx->client_socket, maybe_req.err.code);
     return NULL;
   }
