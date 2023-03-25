@@ -174,7 +174,7 @@ typedef __server_t *server_t;
 typedef array_t *middlewares_t;
 
 /**
- * res_setheader appends the given key/value pair as a header object in
+ * set_header appends the given key/value pair as a header object in
  * `headers`
  *
  * @param res
@@ -182,23 +182,23 @@ typedef array_t *middlewares_t;
  * @param value
  * @return bool
  */
-bool res_setheader(res_t *res, const char *key, const char *value);
+bool set_header(res_t *res, const char *key, const char *value);
 
 /**
- * res_setbody sets the given body on the given response
+ * set_body sets the given body on the given response
  *
  * @param response
  * @param body
  */
-void res_setbody(res_t *response, const char *body);
+void set_body(res_t *response, const char *body);
 
 /**
- * res_setstatus sets the given status code on the given response
+ * set_status sets the given status code on the given response
  *
  * @param response
  * @param status
  */
-void res_setstatus(res_t *response, http_status_t status);
+void set_status(res_t *response, http_status_t status);
 
 /**
  * router_free deallocates memory for router_t `router`
@@ -385,10 +385,19 @@ cors_opts_t *cors_allow_all();
 
 /**
  * use_cors binds the CORS global middleware to the router attributes instance
- * TODO: test
+ *
  * @param r
  * @param opts
  */
 void use_cors(router_attr_t *r, cors_opts_t *opts);
+
+/**
+ * from_file reads a file into a string buffer. Useful utility for passing to
+ * `set_body`.
+ *
+ * @param filename
+ * @return char*
+ */
+char *from_file(const char *filename);
 
 #endif /* LIBHTTP_H */

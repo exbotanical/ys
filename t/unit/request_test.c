@@ -35,8 +35,6 @@ void test_fix_pragma_cache_control() {
      "keeps the Pragma: no-cache header");
 
   ok(headers->count == 2, "has two header keys");
-
-  // TODO: ADD CACHE_CONTROL AND TEST
 }
 
 void test_fix_pragma_cache_control_has_cache_control() {

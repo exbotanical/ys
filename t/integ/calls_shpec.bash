@@ -97,7 +97,6 @@ describe 'libhttp integration tests'
   it 'returns the expected headers for an OPTIONS request with an allowed Origin'
     actual="$(curl "$SERVER_ADDR" -s -i -H "Access-Control-Request-Method: $ALLOWED_METHOD" -H "Access-Control-Request-Headers: $ALLOWED_HEADER" -H "Origin: $ALLOWED_ORIGIN" -X OPTIONS)"
 
-
     vary_header=$(get_header 'Vary' <<< "$actual")
     assert equal "$vary_header" 'Origin,Access-Control-Request-Method,Access-Control-Request-Headers'
 

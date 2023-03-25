@@ -5,12 +5,12 @@
 #define PORT 9000
 
 res_t *handler(req_t *req, res_t *res) {
-  res_setheader(res, "Content-Type", "text/plain");
-  res_setheader(res, "X-Powered-By", "integ-test");
-  res_setheader(res, "X-Not-Exposed", "integ-test");
+  set_header(res, "Content-Type", "text/plain");
+  set_header(res, "X-Powered-By", "integ-test");
+  set_header(res, "X-Not-Exposed", "integ-test");
 
-  res_setbody(res, "Hello World!");
-  res_setstatus(res, STATUS_OK);
+  set_body(res, "Hello World!");
+  set_status(res, STATUS_OK);
 
   return res;
 }

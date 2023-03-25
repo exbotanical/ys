@@ -146,10 +146,10 @@ res_t *res_init() {
   return res;
 }
 
-void res_setbody(res_t *response, const char *body) {
+void set_body(res_t *response, const char *body) {
   response->body = s_copy(body);
 }
 
-void res_setstatus(res_t *response, http_status_t status) {
+void set_status(res_t *response, http_status_t status) {
   response->status = status;
 }
