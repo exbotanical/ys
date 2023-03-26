@@ -1,7 +1,5 @@
-run
 demo
 main
 *.o
 *.so
 .vscode
-scratchpad.c

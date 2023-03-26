@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdbool.h>
-#include <stdio.h>   // TODO: rm
+#include <string.h>  // for memset
 #include <unistd.h>  // for read
 
 #include "header.h"
@@ -31,8 +31,11 @@ static void fix_pragma_cache_control(hash_table* headers) {
 
 // TODO: break up into two functions
 req_meta_t req_read_and_parse(int sock) {
-  const char *method, *path;
+  char* method = NULL;
+  char* path = NULL;
   char buf[REQ_BUFFER_SIZE];
+  memset(buf, 0, REQ_BUFFER_SIZE);
+
   int pret, minor_version;
   struct phr_header headers[100];
   size_t buflen = 0, prevbuflen = 0, method_len, path_len, num_headers;
@@ -76,7 +79,7 @@ req_meta_t req_read_and_parse(int sock) {
   }
 
   req_t* request = xmalloc(sizeof(req_t));
-  request->raw = buf;  // TODO: full req
+  request->raw = strdup(buf);  // TODO: full req
   request->body = strdup(buf + pret);
   request->content_length = pret;
   request->method = fmt_str("%.*s", (int)method_len, method);

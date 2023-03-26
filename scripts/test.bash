@@ -55,6 +55,8 @@ main () {
   export USE_JSON=1
 	make
 
+  [[ $1 == 'integ' ]] && return
+
 	declare -a tests=($(ls $TESTING_DIR | filter not_test_file))
 
 	for_each run_test ${tests[*]}
