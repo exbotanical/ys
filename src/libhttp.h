@@ -420,6 +420,17 @@ void add_middleware(router_attr *attr, route_handler *mw);
   opts->allowed_headers = array_collect(__VA_ARGS__)
 
 /**
+ * set_expose_headers sets the expose headers on the given cors_opts. You do
+ * not need to pass a NULL sentinel to terminate the list; this macro will do
+ * this for you.
+ *
+ * @param opts cors_opts*
+ * @param ... char*[]
+ */
+#define set_expose_headers(opts, ...) \
+  opts->expose_headers = array_collect(__VA_ARGS__)
+
+/**
  * cors_opts_init initializes a new CORS options object
  *
  * @return cors_opts*

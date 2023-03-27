@@ -67,9 +67,13 @@ bool delete_record(char *id) {
   return true;
 }
 
+response *set_global_headers(request *req, response *res) {
+  set_header(res, "X-Powered-By", "demo");
+  return res;
+}
+
 response *handle_get(request *req, response *res) {
   set_header(res, "Content-Type", "application/json");
-  set_header(res, "X-Powered-By", "demo");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {
@@ -93,7 +97,6 @@ response *handle_get(request *req, response *res) {
 
 response *handle_delete(request *req, response *res) {
   set_header(res, "Content-Type", "application/json");
-  set_header(res, "X-Powered-By", "demo");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {
@@ -116,7 +119,6 @@ response *handle_delete(request *req, response *res) {
 
 response *handle_put(request *req, response *res) {
   set_header(res, "Content-Type", "application/json");
-  set_header(res, "X-Powered-By", "demo");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {
@@ -148,7 +150,6 @@ response *handle_put(request *req, response *res) {
 
 response *handle_post(request *req, response *res) {
   set_header(res, "Content-Type", "application/json");
-  set_header(res, "X-Powered-By", "demo");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {
@@ -182,6 +183,7 @@ int main() {
   records = malloc(sizeof(db_record));
 
   router_attr *attr = router_attr_init();
+  add_middleware(attr, set_global_headers);
   http_router *router = router_init(attr);
   char *record_path = "/records/:id[^\\d+$]";
 

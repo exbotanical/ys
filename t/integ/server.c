@@ -67,9 +67,13 @@ bool delete_record(char *id) {
   return true;
 }
 
+response *set_global_headers(request *req, response *res) {
+  set_header(res, "X-Powered-By", "demo");
+  return res;
+}
+
 response *handle_get(request *req, response *res) {
   set_header(res, "Content-Type", "application/json");
-  set_header(res, "X-Powered-By", "demo");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {
@@ -93,7 +97,6 @@ response *handle_get(request *req, response *res) {
 
 response *handle_delete(request *req, response *res) {
   set_header(res, "Content-Type", "application/json");
-  set_header(res, "X-Powered-By", "demo");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {
@@ -116,7 +119,6 @@ response *handle_delete(request *req, response *res) {
 
 response *handle_put(request *req, response *res) {
   set_header(res, "Content-Type", "application/json");
-  set_header(res, "X-Powered-By", "demo");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {
@@ -148,7 +150,6 @@ response *handle_put(request *req, response *res) {
 
 response *handle_post(request *req, response *res) {
   set_header(res, "Content-Type", "application/json");
-  set_header(res, "X-Powered-By", "demo");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {
@@ -195,7 +196,8 @@ request *meta_handler(request *req, response *res) {
 
 response *root_handler(request *req, response *res) {
   set_header(res, "Content-Type", "text/plain");
-  set_header(res, "X-Powered-By", "integ-test");
+  set_header(res, "X-Powered-By",
+             "integ-test");  // TODO: duplicate headers 1, 2, 3
   set_header(res, "X-Not-Exposed", "integ-test");
 
   set_body(res, "Hello World!");
@@ -205,19 +207,22 @@ response *root_handler(request *req, response *res) {
 }
 
 cors_opts *setup_cors() {
-  cors_opts *c = malloc(sizeof(cors_opts));
-  c->allowed_methods = array_collect("GET", "DELETE");
-  c->allowed_headers = array_collect("X-Test-Header");
-  c->expose_headers = array_collect("X-Powered-By");
-  c->allowed_origins = array_collect("test.com");
+  cors_opts *opts = malloc(sizeof(cors_opts));
 
-  return c;
+  set_allowed_methods(opts, "GET", "DELETE");
+  set_allowed_headers(opts, "X-Test-Header");
+  set_expose_headers(opts, "X-Powered-By");
+  set_allowed_origins(opts, "test.com");
+
+  return opts;
 }
 
 int main() {
   records = malloc(sizeof(db_record));
 
   router_attr *attr = router_attr_init();
+
+  add_middleware(attr, set_global_headers);
   use_cors(attr, setup_cors());
 
   http_router *router = router_init(attr);
