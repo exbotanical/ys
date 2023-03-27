@@ -29,9 +29,10 @@
 - [ ] review all `include`d functions and replace any non-standard ones
 - [ ] documentation
 - [ ] make all public structs opaque
+- [ ] Use method enum in CORS middleware helpers
 
 ## New Features
-- [ ] global hooks/interceptors (e.g. global HTTP headers)
+- [x] ~~global hooks/interceptors (e.g. global HTTP headers)~~ just use middleware
 - [x] allow middleware to exit early by sending response
 - [x] Built-in middlewares
   - [x] CORS middleware
@@ -46,12 +47,14 @@
 - [x] global middlewares
 - [ ] multiple routers
 - [ ] handle signals for graceful shutdown
-- [ ] query strings
+- [x] query strings
 
 ## Best Practices
 - [x] ~~specific int types~~
 - [ ] check all instances of `strcmp` and see if `strncmp` makes more sense
 - [ ] Determine where we actually need to be passing by reference (currently, this is done everywhere)
+- [ ] Add LICENSE of yyjson
+- [ ] Pass correct function pointers e.g. https://stackoverflow.com/questions/14134245/iso-c-void-and-function-pointers
 
 ## Spec Compliance
 - [ ] handle duplicate response headers
@@ -62,7 +65,7 @@
   - [ ] cache-control
   - [ ] transfer-encoding
 - [ ] Test URL fragments
-- [ ] URL queries
+- [x] URL queries
 
 ## Misc Improvements
 - [ ] use a better regex engine than pcre
@@ -77,11 +80,23 @@
 - [ ] helper ??? `#define CAST(type, name, stmt) type *name = (type *)stmt`
 - [x] Setup linter that uses Google's C/C++ style guide
 - [ ] `@return` doc for `true` and `false` cases instead of just `bool`
-- [ ] pick a style for struct types
+- [x] pick a style for struct types
+- [ ] Debug helpers e.g.
+  ```c
+  static int c = 1;
+  #define checkpoint() printf("CHECKPOINT %d\n", c++)
+  #define isnull(thing) printf("IS NULL? %s\n", thing == NULL ? "yes" : "no")
+  ```
 
 ## Fixes
 - [x] Allow OPTIONS requests by default in router when CORS enabled
-- [ ] Urls with `-` segfault e.g. `/feed_meta/index-0.json`
+- [x] Urls with `-` segfault e.g. `/feed_meta/index-0.json`
+  - [ ] Add test
+
+## Ecosystem
+- [ ] Addon / plugin libraries
+  - [ ] Metrics
+  - [ ] Testing (stubs, mock calls etc)
 
 # Style Guide
 - Use [Go Doc-style](https://tip.golang.org/doc/comment) for doc  comments e.g. `// function_name does thing`
@@ -90,18 +105,18 @@
 
 # Desired API
 - Router
-  - `router_init(router_attr_t*)`
-  - `router_set_400_handler(router_attr_t*, handler_t*)`
-  - `router_set_400_handler(router_attr_t*, handler_t*)`
-  - `router_set_405_handler(router_attr_t*, handler_t*)`
-  - `router_set_500_handler(router_attr_t*, handler_t*)`
+  - `router_init(router_attr*)`
+  - `router_set_400_handler(router_attr*, route_handler*)`
+  - `router_set_400_handler(router_attr*, route_handler*)`
+  - `router_set_405_handler(router_attr*, route_handler*)`
+  - `router_set_500_handler(router_attr*, route_handler*)`
   - `router_register`
 - Server
-  - `server_init(router_t*, int)`
-  - `server_start(server_t*)`
-  - `server_free(server_t*)`
+  - `server_init(http_router*, int)`
+  - `server_start(tcp_server*)`
+  - `server_free(tcp_server*)`
 - Request
-  - `get_request_header(req_t*, const char*)`
+  - `get_request_header(request*, const char*)`
 - Response
-  - `set_response_header(req_t*, const char*, const char*)`
-  - `insert_response_header(req_t*, const char*, const char*)`
+  - `set_response_header(request*, const char*, const char*)`
+  - `insert_response_header(request*, const char*, const char*)`

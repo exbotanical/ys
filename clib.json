@@ -1,8 +1,8 @@
 {
-  "name": "lib.http",
+  "name": "libhttp",
   "version": "0.0.1",
   "author": "Matthew Zito",
-  "repo": "exbotanical/lib.http",
+  "repo": "exbotanical/libhttp",
   "license": "MIT",
   "description": "A C server framework",
   "keywords": [
@@ -14,6 +14,7 @@
   ],
   "src": [
     "src/libhttp.h",
+
     "src/cache.c",
     "src/cache.h",
     "src/client.h",
@@ -27,6 +28,8 @@
     "src/header.c",
     "src/header.h",
     "src/http.c",
+    "src/json.c",
+    "src/json.h",
     "src/logger.c",
     "src/logger.h",
     "src/middleware.c",
@@ -39,9 +42,10 @@
     "src/router.c",
     "src/router.h",
     "src/server.c",
-    "src/server.h",
     "src/trie.c",
     "src/trie.h",
+    "src/url.c",
+    "src/url.h",
     "src/util.c",
     "src/util.h",
     "src/xmalloc.c",

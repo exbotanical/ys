@@ -41,7 +41,7 @@ void test_token_table() {
      "has the expected number of true values in token table");
 }
 
-void test_to_canonical_MIME_header_key() {
+void test_to_canonical_mime_header_key() {
   test_case tests[] = {
       {.in = "a-b-c", .expected = "A-B-C"},
       {.in = "a-1-c", .expected = "A-1-C"},
@@ -70,7 +70,7 @@ void test_to_canonical_MIME_header_key() {
     char *in = tests[i].in;
     char *expected = tests[i].expected;
 
-    char *actual = to_canonical_MIME_header_key(in);
+    char *actual = to_canonical_mime_header_key(in);
 
     is(expected, actual,
        "canonicalization of '%s' yields the expected value '%s'", in, expected);
@@ -160,7 +160,7 @@ int main() {
   plan(24);
 
   test_token_table();
-  test_to_canonical_MIME_header_key();
+  test_to_canonical_mime_header_key();
 
   test_req_header_get();
   test_req_header_values();

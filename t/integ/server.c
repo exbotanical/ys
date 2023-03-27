@@ -7,20 +7,19 @@
 #include "json.h"
 #include "libhttp.h"
 
-// TODO: finalize example
 #define PORT 9000
 
 typedef struct record {
   char *key;
   char *value;
-} record_t;
+} db_record;
 
-record_t *records = NULL;
+db_record *records = NULL;
 int num_records = 0;
 
-record_t *search_records(char *key) {
+db_record *search_records(char *key) {
   for (size_t i = 0; i < num_records; i++) {
-    record_t *record = &records[i];
+    db_record *record = &records[i];
     if (strcmp(record->key, key) == 0) {
       return record;
     }
@@ -31,7 +30,7 @@ record_t *search_records(char *key) {
 
 int search_records_idx(char *key) {
   for (size_t i = 0; i < num_records; i++) {
-    record_t record = records[i];
+    db_record record = records[i];
     if (strcmp(record.key, key) == 0) {
       return i;
     }
@@ -45,7 +44,7 @@ char *res_ok(char *data) { return fmt_str("{\"data\":\"%s\"}", data); }
 char *res_err(char *errmsg) { return fmt_str("{\"message\":\"%s\"}", errmsg); }
 
 void add_record(const char *k, const char *v) {
-  records = realloc(records, (num_records + 1) * sizeof(record_t));
+  records = realloc(records, (num_records + 1) * sizeof(db_record));
 
   records[num_records].key = strdup(k);
   records[num_records].value = strdup(v);
@@ -68,7 +67,7 @@ bool delete_record(char *id) {
   return true;
 }
 
-res_t *handle_get(req_t *req, res_t *res) {
+response *handle_get(request *req, response *res) {
   set_header(res, "Content-Type", "application/json");
   set_header(res, "X-Powered-By", "demo");
 
@@ -79,7 +78,7 @@ res_t *handle_get(req_t *req, res_t *res) {
     return res;
   }
 
-  record_t *record = search_records(id);
+  db_record *record = search_records(id);
   if (!record) {
     set_body(res, res_err("no matching record"));
     set_status(res, STATUS_NOT_FOUND);
@@ -92,7 +91,7 @@ res_t *handle_get(req_t *req, res_t *res) {
   return res;
 }
 
-res_t *handle_delete(req_t *req, res_t *res) {
+response *handle_delete(request *req, response *res) {
   set_header(res, "Content-Type", "application/json");
   set_header(res, "X-Powered-By", "demo");
 
@@ -115,7 +114,7 @@ res_t *handle_delete(req_t *req, res_t *res) {
   return res;
 }
 
-res_t *handle_put(req_t *req, res_t *res) {
+response *handle_put(request *req, response *res) {
   set_header(res, "Content-Type", "application/json");
   set_header(res, "X-Powered-By", "demo");
 
@@ -140,14 +139,14 @@ res_t *handle_put(req_t *req, res_t *res) {
     return res;
   }
 
-  record_t *record = &records[idx];
+  db_record *record = &records[idx];
   memcpy(record->value, v, strlen(v));
 
   set_status(res, STATUS_OK);
   return res;
 }
 
-res_t *handle_post(req_t *req, res_t *res) {
+response *handle_post(request *req, response *res) {
   set_header(res, "Content-Type", "application/json");
   set_header(res, "X-Powered-By", "demo");
 
@@ -166,7 +165,7 @@ res_t *handle_post(req_t *req, res_t *res) {
     return res;
   }
 
-  record_t *record = search_records(id);
+  db_record *record = search_records(id);
   if (record) {
     set_body(res, res_err("record exists"));
     set_status(res, STATUS_BAD_REQUEST);
@@ -180,7 +179,7 @@ res_t *handle_post(req_t *req, res_t *res) {
   return res;
 }
 
-req_t *meta_handler(req_t *req, res_t *res) {
+request *meta_handler(request *req, response *res) {
   char **movies = req_get_query(req, "movies");
 
   buffer_t *buf = buffer_init(NULL);
@@ -194,7 +193,7 @@ req_t *meta_handler(req_t *req, res_t *res) {
   return res;
 }
 
-res_t *root_handler(req_t *req, res_t *res) {
+response *root_handler(request *req, response *res) {
   set_header(res, "Content-Type", "text/plain");
   set_header(res, "X-Powered-By", "integ-test");
   set_header(res, "X-Not-Exposed", "integ-test");
@@ -205,8 +204,8 @@ res_t *root_handler(req_t *req, res_t *res) {
   return res;
 }
 
-cors_opts_t *setup_cors() {
-  cors_opts_t *c = malloc(sizeof(cors_opts_t));
+cors_opts *setup_cors() {
+  cors_opts *c = malloc(sizeof(cors_opts));
   c->allowed_methods = array_collect("GET", "DELETE");
   c->allowed_headers = array_collect("X-Test-Header");
   c->expose_headers = array_collect("X-Powered-By");
@@ -216,12 +215,12 @@ cors_opts_t *setup_cors() {
 }
 
 int main() {
-  records = malloc(sizeof(record_t));
+  records = malloc(sizeof(db_record));
 
-  router_attr_t *attr = router_attr_init();
+  router_attr *attr = router_attr_init();
   use_cors(attr, setup_cors());
 
-  router_t *router = router_init(attr);
+  http_router *router = router_init(attr);
   char *record_path = "/records/:id[^\\d+$]";
 
   router_register(router, "/", root_handler, METHOD_GET, NULL);
@@ -232,7 +231,7 @@ int main() {
   router_register(router, record_path, handle_put, METHOD_PUT, NULL);
   router_register(router, record_path, handle_post, METHOD_POST, NULL);
 
-  server_t *server = server_init(router, PORT);
+  tcp_server *server = server_init(router, PORT);
   if (!server_start(server)) {
     return EXIT_FAILURE;
   }

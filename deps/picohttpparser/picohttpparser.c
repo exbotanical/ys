@@ -403,8 +403,8 @@ static const char *parse_request(const char *buf, const char *buf_end,
   return parse_headers(buf, buf_end, headers, num_headers, max_headers, ret);
 }
 
-int phr_parse_request(const char *buf_start, size_t len, const char **method,
-                      size_t *method_len, const char **path, size_t *path_len,
+int phr_parse_request(const char *buf_start, size_t len, char **method,
+                      size_t *method_len, char **path, size_t *path_len,
                       int *minor_version, struct phr_header *headers,
                       size_t *num_headers, size_t last_len) {
   const char *buf = buf_start, *buf_end = buf_start + len;

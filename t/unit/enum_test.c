@@ -9,7 +9,8 @@ void sanity_test_enum_macros() {
 
 int main() {
   plan(2);
+
   sanity_test_enum_macros();
+
   done_testing();
-  return 0;
 }

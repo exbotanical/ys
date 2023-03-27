@@ -35,8 +35,7 @@ void test_derive_label_pattern() {
       {.name = "EmptyRegex", .input = ":id[]", .expected = NULL},
       {.name = "NoRegex", .input = ":id", .expected = "(.+)"},
       {.name = "LiteralRegex", .input = ":id[xxx]", .expected = "xxx"},
-      {.name = "WildcardRegex", .input = ":id[*]", .expected = "*"},
-  };
+      {.name = "WildcardRegex", .input = ":id[*]", .expected = "*"}};
 
   for (int i = 0; i < sizeof(tests) / sizeof(test_case_t); i++) {
     test_case_t test_case = tests[i];
@@ -51,8 +50,7 @@ void test_derive_parameter_key() {
       {.name = "BasicKey", .input = ":id[^\\d+$]", .expected = "id"},
       {.name = "BasicKeyEmptyRegex", .input = ":val[]", .expected = "val"},
       {.name = "BasicKeyWildcardRegex", .input = ":ex[(.*)]", .expected = "ex"},
-      {.name = "BasicKeyNoRegex", .input = ":id", .expected = "id"},
-  };
+      {.name = "BasicKeyNoRegex", .input = ":id", .expected = "id"}};
 
   for (int i = 0; i < sizeof(tests) / sizeof(test_case_t); i++) {
     test_case_t test_case = tests[i];
@@ -69,7 +67,6 @@ int main() {
   test_expand_no_match();
 
   test_derive_label_pattern();
-
   test_derive_parameter_key();
 
   done_testing();

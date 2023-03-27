@@ -2,7 +2,7 @@
 
 #include "libhttp.h"
 
-res_t *handler(req_t *req, res_t *res) {
+response *handler(request *req, response *res) {
   set_header(res, "Content-Type", "text/plain");
   set_header(res, "X-Powered-By", "demo");
 
@@ -13,11 +13,11 @@ res_t *handler(req_t *req, res_t *res) {
 }
 
 int main() {
-  router_attr_t *attr = router_attr_init();
-  router_t *router = router_init(attr);
+  router_attr *attr = router_attr_init();
+  http_router *router = router_init(attr);
   router_register(router, "/", handler, METHOD_GET, NULL);
 
-  server_t *server = server_init(router, -1);
+  tcp_server *server = server_init(router, -1);
   if (!server_start(server)) {
     server_free(server);  // also frees router
 

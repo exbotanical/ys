@@ -19,21 +19,21 @@ char *safe_itoa(int x);
 /**
  * split splits a string on all instances of a delimiter.
  *
- * @param str The string to split
- * @param delimiter The delimiter on which to split `str`
+ * @param s The string to split
+ * @param delim The delimiter on which to split `str`
  * @return array_t* An array of matches, if any; NULL if erroneous
  */
-array_t *split(const char *str, const char *delimiter);
+array_t *split(const char *s, const char *delim);
 
 /**
  * str_join joins all strings stored in an array_t thereof with the delimiter
  * `delim`. `delim` is not appended to the end of the last string
  *
- * @param strarr
+ * @param sarr
  * @param delim
  * @return char*
  */
-char *str_join(array_t *strarr, const char *delim);
+char *str_join(array_t *sarr, const char *delim);
 
 /**
  * str_cut slices s around the first instance of sep, returning the text before
@@ -74,10 +74,12 @@ bool ishex(char c);
 char unhex(char c);
 
 /**
- * Convert a char `c` into a char*
+ * Convert a char `c` into a null-terminated char*
  *
  * @param c
  * @return char*
+ *
+ * TODO: test
  */
 char *tostr(char c);
 

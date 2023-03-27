@@ -4,15 +4,20 @@
 #include "libhash/libhash.h"  // for hash sets and hash tables
 #include "libutil/libutil.h"  // for arrays
 
-// A key/value pair for response headers
+/**
+ * A key/value pair for response headers
+ */
 typedef struct {
   const char* key;
   const char* value;
-} header_t;
+} header_pair;
 
-// A 256 slot lookup table where each index corresponds to an ASCII character
-// and indicates whether that character is a valid header byte
-// see: https://httpwg.github.io/specs/rfc7230.html#rule.token.separators
+/**
+ * A 256 slot lookup table where each index corresponds to an ASCII character
+ * and indicates whether that character is a valid header byte
+ *
+ * @see https://httpwg.github.io/specs/rfc7230.html#rule.token.separators
+ */
 static const char token_table[] =
     "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
     "\0\0\0\0\0\0\0\0\0\1\0\1\1\1\1\1\0\0\1\1\0\1\1\0\1"
@@ -27,28 +32,29 @@ static const char token_table[] =
     "\0\0\0\0\0\0\0\0\0\0\0";
 
 /**
- * to_canonical_MIME_header_key returns the canonical format of the MIME header
- * key s. The canonicalization converts the first letter and any letter
+ * to_canonical_mime_header_key returns the canonical format of the MIME header
+ * key `key`. The canonicalization converts the first letter and any letter
  * following a hyphen to upper case; the rest are converted to lowercase.
  *
  * MIME header keys are assumed to be ASCII only.
  *
- * If s contains a space or invalid header field bytes, it is returned without
- * modifications.
+ * If `key` contains a space or invalid header field bytes, it is returned
+ * without modifications.
  *
- * @param s
+ * @param key
  * @return char*
  */
-char* to_canonical_MIME_header_key(char* s);
+char* to_canonical_mime_header_key(char* key);
 
 /**
  * req_header_get retrieves the first value for a given header key from
  * `headers`, or NULL if not found
- * TODO: pub
  *
  * @param headers
  * @param key
  * @return char*
+ *
+ * TODO: public
  */
 char* req_header_get(hash_table* headers, const char* key);
 
@@ -59,6 +65,8 @@ char* req_header_get(hash_table* headers, const char* key);
  * @param headers
  * @param key
  * @return char**
+ *
+ * TODO: public
  */
 char** req_header_values(hash_table* headers, const char* key);
 
@@ -73,11 +81,11 @@ char** req_header_values(hash_table* headers, const char* key);
  * rules.
  *
  * @param headers
- * @param k
- * @param v
+ * @param key
+ * @param value
  * @return bool
  */
-bool insert_header(hash_table* headers, const char* k, const char* v);
+bool insert_header(hash_table* headers, const char* key, const char* value);
 
 /**
  * derive_headers extracts the comma-delimited headers in the value of the

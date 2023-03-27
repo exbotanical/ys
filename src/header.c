@@ -123,13 +123,13 @@ static bool is_valid_header_field_byte(int b) {
 
 /**
  * is_singleton_header returns a bool indicating whether the given header
- * `header_key` is a singleton header
+ * `key` is a singleton header
  *
- * @param header_key
+ * @param key
  * @return bool
  */
-static bool is_singleton_header(const char* header_key) {
-  return hs_contains(get_singleton_header_set(), header_key);
+static bool is_singleton_header(const char* key) {
+  return hs_contains(get_singleton_header_set(), key);
 }
 
 /**
@@ -138,26 +138,26 @@ static bool is_singleton_header(const char* header_key) {
  * @param s
  * @return char*
  */
-static char* canonical_mime_header_key(char* s) {
+static char* canonical_mime_header_key(char* key) {
   hash_set* common_headers = get_common_header_set();
   // Avoid needless computation if we know the header is already correct
-  if (hs_contains(common_headers, s)) {
-    return s;
+  if (hs_contains(common_headers, key)) {
+    return key;
   }
 
   // See if it looks like a header key; if not return it as-is
-  for (unsigned int i = 0; i < strlen(s); i++) {
-    char c = s[i];
+  for (unsigned int i = 0; i < strlen(key); i++) {
+    char c = key[i];
     if (is_valid_header_field_byte(c)) {
       continue;
     }
 
-    return s;
+    return key;
   }
 
   bool upper = true;
-  for (unsigned int i = 0; i < strlen(s); i++) {
-    char c = s[i];
+  for (unsigned int i = 0; i < strlen(key); i++) {
+    char c = key[i];
     // Canonicalize: first letter upper case and upper case after each dash
     // MIME headers are ASCII only, so no Unicode issues
     if (upper && 'a' <= c && c <= 'z') {
@@ -167,39 +167,40 @@ static char* canonical_mime_header_key(char* s) {
     }
 
     // TODO: fix ... ugh this is disgusting
-    char* ca = xmalloc(strlen(s) + 1);
-    strncpy(ca, s, strlen(s));
-    ca[strlen(s)] = '\0';
+    unsigned int l = strlen(key);
+    char* ca = xmalloc(l + 1);
+    strncpy(ca, key, l);
+    ca[l] = '\0';
     ca[i] = c;
-    s = ca;
+    key = ca;
 
     upper = c == '-';  // for next time
   }
 
-  return s;
+  return key;
 }
 
-char* to_canonical_MIME_header_key(char* s) {
+char* to_canonical_mime_header_key(char* key) {
   // Check for canonical encoding
   bool upper = true;
-  for (unsigned int i = 0; i < strlen(s); i++) {
-    char c = s[i];
+  for (unsigned int i = 0; i < strlen(key); i++) {
+    char c = key[i];
     if (!is_valid_header_field_byte(c)) {
-      return s;
+      return key;
     }
 
     if (upper && 'a' <= c && c <= 'z') {
-      return canonical_mime_header_key(s);
+      return canonical_mime_header_key(key);
     }
 
     if (!upper && 'A' <= c && c <= 'Z') {
-      return canonical_mime_header_key(s);
+      return canonical_mime_header_key(key);
     }
 
     upper = c == '-';
   }
 
-  return s;
+  return key;
 }
 
 char* req_header_get(hash_table* headers, const char* key) {
@@ -227,27 +228,27 @@ char** req_header_values(hash_table* headers, const char* key) {
   return headers_list;
 }
 
-bool set_header(res_t* res, const char* key, const char* value) {
-  header_t* header = xmalloc(sizeof(header_t));
+bool set_header(response* res, const char* key, const char* value) {
+  header_pair* header = xmalloc(sizeof(header_pair));
   header->key = key;
   header->value = value;
 
   return array_push(res->headers, header);
 }
 
-bool insert_header(hash_table* headers, const char* k, const char* v) {
+bool insert_header(hash_table* headers, const char* key, const char* value) {
   // Check if we've already encountered this header key. Some headers cannot
   // be duplicated e.g. Content-Type, so we'll need to handle those as well
-  ht_record* existing_headers = ht_search(headers, k);
+  ht_record* existing_headers = ht_search(headers, key);
   if (existing_headers) {
     // Disallow duplicates where necessary e.g. multiple Content-Type headers is
     // a 400 This follows Section 4.2 of RFC 7230 to ensure we handle multiples
     // of the same header correctly
-    if (is_singleton_header(k)) {
+    if (is_singleton_header(key)) {
       return false;
     }
 
-    array_push(existing_headers->value, (void*)v);
+    array_push(existing_headers->value, (void*)value);
   } else {
     // We haven't encountered this header before; insert into the hash table
     // along with the first value
@@ -256,8 +257,8 @@ bool insert_header(hash_table* headers, const char* k, const char* v) {
       DIE(EXIT_FAILURE, "[header::%s] failed to allocate array\n", __func__);
     }
 
-    array_push(values, (void*)v);
-    ht_insert(headers, k, values);
+    array_push(values, (void*)value);
+    ht_insert(headers, key, values);
   }
 
   return true;
@@ -266,7 +267,7 @@ bool insert_header(hash_table* headers, const char* k, const char* v) {
 array_t* derive_headers(const char* header_str) {
   array_t* headers = array_init();
 
-  if (!header_str || s_equals(header_str, "")) {
+  if (s_nullish(header_str)) {
     return headers;
   }
 
@@ -291,7 +292,7 @@ array_t* derive_headers(const char* header_str) {
         char* v = xmalloc(size + 1);
         unsigned int i;
         for (i = 0; i < size; i++) {
-          v[i] = array_get(tmp, i);
+          v[i] = (char)array_get(tmp, i);
         }
 
         v[i + 1] = '\0';

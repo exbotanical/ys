@@ -25,11 +25,6 @@ pair* topair(char* k, array_t* v) {
   return p;
 }
 
-// TODO: package in debug header
-static int c = 1;
-#define checkpoint() printf("CHECKPOINT %d\n", c++)
-#define isnull(thing) printf("IS NULL? %s\n", thing == NULL ? "yes" : "no")
-
 void test_parse_query() {
   parse_test tests[] = {
       {.query = "a=1",

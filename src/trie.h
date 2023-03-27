@@ -20,35 +20,35 @@ typedef struct {
   char *label;
   hash_table *children;
   hash_table *actions;
-} node_t;
+} trie_node;
 
 // A trie data structure used for routing
 typedef struct {
-  node_t *root;
+  trie_node *root;
   hash_table *regex_cache;
-} trie_t;
+} route_trie;
 
 // Stores a route's handler
 typedef struct {
   void *(*handler)(void *, void *);
-} action_t;
+} route_action;
 
 // Trie search result record
 typedef struct {
-  action_t *action;
+  route_action *action;
   // hash_table<char*, char*>
   hash_table *parameters;
   // hash_table<char*, hash_set<char*>>
   hash_table *queries;
   unsigned int flags;
-} result_t;
+} route_result;
 
 /**
  * trie_init allocates memory for a trie and its root node
  *
- * @return trie_t*
+ * @return route_trie*
  */
-trie_t *trie_init();
+route_trie *trie_init();
 
 /**
  * trie_insert inserts a node into the trie at `path` and each method of
@@ -59,7 +59,7 @@ trie_t *trie_init();
  * @param path The path on which to create a node
  * @param handler The handler to be associated with the inserted node
  */
-void trie_insert(trie_t *trie, array_t *methods, const char *path,
+void trie_insert(route_trie *trie, array_t *methods, const char *path,
                  void *(*handler)(void *, void *));
 
 /**
@@ -68,9 +68,9 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
  * @param trie The trie in which to perform the search
  * @param method A method to search against
  * @param search_path A path to search against
- * @return result_t* A result object, or NULL if not found
+ * @return route_result* A result object, or NULL if not found
  */
-result_t *trie_search(trie_t *trie, const char *method,
-                      const char *search_path);
+route_result *trie_search(route_trie *trie, const char *method,
+                          const char *search_path);
 
 #endif /* TRIE_H */

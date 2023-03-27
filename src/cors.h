@@ -4,7 +4,9 @@
 #include "libhttp.h"
 #include "libutil/libutil.h"  // for arrays
 
-// CORS configurations
+/**
+ * CORS configurations
+ */
 typedef struct {
   unsigned int max_age;
   bool allow_credentials;
@@ -15,11 +17,12 @@ typedef struct {
   array_t *allowed_origins;
   array_t *allowed_headers;
   array_t *exposed_headers;
-} cors_t;
+} cors_config;
 
 // Set by server and specifies the allowed origin. Must be a single value, or a
 // wildcard for allow all origins.
 static const char ALLOW_ORIGINS_HEADER[] = "Access-Control-Allow-Origin";
+
 // Set by server and specifies the allowed methods. May be multiple values.
 static const char ALLOW_METHODS_HEADER[] = "Access-Control-Allow-Methods";
 
@@ -56,12 +59,12 @@ static const char VARY_HEADER[] = "Vary";
 
 /**
  * cors_init initializes a CORS context using the user-specified settings on the
- * given cors_opts_t `opts`
+ * given cors_opts `opts`
  *
  * @param opts
- * @return cors_t*
+ * @return cors_config*
  */
-cors_t *cors_init(cors_opts_t *opts);
+cors_config *cors_init(cors_opts *opts);
 
 /**
  * cors_handler is a middleware handler that executes a spec-compliant CORS
@@ -69,8 +72,8 @@ cors_t *cors_init(cors_opts_t *opts);
  *
  * @param req
  * @param res
- * @return res_t*
+ * @return response*
  */
-res_t *cors_handler(req_t *req, res_t *res);
+response *cors_handler(request *req, response *res);
 
 #endif /* CORS_H */

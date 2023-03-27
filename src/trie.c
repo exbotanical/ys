@@ -14,15 +14,13 @@
 /**
  * node_init allocates memory for a new node, its children and action members
  *
- * @return node_t*
+ * @return trie_node*
  */
-static node_t *node_init() {
-  node_t *node = xmalloc(sizeof(node_t));
+static trie_node *node_init() {
+  trie_node *node = xmalloc(sizeof(trie_node));
 
   node->children = ht_init(0);
   if (!node->children) {
-    free(node->children);
-    free(node);
     DIE(EXIT_FAILURE,
         "[trie::%s] failed to initialize hash table for node children\n",
         __func__);
@@ -30,8 +28,6 @@ static node_t *node_init() {
 
   node->actions = ht_init(0);
   if (!node->actions) {
-    free(node->actions);
-    free(node);
     DIE(EXIT_FAILURE,
         "[trie::%s] failed to initialize hash table for node actions\n",
         __func__);
@@ -40,14 +36,12 @@ static node_t *node_init() {
   return node;
 }
 
-trie_t *trie_init() {
-  trie_t *trie = xmalloc(sizeof(trie_t));
+route_trie *trie_init() {
+  route_trie *trie = xmalloc(sizeof(route_trie));
 
   trie->root = node_init();
   trie->regex_cache = ht_init(0);
   if (!trie->regex_cache) {
-    free(trie->regex_cache);
-    free(trie);
     DIE(EXIT_FAILURE,
         "[trie::%s] failed to initialize hash table for trie regex cache\n",
         __func__);
@@ -56,19 +50,17 @@ trie_t *trie_init() {
   return trie;
 }
 
-void trie_insert(trie_t *trie, array_t *methods, const char *path,
+void trie_insert(route_trie *trie, array_t *methods, const char *path,
                  void *(*handler)(void *, void *)) {
   char *realpath = s_copy(path);
-
-  node_t *curr = trie->root;
+  trie_node *curr = trie->root;
 
   // Handle root path
   if (s_equals(realpath, PATH_ROOT)) {
     curr->label = realpath;
 
     foreach (methods, i) {
-      action_t *action = xmalloc(sizeof(action_t));
-
+      route_action *action = xmalloc(sizeof(route_action));
       action->handler = handler;
 
       ht_insert(curr->actions, array_get(methods, i), action);
@@ -80,11 +72,12 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
   array_t *paths = expand_path(realpath);
   foreach (paths, i) {
     char *split_path = array_get(paths, i);
+
     ht_record *next = ht_search(curr->children, split_path);
     if (next) {
       curr = next->value;
     } else {
-      node_t *node = node_init();
+      trie_node *node = node_init();
 
       node->label = split_path;
       ht_insert(curr->children, split_path, node);
@@ -95,11 +88,10 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
     if (i == array_size(paths) - 1) {
       curr->label = split_path;
 
-      foreach (methods, k) {
-        char *method = array_get(methods, k);
+      foreach (methods, j) {
+        char *method = array_get(methods, j);
 
-        action_t *action = xmalloc(sizeof(action_t));
-
+        route_action *action = xmalloc(sizeof(route_action));
         action->handler = handler;
 
         ht_insert(curr->actions, method, action);
@@ -110,22 +102,22 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
   }
 }
 
-result_t *trie_search(trie_t *trie, const char *method,
-                      const char *search_path) {
+route_result *trie_search(route_trie *trie, const char *method,
+                          const char *search_path) {
   // Extract query string, if present
   char *realpath = s_copy(search_path);
 
-  result_t *result = xmalloc(sizeof(result_t));
+  route_result *result = xmalloc(sizeof(route_result));
   result->parameters = ht_init(0);
   result->flags = INITIAL_FLAG_STATE;
 
-  node_t *curr = trie->root;
+  trie_node *curr = trie->root;
 
   if (has_query_string(search_path)) {
     array_t *arr = str_cut(realpath, "?");
     // Remove query from path
     realpath = array_get(arr, 0);
-
+    // Grab query and parse it into key/value[] pairs
     result->queries = parse_query(array_get(arr, 1));
   }
 
@@ -150,13 +142,16 @@ result_t *trie_search(trie_t *trie, const char *method,
 
     bool is_param_match = false;
 
-    for (int k = 0; k < curr->children->capacity; k++) {
-      ht_record *child_record = curr->children->records[k];
+    // We must iterate the capacity here because hash table records are not
+    // stored contiguously
+    for (int j = 0; j < curr->children->capacity; j++) {
+      ht_record *child_record = curr->children->records[j];
+      // If there's no record in this slot, continue
       if (!child_record) {
         continue;
       }
 
-      node_t *child = child_record->value;
+      trie_node *child = child_record->value;
       char child_prefix = child->label[0];
 
       if (child_prefix == PARAMETER_DELIMITER[0]) {
@@ -169,6 +164,7 @@ result_t *trie_search(trie_t *trie, const char *method,
         pcre *re = regex_cache_get(trie->regex_cache, pattern);
         if (!re) {
           printlogf(LOG_INFO, "[trie::%s] regex was NULL\n", __func__);
+
           return NULL;  // 500
         }
 
@@ -224,7 +220,7 @@ result_t *trie_search(trie_t *trie, const char *method,
     return result;
   }
 
-  action_t *next_action = action_record->value;
+  route_action *next_action = action_record->value;
   // No matching handler
   if (next_action == NULL) {
     result->flags |= NOT_ALLOWED_MASK;

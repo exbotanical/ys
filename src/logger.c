@@ -12,7 +12,10 @@
 #include "config.h"
 #include "libutil/libutil.h"
 
+#define EDWARD_THE_FOURTH 1461
+
 // Standard syslog log levels
+// TODO: use less levels
 const char *log_levels[] = {"emerg",   "alert",  "crit", "err",
                             "warning", "notice", "info", "debug",
                             "panic",   "error",  "warn", NULL};
@@ -25,22 +28,26 @@ char *gen_timestamp(void) {
 
   time_t now = time(NULL);
   if (now == (time_t)-1) {
-    return NULL;  // Error: unable to get the current time
+    return NULL;  // Unable to get the current time
   }
 
+  // So for some reason localtime, gmtime, and re-entrant variations thereof
+  // aren't working (they cause some sort of segfault when the thread pool grabs
+  // a mutex). TODO: fix this
   struct tm tm_utc;
   const int seconds_per_day = 24 * 60 * 60;
   int days_since_epoch = (int)(now / seconds_per_day);
   int seconds_today = (int)(now % seconds_per_day);
-  int leap_years = (days_since_epoch - 4) / 1461;
+  int leap_years = (days_since_epoch - 4) / EDWARD_THE_FOURTH;
   int year = 1970 + 4 * leap_years;
-  int day_of_year = days_since_epoch - leap_years * 1461;
+  int day_of_year = days_since_epoch - leap_years * EDWARD_THE_FOURTH;
 
   if (day_of_year >= 366) {
     leap_years = (year - 1968) / 4;
     day_of_year -= 366;
     year += leap_years;
   }
+
   tm_utc.tm_year = year - 1900;
   tm_utc.tm_yday = day_of_year;
   tm_utc.tm_hour = seconds_today / 3600;
@@ -48,7 +55,7 @@ char *gen_timestamp(void) {
   tm_utc.tm_sec = seconds_today % 60;
 
   if (strftime(timestamp, sizeof(timestamp), TIMESTAMP_FORMAT, &tm_utc) == 0) {
-    return NULL;  // Error: unable to format the timestamp
+    return NULL;  // Unable to format the timestamp
   }
 
   return timestamp;
@@ -84,13 +91,12 @@ static void vlog(int level, int fd, const char *fmt, va_list va) {
   if (level <= log_level) {
     char host_name[SMALL_BUFFER];
 
+    // gethostname successful
     if (gethostname(host_name, sizeof(host_name)) == 0) {
-      // gethostname successful
-      // result will be \0-terminated except gethostname doesn't promise
-      // to do so if it has to truncate
+      // result will be null-terminated unless gethostname had to truncate
       host_name[sizeof(host_name) - 1] = 0;
     } else {
-      host_name[0] = 0;  // gethostname() call failed
+      host_name[0] = 0;  // gethostname failed
     }
 
     char *header = fmt_str("%s %s %s\t", gen_timestamp(), host_name, LOG_IDENT);
@@ -98,10 +104,9 @@ static void vlog(int level, int fd, const char *fmt, va_list va) {
     char buf[LOG_BUFFER];
 
     int buflen, header_len = 0;
-    buf[0] = 0;  // in case suppress_header or strftime fails
+    buf[0] = 0;  // in case strftime fails
 
     // snprintf null-terminates, even when truncating
-    // retval >= size means result was truncated
     if ((header_len = snprintf(buf, strlen(header), header)) >=
         (int)strlen(header)) {
       header_len = strlen(header) - 1;
@@ -113,7 +118,7 @@ static void vlog(int level, int fd, const char *fmt, va_list va) {
       buflen = sizeof(buf) - 1;
     }
 
-    if (server_config.log_file) {
+    if (server_conf.log_file) {
       write(fd, buf, buflen);
     } else {
       fprintf(stderr, buf);
@@ -123,18 +128,19 @@ static void vlog(int level, int fd, const char *fmt, va_list va) {
 
 /**
  * setup_log_level configures the log level global based on the level specified
- * in the server_config (or default if none specified)
+ * in the server_conf (or default if none specified)
  */
 static void setup_log_level() {
-  const char *ptr = server_config.log_level;
-  int j;
-  for (j = 0; log_levels[j]; ++j) {
-    if (strncmp(ptr, log_levels[j], strlen(log_levels[j])) == 0) {
+  const char *lvl = server_conf.log_level;
+
+  unsigned int i;
+  for (i = 0; log_levels[i]; i++) {
+    if (strncmp(lvl, log_levels[i], strlen(log_levels[i])) == 0) {
       break;
     }
   }
 
-  switch (j) {
+  switch (i) {
     case 0:
     case 8:
       // system is unusable
@@ -176,18 +182,17 @@ static void setup_log_level() {
 void setup_logging() {
   setup_log_level();
 
-  // TODO: stdout opt
-  if (server_config.log_file) {
+  if (server_conf.log_file) {
     int fd;
-    if ((fd = open(server_config.log_file, O_WRONLY | O_CREAT | O_APPEND,
+    if ((fd = open(server_conf.log_file, O_WRONLY | O_CREAT | O_APPEND,
                    0600)) >= 0) {
-      /* 2> log_file */
+      // 2> log_file
       fclose(stderr);
       dup2(fd, 2);
     } else {
       int n = errno;
       fdprintf(2, "failed to open logfile '%s', reason: %s",
-               server_config.log_file, strerror(n));
+               server_conf.log_file, strerror(n));
       // TODO: ???
     }
   }

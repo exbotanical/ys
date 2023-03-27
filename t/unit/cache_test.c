@@ -19,8 +19,8 @@ void sanity_test_regex_cache_get() {
 
 int main() {
   plan(2);
-  sanity_test_regex_cache_get();
-  done_testing();
 
-  return 0;
+  sanity_test_regex_cache_get();
+
+  done_testing();
 }

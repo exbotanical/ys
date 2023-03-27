@@ -13,7 +13,7 @@
 #include "logger.h"
 #include "xmalloc.h"
 
-static router_t *router;
+static http_router *router;
 // TODO: make atomic
 static const char *ignore_dir;
 
@@ -74,8 +74,8 @@ static void load_route(const char *file_path) {
     return;
   }
 
-  for (http_method_t i = METHOD_GET; i <= METHOD_OPTIONS; i++) {
-    handler_t *fn;
+  for (http_method i = METHOD_GET; i <= METHOD_OPTIONS; i++) {
+    route_handler *fn;
     *(void **)(&fn) = dlsym(h, http_method_names[i]);
     if (!fn) {
       continue;
@@ -124,9 +124,9 @@ static void traverse_dir(const char *dir_path) {
   closedir(dir);
 }
 
-router_t *sync_file_router(const char *dir_path) {
+http_router *sync_file_router(const char *dir_path) {
   if (!router) {
-    router_attr_t *attr = router_attr_init();
+    router_attr *attr = router_attr_init();
     router = router_init(attr);
   }
 

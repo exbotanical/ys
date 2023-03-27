@@ -3,7 +3,7 @@
 
 #define X(e) [e] = #e + 7
 
-// Mapping of HTTP status codes to stringified names.
+// Mapping of HTTP status codes to stringified names
 const char* http_status_names[] = {
     [STATUS_CONTINUE] = "Continue",
     [STATUS_SWITCHING_PROTOCOLS] = "Switching Protocols",
@@ -77,7 +77,7 @@ const char* http_status_names[] = {
         "Network Authentication Required",
 };
 
-// Mapping of HTTP method name enums to stringified names.
+// Mapping of HTTP method name enums to stringified names
 const char* http_method_names[] = {
     X(METHOD_GET),     X(METHOD_HEAD),    X(METHOD_POST),
     X(METHOD_PUT),     X(METHOD_PATCH),   X(METHOD_DELETE),

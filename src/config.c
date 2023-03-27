@@ -8,11 +8,13 @@
 #include "logger.h"
 #include "util.h"  // for s_equals, s_copy
 
-// Default server config
-server_config_t server_config = {.log_file = NULL,
-                                 .log_level = DEFAULT_LOG_LEVEL,
-                                 .num_threads = DEFAULT_NUM_THREADS,
-                                 .port_num = DEFAULT_PORT_NUM};
+/**
+ * Default server config
+ */
+server_config server_conf = {.log_file = NULL,
+                             .log_level = DEFAULT_LOG_LEVEL,
+                             .threads = DEFAULT_NUM_THREADS,
+                             .port = DEFAULT_PORT_NUM};
 
 bool parse_config(const char* filename) {
   bool ret = false;
@@ -31,10 +33,10 @@ bool parse_config(const char* filename) {
     return ret;
   }
 
+  int port;
+  int threads;
   char* log_level = NULL;
   char* log_file = NULL;
-  int port_num;
-  int num_threads;
 
   while (fgets(line, sizeof(line), fp)) {
     char* name = strtok(line, "=");
@@ -50,14 +52,16 @@ bool parse_config(const char* filename) {
     value[strcspn(value, "\r\n")] = '\0';  // remove trailing newline
 
     if (s_equals(name, SERVER_PORT_KEY)) {
-      port_num = atoi(value);
-      if (port_num < 1024 || port_num > 65535) {
+      port = atoi(value);
+
+      if (port < 1024 || port > 65535) {
         printlogf(LOG_INFO, "Invalid port number\n");
         goto cleanup;
       }
     } else if (s_equals(name, NUM_THREADS_KEY)) {
-      num_threads = atoi(value);
-      if (num_threads < 0) {
+      threads = atoi(value);
+
+      if (threads < 0) {
         printlogf(LOG_INFO, "Invalid number of threads\n");
         goto cleanup;
       }
@@ -66,12 +70,14 @@ bool parse_config(const char* filename) {
         printlogf(LOG_INFO, "Invalid log level\n");
         goto cleanup;
       }
+
       log_level = s_copy(value);
     } else if (s_equals(name, LOG_FILE_KEY)) {
       if (s_nullish(value)) {
         printlogf(LOG_INFO, "Invalid log file\n");
         goto cleanup;
       }
+
       log_file = s_copy(value);
     } else {
       printlogf(LOG_INFO, "Unknown option '%s' in config file\n", name);
@@ -79,19 +85,20 @@ bool parse_config(const char* filename) {
     }
   }
 
-  if (port_num) {
-    server_config.port_num = port_num;
+  if (port) {
+    server_conf.port = port;
   }
-  if (num_threads) {
-    server_config.num_threads = num_threads;
+
+  if (threads) {
+    server_conf.threads = threads;
   }
 
   if (!s_nullish(log_level)) {
-    server_config.log_level = log_level;
+    server_conf.log_level = log_level;
   }
 
   if (!s_nullish(log_file)) {
-    server_config.log_file = log_file;
+    server_conf.log_file = log_file;
   }
 
   ret = true;

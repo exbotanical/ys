@@ -8,9 +8,9 @@
 /**
  * res_init initializes a new response object
  *
- * @return res_t*
+ * @return response*
  */
-res_t *res_init();
+response *res_init();
 
 /**
  * res_serialize converts a user-defined response object into a buffer that
@@ -21,16 +21,16 @@ res_t *res_init();
  * @param res
  * @return buffer_t*
  */
-buffer_t *res_serialize(req_t *req, res_t *res);
+buffer_t *res_serialize(request *req, response *res);
 
 /**
  * res_send writes the given response to the given socket
  *
- * @param socket
- * @param response
+ * @param sockfd
+ * @param resbuf
  */
-void res_send(int socket, buffer_t *response);
+void res_send(int sockfd, buffer_t *resbuf);
 
-void res_preempterr(int socket, read_error_t err);
+void res_preempterr(int sockfd, parse_error err);
 
 #endif /* RESPONSE_H */

@@ -18,19 +18,20 @@ char *safe_itoa(int x) {
   return str;
 }
 
-array_t *split(const char *str, const char *delimiter) {
-  if (str == NULL || delimiter == NULL) {
-    printlogf(LOG_INFO,
-              "[path::%s] invariant violation - null arguments(s), where str "
-              "was %s and delimiter was %s\n",
-              __func__, str, delimiter);
+array_t *split(const char *s, const char *delim) {
+  if (s == NULL || delim == NULL) {
+    printlogf(
+        LOG_INFO,
+        "[path::%s] invariant violation - null arguments(s), where string "
+        "was %s and delimiter was %s\n",
+        __func__, s, delim);
 
     return NULL;
   }
 
   // see:
   // https://wiki.sei.cmu.edu/confluence/display/c/STR06-C.+Do+not+assume+that+strtok%28%29+leaves+the+parse+string+unchanged
-  char *input = s_copy(str);
+  char *input = s_copy(s);
 
   array_t *tokens = array_init();
   if (tokens == NULL) {
@@ -41,29 +42,29 @@ array_t *split(const char *str, const char *delimiter) {
 
   // If the input doesn't even contain the delimiter, return early and avoid
   // further computation
-  if (!strstr(input, delimiter)) {
+  if (!strstr(input, delim)) {
     return tokens;
   }
 
   // If the input *is* the delimiter, just return the empty array
-  if (s_equals(input, delimiter)) {
+  if (s_equals(input, delim)) {
     return tokens;
   }
 
-  char *token = strtok(input, delimiter);
+  char *token = strtok(input, delim);
   if (token == NULL) {
     printlogf(LOG_INFO,
               "[path::%s] `strtok` returned NULL for its initial token; "
               "this is likely a bug because the input contains the delimiter. "
               "input was %s and delimiter was %s\n",
-              __func__, input, delimiter);
+              __func__, input, delim);
 
     return tokens;
   }
 
   while (token != NULL) {
     array_push(tokens, s_copy(token));
-    token = strtok(NULL, delimiter);
+    token = strtok(NULL, delim);
   }
 
   free(input);
@@ -71,14 +72,14 @@ array_t *split(const char *str, const char *delimiter) {
   return tokens;
 }
 
-char *str_join(array_t *strarr, const char *delim) {
+char *str_join(array_t *sarr, const char *delim) {
   buffer_t *buf = buffer_init(NULL);
 
-  unsigned int sz = array_size(strarr);
+  unsigned int sz = array_size(sarr);
 
   for (unsigned int i = 0; i < sz; i++) {
-    const char *str = array_get(strarr, i);
-    buffer_append(buf, str);
+    const char *s = array_get(sarr, i);
+    buffer_append(buf, s);
 
     if (i != sz - 1) {
       buffer_append(buf, delim);
@@ -99,7 +100,7 @@ array_t *str_cut(const char *s, const char *sep) {
                          s_nullish(second) ? NULL : second);
   }
 
-  return array_collect(s);
+  return array_collect(s_copy(s));
 }
 
 bool str_contains_ctl_byte(const char *s) {
@@ -113,11 +114,8 @@ bool str_contains_ctl_byte(const char *s) {
 }
 
 bool ishex(char c) {
-  if ('0' <= c && c <= '9') return true;
-  if ('a' <= c && c <= 'f') return true;
-  if ('A' <= c && c <= 'F') return true;
-
-  return false;
+  return ('0' <= c && c <= '9') || ('a' <= c && c <= 'f') ||
+         ('A' <= c && c <= 'F');
 }
 
 char unhex(char c) {

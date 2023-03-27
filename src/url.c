@@ -11,7 +11,7 @@
  * @return char*
  */
 static char* unescape(const char* s) {
-  // Count %, check that they're well-formed
+  // % char count
   int n = 0;
   bool has_plus = false;
 
@@ -29,16 +29,21 @@ static char* unescape(const char* s) {
         }
 
         i += 3;
+        break;
+
       case '+':
         has_plus = true;
+
         i++;
+        break;
+
       default:
         i++;
     }
   }
 
   if (n == 0 && !has_plus) {
-    return s;
+    return s_copy(s);
   }
 
   buffer_t* b = buffer_init(NULL);
@@ -46,16 +51,18 @@ static char* unescape(const char* s) {
   for (unsigned int i = 0; i < strlen(s); i++) {
     switch (s[i]) {
       case '%':
-        char* sp = tostr(unhex(s[i + 1]) << 4 | unhex(s[i + 2]));
-        buffer_append(b, sp);
+        buffer_append(b, tostr(unhex(s[i + 1]) << 4 | unhex(s[i + 2])));
+
         i += 2;
         break;
+
       case '+':
         buffer_append(b, " ");
+
         break;
+
       default:
-        char* spp = tostr(s[i]);
-        buffer_append(b, spp);
+        buffer_append(b, tostr(s[i]));
     }
   }
 
@@ -66,13 +73,14 @@ hash_table* parse_query(const char* query) {
   hash_table* ht = ht_init(0);
 
   while (!s_nullish(query)) {
-    array_t* pair1 = str_cut(query, "&");
-    if (!pair1) {
+    // Either two key/value statements, or a [path, query]
+    array_t* pair = str_cut(query, "&");
+    if (!pair) {
       return ht;
     }
 
-    char* key = array_get(pair1, 0);
-    query = array_get(pair1, 1);
+    char* key = array_get(pair, 0);
+    query = array_get(pair, 1);
     if (strchr(key, ';')) {
       continue;
     }
@@ -81,13 +89,13 @@ hash_table* parse_query(const char* query) {
       continue;
     }
 
-    array_t* pair2 = str_cut(key, "=");
-    if (!pair2) {
+    array_t* kv_pair = str_cut(key, "=");
+    if (!kv_pair) {
       return ht;
     }
 
-    key = array_get(pair2, 0);
-    char* value = array_get(pair2, 1);
+    key = array_get(kv_pair, 0);
+    char* value = array_get(kv_pair, 1);
 
     key = unescape(key);
 
@@ -101,11 +109,11 @@ hash_table* parse_query(const char* query) {
       continue;
     }
 
-    array_t* r = (array_t*)ht_get(ht, key);
-    if (!r) {
+    array_t* values = (array_t*)ht_get(ht, key);
+    if (!values) {
       ht_insert(ht, key, array_collect(value));
     } else {
-      array_push(r, value);
+      array_push(values, value);
     }
   }
 

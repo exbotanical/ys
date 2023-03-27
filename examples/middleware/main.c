@@ -6,7 +6,7 @@
 
 #define PORT 9000
 
-res_t *handler(req_t *req, res_t *res) {
+response *handler(request *req, response *res) {
   printf("handler\n");
 
   set_header(res, "Content-Type", "text/plain");
@@ -18,26 +18,26 @@ res_t *handler(req_t *req, res_t *res) {
   return res;
 }
 
-res_t *middleware1(req_t *req, res_t *res) {
+response *middleware1(request *req, response *res) {
   printf("middleware 1\n");
 
   return res;
 }
 
-res_t *middleware2(req_t *req, res_t *res) {
+response *middleware2(request *req, response *res) {
   printf("middleware 2\n");
 
   return res;
 }
 
 int main() {
-  router_attr_t *attr = router_attr_init();
+  router_attr *attr = router_attr_init();
   middlewares(attr, middleware1, middleware2);
-  router_t *router = router_init(attr);
+  http_router *router = router_init(attr);
 
   router_register(router, "/:key[^\\d+$]", handler, METHOD_GET, NULL);
 
-  server_t *server = server_init(router, PORT);
+  tcp_server *server = server_init(router, PORT);
   if (!server_start(server)) {
     server_free(server);  // also frees router
 

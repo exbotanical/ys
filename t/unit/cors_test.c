@@ -24,7 +24,7 @@ inline static array_t *toheaders(char *s, ...) {
   va_start(args, s);
 
   for (unsigned int i = 0; s != NULL; i++) {
-    header_t *h = malloc(sizeof(header_t));
+    header_pair *h = malloc(sizeof(header_pair));
     h->key = s;
     h->value = va_arg(args, char *);
 
@@ -37,29 +37,27 @@ inline static array_t *toheaders(char *s, ...) {
   return arr;
 }
 
-req_t *toreq(http_method_t method, array_t *headers) {
+request *toreq(http_method method, array_t *headers) {
   hash_table *ht = ht_init(0);
   foreach (headers, i) {
-    header_t *h = array_get(headers, i);
+    header_pair *h = array_get(headers, i);
 
     ht_insert(ht, h->key, array_collect(h->value));
   }
 
-  req_t *req = malloc(sizeof(req_t));
+  request *req = malloc(sizeof(request));
   req->method = http_method_names[method];
   req->headers = ht;
 
   return req;
 }
 
-void insert_headers(req_t *req, array_t *headers) {
+static void insert_headers(request *req, array_t *headers) {
   foreach (headers, i) {
-    header_t *h = array_get(headers, i);
+    header_pair *h = array_get(headers, i);
 
     // We're not using this helper for duplicate headers, so we can assume the
     // header hasn't been inserted before
-    // TODO: use method that does this internally so we never have to worry
-    // about whether the value array_t was initialized
     array_t *v = array_init();
     array_push(v, (void *)h->value);
 
@@ -67,23 +65,23 @@ void insert_headers(req_t *req, array_t *headers) {
   }
 }
 
-void check_status_code(res_t *res, int expected_status) {
+static void check_status_code(response *res, int expected_status) {
   if (expected_status != res->status) {
     fail("expected status code to be %d but got %d. ", expected_status,
          res->status);
   }
 }
 
-bool m(void *h, void *v) {
-  return strcmp(((header_t *)h)->key, (char *)v) == 0;
+static bool header_key_eq(void *h, void *v) {
+  return strcmp(((header_pair *)h)->key, (char *)v) == 0;
 }
 
 void check_headers(char *test_name, array_t *actual, array_t *expected) {
   for (unsigned int i = 0; i < sizeof(all_headers) / sizeof(char *); i++) {
     const char *key = all_headers[i];
 
-    int eidx = array_find(expected, m, key);
-    int aidx = array_find(actual, m, key);
+    int eidx = array_find(expected, header_key_eq, key);
+    int aidx = array_find(actual, header_key_eq, key);
 
     // If *both* are NULL, they're equal, so continue
     if (eidx == -1 && aidx == -1) {
@@ -93,17 +91,18 @@ void check_headers(char *test_name, array_t *actual, array_t *expected) {
            eidx == -1 ? "expected" : "actual");
     }
 
-    header_t *expected_h = array_get(expected, eidx);
-    header_t *actual_h = array_get(actual, aidx);
+    header_pair *expected_h = array_get(expected, eidx);
+    header_pair *actual_h = array_get(actual, aidx);
+
     is(actual_h->value, expected_h->value, "%s - headers for key '%s' match",
        test_name, key);
   }
 }
 
-cors_opts_t *make_opts(array_t *allowed_origins, array_t *allowed_methods,
-                       array_t *allowed_headers, array_t *expose_headers,
-                       bool allow_credentials) {
-  cors_opts_t *o = malloc(sizeof(cors_opts_t));
+cors_opts *make_opts(array_t *allowed_origins, array_t *allowed_methods,
+                     array_t *allowed_headers, array_t *expose_headers,
+                     bool allow_credentials) {
+  cors_opts *o = malloc(sizeof(cors_opts));
   o->allowed_origins = allowed_origins;
   o->allowed_methods = allowed_methods;
   o->allowed_headers = allowed_headers;
@@ -116,34 +115,29 @@ cors_opts_t *make_opts(array_t *allowed_origins, array_t *allowed_methods,
 void test_cors_middleware() {
   typedef struct {
     char *name;
-    cors_opts_t *options;
-    http_method_t method;
+    cors_opts *options;
+    http_method method;
     array_t *req_headers;
     array_t *res_headers;
-    http_status_t code;
+    http_status code;
   } test_case;
 
   test_case tests[] = {
-      {
-          .name = "AllOriginAllowed",
-          .options = make_opts(array_collect("*"), NULL, NULL, NULL, false),
-          .method = METHOD_GET,
-          .req_headers = toheaders("Origin", "http://foo.com", NULL),
-          .res_headers = toheaders("Vary", "Origin",
-                                   "Access-Control-Allow-Origin", "*", NULL),
-          .code = STATUS_OK,
-      },
-      {
-          .name = "OriginAllowed",
-          .options = make_opts(array_collect("http://foo.com"), NULL, NULL,
-                               NULL, false),
-          .method = METHOD_GET,
-          .req_headers = toheaders("Origin", "http://foo.com", NULL),
-          .res_headers =
-              toheaders("Vary", "Origin", "Access-Control-Allow-Origin",
-                        "http://foo.com", NULL),
-          .code = STATUS_OK,
-      },
+      {.name = "AllOriginAllowed",
+       .options = make_opts(array_collect("*"), NULL, NULL, NULL, false),
+       .method = METHOD_GET,
+       .req_headers = toheaders("Origin", "http://foo.com", NULL),
+       .res_headers = toheaders("Vary", "Origin", "Access-Control-Allow-Origin",
+                                "*", NULL),
+       .code = STATUS_OK},
+      {.name = "OriginAllowed",
+       .options =
+           make_opts(array_collect("http://foo.com"), NULL, NULL, NULL, false),
+       .method = METHOD_GET,
+       .req_headers = toheaders("Origin", "http://foo.com", NULL),
+       .res_headers = toheaders("Vary", "Origin", "Access-Control-Allow-Origin",
+                                "http://foo.com", NULL),
+       .code = STATUS_OK},
       {.name = "OriginAllowedMultipleProvided",
        .options = make_opts(array_collect("http://foo.com", "http://bar.com"),
                             NULL, NULL, NULL, false),
@@ -177,7 +171,6 @@ void test_cors_middleware() {
                                 "http://foo.com", NULL),
        .code = STATUS_OK},
       {.name = "MethodAllowed",
-       // TODO: allow just enum
        .options = make_opts(array_collect("*"),
                             array_collect(http_method_names[METHOD_DELETE]),
                             NULL, NULL, false),
@@ -302,7 +295,7 @@ void test_cors_middleware() {
     test_case test = tests[i];
 
     // Build mock request
-    req_t *req = &(req_t){
+    request *req = &(request){
         .method = http_method_names[test.method],
     };
     req->headers = ht_init(0);
@@ -310,7 +303,7 @@ void test_cors_middleware() {
     // Add headers to mock request
     insert_headers(req, test.req_headers);
 
-    res_t *res = malloc(sizeof(res_t));
+    response *res = malloc(sizeof(response));
     res->headers = array_init();
 
     // Run CORS handler
@@ -332,7 +325,7 @@ void test_are_headers_allowed() {
 
   typedef struct {
     char *name;
-    cors_t *cors;
+    cors_config *cors;
     array_t *cases;
   } test;
 
@@ -381,7 +374,7 @@ void test_is_method_allowed() {
 
   typedef struct {
     char *name;
-    cors_t *cors;
+    cors_config *cors;
     array_t *cases;
   } test;
 
@@ -419,7 +412,7 @@ void test_origin_is_allowed() {
 
   typedef struct {
     char *name;
-    cors_t *cors;
+    cors_config *cors;
     array_t *cases;
   } test;
 
@@ -435,7 +428,7 @@ void test_origin_is_allowed() {
            &(test_case){.origin = "http://foo.com/", .is_allowed = false},
            &(test_case){.origin = "https://bar.com", .is_allowed = false},
            &(test_case){.origin = "http://baz.com", .is_allowed = false},
-           &(test_case){.origin = "null",  // file redirect
+           &(test_case){.origin = "null",  // File redirect
                         .is_allowed = true})},
       {.name = "WildcardOrigin",
        .cors =
@@ -463,7 +456,7 @@ void test_origin_is_allowed() {
 void test_is_preflight_request() {
   typedef struct {
     const char *name;
-    req_t *req;
+    request *req;
     bool is_preflight;
   } test_case;
 
@@ -495,8 +488,8 @@ void test_is_preflight_request() {
 }
 
 void test_cors_allow_all() {
-  cors_opts_t *o = cors_allow_all();
-  cors_t *c = cors_init(o);
+  cors_opts *o = cors_allow_all();
+  cors_config *c = cors_init(o);
 
   ok(c->allow_all_origins == true, "cors_allow_all allows all origins");
   ok(c->allow_all_headers == true, "cors_allow_all allows all headers");
@@ -507,25 +500,25 @@ void test_cors_allow_all() {
 }
 
 void test_set_helpers() {
-  cors_opts_t *o = cors_opts_init();
+  cors_opts *o = cors_opts_init();
 
   const char *o1 = "o1";
   const char *o2 = "o2";
   const char *o3 = "o3";
-  set_allowed_origins(o, o1, o2, o3);  // TODO: internal to omit NULL
+  set_allowed_origins(o, o1, o2, o3);
 
   set_allowed_methods(o, "GET", "PUT", "DELETE");
 
   const char *h1 = "h1";
   const char *h2 = "h2";
   const char *h3 = "h3";
-  set_allowed_headers(o, h1, h2, h3, NULL);
+  set_allowed_headers(o, h1, h2, h3);
 
   const int m = 3600;
   set_max_age(o, m);
   ok(o->max_age == 3600, "max_age is 0 by default");
 
-  cors_t *c = cors_init(o);
+  cors_config *c = cors_init(o);
 
   ok(c->allow_credentials == false, "allow_credentials is false by default");
 

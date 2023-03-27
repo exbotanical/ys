@@ -10,7 +10,7 @@
 #include "util.h"             // for str_join
 #include "xmalloc.h"
 
-static cors_t *cors_config;
+static cors_config *cors_conf;
 
 /**
  * match is a matcher function for comparing array values against a given value
@@ -30,7 +30,7 @@ bool match(void *s1, void *s2) { return s_casecmp((char *)s1, (char *)s2); }
  * @param origin
  * @return bool
  */
-static bool is_origin_allowed(cors_t *c, char *origin) {
+static bool is_origin_allowed(cors_config *c, char *origin) {
   if (c->allow_all_origins) {
     return true;
   }
@@ -53,7 +53,7 @@ static bool is_origin_allowed(cors_t *c, char *origin) {
  * @param method
  * @return bool
  */
-static bool is_method_allowed(cors_t *c, char *method) {
+static bool is_method_allowed(cors_config *c, char *method) {
   if (!has_elements(c->allowed_methods)) {
     return false;
   }
@@ -81,20 +81,15 @@ static bool is_method_allowed(cors_t *c, char *method) {
  * @param headers
  * @return bool
  */
-static bool are_headers_allowed(cors_t *c, array_t *headers) {
+static bool are_headers_allowed(cors_config *c, array_t *headers) {
   if (c->allow_all_headers || !has_elements(headers)) {
     return true;
   }
 
   foreach (headers, i) {
-    char *header = to_canonical_MIME_header_key(array_get(headers, i));
-    bool allows_header = false;
+    char *header = to_canonical_mime_header_key(array_get(headers, i));
 
-    if (array_includes(c->allowed_headers, match, header)) {
-      allows_header = true;
-    }
-
-    if (!allows_header) {
+    if (!array_includes(c->allowed_headers, match, header)) {
       return false;
     }
   }
@@ -112,7 +107,7 @@ static bool are_headers_allowed(cors_t *c, array_t *headers) {
  * @param req
  * @return bool
  */
-static bool is_preflight_request(req_t *req) {
+static bool is_preflight_request(request *req) {
   bool is_options_req =
       s_equals(req->method, http_method_names[METHOD_OPTIONS]);
   bool has_origin_header =
@@ -126,28 +121,30 @@ static bool is_preflight_request(req_t *req) {
 /**
  * handleRequest handles actual HTTP requests subsequent to or standalone from
  * Preflight requests
- * TODO: test
+ *
  * @param req
  * @param res
+ *
+ * TODO: test
  */
-static void handle_request(req_t *req, res_t *res) {
+static void handle_request(request *req, response *res) {
   char *origin = req_header_get(req->headers, ORIGIN_HEADER);
   // Set the "vary" header to prevent proxy servers from sending cached
   // responses for one client to another
   set_header(res, VARY_HEADER, ORIGIN_HEADER);
 
   // If no origin was specified, this is not a valid CORS request
-  if (!origin || s_equals(origin, "")) {
+  if (s_nullish(origin)) {
     return;
   }
 
   // If the origin is not in the allow list, deny
-  if (!is_origin_allowed(cors_config, origin)) {
+  if (!is_origin_allowed(cors_conf, origin)) {
     set_status(res, STATUS_FORBIDDEN);
     return;
   }
 
-  if (cors_config->allow_all_origins) {
+  if (cors_conf->allow_all_origins) {
     // If all origins are allowed, use the wildcard value
     set_header(res, ALLOW_ORIGINS_HEADER, "*");
   } else {
@@ -158,25 +155,27 @@ static void handle_request(req_t *req, res_t *res) {
   // If we've exposed headers, set them
   // If the consumer specified headers that are exposed by default, we'll still
   // include them - this is spec compliant
-  if (has_elements(cors_config->exposed_headers)) {
+  if (has_elements(cors_conf->exposed_headers)) {
     set_header(res, EXPOSE_HEADERS_HEADER,
-               str_join(cors_config->exposed_headers, ", "));
+               str_join(cors_conf->exposed_headers, ", "));
   }
 
   // Allow the client to send credentials. If making an XHR request, the client
-  // must set `withCredentials` to `true`
-  if (cors_config->allow_credentials) {
+  // must set `with_credentials` to `true`
+  if (cors_conf->allow_credentials) {
     set_header(res, ALLOW_CREDENTIALS_HEADER, "true");
   }
 }
 
 /**
  * handle_preflight_request handles preflight requests
- * TODO: test
+ *
  * @param req
  * @param res
+ *
+ * TODO: test
  */
-static void handle_preflight_request(req_t *req, res_t *res) {
+static void handle_preflight_request(request *req, response *res) {
   char *origin = req_header_get(req->headers, ORIGIN_HEADER);
 
   // Set the "vary" header to prevent proxy servers from sending cached
@@ -191,16 +190,16 @@ static void handle_preflight_request(req_t *req, res_t *res) {
   }
 
   // If the origin is not in the allow list, deny
-  if (!is_origin_allowed(cors_config, origin)) {
+  if (!is_origin_allowed(cors_conf, origin)) {
     set_status(res, STATUS_FORBIDDEN);
 
     return;
   }
 
   // Validate the method; this is the crux of the Preflight
-  char *req_method_header = req_header_get(req->headers, REQUEST_METHOD_HEADER);
+  char *reqd_method = req_header_get(req->headers, REQUEST_METHOD_HEADER);
 
-  if (!is_method_allowed(cors_config, req_method_header)) {  // TODO: nullcheck
+  if (s_nullish(reqd_method) || !is_method_allowed(cors_conf, reqd_method)) {
     return;
   }
 
@@ -209,11 +208,11 @@ static void handle_preflight_request(req_t *req, res_t *res) {
   char *header_str = req_header_get(req->headers, REQUEST_HEADERS_HEADER);
 
   array_t *reqd_headers = derive_headers(header_str);
-  if (!are_headers_allowed(cors_config, reqd_headers)) {
+  if (!are_headers_allowed(cors_conf, reqd_headers)) {
     return;
   }
 
-  if (cors_config->allow_all_origins) {
+  if (cors_conf->allow_all_origins) {
     // If all origins are allowed, use the wildcard value
     set_header(res, ALLOW_ORIGINS_HEADER, "*");
   } else {
@@ -223,84 +222,87 @@ static void handle_preflight_request(req_t *req, res_t *res) {
 
   // Set the allowed methods, as a Preflight may have been sent if the client
   // included non-simple methods
-  set_header(res, ALLOW_METHODS_HEADER, req_method_header);
+  set_header(res, ALLOW_METHODS_HEADER, reqd_method);
 
   // Set the allowed headers, as a Preflight may have been sent if the client
   // included non-simple headers.
   if (has_elements(reqd_headers)) {
     set_header(res, ALLOW_HEADERS_HEADER,
-               str_join(cors_config->allowed_headers, ", "));
+               str_join(cors_conf->allowed_headers, ", "));
   }
 
   // Allow the client to send credentials. If making an XHR request, the client
-  // must set `withCredentials` to `true`.
-  if (cors_config->allow_credentials) {
+  // must set `with_credentials` to `true`.
+  if (cors_conf->allow_credentials) {
     set_header(res, ALLOW_CREDENTIALS_HEADER, "true");
   }
 
   // Set the Max Age. This is only necessary for Preflights given the Max Age
   // refers to server-suggested duration, in seconds, a response should stay in
   // the browser's cache before another Preflight is made
-  if (cors_config->max_age > 0) {
-    set_header(res, MAX_AGE_HEADER, fmt_str("%d", cors_config->max_age));
+  if (cors_conf->max_age > 0) {
+    set_header(res, MAX_AGE_HEADER, fmt_str("%d", cors_conf->max_age));
   }
 }
 
-cors_opts_t *cors_opts_init() {
-  cors_opts_t *o = xmalloc(sizeof(cors_opts_t));
-  o->allow_credentials = false;
-  o->max_age = 0;
-  o->use_options_passthrough = false;
+cors_opts *cors_opts_init() {
+  cors_opts *opts = xmalloc(sizeof(cors_opts));
+  opts->allow_credentials = false;
+  opts->max_age = 0;
+  opts->use_options_passthrough = false;
+
+  return opts;
 }
 
-cors_t *cors_init(cors_opts_t *opts) {
-  cors_config = xmalloc(sizeof(cors_t));
-  cors_config->allow_credentials = opts->allow_credentials;
-  cors_config->max_age = opts->max_age;
-  cors_config->exposed_headers = opts->expose_headers;
-  cors_config->use_options_passthrough = opts->use_options_passthrough;
-  cors_config->allowed_origins = array_init();
-  cors_config->allowed_methods = array_init();
+cors_config *cors_init(cors_opts *opts) {
+  cors_conf = xmalloc(sizeof(cors_config));
+  cors_conf->allow_credentials = opts->allow_credentials;
+  cors_conf->max_age = opts->max_age;
+  cors_conf->exposed_headers = opts->expose_headers;
+  cors_conf->use_options_passthrough = opts->use_options_passthrough;
+  cors_conf->allowed_origins = array_init();
+  cors_conf->allowed_methods = array_init();
 
   // Register origins - if no given origins, default to allow all i.e. "*"
   if (!has_elements(opts->allowed_origins)) {
-    cors_config->allow_all_origins = true;
+    cors_conf->allow_all_origins = true;
   } else {
     foreach (opts->allowed_origins, i) {
       char *origin = array_get(opts->allowed_origins, i);
       if (s_equals("*", origin)) {
-        cors_config->allow_all_origins = true;
+        cors_conf->allow_all_origins = true;
         break;
       }
-      array_push(cors_config->allowed_origins, origin);
+
+      array_push(cors_conf->allowed_origins, origin);
     }
 
     // Append "null" to allow list to support testing / requests from files,
     // redirects, etc. Note: Used for redirects because the browser should not
     // expose the origin of the new server; redirects are followed
     // automatically
-    array_push(cors_config->allowed_origins, "null");
+    array_push(cors_conf->allowed_origins, "null");
   }
 
   // Register headers - if no given headers, default to those allowed per the
   // spec. Although these headers are allowed by default, we add them anyway for
   // the sake of consistency
-  cors_config->allowed_headers = array_init();
+  cors_conf->allowed_headers = array_init();
   if (has_elements(opts->allowed_headers)) {
     foreach (opts->allowed_headers, i) {
       char *header = array_get(opts->allowed_headers, i);
 
       if (s_equals("*", header)) {
-        cors_config->allow_all_headers = true;
+        cors_conf->allow_all_headers = true;
         break;
       }
 
-      array_push(cors_config->allowed_headers,
-                 to_canonical_MIME_header_key(header));
+      array_push(cors_conf->allowed_headers,
+                 to_canonical_mime_header_key(header));
     }
   }
 
-  array_push(cors_config->allowed_headers, (void *)ORIGIN_HEADER);
+  array_push(cors_conf->allowed_headers, (void *)ORIGIN_HEADER);
 
   if (!has_elements(opts->allowed_methods)) {
     // Default allowed methods. Defaults to simple methods (those that do not
@@ -310,37 +312,38 @@ cors_t *cors_init(cors_opts_t *opts) {
                       s_copy(http_method_names[METHOD_POST]),
                       s_copy(http_method_names[METHOD_HEAD]));
 
-    cors_config->allowed_methods = default_allowed_methods;
+    cors_conf->allowed_methods = default_allowed_methods;
   } else {
     foreach (opts->allowed_methods, i) {
       char *method = array_get(opts->allowed_methods, i);
-      array_push(cors_config->allowed_methods, s_upper(method));
+      array_push(cors_conf->allowed_methods, s_upper(method));
     }
   }
 
-  return cors_config;
+  return cors_conf;
 }
 
-cors_opts_t *cors_allow_all() {
-  cors_opts_t *c = xmalloc(sizeof(cors_opts_t));
-  c->allowed_origins = array_collect("*");
-  c->allowed_methods = array_collect(s_copy(http_method_names[METHOD_HEAD]),
-                                     s_copy(http_method_names[METHOD_GET]),
-                                     s_copy(http_method_names[METHOD_POST]),
-                                     s_copy(http_method_names[METHOD_PATCH]),
-                                     s_copy(http_method_names[METHOD_PUT]),
-                                     s_copy(http_method_names[METHOD_DELETE]));
-  c->allowed_headers = array_collect("*");
-  c->allow_credentials = false;
+cors_opts *cors_allow_all() {
+  cors_opts *opts = xmalloc(sizeof(cors_opts));
+  opts->allowed_origins = array_collect("*");
+  opts->allowed_methods =
+      array_collect(s_copy(http_method_names[METHOD_HEAD]),
+                    s_copy(http_method_names[METHOD_GET]),
+                    s_copy(http_method_names[METHOD_POST]),
+                    s_copy(http_method_names[METHOD_PATCH]),
+                    s_copy(http_method_names[METHOD_PUT]),
+                    s_copy(http_method_names[METHOD_DELETE]));
+  opts->allowed_headers = array_collect("*");
+  opts->allow_credentials = false;
 
-  return c;
+  return opts;
 }
 
-res_t *cors_handler(req_t *req, res_t *res) {
+response *cors_handler(request *req, response *res) {
   if (is_preflight_request(req)) {
     handle_preflight_request(req, res);
 
-    if (cors_config->use_options_passthrough) {
+    if (cors_conf->use_options_passthrough) {
       // Do nothing i.e. allow next handler to run
     } else {
       set_status(res, STATUS_NO_CONTENT);
@@ -355,12 +358,12 @@ res_t *cors_handler(req_t *req, res_t *res) {
   return res;
 }
 
-void set_allow_credentials(cors_opts_t *c, bool allow) {
-  c->allow_credentials = allow;
+void set_allow_credentials(cors_opts *opts, bool allow) {
+  opts->allow_credentials = allow;
 }
 
-void set_use_options_passthrough(cors_opts_t *c, bool use) {
-  c->use_options_passthrough = use;
+void set_use_options_passthrough(cors_opts *opts, bool use) {
+  opts->use_options_passthrough = use;
 }
 
-void set_max_age(cors_opts_t *c, int max_age) { c->max_age = max_age; }
+void set_max_age(cors_opts *opts, int max_age) { opts->max_age = max_age; }

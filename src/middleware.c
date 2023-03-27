@@ -4,15 +4,15 @@
 #include "libhttp.h"
 #include "xmalloc.h"
 
-void add_middleware(router_attr_t *r, handler_t *mw) {
-  if (!has_elements(r->middlewares)) {
-    r->middlewares = array_init();
+void add_middleware(router_attr *attr, route_handler *mw) {
+  if (!has_elements(attr->middlewares)) {
+    attr->middlewares = array_init();
   }
 
-  array_push(r->middlewares, mw);
+  array_push(attr->middlewares, mw);
 }
 
-void __middlewares(router_attr_t *r, handler_t *mw, ...) {
+void __middlewares(router_attr *attr, route_handler *mw, ...) {
   array_t *mws = array_init();
   if (!mws) {
     return;
@@ -26,21 +26,21 @@ void __middlewares(router_attr_t *r, handler_t *mw, ...) {
       return;
     }
 
-    mw = va_arg(args, handler_t *);
+    mw = va_arg(args, route_handler *);
   }
 
   va_end(args);
 
-  r->middlewares = mws;
+  attr->middlewares = mws;
 }
 
-void use_cors(router_attr_t *r, cors_opts_t *opts) {
-  r->use_cors = true;
+void use_cors(router_attr *attr, cors_opts *opts) {
+  attr->use_cors = true;
   cors_init(opts);
 
-  if (!has_elements(r->middlewares)) {
-    r->middlewares = array_init();
+  if (!has_elements(attr->middlewares)) {
+    attr->middlewares = array_init();
   }
 
-  array_push(r->middlewares, cors_handler);
+  array_push(attr->middlewares, cors_handler);
 }

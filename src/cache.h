@@ -10,10 +10,10 @@
  * given pattern from a hash-table cache. If one does not exist, it will be
  * compiled and cached for subsequent retrievals.
  *
- * @param regex_cache
+ * @param cache
  * @param pattern
  * @return pcre* A pre-compiled pcre regex
  */
-pcre *regex_cache_get(hash_table *regex_cache, const char *pattern);
+pcre *regex_cache_get(hash_table *cache, const char *pattern);
 
 #endif /* CACHE_H */
