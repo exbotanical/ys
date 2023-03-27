@@ -7,13 +7,19 @@
 #include "libutil/libutil.h"
 #include "trie.h"
 
-// HTTP status names.
+/**
+ * Mappings of HTTP status enums to string literal names
+ */
 extern const char *http_status_names[];
 
-// HTTP method names.
+/**
+ * Mappings of HTTP method enums to string literal names
+ */
 extern const char *http_method_names[];
 
-// HTTP methods.
+/**
+ * All possible HTTP methods
+ */
 typedef enum {
   // MUST start with 1 for varargs handling e.g. collect
   METHOD_GET = 1,
@@ -27,7 +33,9 @@ typedef enum {
   METHOD_TRACE
 } http_method_t;
 
-// HTTP status codes.
+/**
+ * All RFC-specified HTTP status codes
+ */
 typedef enum {
   STATUS_CONTINUE = 100,             // RFC 7231, 6.2.1
   STATUS_SWITCHING_PROTOCOLS = 101,  // RFC 7231, 6.2.2
@@ -98,7 +106,10 @@ typedef enum {
   STATUS_NETWORK_AUTHENTICATION_REQUIRED = 511,  // RFC 6585, 6
 } http_status_t;
 
-// A context object containing metadata to be passed to matched route handlers
+/**
+ * A req_t contains request data such as the path, method, body, any route or
+ * query parameters, etc.
+ */
 typedef struct {
   const char *path;
   const char *method;
@@ -116,25 +127,42 @@ typedef struct {
   int content_length;
 } req_t;
 
-// A response object; client handlers must return this struct to be sent to the
-// client.
+/**
+ * A res_t holds the necessary metadata for the response that will be sent to
+ * the client. Client handlers should use the library-provided helpers to set
+ * the desired properties e.g. status, body, and headers.
+ */
 typedef struct {
-  // A flag used by middleware - setting this to true will stop the middleware
-  // chain and prevent subsequent middlewares from being run
+  /**
+   * A flag used by middleware - setting this to true will stop the middleware
+   * chain and prevent subsequent middlewares from being run
+   */
   bool done;
 
-  // HTTP status code - required
+  /**
+   * HTTP status code - if not set, will default to 200 OK
+   */
   http_status_t status;
-  // HTTP headers - optional, but you should pass content-type if sending a body
+
+  /**
+   * HTTP headers - optional, but you should pass content-type if sending a body
+   */
   array_t *headers;
-  // res_t body - optional; Content-length header will be set for you
+
+  /**
+   * res_t body - optional; Content-length header will be set for you
+   */
   char *body;
 } res_t;
 
-// An alias type for request handlers
+/**
+ * An alias type for request handlers
+ */
 typedef res_t *handler_t(req_t *, res_t *);
 
-// CORS configuration options
+/**
+ * CORS configuration options
+ */
 typedef struct {
   bool allow_credentials;
   bool use_options_passthrough;
@@ -146,7 +174,9 @@ typedef struct {
 } __cors_opts_t;
 typedef __cors_opts_t cors_opts_t;
 
-// A router object
+/**
+ * A router / HTTP multiplexer
+ */
 typedef struct {
   bool use_cors;
   trie_t *trie;
@@ -157,6 +187,9 @@ typedef struct {
 } __router_t;
 typedef __router_t *router_t;
 
+/**
+ * An attributes object for configuring a router_t
+ */
 typedef struct {
   bool use_cors;
   handler_t *not_found_handler;
@@ -165,7 +198,9 @@ typedef struct {
   array_t *middlewares;
 } router_attr_t;
 
-// A server configuration object that stores settings for the HTTP server
+/**
+ * A server configuration object that stores settings for the HTTP server
+ */
 typedef struct {
   __router_t *router;
   int port;
@@ -181,7 +216,8 @@ typedef array_t *middlewares_t;
  * @param res
  * @param key
  * @param value
- * @return bool
+ * @return true if adding the header succeeded
+ * @return false if adding the header failed; this would indicate an OOM error
  */
 bool set_header(res_t *res, const char *key, const char *value);
 
@@ -219,7 +255,7 @@ router_attr_t *router_attr_init();
  * router_init allocates memory for a new router and its `trie` member;
  * sets the handlers for 404 and 405 (if none provided, defaults will be
  * used).
- * @param router_attr_t* TODO:
+ * @param router_attr_t* Router attributes to apply to the new router_t instance
  * @return router_t*
  */
 router_t *router_init(router_attr_t *attr);
@@ -232,7 +268,9 @@ router_t *router_init(router_attr_t *attr);
  * @param path The path to associate with the route
  * @param handler The handler to associate with the route
  * @param method
- * @param ...Methods to associate with the route
+ * @param ... Methods to associate with the route. You must pass a NULL sentinel
+ * to indicate the end of the list e.g.
+ * `router_register(...args, METHOD_GET, METHOD_POST, NULL)`
  */
 void router_register(router_t *router, const char *path, handler_t *handler,
                      http_method_t method, ...);
@@ -240,28 +278,29 @@ void router_register(router_t *router, const char *path, handler_t *handler,
 /**
  * server_init allocates the necessary memory for a `server_t`
  *
- * @param router
- * @param port
+ * @param router The router instance to run on new client connections
+ * @param port The port on which the server will listen for incoming connections
  */
 server_t *server_init(router_t *router, int port);
 
 /**
  * server_start listens for client connections and executes routing
  *
- * @param server
+ * @param server The server instance on which to start listening
  * @returns bool indicating whether this blocking operation failed
  */
 bool server_start(server_t *server);
 
 /**
- * Deallocates a server_t
+ * Deallocates a server_t's heap memory
  *
  * @param server
  */
 void server_free(server_t *server);
 
 /**
- * req_get_parameter gets parameter value matching `key`, or NULL if not extant
+ * req_get_parameter retrieves the parameter value matching `key`, or NULL if
+ * not extant
  *
  * @param req
  * @param key
@@ -270,7 +309,8 @@ void server_free(server_t *server);
 char *req_get_parameter(req_t *req, const char *key);
 
 /**
- * req_num_parameters returns the number of parameters on the given request
+ * req_num_parameters returns the number of parameters matched on the given
+ * request
  *
  * @param req
  * @return unsigned int
@@ -282,7 +322,8 @@ unsigned int req_num_parameters(req_t *req);
  * any parameters
  *
  * @param req
- * @return bool
+ * @return true if the request contains any matched parameters
+ * @return false if the request contains no matched parameters
  */
 bool req_has_parameters(req_t *req);
 
@@ -291,7 +332,10 @@ bool req_has_parameters(req_t *req);
  *
  * @param req
  * @param key
- * @return char** A list of values e.g. key=1&key=2&key=3, or NULL if no match
+ * @return char** A list of values, or NULL if no match
+ * For example, if the request URL was some-url/?key=1&key=2&key=3, calling
+ * req_get_query(req, "key") would yield ["1", "2", "3"]. Use `req_num_queries`
+ * to retrieve the size of this list.
  */
 char **req_get_query(req_t *req, const char *key);
 
@@ -306,8 +350,19 @@ char **req_get_query(req_t *req, const char *key);
 bool req_has_query(req_t *req, const char *key);
 
 /**
+ * req_num_queries returns the number of values associated with a given key
+ * `key`
  *
- * middlewares binds n middleware handlers to the router attributes instance
+ * @param req
+ * @param key
+ * @return unsigned int
+ */
+unsigned int req_num_queries(req_t *req, const char *key);
+
+/**
+ * middlewares binds n middleware handlers to the router attributes instance.
+ * You do not need to pass a NULL sentinel to terminate the list; this macro
+ * will do this for you.
  *
  * @param router_attr_t*
  * @param handler_t*[]
@@ -324,7 +379,8 @@ bool req_has_query(req_t *req, const char *key);
 void __middlewares(router_attr_t *r, handler_t *mw, ...);
 
 /**
- * add_middleware appends a new middleware to the routes attributes object
+ * add_middleware binds a new middleware to the routes attributes object.
+ * Middlewares will be run in a LIFO fashion.
  *
  * @param r
  * @param mw
@@ -332,7 +388,10 @@ void __middlewares(router_attr_t *r, handler_t *mw, ...);
 void add_middleware(router_attr_t *r, handler_t *mw);
 
 /**
- * set_allowed_origins sets the cors_opts_t allowed origins
+ * set_allowed_origins sets allowed origins on given the cors_opts_t. You do not
+ * need to pass a NULL sentinel to terminate the list; this macro will do this
+ * for you.
+ *
  * @param o cors_opts_t*
  * @param ... char*[]
  */
@@ -340,7 +399,10 @@ void add_middleware(router_attr_t *r, handler_t *mw);
   c->allowed_origins = array_collect(__VA_ARGS__)
 
 /**
- * set_allowed_methods sets the cors_opts_t allowed methods
+ * set_allowed_methods sets the allowed methods on the given cors_opts_t. You do
+ * not need to pass a NULL sentinel to terminate the list; this macro will do
+ * this for you.
+ *
  * @param o cors_opts_t*
  * @param ... char*[]
  */
@@ -348,7 +410,10 @@ void add_middleware(router_attr_t *r, handler_t *mw);
   c->allowed_methods = array_collect(__VA_ARGS__)
 
 /**
- * set_allowed_headers sets the cors_opts_t allowed headers
+ * set_allowed_headers sets the allowed headers on the given cors_opts_t. You do
+ * not need to pass a NULL sentinel to terminate the list; this macro will do
+ * this for you.
+ *
  * @param o cors_opts_t*
  * @param ... char*[]
  */
@@ -383,7 +448,7 @@ void set_use_options_passthrough(cors_opts_t *c, bool use);
  * set_max_age sets the cors_opts_t max age option
  *
  * @param c
- * @param max_age
+ * @param max_age an int, interpreted as seconds
  */
 void set_max_age(cors_opts_t *c, int max_age);
 
@@ -404,8 +469,8 @@ cors_opts_t *cors_allow_all();
 void use_cors(router_attr_t *r, cors_opts_t *opts);
 
 /**
- * from_file reads a file into a string buffer. Useful utility for passing to
- * `set_body`.
+ * from_file reads a file into a string buffer, which may then be passed
+ * directly to `set_body` e.g. set_body(res, from_file("./index.html"));
  *
  * @param filename
  * @return char*

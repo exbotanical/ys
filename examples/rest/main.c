@@ -7,7 +7,6 @@
 #include "json.h"
 #include "libhttp.h"
 
-// TODO: finalize example
 #define PORT 9000
 
 typedef struct record {
