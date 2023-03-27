@@ -17,7 +17,7 @@ void sanity_test_regex_cache_get() {
      "retrieved regex is valid");
 }
 
-int main(int argc, char const *argv[]) {
+int main() {
   plan(2);
   sanity_test_regex_cache_get();
   done_testing();

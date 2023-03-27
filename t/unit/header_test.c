@@ -156,7 +156,7 @@ void test_derive_headers() {
   }
 }
 
-int main(int argc, char const *argv[]) {
+int main() {
   plan(24);
 
   test_token_table();

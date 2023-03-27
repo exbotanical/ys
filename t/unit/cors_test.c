@@ -573,7 +573,7 @@ void test_set_helpers() {
      "set_allowed_headers allows the headers");
 }
 
-int main(int argc, char const *argv[]) {
+int main() {
   plan(85);
 
   test_cors_middleware();

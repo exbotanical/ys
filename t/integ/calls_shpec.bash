@@ -194,3 +194,12 @@ describe 'REST functionality'
     assert equal "$body" '{"message":"no matching record"}'
   ti
 end_describe
+
+describe 'query and route parameters'
+  it 'reads all of the query parameters'
+    res="$(curl -s -i "$SERVER_ADDR/metadata/?movies=LoveExposure&movies=Downtown81")"
+
+    body="$(tail -1 <<< "$res")"
+    assert equal "$body" 'LoveExposureDowntown81'
+  ti
+end_describe

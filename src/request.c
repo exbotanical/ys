@@ -79,8 +79,8 @@ req_meta_t req_read_and_parse(int sock) {
   }
 
   req_t* request = xmalloc(sizeof(req_t));
-  request->raw = strdup(buf);  // TODO: full req
-  request->body = strdup(buf + pret);
+  request->raw = s_copy(buf);
+  request->body = s_copy(buf + pret);
   request->content_length = pret;
   request->method = fmt_str("%.*s", (int)method_len, method);
   request->path = fmt_str("%.*s", (int)path_len, path);
@@ -118,28 +118,41 @@ req_meta_t req_read_and_parse(int sock) {
   return meta;
 }
 
-parameter_t* req_get_parameter_at(req_t* req, unsigned int idx) {
+char* req_get_parameter(req_t* req, const char* key) {
   if (!req->parameters) return NULL;
-  return array_get(req->parameters, idx);
+  return ht_get(req->parameters, key);
 }
 
-void* req_get_parameter(req_t* req, const char* key) {
-  if (!req->parameters) return NULL;
-  for (unsigned int i = 0; i < req_num_parameters(req); i++) {
-    parameter_t* param = req_get_parameter_at(req, i);
-    if (s_equals(param->key, key)) {
-      return param->value;
+unsigned int req_num_parameters(req_t* req) {
+  if (!req->parameters) return 0;
+  return req->parameters->count;
+}
+
+bool req_has_parameters(req_t* req) {
+  return req && req->parameters && req->parameters->count > 0;
+}
+
+char** req_get_query(req_t* req, const char* key) {
+  array_t* arr = ht_get(req->queries, key);
+  if (arr) {
+    char** values = malloc(array_size(arr));
+    foreach (arr, i) {
+      values[i] = array_get(arr, i);
     }
+    return values;
   }
 
   return NULL;
 }
 
-unsigned int req_num_parameters(req_t* req) {
-  if (!req->parameters) return 0;
-  return array_size(req->parameters);
+bool req_has_query(req_t* req, const char* key) {
+  return req->queries && ht_search(req->queries, key);
 }
 
-bool req_has_parameters(req_t* req) {
-  return req && req->parameters && array_size(req->parameters) > 0;
+unsigned int req_num_queries(req_t* req, const char* key) {
+  if (req_has_query(req, key)) {
+    return array_size((array_t*)ht_get(req->queries, key));
+  }
+
+  return 0;
 }

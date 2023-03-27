@@ -110,7 +110,8 @@ typedef struct {
   const char *user_agent;
   const char *content_type;
   const char *version;
-  array_t *parameters;
+  hash_table *parameters;
+  hash_table *queries;
   hash_table *headers;
   int content_length;
 } req_t;
@@ -266,16 +267,7 @@ void server_free(server_t *server);
  * @param key
  * @return void*
  */
-void *req_get_parameter(req_t *req, const char *key);
-
-/**
- * req_get_parameter_at gets a request parameter at the specified index
- *
- * @param req
- * @param idx
- * @return parameter_t*
- */
-parameter_t *req_get_parameter_at(req_t *req, unsigned int idx);
+char *req_get_parameter(req_t *req, const char *key);
 
 /**
  * req_num_parameters returns the number of parameters on the given request
@@ -295,6 +287,26 @@ unsigned int req_num_parameters(req_t *req);
 bool req_has_parameters(req_t *req);
 
 /**
+ * req_get_query gets the list of values for a given query key
+ *
+ * @param req
+ * @param key
+ * @return char** A list of values e.g. key=1&key=2&key=3, or NULL if no match
+ */
+char **req_get_query(req_t *req, const char *key);
+
+/**
+ * req_has_query tests whether the request has a query match for `key`
+ *
+ * @param req
+ * @param key
+ * @return true if the request has at least one query match for the given key
+ * @return false if the request has no query matches for the given key
+ */
+bool req_has_query(req_t *req, const char *key);
+
+/**
+ *
  * middlewares binds n middleware handlers to the router attributes instance
  *
  * @param router_attr_t*

@@ -20,7 +20,7 @@
 - [x] xmalloc that dies
 
 ## Testing
-- [ ] test handlers with a mocking library
+- [ ] test handlers with a mocking library?
 - [ ] test with a real server (E2E)
 
 ## UX
@@ -36,11 +36,11 @@
 - [x] Built-in middlewares
   - [x] CORS middleware
 - [ ] Cookies
-- [ ] support erroneous (Request / Response)s
+- [x] support erroneous (Request / Response)s
 - [x] use attr struct for fallback handlers
 - [ ] Figure out file routing. The problem here is we want the `response_t` type to be accessible to consumers without having to compile the entire library and link it.
 - [ ] SSL support
-- [ ] JSON parsed body in context
+- [x] JSON parsed body in context (decided to offer JSON opt-in utilities)
 - [ ] async i/o option using epoll
   - [ ] Evented server e.g. `onRequest`
 - [x] global middlewares
@@ -61,6 +61,8 @@
   - [ ] keep-alive
   - [ ] cache-control
   - [ ] transfer-encoding
+- [ ] Test URL fragments
+- [ ] URL queries
 
 ## Misc Improvements
 - [ ] use a better regex engine than pcre

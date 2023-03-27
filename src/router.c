@@ -198,18 +198,18 @@ void router_run(__router_t *router, int client_socket, req_t *req) {
     res = internal_router->method_not_allowed_handler(req, res);
   } else {
     req->parameters = result->parameters;
+    req->queries = result->queries;
 
     handler_t *h = (handler_t *)result->action->handler;
 
     // TODO: wrap other handlers - for example, if auth or CORS err, caller
     // should not see 404 and 405
-    bool done = false;
     array_t *mws = router->middlewares;
     if (mws && array_size(mws) > 0) {
-      done = invoke_chain(req, res, mws);
+      res->done = invoke_chain(req, res, mws);
     }
 
-    if (!done) {
+    if (!res->done) {
       res = h(req, res);
     }
   }

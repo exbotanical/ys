@@ -175,12 +175,26 @@ res_t *handle_post(req_t *req, res_t *res) {
 
   add_record(id, v);
 
-  set_status(res, STATUS_CREATED);  // TODO: default to 200
+  set_status(res, STATUS_CREATED);
 
   return res;
 }
 
-res_t *handler(req_t *req, res_t *res) {
+req_t *meta_handler(req_t *req, res_t *res) {
+  char **movies = req_get_query(req, "movies");
+
+  buffer_t *buf = buffer_init(NULL);
+  for (unsigned int i = 0; i < req_num_queries(req, "movies"); i++) {
+    buffer_append(buf, movies[i]);
+  }
+
+  set_body(res, buffer_state(buf));
+
+  // status defaults to 200 when not set explicitly
+  return res;
+}
+
+res_t *root_handler(req_t *req, res_t *res) {
   set_header(res, "Content-Type", "text/plain");
   set_header(res, "X-Powered-By", "integ-test");
   set_header(res, "X-Not-Exposed", "integ-test");
@@ -210,7 +224,8 @@ int main() {
   router_t *router = router_init(attr);
   char *record_path = "/records/:id[^\\d+$]";
 
-  router_register(router, "/", handler, METHOD_GET, NULL);
+  router_register(router, "/", root_handler, METHOD_GET, NULL);
+  router_register(router, "/metadata", meta_handler, METHOD_GET, NULL);
 
   router_register(router, record_path, handle_get, METHOD_GET, NULL);
   router_register(router, record_path, handle_delete, METHOD_DELETE, NULL);

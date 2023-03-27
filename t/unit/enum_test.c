@@ -7,7 +7,7 @@ void sanity_test_enum_macros() {
      "gets the expected status string using the enum");
 }
 
-int main(int argc, char const *argv[]) {
+int main() {
   plan(2);
   sanity_test_enum_macros();
   done_testing();

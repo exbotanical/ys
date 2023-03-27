@@ -35,4 +35,50 @@ array_t *split(const char *str, const char *delimiter);
  */
 char *str_join(array_t *strarr, const char *delim);
 
+/**
+ * str_cut slices s around the first instance of sep, returning the text before
+ * and after sep in a 2-element array. If sep does not appear in s, str_cut
+ * returns NULL.
+ * TODO: test
+ * @param s
+ * @param sep
+ * @return array_t*
+ */
+array_t *str_cut(const char *s, const char *sep);
+
+/**
+ * str_contains_ctl_byte reports whether s contains any ASCII control character
+ *
+ * @param s
+ * @return true
+ * @return false
+ */
+bool str_contains_ctl_byte(const char *s);
+
+/**
+ * ishex tests whether a character is valid hex
+ *
+ * @param c
+ * @return true
+ * @return false
+ */
+bool ishex(char c);
+
+/**
+ * unhex converts the given char `c` into its hex integer equivalent
+ * e.g. 'f' -> 15
+ *
+ * @param c
+ * @return char
+ */
+char unhex(char c);
+
+/**
+ * Convert a char `c` into a char*
+ *
+ * @param c
+ * @return char*
+ */
+char *tostr(char c);
+
 #endif /* UTIL_H */

@@ -101,9 +101,18 @@ void test_trie_search_ok() {
                        {.path = "/bar/:id[^\\d+$]/:user[^\\D+$]",
                         .methods = collect_methods(METHOD_POST, NULL),
                         .handler = test_handler},
-                       {.path = "/:*[(.+)]",
-                        .methods = collect_methods(METHOD_OPTIONS, NULL),
-                        .handler = test_handler}};
+                       {
+                           .path = "/:*[(.+)]",
+                           .methods = collect_methods(METHOD_OPTIONS, NULL),
+                           .handler = test_handler,
+                       },
+                       {
+                           .path = "/futon",
+                           .methods = collect_methods(METHOD_OPTIONS, NULL),
+                           .handler = test_handler,
+                       }
+
+  };
 
   test_case tests[] = {
       {.name = "SearchRoot", .search = {.method = "GET", .path = "/"}},
@@ -124,7 +133,11 @@ void test_trie_search_ok() {
       {.name = "SearchComplexRegex",
        .search = {.method = "POST", .path = "/bar/123/alice"}},
       {.name = "SearchWildcardRegex",
-       .search = {.method = "OPTIONS", .path = "/wildcard"}}};
+       .search = {.method = "OPTIONS", .path = "/wildcard"}},
+      {.name = "WithQueryStringIgnored",
+       .search = {.method = "OPTIONS", .path = "/futon/?ohno=1&heu=2"}}
+
+  };
 
   trie_t *trie = trie_init();
 
@@ -220,13 +233,53 @@ void test_trie_search_no_match() {
   free(trie);
 }
 
+void test_trie_search_ignore_trailing_slash() {
+  trie_t *trie = trie_init();
+
+  trie_insert(trie, array_collect("GET"), "/foo", test_handler);
+  result_t *r = trie_search(trie, "GET", "/foo/");
+  isnt(r, NULL, "trie search ignores trailing slash");
+
+  lives_ok({ r->action->handler(NULL, NULL); },
+           "TrieSearchIgnoreTrailingSlash - callable handler");
+
+  trie_insert(trie, array_collect("GET"), "/bar/", test_handler);
+  result_t *r2 = trie_search(trie, "GET", "/bar/");
+  isnt(r2, NULL, "trie insert ignores trailing slash");
+
+  lives_ok({ r2->action->handler(NULL, NULL); },
+           "TrieSearchIgnoreTrailingSlash - callable handler");
+
+  free(trie);
+}
+
+void test_trie_search_with_queries() {
+  trie_t *trie = trie_init();
+
+  trie_insert(trie, array_collect("GET"), "/foo", test_handler);
+
+  result_t *r = trie_search(trie, "GET", "/foo/?cookie=1&value=12");
+
+  ht_record *rr = ht_search(r->queries, "cookie");
+
+  is(array_get(ht_get(r->queries, "cookie"), 0), "1",
+     "stores the query key/value pairs");
+  is(array_get(ht_get(r->queries, "value"), 0), "12",
+     "stores the query key/value pairs");
+  ok(r->queries->count, "has only 2 query results");
+
+  free(trie);
+}
+
 int main(int argc, char *argv[]) {
-  plan(34);
+  plan(43);
 
   test_trie_init();
   test_trie_insert();
   test_trie_search_ok();
   test_trie_search_no_match();
+  test_trie_search_ignore_trailing_slash();
+  test_trie_search_with_queries();
 
   done_testing();
 }

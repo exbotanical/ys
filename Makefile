@@ -31,11 +31,12 @@ unit_test:
 	./scripts/test.bash
 	$(MAKE) clean
 
+# make -s integ_test 2>/dev/null
 integ_test:
 	./scripts/test.bash integ
 	$(CC) t/integ/server.c -Isrc -Ideps -o $(INTEG_BIN) -L. -lhttp
 	shpec
-	rm integ
+	# rm integ
 
 lint:
 	$(LINTER) -i $(SRC) $(TESTS)

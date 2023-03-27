@@ -7,15 +7,9 @@
 #include "libutil/libutil.h"  // for s_copy, s_equals
 #include "logger.h"
 #include "path.h"
+#include "url.h"
 #include "util.h"
 #include "xmalloc.h"
-
-static parameter_t *parameter_init(const char *k, const char *v) {
-  parameter_t *p = xmalloc(sizeof(parameter_t));
-  p->key = k;
-  p->value = v;
-  return p;
-}
 
 /**
  * node_init allocates memory for a new node, its children and action members
@@ -64,11 +58,13 @@ trie_t *trie_init() {
 
 void trie_insert(trie_t *trie, array_t *methods, const char *path,
                  void *(*handler)(void *, void *)) {
+  char *realpath = s_copy(path);
+
   node_t *curr = trie->root;
 
   // Handle root path
-  if (s_equals(path, PATH_ROOT)) {
-    curr->label = s_copy(path);
+  if (s_equals(realpath, PATH_ROOT)) {
+    curr->label = realpath;
 
     foreach (methods, i) {
       action_t *action = xmalloc(sizeof(action_t));
@@ -81,7 +77,7 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
     return;
   }
 
-  array_t *paths = expand_path(path);
+  array_t *paths = expand_path(realpath);
   foreach (paths, i) {
     char *split_path = array_get(paths, i);
     ht_record *next = ht_search(curr->children, split_path);
@@ -116,20 +112,24 @@ void trie_insert(trie_t *trie, array_t *methods, const char *path,
 
 result_t *trie_search(trie_t *trie, const char *method,
                       const char *search_path) {
-  result_t *result = xmalloc(sizeof(result_t));
+  // Extract query string, if present
+  char *realpath = s_copy(search_path);
 
-  result->parameters = array_init();
-  if (!result->parameters) {
-    free(result->parameters);
-    DIE(EXIT_FAILURE,
-        "[trie::%s] failed to allocate result->parameters via array_init\n",
-        __func__);
-  }
+  result_t *result = xmalloc(sizeof(result_t));
+  result->parameters = ht_init(0);
   result->flags = INITIAL_FLAG_STATE;
 
   node_t *curr = trie->root;
 
-  array_t *paths = expand_path(search_path);
+  if (has_query_string(search_path)) {
+    array_t *arr = str_cut(realpath, "?");
+    // Remove query from path
+    realpath = array_get(arr, 0);
+
+    result->queries = parse_query(array_get(arr, 1));
+  }
+
+  array_t *paths = expand_path(realpath);
   foreach (paths, i) {
     char *path = array_get(paths, i);
 
@@ -183,15 +183,7 @@ result_t *trie_search(trie_t *trie, const char *method,
         }
 
         char *param_key = derive_parameter_key(child->label);
-
-        parameter_t *param = parameter_init(param_key, path);
-
-        if (!array_push(result->parameters, param)) {
-          printlogf(LOG_INFO,
-                    "[trie::%s] failed to insert parameter record in "
-                    "result->parameters\n",
-                    __func__);
-        }
+        ht_insert(result->parameters, param_key, path);
 
         ht_record *next = ht_search(curr->children, child->label);
         if (!next) {
@@ -217,7 +209,7 @@ result_t *trie_search(trie_t *trie, const char *method,
     }
   }
 
-  if (s_equals(search_path, PATH_ROOT)) {
+  if (s_equals(realpath, PATH_ROOT)) {
     // No matching handler
     if (curr->actions->count == 0) {
       result->flags |= NOT_FOUND_MASK;

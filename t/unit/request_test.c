@@ -5,19 +5,12 @@
 #include "libhttp.h"
 #include "tap.c/tap.h"
 
-static parameter_t *parameter_init(const char *k, const char *v) {
-  parameter_t *p = xmalloc(sizeof(parameter_t));
-  p->key = k;
-  p->value = v;
-  return p;
-}
-
 static req_t *make_req() {
   req_t *req = malloc(sizeof(req_t));
-  req->parameters = array_init();
+  req->parameters = ht_init(0);
 
-  array_push(req->parameters, parameter_init("k1", "v1"));
-  array_push(req->parameters, parameter_init("k2", "v2"));
+  ht_insert(req->parameters, "k1", "v1");
+  ht_insert(req->parameters, "k2", "v2");
   return req;
 }
 
@@ -64,25 +57,6 @@ void test_fix_pragma_cache_control_no_pragma() {
   ok(headers->count == 0, "has no header keys");
 }
 
-void test_req_get_parameter_at() {
-  req_t *req = make_req();
-
-  is(req_get_parameter_at(req, 0)->key, "k1", "returns the correct parameter");
-  is(req_get_parameter_at(req, 0)->value, "v1",
-     "returns the correct parameter");
-  is(req_get_parameter_at(req, 1)->key, "k2", "returns the correct parameter");
-  is(req_get_parameter_at(req, 1)->value, "v2",
-     "returns the correct parameter");
-}
-
-void test_req_get_parameter_at_no_param() {
-  req_t *req = malloc(sizeof(req_t));
-
-  is(req_get_parameter_at(req, 0), NULL, "returns NULL if no parameters");
-  is(req_get_parameter_at(req, 100), NULL,
-     "returns NULL if no parameters no matter the index");
-}
-
 void test_req_get_parameter() {
   req_t *req = make_req();
 
@@ -123,14 +97,11 @@ void test_req_has_parameters() {
 }
 
 int main() {
-  plan(22);
+  plan(16);
 
   test_fix_pragma_cache_control();
   test_fix_pragma_cache_control_has_cache_control();
   test_fix_pragma_cache_control_no_pragma();
-
-  test_req_get_parameter_at();
-  test_req_get_parameter_at_no_param();
 
   test_req_get_parameter();
   test_req_get_parameter_no_param();

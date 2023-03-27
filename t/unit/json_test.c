@@ -53,7 +53,7 @@ void test_json_getint_sadcase() {
      "non-existent nested key returns 0");
 }
 
-int main(int argc, char const *argv[]) {
+int main() {
   plan(11);
 
   test_json_getstr_toplvl_happycase();

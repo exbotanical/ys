@@ -33,16 +33,13 @@ typedef struct {
   void *(*handler)(void *, void *);
 } action_t;
 
-// Parameter collected from a route match
-typedef struct {
-  char *key;
-  char *value;
-} parameter_t;
-
 // Trie search result record
 typedef struct {
   action_t *action;
-  array_t *parameters;
+  // hash_table<char*, char*>
+  hash_table *parameters;
+  // hash_table<char*, hash_set<char*>>
+  hash_table *queries;
   unsigned int flags;
 } result_t;
 

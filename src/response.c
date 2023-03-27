@@ -41,13 +41,13 @@ static bool should_set_content_len(req_t *req, res_t *res) {
 buffer_t *res_serialize(req_t *req, res_t *res) {
   buffer_t *rbuf = buffer_init(NULL);
   if (!rbuf) {
-    // TODO: constant template str for malloc failures
     DIE(EXIT_FAILURE, "[response::%s] could not allocate memory for buffer_t\n",
         __func__);
   }
 
   array_t *headers = res->headers;
   const int status = res->status;
+
   const char *body = res->body;
 
   buffer_append(rbuf,
@@ -138,11 +138,10 @@ res_t *res_init() {
   res_t *res = xmalloc(sizeof(res_t));
 
   res->headers = array_init();
-  if (!res->headers) {
-    DIE(EXIT_FAILURE, "[response::%s] unable to allocate array_t\n", __func__);
-  }
-
   res->body = NULL;
+  res->status = STATUS_OK;  // default
+  res->done = false;
+
   return res;
 }
 

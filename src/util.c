@@ -9,6 +9,7 @@
 #include "logger.h"           // for DIE
 #include "xmalloc.h"
 
+// TODO: fix
 char *safe_itoa(int x) {
   int length = snprintf(NULL, 0, "%d", x);
   char *str = xmalloc(length + 1);
@@ -85,4 +86,51 @@ char *str_join(array_t *strarr, const char *delim) {
   }
 
   return buffer_state(buf);
+}
+
+array_t *str_cut(const char *s, const char *sep) {
+  int i = s_indexof(s, sep);
+
+  if (i >= 0) {
+    char *first = s_substr(s, 0, i, false);
+    char *second = s_substr(s, i + strlen(sep), strlen(s), true);
+
+    return array_collect(s_nullish(first) ? NULL : first,
+                         s_nullish(second) ? NULL : second);
+  }
+
+  return array_collect(s);
+}
+
+bool str_contains_ctl_byte(const char *s) {
+  for (unsigned int i = 0; i < strlen(s); i++) {
+    char b = s[i];
+    if (b < ' ' || b == 0x7f) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool ishex(char c) {
+  if ('0' <= c && c <= '9') return true;
+  if ('a' <= c && c <= 'f') return true;
+  if ('A' <= c && c <= 'F') return true;
+
+  return false;
+}
+
+char unhex(char c) {
+  if ('0' <= c && c <= '9') return c - '0';
+  if ('a' <= c && c <= 'f') return c - 'a' + 10;
+  if ('A' <= c && c <= 'F') return c - 'A' + 10;
+
+  return 0;
+}
+
+char *tostr(char c) {
+  char *strp = malloc(2);
+  char str[2] = {c, '\0'};
+  memcpy(strp, str, 2);
+  return strp;
 }

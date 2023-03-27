@@ -12,11 +12,12 @@ declare -a SKIP_FILES=(
   # 'enum_test.c'
   # 'header_test.c'
   # 'json_test.c'
+  # 'middleware_test.c'
 	# 'path_test.c'
   # 'request_test.c'
 	# 'trie_test.c'
+  # 'url_test.c'
   # 'util_test.c'
-  # 'middleware_test.c'
 )
 
 not_test_file () {
