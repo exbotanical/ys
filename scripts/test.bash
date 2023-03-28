@@ -6,19 +6,19 @@ UTIL_F=util.bash
 REPO_DIR=http
 
 declare -a SKIP_FILES=(
-  'cache_test.c'
-  'config_test.c'
-  'cors_configest.c'
-  'enum_test.c'
-  'header_pairest.c'
-  'json_test.c'
-  'middleware_test.c'
-	'path_test.c'
-  'request_test.c'
+  # 'cache_test.c'
+  # 'config_test.c'
+  # 'cors_test.c'
+  # 'enum_test.c'
+  # 'header_test.c'
+  # 'json_test.c'
+  # 'middleware_test.c'
+	# 'path_test.c'
+  # 'request_test.c'
   # 'response_test.c'
-	'trie_test.c'
-  'url_test.c'
-  'util_test.c'
+	# 'trie_test.c'
+  # 'url_test.c'
+  # 'util_test.c'
 )
 
 not_test_file () {
@@ -55,7 +55,7 @@ run_test () {
 
 main () {
   export USE_JSON=1
-	make
+  make
 
   [[ $1 == 'integ' ]] && return
 

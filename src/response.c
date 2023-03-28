@@ -9,6 +9,7 @@
 #include "header.h"
 #include "libutil/libutil.h"  // for s_equals, s_copy
 #include "logger.h"           // for DIE
+#include "util.h"
 #include "xmalloc.h"
 
 static const char CRLF[3] = "\r\n";
@@ -38,8 +39,6 @@ static bool should_set_content_len(request *req, response *res) {
  * @param req
  * @param res
  * @return buffer_t*
- *
- * TODO: test
  */
 buffer_t *res_serialize(request *req, response *res) {
   buffer_t *buf = buffer_init(NULL);
@@ -48,7 +47,7 @@ buffer_t *res_serialize(request *req, response *res) {
         __func__);
   }
 
-  array_t *headers = res->headers;
+  hash_table *headers = res->headers;
   const int status = res->status;
   const char *body = res->body;
 
@@ -56,10 +55,12 @@ buffer_t *res_serialize(request *req, response *res) {
                 fmt_str("HTTP/1.1 %d %s", status, http_status_names[status]));
   buffer_append(buf, CRLF);
 
-  foreach (headers, i) {
-    header_pair *header = array_get(headers, i);
+  for (unsigned int i = 0; i < headers->capacity; i++) {
+    ht_record *header = headers->records[i];
+    if (!header) continue;
 
-    buffer_append(buf, fmt_str("%s: %s", header->key, header->value));
+    buffer_append(buf, fmt_str("%s: %s", header->key,
+                               str_join((array_t *)header->value, ",")));
     buffer_append(buf, CRLF);
   }
 
@@ -69,7 +70,6 @@ buffer_t *res_serialize(request *req, response *res) {
   // (Successful) response to a METHOD_CONNECT request (Section 4.3.6 of
   // [RFC7231]).
 
-  // TODO: test
   if (req && should_set_content_len(req, res)) {
     buffer_append(buf, fmt_str("Content-Length: %d", body ? strlen(body) : 0));
     buffer_append(buf, CRLF);
@@ -117,7 +117,7 @@ done:
 }
 
 void res_preempterr(int sockfd, parse_error err) {
-  response *res = res_init();
+  response *res = response_init();
 
   switch (err) {
     case IO_ERR:
@@ -140,10 +140,10 @@ void res_preempterr(int sockfd, parse_error err) {
   res_send(sockfd, res_serialize(NULL, res));
 }
 
-response *res_init() {
+response *response_init() {
   response *res = xmalloc(sizeof(response));
 
-  res->headers = array_init();
+  res->headers = ht_init(0);
   res->body = NULL;
   res->status = STATUS_OK;  // Default
   res->done = false;

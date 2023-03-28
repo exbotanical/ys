@@ -147,7 +147,7 @@ typedef struct {
   /**
    * HTTP headers - optional, but you should pass content-type if sending a body
    */
-  array_t *headers;
+  hash_table *headers;
 
   /**
    * response body - optional; Content-length header will be set for you
@@ -208,8 +208,7 @@ typedef struct {
 typedef server_internal *tcp_server;
 
 /**
- * set_header appends the given key/value pair as a header object in
- * `headers`
+ * set_header inserts the given key/value pair as a header on the response
  *
  * @param res
  * @param key

@@ -5,7 +5,7 @@
 #include "config.h"
 #include "libutil/libutil.h"  // for s_copy, s_equals
 #include "logger.h"
-#include "response.h"  // for res_init, res_send
+#include "response.h"  // for response_init, res_send
 #include "xmalloc.h"
 
 static const char CONFIG_FILE_NAME[13] = "libhttp.conf";
@@ -212,7 +212,7 @@ void router_run(router_internal *router, int client_sockfd, request *req) {
   route_result *result =
       trie_search(internal_router->trie, req->method, req->path);
 
-  response *res = res_init();
+  response *res = response_init();
 
   if (!result) {
     res = internal_router->internal_error_handler(req, res);

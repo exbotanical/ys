@@ -8,7 +8,7 @@
 #include "libhttp.h"
 #include "tap.c/tap.h"
 
-// TODO: cleanup test helpers
+// TODO: cleanup test helpers and use test_util
 static const char *all_headers[] = {"Vary",
                                     "Access-Control-Allow-Origin",
                                     "Access-Control-Allow-Methods",
@@ -76,26 +76,26 @@ static bool header_key_eq(void *h, void *v) {
   return strcmp(((header_pair *)h)->key, (char *)v) == 0;
 }
 
-void check_headers(char *test_name, array_t *actual, array_t *expected) {
+void check_headers(char *test_name, hash_table *actual, array_t *expected) {
   for (unsigned int i = 0; i < sizeof(all_headers) / sizeof(char *); i++) {
     const char *key = all_headers[i];
 
     int eidx = array_find(expected, header_key_eq, key);
-    int aidx = array_find(actual, header_key_eq, key);
+
+    array_t *actualh = ht_get(actual, key);
 
     // If *both* are NULL, they're equal, so continue
-    if (eidx == -1 && aidx == -1) {
+    if (eidx == -1 && !actualh) {
       continue;
-    } else if (eidx == -1 || aidx == -1) {
+    } else if (eidx == -1 || !actualh) {
       fail("headers do not match: %s was not found in %s\n", key,
            eidx == -1 ? "expected" : "actual");
     }
 
     header_pair *expected_h = array_get(expected, eidx);
-    header_pair *actual_h = array_get(actual, aidx);
 
-    is(actual_h->value, expected_h->value, "%s - headers for key '%s' match",
-       test_name, key);
+    is(array_get(actualh, 0), expected_h->value,
+       "%s - headers for key '%s' match", test_name, key);
   }
 }
 
@@ -304,10 +304,11 @@ void test_cors_middleware() {
     insert_headers(req, test.req_headers);
 
     response *res = malloc(sizeof(response));
-    res->headers = array_init();
+    res->headers = ht_init(0);
 
     // Run CORS handler
     cors_init(test.options);
+
     cors_handler(req, res);
 
     // Evaluate resulting headers and status
@@ -488,8 +489,8 @@ void test_is_preflight_request() {
 }
 
 void test_cors_allow_all() {
-  cors_opts *o = cors_allow_all();
-  cors_config *c = cors_init(o);
+  cors_opts *opts = cors_allow_all();
+  cors_config *c = cors_init(opts);
 
   ok(c->allow_all_origins == true, "cors_allow_all allows all origins");
   ok(c->allow_all_headers == true, "cors_allow_all allows all headers");

@@ -36,9 +36,9 @@ describe 'libhttp integration tests'
     assert equal 'text/plain' "$res"
   ti
 
-  it 'sets the X-powered-by header'
+  it 'sets multiple X-powered-by headers'
     res="$(curl -i -s "$SERVER_ADDR" | get_header 'X-Powered-By')"
-    assert equal 'integ-test' "$res"
+    assert equal 'demo,integ-test' "$res"
   ti
 
   it 'returns a 405 for unsupported methods'

@@ -6,11 +6,11 @@
 #include "request.h"
 
 /**
- * res_init initializes a new response object
+ * response_init initializes a new response object
  *
  * @return response*
  */
-response *res_init();
+response *response_init();
 
 /**
  * res_serialize converts a user-defined response object into a buffer that

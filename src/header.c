@@ -229,11 +229,7 @@ char** req_header_values(hash_table* headers, const char* key) {
 }
 
 bool set_header(response* res, const char* key, const char* value) {
-  header_pair* header = xmalloc(sizeof(header_pair));
-  header->key = key;
-  header->value = value;
-
-  return array_push(res->headers, header);
+  return insert_header(res->headers, key, value);  // TODO: singleton check
 }
 
 bool insert_header(hash_table* headers, const char* key, const char* value) {

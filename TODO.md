@@ -92,6 +92,7 @@
 - [x] Allow OPTIONS requests by default in router when CORS enabled
 - [x] Urls with `-` segfault e.g. `/feed_meta/index-0.json`
   - [ ] Add test
+- [ ] curl - Connection #0 to host localhost left intact?
 
 ## Ecosystem
 - [ ] Addon / plugin libraries
