@@ -81,7 +81,7 @@
 - [x] Setup linter that uses Google's C/C++ style guide
 - [ ] `@return` doc for `true` and `false` cases instead of just `bool`
 - [x] pick a style for struct types
-- [ ] Debug helpers e.g.
+- [x] Debug helpers e.g.
   ```c
   static int c = 1;
   #define checkpoint() printf("CHECKPOINT %d\n", c++)

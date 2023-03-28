@@ -6,18 +6,19 @@ UTIL_F=util.bash
 REPO_DIR=http
 
 declare -a SKIP_FILES=(
-  # 'cache_test.c'
-  # 'config_test.c'
-  # 'cors_configest.c'
-  # 'enum_test.c'
-  # 'header_pairest.c'
-  # 'json_test.c'
-  # 'middleware_test.c'
-	# 'path_test.c'
-  # 'request_test.c'
-	# 'trie_test.c'
-  # 'url_test.c'
-  # 'util_test.c'
+  'cache_test.c'
+  'config_test.c'
+  'cors_configest.c'
+  'enum_test.c'
+  'header_pairest.c'
+  'json_test.c'
+  'middleware_test.c'
+	'path_test.c'
+  'request_test.c'
+  # 'response_test.c'
+	'trie_test.c'
+  'url_test.c'
+  'util_test.c'
 )
 
 not_test_file () {
@@ -41,8 +42,8 @@ not_test_file () {
 run_test () {
 	local file_name="$1"
 
-	gcc -w -D debug -Ideps -Isrc -c "$TESTING_DIR/$file_name" -o main.o
-	gcc -D debug -o main main.o -L./ -l$REPO_DIR -lm -lpcre
+	gcc -w -Ideps -Isrc -Ilib -c "$TESTING_DIR/$file_name" -o main.o
+	gcc -o main main.o -L./ -l$REPO_DIR -lm -lpcre
 
 	export LD_LIBRARY_PATH=$(pwd)/src/:$(pwd)/include/:$LD_LIBRARY_PATH
 	green "\n[+] Running test $file_name...\n\n"
