@@ -201,6 +201,8 @@ bool s_equals(const char *s1, const char *s2);
  */
 bool s_nullish(const char *s);
 
+char *s_trim(const char *s);
+
 #ifdef __cplusplus
 }
 #endif

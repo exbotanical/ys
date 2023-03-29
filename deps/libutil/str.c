@@ -6,6 +6,10 @@
 
 #include "libutil.h"
 
+static bool is_ascii_space(char b) {
+  return b == ' ' || b == '\t' || b == '\n' || b == '\r';
+}
+
 char *s_truncate(const char *s, int n) {
   unsigned int full_len = strlen(s);
   unsigned int trunclen = abs(n);
@@ -97,7 +101,8 @@ char *s_substr(const char *s, int start, int end, bool inclusive) {
   }
 
   int size_multiplier = end - start;
-  char *ret = malloc(sizeof(char) * size_multiplier);
+
+  char *ret = malloc(sizeof(char) * size_multiplier + 1);
   if (!ret) {
     return NULL;
   }
@@ -151,3 +156,17 @@ bool s_equals(const char *s1, const char *s2) {
 }
 
 bool s_nullish(const char *s) { return s == NULL || s_equals(s, ""); }
+
+char *s_trim(const char *s) {
+  char *scp = s_copy(s);
+
+  while (strlen(scp) > 0 && is_ascii_space(scp[0])) {
+    scp = s_substr(scp, 1, strlen(scp), true);
+  }
+
+  while (strlen(scp) > 0 && is_ascii_space(scp[strlen(scp) - 1])) {
+    scp = s_substr(scp, 0, strlen(scp) - 1, false);
+  }
+
+  return scp;
+}
