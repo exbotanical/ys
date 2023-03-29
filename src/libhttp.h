@@ -163,16 +163,7 @@ typedef response *route_handler(request *, response *);
 /**
  * CORS configuration options
  */
-typedef struct {
-  bool allow_credentials;
-  bool use_options_passthrough;
-  unsigned int max_age;
-  array_t *allowed_origins;
-  array_t *allowed_methods;
-  array_t *allowed_headers;
-  array_t *expose_headers;
-} cors_opts_internal;
-typedef cors_opts_internal cors_opts;  // TODO: ptr
+typedef struct cors_opts_internal cors_opts;  // TODO: ptr
 
 /**
  * A router / HTTP multiplexer
@@ -369,10 +360,6 @@ unsigned int req_num_queries(request *req, const char *key);
 
 /**
  * @internal
- *
- * @param attr
- * @param mw
- * @param ...
  */
 void __middlewares(router_attr *attr, route_handler *mw, ...);
 
@@ -394,7 +381,12 @@ void add_middleware(router_attr *attr, route_handler *mw);
  * @param ... char*[]
  */
 #define set_allowed_origins(opts, ...) \
-  opts->allowed_origins = array_collect(__VA_ARGS__)
+  __set_allowed_origins(opts, array_collect(__VA_ARGS__))
+
+/**
+ * @internal
+ */
+void __set_allowed_origins(cors_opts *opts, array_t *origins);
 
 /**
  * set_allowed_methods sets the allowed methods on the given cors_opts. You do
@@ -405,7 +397,12 @@ void add_middleware(router_attr *attr, route_handler *mw);
  * @param ... char*[]
  */
 #define set_allowed_methods(opts, ...) \
-  opts->allowed_methods = array_collect(__VA_ARGS__)
+  __set_allowed_methods(opts, array_collect(__VA_ARGS__))
+
+/**
+ * @internal
+ */
+void __set_allowed_methods(cors_opts *opts, array_t *methods);
 
 /**
  * set_allowed_headers sets the allowed headers on the given cors_opts. You do
@@ -416,7 +413,12 @@ void add_middleware(router_attr *attr, route_handler *mw);
  * @param ... char*[]
  */
 #define set_allowed_headers(opts, ...) \
-  opts->allowed_headers = array_collect(__VA_ARGS__)
+  __set_allowed_headers(opts, array_collect(__VA_ARGS__))
+
+/**
+ * @internal
+ */
+void __set_allowed_headers(cors_opts *opts, array_t *headers);
 
 /**
  * set_expose_headers sets the expose headers on the given cors_opts. You do
@@ -427,7 +429,12 @@ void add_middleware(router_attr *attr, route_handler *mw);
  * @param ... char*[]
  */
 #define set_expose_headers(opts, ...) \
-  opts->expose_headers = array_collect(__VA_ARGS__)
+  __set_expose_headers(opts, array_collect(__VA_ARGS__))
+
+/**
+ * @internal
+ */
+void __set_expose_headers(cors_opts *opts, array_t *headers);
 
 /**
  * cors_opts_init initializes a new CORS options object

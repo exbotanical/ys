@@ -1,6 +1,7 @@
+#include "cookie.c"
+
 #include <stdarg.h>
 
-#include "cookies.c"
 #include "libhash/libhash.h"
 #include "libhttp.h"
 #include "libutil/libutil.h"

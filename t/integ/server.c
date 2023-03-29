@@ -207,7 +207,7 @@ response *root_handler(request *req, response *res) {
 }
 
 cors_opts *setup_cors() {
-  cors_opts *opts = malloc(sizeof(cors_opts));
+  cors_opts *opts = cors_opts_init();
 
   set_allowed_methods(opts, "GET", "DELETE");
   set_allowed_headers(opts, "X-Test-Header");

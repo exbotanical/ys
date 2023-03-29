@@ -245,15 +245,15 @@ static void handle_preflight_request(request *req, response *res) {
 }
 
 cors_opts *cors_opts_init() {
-  cors_opts *opts = xmalloc(sizeof(cors_opts));
+  cors_opts_internal *opts = xmalloc(sizeof(cors_opts_internal));
   opts->allow_credentials = false;
   opts->max_age = 0;
   opts->use_options_passthrough = false;
 
-  return opts;
+  return (cors_opts *)opts;
 }
 
-cors_config *cors_init(cors_opts *opts) {
+cors_config *cors_init(cors_opts_internal *opts) {
   cors_conf = xmalloc(sizeof(cors_config));
   cors_conf->allow_credentials = opts->allow_credentials;
   cors_conf->max_age = opts->max_age;
@@ -323,7 +323,7 @@ cors_config *cors_init(cors_opts *opts) {
 }
 
 cors_opts *cors_allow_all() {
-  cors_opts *opts = xmalloc(sizeof(cors_opts));
+  cors_opts_internal *opts = xmalloc(sizeof(cors_opts_internal));
   opts->allowed_origins = array_collect("*");
   opts->allowed_methods =
       array_collect(s_copy(http_method_names[METHOD_HEAD]),
@@ -335,7 +335,7 @@ cors_opts *cors_allow_all() {
   opts->allowed_headers = array_collect("*");
   opts->allow_credentials = false;
 
-  return opts;
+  return (cors_opts *)opts;
 }
 
 response *cors_handler(request *req, response *res) {
@@ -358,11 +358,29 @@ response *cors_handler(request *req, response *res) {
 }
 
 void set_allow_credentials(cors_opts *opts, bool allow) {
-  opts->allow_credentials = allow;
+  ((cors_opts_internal *)opts)->allow_credentials = allow;
 }
 
 void set_use_options_passthrough(cors_opts *opts, bool use) {
-  opts->use_options_passthrough = use;
+  ((cors_opts_internal *)opts)->use_options_passthrough = use;
 }
 
-void set_max_age(cors_opts *opts, int max_age) { opts->max_age = max_age; }
+void set_max_age(cors_opts *opts, int max_age) {
+  ((cors_opts_internal *)opts)->max_age = max_age;
+}
+
+void __set_allowed_origins(cors_opts *opts, array_t *origins) {
+  ((cors_opts_internal *)opts)->allowed_origins = origins;
+}
+
+void __set_allowed_methods(cors_opts *opts, array_t *methods) {
+  ((cors_opts_internal *)opts)->allowed_methods = methods;
+}
+
+void __set_allowed_headers(cors_opts *opts, array_t *headers) {
+  ((cors_opts_internal *)opts)->allowed_headers = headers;
+}
+
+void __set_expose_headers(cors_opts *opts, array_t *headers) {
+  ((cors_opts_internal *)opts)->expose_headers = headers;
+}

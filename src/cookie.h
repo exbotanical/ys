@@ -1,5 +1,5 @@
-#ifndef COOKIES_H
-#define COOKIES_H
+#ifndef COOKIE_H
+#define COOKIE_H
 
 #include <time.h>
 
@@ -132,4 +132,4 @@ void cookie_set_same_site(cookie* c, same_site_mode mode);
  */
 void cookie_set_secure(cookie* c, bool secure);
 
-#endif /* COOKIES_H */
+#endif /* COOKIE_H */

@@ -5,6 +5,20 @@
 #include "libutil/libutil.h"  // for arrays
 
 /**
+ * CORS configuration options
+ * @internal
+ */
+typedef struct {
+  bool allow_credentials;
+  bool use_options_passthrough;
+  unsigned int max_age;
+  array_t *allowed_origins;
+  array_t *allowed_methods;
+  array_t *allowed_headers;
+  array_t *expose_headers;
+} cors_opts_internal;
+
+/**
  * CORS configurations
  */
 typedef struct {
@@ -59,12 +73,12 @@ static const char VARY_HEADER[] = "Vary";
 
 /**
  * cors_init initializes a CORS context using the user-specified settings on the
- * given cors_opts `opts`
+ * given cors_opts_internal `opts`
  *
  * @param opts
  * @return cors_config*
  */
-cors_config *cors_init(cors_opts *opts);
+cors_config *cors_init(cors_opts_internal *opts);
 
 /**
  * cors_handler is a middleware handler that executes a spec-compliant CORS

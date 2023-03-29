@@ -102,7 +102,7 @@ void check_headers(char *test_name, hash_table *actual, array_t *expected) {
 cors_opts *make_opts(array_t *allowed_origins, array_t *allowed_methods,
                      array_t *allowed_headers, array_t *expose_headers,
                      bool allow_credentials) {
-  cors_opts *o = malloc(sizeof(cors_opts));
+  cors_opts_internal *o = malloc(sizeof(cors_opts_internal));
   o->allowed_origins = allowed_origins;
   o->allowed_methods = allowed_methods;
   o->allowed_headers = allowed_headers;
@@ -115,7 +115,7 @@ cors_opts *make_opts(array_t *allowed_origins, array_t *allowed_methods,
 void test_cors_middleware() {
   typedef struct {
     char *name;
-    cors_opts *options;
+    cors_opts_internal *options;
     http_method method;
     array_t *req_headers;
     array_t *res_headers;
@@ -501,7 +501,7 @@ void test_cors_allow_all() {
 }
 
 void test_set_helpers() {
-  cors_opts *o = cors_opts_init();
+  cors_opts_internal *o = (cors_opts_internal *)cors_opts_init();
 
   const char *o1 = "o1";
   const char *o2 = "o2";
