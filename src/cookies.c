@@ -119,6 +119,8 @@ static bool is_valid_cookie_domain_name(const char* s) {
   char prev = '.';
   // true once we've seen a letter
   bool ok = false;
+  // Retval
+  bool ret = false;
   // The length of the current domain component we're parsing
   int component_len = 0;
 
@@ -132,30 +134,35 @@ static bool is_valid_cookie_domain_name(const char* s) {
     } else if (c == '-') {
       // Character preceding a dash cannot be dot
       if (prev == '.') {
-        return false;
+        goto done;
       }
       component_len++;
     } else if (c == '.') {
       // Character preceding a dot cannot be another dot or dash
       if (prev == '.' || prev == '-') {
-        return false;
+        goto done;
       }
       if (component_len > 63 || component_len == 0) {
-        return false;
+        goto done;
       }
       component_len = 0;
     } else {
-      return false;
+      goto done;
     }
 
     prev = c;
   }
 
   if (prev == '-' || component_len > 63) {
-    return false;
+    goto done;
   }
 
-  return ok;
+  ret = ok;
+  goto done;
+
+done:
+  free(cp);
+  return ret;
 }
 
 /**
@@ -341,51 +348,6 @@ static char* cookie_serialize(cookie* c) {
 
   return buffer_state(b);
 }
-
-// static array_t* read_cookies(hash_table* headers, const char* filter) {
-//   array_t* cookies = array_init();
-
-//   array_t* lines = ht_get(headers, COOKIE);
-//   if (!has_elements(lines)) {
-//     return cookies;
-//   }
-
-//   foreach (lines, i) {
-//     char* line = s_trim(array_get(lines, i));
-
-//     while (!s_nullish(line)) {
-//       array_t* split = str_cut(line, ";");
-
-//       char* part = array_get(split, 0);
-//       line = array_get(split, 1);
-
-//       if (s_nullish(part)) {
-//         continue;
-//       }
-
-//       array_t* pair = str_cut(part, "=");
-//       char* name = array_get(pair, 0);
-//       char* value = array_get(pair, 1);
-
-//       if (!is_valid_cookie_name(name)) {
-//         continue;
-//       }
-
-//       if (!s_nullish(filter) && !s_equals(filter, name)) {
-//         continue;
-//       }
-
-//       value = parse_cookie_value(value, true);
-//       if (s_nullish(value)) {
-//         continue;
-//       }
-
-//       array_push(cookies, cookie_init(name, value));
-//     }
-//   }
-
-//   return cookies;
-// }
 
 cookie* get_cookie(request* req, const char* name) {
   array_t* cookies = read_cookies(req->headers);

@@ -1,5 +1,11 @@
 # TODOs
 
+## Pre-release
+- [ ] All best practices
+- [ ] All fixes
+- [ ] SSL support
+- [ ] Cookies
+
 - [x] Clean up all objects w/ free where necessary
 - [x] Validate NULLs and allocated objects
 - [x] Add logging
@@ -55,9 +61,10 @@
 - [ ] Determine where we actually need to be passing by reference (currently, this is done everywhere)
 - [ ] Add LICENSE of yyjson
 - [ ] Pass correct function pointers e.g. https://stackoverflow.com/questions/14134245/iso-c-void-and-function-pointers
-- [ ] const pointers
-- [ ] const structs
-- [ ] fix const char CONSTANT[n]
+- [ ] `const` pointers
+- [ ] `const` structs
+- [ ] fix `const char CONSTANT[n]`
+- [ ] `free` everywhere we can
 
 ## Spec Compliance
 - [ ] handle duplicate response headers
