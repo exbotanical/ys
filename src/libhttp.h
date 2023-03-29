@@ -125,7 +125,7 @@ typedef struct {
   hash_table *queries;
   hash_table *headers;
   int content_length;
-} request;
+} request;  // TODO: opaque
 
 /**
  * A response holds the necessary metadata for the response that will be sent to
@@ -153,7 +153,7 @@ typedef struct {
    * response body - optional; Content-length header will be set for you
    */
   char *body;
-} response;
+} response;  // TODO: opaque
 
 /**
  * An alias type for request handlers
@@ -163,20 +163,12 @@ typedef response *route_handler(request *, response *);
 /**
  * CORS configuration options
  */
-typedef struct cors_opts_internal cors_opts;  // TODO: ptr
+typedef struct cors_opts_internal cors_opts;
 
 /**
  * A router / HTTP multiplexer
  */
-typedef struct {
-  bool use_cors;
-  route_trie *trie;
-  route_handler *not_found_handler;
-  route_handler *method_not_allowed_handler;
-  route_handler *internal_error_handler;
-  array_t *middlewares;
-} router_internal;
-typedef router_internal *http_router;
+typedef struct router_internal *http_router;
 
 /**
  * An attributes object for configuring a http_router
@@ -187,16 +179,12 @@ typedef struct {
   route_handler *internal_error_handler;
   route_handler *method_not_allowed_handler;
   array_t *middlewares;
-} router_attr;
+} router_attr;  // TODO: opaque
 
 /**
  * A server configuration object that stores settings for the HTTP server
  */
-typedef struct {
-  router_internal *router;
-  int port;
-} server_internal;
-typedef server_internal *tcp_server;
+typedef struct server_internal *tcp_server;
 
 /**
  * set_header inserts the given key/value pair as a header on the response

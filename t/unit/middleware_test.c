@@ -1,4 +1,5 @@
 #include "libhttp.h"
+#include "router.h"
 #include "tap.c/tap.h"
 
 static response* _h1(request* req, response* res) { return NULL; }
