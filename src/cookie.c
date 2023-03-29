@@ -7,6 +7,8 @@
 
 #include "header.h"
 #include "ip.h"
+#include "libhash/libhash.h"
+#include "libutil/libutil.h"
 #include "logger.h"
 #include "util.h"
 
@@ -266,7 +268,7 @@ static char* sanitize_cookie_path(const char* p) {
  * @param c
  * @return char* or NULL if the cookie name is invalid
  */
-static char* cookie_serialize(cookie* c) {
+static char* cookie_serialize(cookie_internal* c) {
   if (c == NULL || !is_valid_cookie_name(c->name)) {
     return NULL;
   }
@@ -349,25 +351,14 @@ static char* cookie_serialize(cookie* c) {
   return buffer_state(b);
 }
 
-cookie* get_cookie(request* req, const char* name) {
-  array_t* cookies = read_cookies(req->headers);
-
-  foreach (cookies, i) {
-    cookie* c = (cookie*)array_get(cookies, i);
-
-    if (s_equals(c->name, name)) {
-      return c;
-    }
-  }
-
-  return NULL;
-}
-
-void set_cookie(response* res, cookie* c) {
-  set_header(res, SET_COOKIE, cookie_serialize(c));
-}
-
-array_t* read_cookies(hash_table* headers) {
+/**
+ * read_cookies parses all "Cookie" values from the given headers and returns
+ * the successfully parsed cookies
+ *
+ * @param headers
+ * @return array_t*
+ */
+static array_t* read_cookies(hash_table* headers) {
   array_t* cookies = (array_t*)ht_get(headers, COOKIE);
 
   array_t* ret = array_init();
@@ -404,7 +395,7 @@ array_t* read_cookies(hash_table* headers) {
       continue;
     }
 
-    cookie* c = cookie_init(name, value);
+    cookie_internal* c = (cookie_internal*)cookie_init(name, value);
 
     for (unsigned int i = 1; i < array_size(parts); i++) {
       ((__array_t*)parts)->state[i] = s_trim(((__array_t*)parts)->state[i]);
@@ -472,7 +463,7 @@ array_t* read_cookies(hash_table* headers) {
 }
 
 cookie* cookie_init(const char* name, const char* value) {
-  cookie* c = malloc(sizeof(cookie));
+  cookie_internal* c = malloc(sizeof(cookie_internal));
 
   c->domain = NULL;
   c->expires = -1;
@@ -484,25 +475,51 @@ cookie* cookie_init(const char* name, const char* value) {
   c->secure = false;
   c->value = s_copy(value);
 
-  return c;
+  return (cookie*)c;
 }
 
 void cookie_set_domain(cookie* c, const char* domain) {
-  c->domain = s_copy(domain);
+  ((cookie_internal*)c)->domain = s_copy(domain);
 }
 
-void cookie_set_expires(cookie* c, time_t when) { c->expires = when; }
+void cookie_set_expires(cookie* c, time_t when) {
+  ((cookie_internal*)c)->expires = when;
+}
 
 void cookie_set_http_only(cookie* c, bool http_only) {
-  c->http_only = http_only;
+  ((cookie_internal*)c)->http_only = http_only;
 }
 
-void cookie_set_max_age(cookie* c, int age) { c->max_age = age; }
+void cookie_set_max_age(cookie* c, int age) {
+  ((cookie_internal*)c)->max_age = age;
+}
 
-void cookie_set_path(cookie* c, const char* path) { c->path = s_copy(path); }
+void cookie_set_path(cookie* c, const char* path) {
+  ((cookie_internal*)c)->path = s_copy(path);
+}
 
 void cookie_set_same_site(cookie* c, same_site_mode mode) {
-  c->same_site = mode;
+  ((cookie_internal*)c)->same_site = mode;
 }
 
-void cookie_set_secure(cookie* c, bool secure) { c->secure = secure; }
+void cookie_set_secure(cookie* c, bool secure) {
+  ((cookie_internal*)c)->secure = secure;
+}
+
+cookie* get_cookie(request* req, const char* name) {
+  array_t* cookies = read_cookies(req->headers);
+
+  foreach (cookies, i) {
+    cookie_internal* c = (cookie_internal*)array_get(cookies, i);
+
+    if (s_equals(c->name, name)) {
+      return (cookie*)c;
+    }
+  }
+
+  return NULL;
+}
+
+void set_cookie(response* res, cookie* c) {
+  set_header(res, SET_COOKIE, cookie_serialize((cookie_internal*)c));
+}

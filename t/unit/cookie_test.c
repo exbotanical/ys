@@ -43,9 +43,10 @@ typedef struct {
   array_t* expected;
 } test_case;
 
-cookie* tocookie(const char* domain, const char* value, const char* name,
-                 const char* path, time_t expires, int max_age,
-                 same_site_mode same_site, bool http_only, bool secure) {
+cookie_internal* tocookie(const char* domain, const char* value,
+                          const char* name, const char* path, time_t expires,
+                          int max_age, same_site_mode same_site, bool http_only,
+                          bool secure) {
   cookie* c = cookie_init(name, value);
 
   cookie_set_domain(c, domain);
@@ -56,7 +57,7 @@ cookie* tocookie(const char* domain, const char* value, const char* name,
   cookie_set_same_site(c, same_site);
   cookie_set_secure(c, secure);
 
-  return c;
+  return (cookie_internal*)c;
 }
 
 void test_read_cookies() {
@@ -107,8 +108,8 @@ void test_read_cookies() {
     array_t* cookies = read_cookies(test.headers);
 
     foreach (cookies, i) {
-      cookie* actual = array_get(cookies, i);
-      cookie* expected = array_get(test.expected, i);
+      cookie_internal* actual = (cookie_internal*)array_get(cookies, i);
+      cookie_internal* expected = (cookie_internal*)array_get(test.expected, i);
 
       is(actual->domain, expected->domain, "domain is correctly deserialized");
       is(actual->name, expected->name, "name is correctly deserialized");
@@ -182,19 +183,9 @@ void test_cookie_serialize() {
       "cookie-9=i3e01nf61b6t23bvfmplnanol3; Path=/restricted/; "
       "Domain=example.com; Expires=Tue, 10 Nov 2009 23:00:00 GMT; Max-Age=3600";
 
-  cookie* c = malloc(sizeof(cookie));
-
-  c->name = "cookie-9";
-  c->value = "i3e01nf61b6t23bvfmplnanol3";
-
-  time_t unix_time = 1257894000;
-
-  c->expires = unix_time;
-
-  c->path = "/restricted/";
-  c->domain = ".example.com";
-  c->max_age = 3600;
-  c->http_only = false;
+  cookie_internal* c = tocookie(".example.com", "i3e01nf61b6t23bvfmplnanol3",
+                                "cookie-9", "/restricted/", 1257894000, 3600,
+                                SAME_SITE_DEFAULT_MODE, false, false);
 
   const char* actual = cookie_serialize(c);
 
@@ -202,11 +193,13 @@ void test_cookie_serialize() {
 }
 
 void test_get_cookie() {
-  cookie* c = tocookie(".somesite.gov", "value", "NotThisCookie", "/path",
-                       1257894000, 3600, SAME_SITE_STRICT_MODE, true, true);
-  cookie* c2 = tocookie("hello.com", "someval", "NotThisCookieEither", "/", -1,
-                        -1, SAME_SITE_NONE_MODE, false, false);
-  cookie* expected =
+  cookie_internal* c =
+      tocookie(".somesite.gov", "value", "NotThisCookie", "/path", 1257894000,
+               3600, SAME_SITE_STRICT_MODE, true, true);
+  cookie_internal* c2 =
+      tocookie("hello.com", "someval", "NotThisCookieEither", "/", -1, -1,
+               SAME_SITE_NONE_MODE, false, false);
+  cookie_internal* expected =
       tocookie(".testsite.com", "test", "ThisCookie", "/", 2257894000, 86400,
                SAME_SITE_LAX_MODE, false, true);
 
@@ -216,7 +209,7 @@ void test_get_cookie() {
   insert_header(req->headers, COOKIE, cookie_serialize(expected));
   insert_header(req->headers, COOKIE, cookie_serialize(c2));
 
-  cookie* actual = get_cookie(req, "ThisCookie");
+  cookie_internal* actual = (cookie_internal*)get_cookie(req, "ThisCookie");
 
   is(actual->domain, "testsite.com",  // . is stripped
      "retrieved cookie domain matches what was inserted");

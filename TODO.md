@@ -36,6 +36,7 @@
 - [ ] documentation
 - [ ] make all public structs opaque
 - [ ] Use method enum in CORS middleware helpers
+- [ ] Ensure everything opaque has getters and setters
 
 ## New Features
 - [x] ~~global hooks/interceptors (e.g. global HTTP headers)~~ just use middleware
