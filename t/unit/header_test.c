@@ -50,7 +50,7 @@ void test_to_canonical_mime_header_key() {
       {.in = "user-agent", .expected = "User-Agent"},
       {.in = "USER-AGENT", .expected = "User-Agent"},
 
-      // Other valid char bytes
+      // Other valid chars
       {.in = "foo-bar_baz", .expected = "Foo-Bar_baz"},
       {.in = "foo-bar$baz", .expected = "Foo-Bar$baz"},
       {.in = "foo-bar~baz", .expected = "Foo-Bar~baz"},
@@ -77,7 +77,7 @@ void test_to_canonical_mime_header_key() {
   }
 }
 
-void test_req_header_get() {
+void test_get_header() {
   const char *k1 = "k1";
   const char *v1 = "v1";
   const char *v2 = "v2";
@@ -92,9 +92,8 @@ void test_req_header_get() {
 
   ht_insert(ht, k1, arr);
 
-  is(req_header_get(ht, k1), v1, "retrieves the first header value");
-  is(req_header_get(ht, v1), NULL,
-     "returns NULL if the header key does not exist");
+  is(get_header(ht, k1), v1, "retrieves the first header value");
+  is(get_header(ht, v1), NULL, "returns NULL if the header key does not exist");
 }
 
 void test_req_header_values() {
@@ -162,7 +161,7 @@ int main() {
   test_token_table();
   test_to_canonical_mime_header_key();
 
-  test_req_header_get();
+  test_get_header();
   test_req_header_values();
   test_derive_headers();
 

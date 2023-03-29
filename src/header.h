@@ -14,7 +14,7 @@ typedef struct {
 
 /**
  * A 256 slot lookup table where each index corresponds to an ASCII character
- * and indicates whether that character is a valid header byte
+ * and indicates whether that character is a valid header char
  *
  * @see https://httpwg.github.io/specs/rfc7230.html#rule.token.separators
  */
@@ -32,13 +32,23 @@ static const char token_table[] =
     "\0\0\0\0\0\0\0\0\0\0\0";
 
 /**
- * to_canonical_mime_header_key returns the canonical format of the MIME header
- * key `key`. The canonicalization converts the first letter and any letter
- * following a hyphen to upper case; the rest are converted to lowercase.
+ * is_valid_header_field_char returns a bool indicating whether the given char
+ * is a valid header char
+ *
+ * @param c
+ * @return bool
+ */
+bool is_valid_header_field_char(int c);
+
+/**
+ * to_canonical_mime_header_key returns the canonical format of the MIME
+ * header key `key`. The canonicalization converts the first letter and any
+ * letter following a hyphen to upper case; the rest are converted to
+ * lowercase.
  *
  * MIME header keys are assumed to be ASCII only.
  *
- * If `key` contains a space or invalid header field bytes, it is returned
+ * If `key` contains a space or invalid header field chars, it is returned
  * without modifications.
  *
  * @param key
@@ -47,7 +57,7 @@ static const char token_table[] =
 char* to_canonical_mime_header_key(char* key);
 
 /**
- * req_header_get retrieves the first value for a given header key from
+ * get_header retrieves the first value for a given header key from
  * `headers`, or NULL if not found
  *
  * @param headers
@@ -56,7 +66,7 @@ char* to_canonical_mime_header_key(char* key);
  *
  * TODO: public
  */
-char* req_header_get(hash_table* headers, const char* key);
+char* get_header(hash_table* headers, const char* key);
 
 /**
  * req_header_values returns a char array of all values for the given header key

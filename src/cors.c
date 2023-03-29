@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <string.h>  // for strlen
 
-#include "header.h"           // for req_header_get, set_header, derive_headers
+#include "header.h"           // for get_header, set_header, derive_headers
 #include "libutil/libutil.h"  // for s_*
 #include "util.h"             // for str_join
 #include "xmalloc.h"
@@ -110,10 +110,9 @@ static bool are_headers_allowed(cors_config *c, array_t *headers) {
 static bool is_preflight_request(request *req) {
   bool is_options_req =
       s_equals(req->method, http_method_names[METHOD_OPTIONS]);
-  bool has_origin_header =
-      !s_nullish(req_header_get(req->headers, ORIGIN_HEADER));
+  bool has_origin_header = !s_nullish(get_header(req->headers, ORIGIN_HEADER));
   bool has_request_method =
-      !s_nullish(req_header_get(req->headers, REQUEST_METHOD_HEADER));
+      !s_nullish(get_header(req->headers, REQUEST_METHOD_HEADER));
 
   return is_options_req && has_origin_header && has_request_method;
 }
@@ -128,7 +127,7 @@ static bool is_preflight_request(request *req) {
  * TODO: test
  */
 static void handle_request(request *req, response *res) {
-  char *origin = req_header_get(req->headers, ORIGIN_HEADER);
+  char *origin = get_header(req->headers, ORIGIN_HEADER);
   // Set the "vary" header to prevent proxy servers from sending cached
   // responses for one client to another
   set_header(res, VARY_HEADER, ORIGIN_HEADER);
@@ -176,7 +175,7 @@ static void handle_request(request *req, response *res) {
  * TODO: test
  */
 static void handle_preflight_request(request *req, response *res) {
-  char *origin = req_header_get(req->headers, ORIGIN_HEADER);
+  char *origin = get_header(req->headers, ORIGIN_HEADER);
 
   // Set the "vary" header to prevent proxy servers from sending cached
   // responses for one client to another
@@ -197,7 +196,7 @@ static void handle_preflight_request(request *req, response *res) {
   }
 
   // Validate the method; this is the crux of the Preflight
-  char *reqd_method = req_header_get(req->headers, REQUEST_METHOD_HEADER);
+  char *reqd_method = get_header(req->headers, REQUEST_METHOD_HEADER);
 
   if (s_nullish(reqd_method) || !is_method_allowed(cors_conf, reqd_method)) {
     return;
@@ -205,7 +204,7 @@ static void handle_preflight_request(request *req, response *res) {
 
   // Validate request headers. Preflights are also used when
   // requests include additional headers from the client
-  char *header_str = req_header_get(req->headers, REQUEST_HEADERS_HEADER);
+  char *header_str = get_header(req->headers, REQUEST_HEADERS_HEADER);
 
   array_t *reqd_headers = derive_headers(header_str);
   if (!are_headers_allowed(cors_conf, reqd_headers)) {

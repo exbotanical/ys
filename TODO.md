@@ -55,6 +55,9 @@
 - [ ] Determine where we actually need to be passing by reference (currently, this is done everywhere)
 - [ ] Add LICENSE of yyjson
 - [ ] Pass correct function pointers e.g. https://stackoverflow.com/questions/14134245/iso-c-void-and-function-pointers
+- [ ] const pointers
+- [ ] const structs
+- [ ] fix const char CONSTANT[n]
 
 ## Spec Compliance
 - [ ] handle duplicate response headers
@@ -87,12 +90,14 @@
   #define checkpoint() printf("CHECKPOINT %d\n", c++)
   #define isnull(thing) printf("IS NULL? %s\n", thing == NULL ? "yes" : "no")
   ```
+- [ ] Shared test utils
 
 ## Fixes
 - [x] Allow OPTIONS requests by default in router when CORS enabled
 - [x] Urls with `-` segfault e.g. `/feed_meta/index-0.json`
   - [ ] Add test
 - [ ] curl - Connection #0 to host localhost left intact?
+- [ ] Address glibc malloc bug in ip
 
 ## Ecosystem
 - [ ] Addon / plugin libraries

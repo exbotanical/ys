@@ -29,7 +29,7 @@ static const char USER_AGENT[11] = "User-Agent";
  * @param header
  */
 static void fix_pragma_cache_control(hash_table* headers) {
-  if (s_equals(req_header_get(headers, PRAGMA), NO_CACHE)) {
+  if (s_equals(get_header(headers, PRAGMA), NO_CACHE)) {
     if (!ht_search(headers, CACHE_CONTROL)) {
       insert_header(headers, CACHE_CONTROL, NO_CACHE);
     }

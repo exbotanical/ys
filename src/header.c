@@ -111,17 +111,6 @@ static hash_set* get_singleton_header_set() {
 }
 
 /**
- * is_valid_header_field_byte returns a bool indicating whether the given byte
- * is a valid header char
- *
- * @param b
- * @return bool
- */
-static bool is_valid_header_field_byte(int b) {
-  return b < sizeof(token_table) && token_table[b];
-}
-
-/**
  * is_singleton_header returns a bool indicating whether the given header
  * `key` is a singleton header
  *
@@ -148,7 +137,7 @@ static char* canonical_mime_header_key(char* key) {
   // See if it looks like a header key; if not return it as-is
   for (unsigned int i = 0; i < strlen(key); i++) {
     char c = key[i];
-    if (is_valid_header_field_byte(c)) {
+    if (is_valid_header_field_char(c)) {
       continue;
     }
 
@@ -180,12 +169,16 @@ static char* canonical_mime_header_key(char* key) {
   return key;
 }
 
+bool is_valid_header_field_char(int c) {
+  return c < sizeof(token_table) && token_table[c];
+}
+
 char* to_canonical_mime_header_key(char* key) {
   // Check for canonical encoding
   bool upper = true;
   for (unsigned int i = 0; i < strlen(key); i++) {
     char c = key[i];
-    if (!is_valid_header_field_byte(c)) {
+    if (!is_valid_header_field_char(c)) {
       return key;
     }
 
@@ -203,7 +196,7 @@ char* to_canonical_mime_header_key(char* key) {
   return key;
 }
 
-char* req_header_get(hash_table* headers, const char* key) {
+char* get_header(hash_table* headers, const char* key) {
   ht_record* header = ht_search(headers, key);
   if (!header) {
     return NULL;
@@ -232,6 +225,8 @@ bool set_header(response* res, const char* key, const char* value) {
   return insert_header(res->headers, key, value);  // TODO: singleton check
 }
 
+// TODO: should check singleton flag so we can use w/response
+// TODO: does get_header handle header=value1;value2 ?
 bool insert_header(hash_table* headers, const char* key, const char* value) {
   // Check if we've already encountered this header key. Some headers cannot
   // be duplicated e.g. Content-Type, so we'll need to handle those as well
