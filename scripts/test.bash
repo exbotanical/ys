@@ -8,9 +8,11 @@ REPO_DIR=http
 declare -a SKIP_FILES=(
   # 'cache_test.c'
   # 'config_test.c'
+  # 'cookie_test.c'
   # 'cors_test.c'
   # 'enum_test.c'
   # 'header_test.c'
+  # 'ip_test.c'
   # 'json_test.c'
   # 'middleware_test.c'
 	# 'path_test.c'

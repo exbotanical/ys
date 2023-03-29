@@ -104,16 +104,16 @@ void test_str_cut_halfmatch() {
      "second element is the string after the delimiter");
 }
 
-void test_str_contains_ctl_byte() {
-  ok(str_contains_ctl_byte("some\x01") == true,
+void test_str_contains_ctl_char() {
+  ok(str_contains_ctl_char("some\x01") == true,
      "detects the control-byte");  // SOH
-  ok(str_contains_ctl_byte("some\x02") == true,
+  ok(str_contains_ctl_char("some\x02") == true,
      "detects the control-byte");  // STC
-  ok(str_contains_ctl_byte("some\x03") == true,
+  ok(str_contains_ctl_char("some\x03") == true,
      "detects the control-byte");  // ETX
-  ok(str_contains_ctl_byte("some\x04") == true,
+  ok(str_contains_ctl_char("some\x04") == true,
      "detects the control-byte");  // EOT
-  ok(str_contains_ctl_byte("some\x05") == true,
+  ok(str_contains_ctl_char("some\x05") == true,
      "detects the control-byte");  // ENQ
 }
 
@@ -149,7 +149,7 @@ int main() {
   test_str_cut_nomatch();
   test_str_cut_halfmatch();
 
-  test_str_contains_ctl_byte();
+  test_str_contains_ctl_char();
   test_ishex();
 
   done_testing();

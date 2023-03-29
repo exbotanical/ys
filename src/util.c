@@ -103,7 +103,7 @@ array_t *str_cut(const char *s, const char *sep) {
   return array_collect(s_copy(s));
 }
 
-bool str_contains_ctl_byte(const char *s) {
+bool str_contains_ctl_char(const char *s) {
   for (unsigned int i = 0; i < strlen(s); i++) {
     char b = s[i];
     if (b < ' ' || b == 0x7f) {
@@ -132,3 +132,5 @@ char *tostr(char c) {
   memcpy(strp, str, 2);
   return strp;
 }
+
+bool is_ascii(char c) { return 0x20 <= c && c < 0x7f; }

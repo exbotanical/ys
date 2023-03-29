@@ -47,13 +47,13 @@ char *str_join(array_t *sarr, const char *delim);
 array_t *str_cut(const char *s, const char *sep);
 
 /**
- * str_contains_ctl_byte reports whether s contains any ASCII control character
+ * str_contains_ctl_char tests whether s contains any ASCII control character
  *
  * @param s
  * @return true
  * @return false
  */
-bool str_contains_ctl_byte(const char *s);
+bool str_contains_ctl_char(const char *s);
 
 /**
  * ishex tests whether a character is valid hex
@@ -82,5 +82,17 @@ char unhex(char c);
  * TODO: test
  */
 char *tostr(char c);
+
+/**
+ * is_ascii tests whether a given character c is a printable ASCII character in
+ * the range of 32 - 127
+ *
+ * @param c
+ * @return true if the character is printable
+ * @return false if the character is non-printable
+ *
+ * TODO: test
+ */
+bool is_ascii(char c);
 
 #endif /* UTIL_H */
