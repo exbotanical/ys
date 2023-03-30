@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Auth Demo</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
+    <script type="text/babel">
+      const app = Vue.createApp({
+        template: `
+        <section id="app">
+          <h1>{{ showLogin ? 'Login' : 'Register' }}</h1>
+
+          <div v-if="isLoggedIn">
+            <div>{{ authProtectedData }}</div>
+
+            <button @click="handleLogout" class="logout-btn">
+              Logout
+            </button>
+          </div>
+
+          <div v-else>
+            <div>
+              <form>
+                <div>
+                  <label>Username</label>
+                  <div>
+                    <input
+                      type="text"
+                      v-model="form.username"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label>Password</label>
+                  <div>
+                    <input
+                      type="password"
+                      v-model="form.password"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  class="submit-btn"
+                  type="submit"
+                  :disabled="shouldDisableSubmit"
+                  @click.prevent="handleSubmit"
+                >
+                  Submit
+                </button>
+              </form>
+            </div>
+            <button @click="showLogin = !showLogin" class="toggle-btn">
+              {{ showLogin ? 'Register instead' : 'Login instead' }}
+            </button>
+          </div>
+
+        </section>
+              `,
+
+        data: () => ({
+          form: {
+            username: '',
+            password: '',
+          },
+          isLoggedIn: false,
+          showLogin: false,
+          authProtectedData: '',
+          disableSubmit: false,
+        }),
+        computed: {
+          shouldDisableSubmit() {
+            return (
+              this.disableSubmit || !this.form.username || !this.form.password
+            )
+          },
+        },
+        methods: {
+          async getData() {
+            try {
+              const res = await fetch('/data')
+              if (res.status !== 200) {
+                throw Error('unauthorized')
+              }
+
+              this.isLoggedIn = true
+              const { data } = await res.json()
+              this.authProtectedData = data
+            } catch (ex) {
+              console.info({ ex: ex.message })
+              this.isLoggedIn = false
+            }
+          },
+
+          async handleSubmit(e, s) {
+            this.disableSubmit = true
+
+            try {
+              const res = await fetch(this.showLogin ? '/login' : '/register', {
+                mode: 'no-cors', // 'cors'
+                method: 'POST',
+                body: JSON.stringify(this.form),
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+              })
+
+              if (res.status === 201) {
+                await this.getData()
+                this.isLoggedIn = true
+              }
+            } catch (ex) {
+              console.info({ ex: ex.message })
+            } finally {
+              this.disableSubmit = false
+            }
+          },
+
+          async handleLogout() {
+            try {
+              const res = await fetch('/logout', {
+                mode: 'no-cors', // 'cors'
+                method: 'POST',
+                credentials: 'include',
+              })
+
+              if (res.status === 200) {
+                this.isLoggedIn = false
+              }
+            } catch (ex) {
+              console.info({ ex: ex.message })
+            }
+          },
+        },
+        async beforeMount() {
+          await this.getData()
+        },
+      }).mount('#app')
+    </script>
+  </body>
+</html>

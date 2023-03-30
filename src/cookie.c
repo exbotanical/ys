@@ -279,12 +279,12 @@ static char* cookie_serialize(cookie_internal* c) {
   buffer_append(b, "=");
   buffer_append(b, sanitize_cookie_value(c->value));
 
-  if (strlen(c->path) > 0) {
+  if (!s_nullish(c->path) && strlen(c->path) > 0) {
     buffer_append(b, "; Path=");
     buffer_append(b, sanitize_cookie_path(c->path));
   }
 
-  if (strlen(c->domain) > 0) {
+  if (!s_nullish(c->domain) && strlen(c->domain) > 0) {
     if (is_valid_cookie_domain(c->domain)) {
       // A domain containing illegal characters is not sanitized but simply
       // dropped which turns the cookie into a host-only cookie. A leading dot
@@ -351,6 +351,47 @@ static char* cookie_serialize(cookie_internal* c) {
   return buffer_state(b);
 }
 
+static array_t* read_browser_cookie(hash_table* headers) {
+  array_t* cookies = array_init();
+
+  array_t* lines = ht_get(headers, COOKIE);
+  if (!has_elements(lines)) {
+    return cookies;
+  }
+
+  foreach (lines, i) {
+    char* line = s_trim(array_get(lines, i));
+
+    while (!s_nullish(line)) {
+      array_t* split = str_cut(line, ";");
+
+      char* part = array_get(split, 0);
+      line = array_get(split, 1);
+
+      if (s_nullish(part)) {
+        continue;
+      }
+
+      array_t* pair = str_cut(part, "=");
+      char* name = array_get(pair, 0);
+      char* value = array_get(pair, 1);
+
+      if (!is_valid_cookie_name(name)) {
+        continue;
+      }
+
+      value = parse_cookie_value(value, true);
+      if (s_nullish(value)) {
+        continue;
+      }
+
+      array_push(cookies, cookie_init(name, value));
+    }
+  }
+
+  return cookies;
+}
+
 /**
  * read_cookies parses all "Cookie" values from the given headers and returns
  * the successfully parsed cookies
@@ -371,6 +412,9 @@ static array_t* read_cookies(hash_table* headers) {
     char* cstr = array_get(cookies, i);
 
     array_t* parts = split(s_trim(cstr), ";");
+    if (array_size(parts) == 0) {
+      return read_browser_cookie(headers);  // TODO: test
+    }
 
     if (array_size(parts) == 1 && s_nullish(array_get(parts, 0))) {
       continue;
@@ -468,7 +512,7 @@ cookie* cookie_init(const char* name, const char* value) {
   c->domain = NULL;
   c->expires = -1;
   c->http_only = false;
-  c->max_age = -1;  // -1 for this library means omit entirely
+  c->max_age = 0;  // 0 for this library means omit entirely
   c->name = s_copy(name);
   c->path = NULL;
   c->same_site = SAME_SITE_DEFAULT_MODE;
@@ -505,6 +549,28 @@ void cookie_set_same_site(cookie* c, same_site_mode mode) {
 void cookie_set_secure(cookie* c, bool secure) {
   ((cookie_internal*)c)->secure = secure;
 }
+
+char* cookie_get_name(cookie* c) { return ((cookie_internal*)c)->name; }
+
+char* cookie_get_value(cookie* c) { return ((cookie_internal*)c)->value; }
+
+char* cookie_get_domain(cookie* c) { return ((cookie_internal*)c)->domain; }
+
+time_t cookie_get_expires(cookie* c) { return ((cookie_internal*)c)->expires; }
+
+bool cookie_get_http_only(cookie* c) {
+  return ((cookie_internal*)c)->http_only;
+}
+
+int cookie_get_max_age(cookie* c) { return ((cookie_internal*)c)->max_age; }
+
+char* cookie_get_path(cookie* c) { return ((cookie_internal*)c)->path; }
+
+same_site_mode cookie_get_same_site(cookie* c) {
+  return ((cookie_internal*)c)->same_site;
+}
+
+bool cookie_get_secure(cookie* c) { return ((cookie_internal*)c)->secure; }
 
 cookie* get_cookie(request* req, const char* name) {
   array_t* cookies = read_cookies(req->headers);

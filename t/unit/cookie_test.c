@@ -52,7 +52,9 @@ cookie_internal* tocookie(const char* domain, const char* value,
   cookie_set_domain(c, domain);
   cookie_set_expires(c, expires);
   cookie_set_http_only(c, http_only);
-  cookie_set_max_age(c, max_age);
+  if (max_age != 0) {
+    cookie_set_max_age(c, max_age < 0 ? 0 : max_age);
+  }
   cookie_set_path(c, path);
   cookie_set_same_site(c, same_site);
   cookie_set_secure(c, secure);
@@ -92,13 +94,13 @@ void test_read_cookies() {
            3418121499, 120, SAME_SITE_LAX_MODE, false, true))},
 
       {.headers = to_headers(
-           to_header(COOKIE,
-                     array_collect("M=T; Path=/; Domain=.somesite.com; "
-                                   "Max-Age=0; SameSite=Lax",
-                                   "M=T; Path=/; Max-Age=0; SameSite=Lax")),
+           to_header(
+               COOKIE,
+               array_collect("M=T; Path=/; Domain=.somesite.com; SameSite=Lax",
+                             "M=T; Path=/; Max-Age=0; SameSite=Lax")),
            NULL),
-       .expected = array_collect(tocookie(".somesite.com", "T", "M", "/", -1,
-                                          -1, SAME_SITE_LAX_MODE, false, false),
+       .expected = array_collect(tocookie(".somesite.com", "T", "M", "/", -1, 0,
+                                          SAME_SITE_LAX_MODE, false, false),
                                  tocookie(NULL, "T", "M", "/", -1, -1,
                                           SAME_SITE_LAX_MODE, false, false))}};
 

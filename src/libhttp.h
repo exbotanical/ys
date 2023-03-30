@@ -579,4 +579,27 @@ cookie *get_cookie(request *req, const char *name);
  */
 void set_cookie(response *res, cookie *c);
 
+char *cookie_get_name(cookie *c);
+
+char *cookie_get_value(cookie *c);
+
+char *cookie_get_domain(cookie *c);
+
+time_t cookie_get_expires(cookie *c);
+
+bool cookie_get_http_only(cookie *c);
+
+int cookie_get_max_age(cookie *c);
+
+char *cookie_get_path(cookie *c);
+
+same_site_mode cookie_get_same_site(cookie *c);
+
+bool cookie_get_secure(cookie *c);
+
+/* Time Helpers */
+time_t n_minutes_from_now(unsigned int n);
+time_t n_hours_from_now(unsigned int n);
+time_t n_days_from_now(unsigned int n);
+
 #endif /* LIBHTTP_H */

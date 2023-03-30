@@ -55,6 +55,9 @@
 - [ ] multiple routers
 - [ ] handle signals for graceful shutdown
 - [x] query strings
+- [ ] wildcard routing
+- [ ] serve entire dir
+- [ ] set X-Powered-By
 
 ## Best Practices
 - [x] ~~specific int types~~
@@ -66,6 +69,7 @@
 - [ ] `const` structs
 - [ ] fix `const char CONSTANT[n]`
 - [ ] `free` everywhere we can
+- [ ] mutexes in examples
 
 ## Spec Compliance
 - [ ] handle duplicate response headers
@@ -86,6 +90,7 @@
   - [x] use function name macro instead of explicit string literals
 - [ ] inline functions where reasonable
 - [x] ~~Change middleware chaining to use `next`, the next middleware in the chain. This will allow a current handler to *not* invoke `next`, thus ending the chain. Note: Figuring this out is going to be a challenge~~
+- [ ] relocate JSON to util library
 
 ## DX
 - [ ] helper ??? `#define CAST(type, name, stmt) type *name = (type *)stmt`
@@ -106,6 +111,7 @@
   - [ ] Add test
 - [ ] curl - Connection #0 to host localhost left intact?
 - [ ] Address glibc malloc bug in ip
+- [ ] Do two route handlers with diff methods for the same /route get handled separately?
 
 ## Ecosystem
 - [ ] Addon / plugin libraries

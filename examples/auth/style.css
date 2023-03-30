@@ -1,0 +1,33 @@
+body {
+  display: flex;
+  justify-content: center;
+  background-color: cadetblue;
+}
+
+input {
+  background-color: lightgray;
+}
+
+button {
+  background: #fa7e4a;
+  border-radius: 6px;
+  border: none;
+  padding: 6px;
+}
+
+button:hover:enabled {
+  background-color: #fb986e !important;
+  cursor: pointer;
+}
+
+.submit-btn {
+  margin-top: 1rem;
+}
+
+.toggle-btn {
+  margin-top: 120px;
+}
+
+.logout-btn {
+  margin-top: 60px;
+}
