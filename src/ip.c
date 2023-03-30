@@ -10,6 +10,7 @@
 
 #include "libutil/libutil.h"
 #include "util.h"
+#include "xmalloc.h"
 
 // Bigger than we need, not too big to worry about overflow
 const int BIG = 0xFFFFFF;
@@ -27,7 +28,7 @@ const int v4InV6Prefix[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff};
  * @return int* An int array of [retval, n chars consumed, ok]
  */
 static int* xtoi(char* s) {
-  int* ret = malloc(3 * sizeof(int));
+  int* ret = xmalloc(3 * sizeof(int));
 
   int n = 0;
   int i = 0;
@@ -74,7 +75,7 @@ static int* xtoi(char* s) {
  * @return int* An int array of [retval, n chars consumed, ok]
  */
 static int* dtoi(char* s) {
-  int* ret = malloc(3 * sizeof(int));
+  int* ret = xmalloc(3 * sizeof(int));
 
   int n = 0;
   int i = 0;
@@ -115,7 +116,7 @@ static int* dtoi(char* s) {
  * @return int* An int array representing the IPv4 address
  */
 static int* to_ipv4(int a, int b, int c, int d) {
-  int* p = malloc(IPv6len * sizeof(int));
+  int* p = xmalloc(IPv6len * sizeof(int));
 
   for (int i = 0; i < 12; i++) {
     p[i] = v4InV6Prefix[i];
@@ -191,7 +192,7 @@ static int* parse_ipv4(const char* s) {
  */
 static bool validate_ipv6(const char* s) {
   char* cp = s_copy(s);
-  int* ip = malloc(IPv6len * sizeof(int));
+  int* ip = xmalloc(IPv6len * sizeof(int));
 
   int ellipsis = -1;  // Position of ellipsis in ip
 

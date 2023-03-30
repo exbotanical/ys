@@ -11,6 +11,7 @@
 #include "libutil/libutil.h"
 #include "logger.h"
 #include "util.h"
+#include "xmalloc.h"
 
 /**
  * sanitize cleans and formats the cookie field
@@ -507,7 +508,7 @@ static array_t* read_cookies(hash_table* headers) {
 }
 
 cookie* cookie_init(const char* name, const char* value) {
-  cookie_internal* c = malloc(sizeof(cookie_internal));
+  cookie_internal* c = xmalloc(sizeof(cookie_internal));
 
   c->domain = NULL;
   c->expires = -1;

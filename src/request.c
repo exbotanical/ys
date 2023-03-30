@@ -143,7 +143,7 @@ bool req_has_parameters(request* req) {
 char** req_get_query(request* req, const char* key) {
   array_t* arr = (array_t*)ht_get(req->queries, key);
   if (arr) {
-    char** values = malloc(array_size(arr));
+    char** values = xmalloc(array_size(arr));
     foreach (arr, i) {
       values[i] = array_get(arr, i);
     }

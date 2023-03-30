@@ -127,7 +127,7 @@ char unhex(char c) {
 }
 
 char *tostr(char c) {
-  char *strp = malloc(2);
+  char *strp = xmalloc(2);
   char str[2] = {c, '\0'};
   memcpy(strp, str, 2);
   return strp;

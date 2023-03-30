@@ -1,10 +1,18 @@
+#include <dirent.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
 
 #include "libhttp.h"
+#include "xmalloc.h"
 
-char* from_file(const char* filename) {
-  FILE* fp = fopen(filename, "r");
+char *from_file(const char *filename) {
+  FILE *fp = fopen(filename, "r");
   if (!fp) {
     DIE(EXIT_FAILURE,
         "Unable to open file %s. Are you sure the path is correct?\n",
@@ -15,7 +23,7 @@ char* from_file(const char* filename) {
   long fsize = ftell(fp);
   fseek(fp, 0, SEEK_SET);
 
-  char* buf = malloc(fsize + 1);
+  char *buf = xmalloc(fsize + 1);
   fread(buf, fsize, 1, fp);
   fclose(fp);
 

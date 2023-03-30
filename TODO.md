@@ -4,7 +4,7 @@
 - [ ] All best practices
 - [ ] All fixes
 - [ ] SSL support
-- [ ] Cookies
+- [x] Cookies
 
 - [x] Clean up all objects w/ free where necessary
 - [x] Validate NULLs and allocated objects
@@ -43,7 +43,7 @@
 - [x] allow middleware to exit early by sending response
 - [x] Built-in middlewares
   - [x] CORS middleware
-- [ ] Cookies
+- [x] Cookies
 - [x] support erroneous (Request / Response)s
 - [x] use attr struct for fallback handlers
 - [ ] Figure out file routing. The problem here is we want the `response_t` type to be accessible to consumers without having to compile the entire library and link it.
@@ -112,6 +112,7 @@
 - [ ] curl - Connection #0 to host localhost left intact?
 - [ ] Address glibc malloc bug in ip
 - [ ] Do two route handlers with diff methods for the same /route get handled separately?
+- [ ] Does router handle URL fragments?
 
 ## Ecosystem
 - [ ] Addon / plugin libraries

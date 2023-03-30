@@ -98,7 +98,7 @@ static response *default_method_not_allowed_handler(request *req,
 }
 
 router_attr *router_attr_init() {
-  router_attr *attr = malloc(sizeof(router_attr));
+  router_attr *attr = xmalloc(sizeof(router_attr));
   attr->use_cors = false;
   attr->middlewares = NULL;
 
