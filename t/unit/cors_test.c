@@ -8,15 +8,23 @@
 #include "libhttp.h"
 #include "tap.c/tap.h"
 
+/**
+ * A key/value pair for response headers
+ */
+typedef struct {
+  const char *key;
+  const char *value;
+} header_pair;
+
 // TODO: cleanup test helpers and use test_util
-static const char *all_headers[] = {"Vary",
-                                    "Access-Control-Allow-Origin",
-                                    "Access-Control-Allow-Methods",
-                                    "Access-Control-Allow-Headers",
-                                    "Access-Control-Allow-Credentials",
+static const char *all_headers[] = {VARY_HEADER,
+                                    ALLOW_ORIGINS_HEADER,
+                                    ALLOW_METHODS_HEADER,
+                                    ALLOW_HEADERS_HEADER,
+                                    ALLOW_CREDENTIALS_HEADER,
                                     "Access-Control-Allow-Private-Network",
-                                    "Access-Control-Max-Age",
-                                    "Access-Control-Expose-Headers"};
+                                    MAX_AGE_HEADER,
+                                    EXPOSE_HEADERS_HEADER};
 
 inline static array_t *toheaders(char *s, ...) {
   array_t *arr = array_init();

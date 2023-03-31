@@ -10,6 +10,13 @@
 #include "util.h"
 #include "xmalloc.h"
 
+const char CACHE_CONTROL[] = "Cache-Control";
+const char NO_CACHE[] = "no-cache";
+const char PRAGMA[] = "Pragma";
+const char CONTENT_TYPE[] = "Content-Type";
+const char ACCEPT[] = "Accept";
+const char USER_AGENT[] = "User-Agent";
+
 static pthread_once_t init_common_headers_once = PTHREAD_ONCE_INIT;
 static pthread_once_t init_singleton_headers_once = PTHREAD_ONCE_INIT;
 
@@ -28,19 +35,19 @@ static const int to_lower = 'a' - 'A';
 static void init_common_headers() {
   common_headers = hs_init(39);
 
-  hs_insert(common_headers, "Accept");
+  hs_insert(common_headers, ACCEPT);
   hs_insert(common_headers, "Accept-Charset");
   hs_insert(common_headers, "Accept-Encoding");
   hs_insert(common_headers, "Accept-Language");
   hs_insert(common_headers, "Accept-Ranges");
-  hs_insert(common_headers, "Cache-Control");
+  hs_insert(common_headers, CACHE_CONTROL);
   hs_insert(common_headers, "Cc");
   hs_insert(common_headers, "Connection");
   hs_insert(common_headers, "Content-Id");
   hs_insert(common_headers, "Content-Language");
   hs_insert(common_headers, "Content-Length");
   hs_insert(common_headers, "Content-Transfer-Encoding");
-  hs_insert(common_headers, "Content-Type");
+  hs_insert(common_headers, CONTENT_TYPE);
   hs_insert(common_headers, "Cookie");
   hs_insert(common_headers, "Date");
   hs_insert(common_headers, "Dkim-Signature");
@@ -55,14 +62,14 @@ static void init_common_headers() {
   hs_insert(common_headers, "Location");
   hs_insert(common_headers, "Message-Id");
   hs_insert(common_headers, "Mime-Version");
-  hs_insert(common_headers, "Pragma");
+  hs_insert(common_headers, PRAGMA);
   hs_insert(common_headers, "Received");
   hs_insert(common_headers, "Return-Path");
   hs_insert(common_headers, "Server");
   hs_insert(common_headers, "Set-Cookie");
   hs_insert(common_headers, "Subject");
   hs_insert(common_headers, "To");
-  hs_insert(common_headers, "User-Agent");
+  hs_insert(common_headers, USER_AGENT);
   hs_insert(common_headers, "Via");
   hs_insert(common_headers, "X-Forwarded-For");
   hs_insert(common_headers, "X-Imforwards");
@@ -79,7 +86,7 @@ static void init_common_headers() {
 static void init_singleton_headers() {
   singleton_headers = hs_init(3);
 
-  hs_insert(singleton_headers, "Content-Type");
+  hs_insert(singleton_headers, CONTENT_TYPE);
   hs_insert(singleton_headers, "Content-Length");
   hs_insert(singleton_headers, "Host");
 }
@@ -159,7 +166,7 @@ static char* canonical_mime_header_key(char* key) {
     unsigned int l = strlen(key);
     char* ca = xmalloc(l + 1);
     strncpy(ca, key, l);
-    ca[l] = '\0';
+    ca[l] = NULL_TERM;
     ca[i] = c;
     key = ca;
 
@@ -286,7 +293,7 @@ array_t* derive_headers(const char* header_str) {
           v[i] = (char)array_get(tmp, i);
         }
 
-        v[i + 1] = '\0';
+        v[i + 1] = NULL_TERM;
 
         array_push(headers, v);
 

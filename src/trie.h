@@ -8,13 +8,13 @@
 #include "logger.h"
 
 // Initial state for route result record
-static const unsigned int INITIAL_FLAG_STATE = 0x00;
+extern const unsigned int INITIAL_FLAG_STATE;
 
 // Route not found flag
-static const unsigned int NOT_FOUND_MASK = 0x01;
+extern const unsigned int NOT_FOUND_MASK;
 
 // Route not allowed flag
-static const unsigned int NOT_ALLOWED_MASK = 0x02;
+extern const unsigned int NOT_ALLOWED_MASK;
 
 typedef struct {
   char *label;

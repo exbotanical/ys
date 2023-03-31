@@ -7,12 +7,12 @@
 #include "logger.h"
 #include "util.h"  // for split
 
-const char *PATH_ROOT = "/";
-const char *PATH_DELIMITER = "/";
-const char *PARAMETER_DELIMITER = ":";
-const char *PARAMETER_DELIMITER_START = "[";
-const char *PARAMETER_DELIMITER_END = "]";
-const char *PATTERN_WILDCARD = "(.+)";
+const char PATH_ROOT[] = "/";
+const char PATH_DELIMITER[] = "/";
+const char PARAMETER_DELIMITER[] = ":";
+const char PARAMETER_DELIMITER_START[] = "[";
+const char PARAMETER_DELIMITER_END[] = "]";
+const char PATTERN_WILDCARD[] = "(.+)";
 
 array_t *expand_path(const char *path) { return split(path, PATH_DELIMITER); }
 

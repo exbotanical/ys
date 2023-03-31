@@ -13,6 +13,13 @@
 #include "util.h"
 #include "xmalloc.h"
 
+#define COOKIE_TIME_LEN 30
+
+static const char COOKIE_TIME_FMT[] = "%a, %d %b %Y %H:%M:%S GMT";
+
+static const char SET_COOKIE[] = "Set-Cookie";
+static const char COOKIE[] = "Cookie";
+
 /**
  * sanitize cleans and formats the cookie field
  *

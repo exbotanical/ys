@@ -4,13 +4,12 @@
 #include "libhash/libhash.h"  // for hash sets and hash tables
 #include "libutil/libutil.h"  // for arrays
 
-/**
- * A key/value pair for response headers
- */
-typedef struct {
-  const char* key;
-  const char* value;
-} header_pair;
+extern const char CACHE_CONTROL[];
+extern const char NO_CACHE[];
+extern const char PRAGMA[];
+extern const char CONTENT_TYPE[];
+extern const char ACCEPT[];
+extern const char USER_AGENT[];
 
 /**
  * A 256 slot lookup table where each index corresponds to an ASCII character

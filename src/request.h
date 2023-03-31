@@ -4,8 +4,6 @@
 #include "client.h"
 #include "libhttp.h"
 
-#define REQ_BUFFER_SIZE 4096
-
 typedef enum { IO_ERR = 1, PARSE_ERR, REQ_TOO_LONG, DUP_HDR } parse_error;
 
 typedef struct {

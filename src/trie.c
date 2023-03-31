@@ -11,6 +11,15 @@
 #include "util.h"
 #include "xmalloc.h"
 
+// Initial state for route result record
+const unsigned int INITIAL_FLAG_STATE = 0x00;
+
+// Route not found flag
+const unsigned int NOT_FOUND_MASK = 0x01;
+
+// Route not allowed flag
+const unsigned int NOT_ALLOWED_MASK = 0x02;
+
 /**
  * node_init allocates memory for a new node, its children and action members
  *

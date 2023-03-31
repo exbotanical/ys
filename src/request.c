@@ -20,12 +20,7 @@
 #include <openssl/ssl.h>
 #endif
 
-static const char CACHE_CONTROL[] = "Cache-Control";
-static const char NO_CACHE[] = "no-cache";
-static const char PRAGMA[] = "Pragma";
-static const char CONTENT_TYPE[] = "Content-Type";
-static const char ACCEPT[] = "Accept";
-static const char USER_AGENT[] = "User-Agent";
+#define REQ_BUFFER_SIZE 4096
 
 /**
  * fix_pragma_cache_control implements RFC 7234, section 5.4:

@@ -32,32 +32,8 @@ typedef struct {
 
 extern server_config server_conf;
 
-// Max line length for config file
-static const int CONFIG_MAX_LINE_LEN = 256;
-
 // Maximum number of queued connections allowed for server
-static const short MAX_QUEUED_CONNECTIONS = 100;
-
-// Default number of threads to use in the server thread pool
-static const short DEFAULT_NUM_THREADS = 4;
-
-// Default port number
-static const int DEFAULT_PORT_NUM = 5000;
-
-// Default log level
-static const char DEFAULT_LOG_LEVEL[] = "info";
-
-// Environment variable key for user-defined number of threads
-static const char NUM_THREADS_KEY[12] = "NUM_THREADS";
-
-// Environment variable key for user-defined port number
-static const char SERVER_PORT_KEY[5] = "PORT";
-
-// Environment variable key for user-defined log level
-static const char LOG_LEVEL_KEY[10] = "LOG_LEVEL";
-
-// Environment variable key for user-defined log file path
-static const char LOG_FILE_KEY[9] = "LOG_FILE";
+extern const short MAX_QUEUED_CONNECTIONS;
 
 /**
  * parse_config parses the given config file at `filename` and set

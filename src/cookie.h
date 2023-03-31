@@ -5,13 +5,6 @@
 
 #include "libhttp.h"
 
-#define COOKIE_TIME_LEN 30
-
-const char COOKIE_TIME_FMT[] = "%a, %d %b %Y %H:%M:%S GMT";
-
-const char SET_COOKIE[] = "Set-Cookie";
-const char COOKIE[] = "Cookie";
-
 typedef struct {
   // IETF RFC 6265, Section 5.2.2
   // If delta-seconds is less than or equal to zero (0), let expiry-time

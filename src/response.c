@@ -16,7 +16,9 @@
 #include <openssl/ssl.h>
 #endif
 
-static const char CRLF[3] = "\r\n";
+#define REQ_BUFFER_SIZE 4096
+
+static const char CRLF[] = "\r\n";
 
 static bool is_2xx_connect(request *req, response *res) {
   return (res->status >= 200 && res->status < 300) &&

@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include "libhttp.h"
+#include "util.h"
 #include "xmalloc.h"
 
 char *from_file(const char *filename) {
@@ -27,7 +28,7 @@ char *from_file(const char *filename) {
   fread(buf, fsize, 1, fp);
   fclose(fp);
 
-  buf[fsize] = '\0';
+  buf[fsize] = NULL_TERM;
 
   return buf;
 }

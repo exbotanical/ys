@@ -6,22 +6,22 @@
 #include "libutil/libutil.h"  // For array_t
 
 // Default root path e.g. /
-extern const char *PATH_ROOT;
+extern const char PATH_ROOT[];
 
 // Default path delimiter e.g. /
-extern const char *PATH_DELIMITER;
+extern const char PATH_DELIMITER[];
 
 // Default parameter delimiter e.g. :
-extern const char *PARAMETER_DELIMITER;
+extern const char PARAMETER_DELIMITER[];
 
 // Default parameter start delimiter e.g. [
-extern const char *PARAMETER_DELIMITER_START;
+extern const char PARAMETER_DELIMITER_START[];
 
 // Default parameter end delimiter e.g. ]
-extern const char *PARAMETER_DELIMITER_END;
+extern const char PARAMETER_DELIMITER_END[];
 
 // Default pattern wildcard e.g. (.+)
-extern const char *PATTERN_WILDCARD;
+extern const char PATTERN_WILDCARD[];
 
 /**
  * Expands a path into an array of all words delimited by

@@ -12,6 +12,13 @@
 #include "config.h"
 #include "libutil/libutil.h"
 
+#define LOG_BUFFER 2048   // max size of log line
+#define SMALL_BUFFER 256  // small buffer size
+
+#define LOG_IDENT "libhttp"
+#define LOG_LEVEL LOG_NOTICE
+#define TIMESTAMP_FORMAT "%Y-%m-%d %H:%M:%S"
+
 #define EDWARD_THE_FOURTH 1461
 
 // Standard syslog log levels

@@ -8,7 +8,7 @@
 #include "response.h"  // for response_init, res_send
 #include "xmalloc.h"
 
-static const char CONFIG_FILE_NAME[13] = "libhttp.conf";
+static const char CONFIG_FILE_NAME[] = "libhttp.conf";
 
 /**
  * setup_env configures the `server_conf` and logger for the current runtime

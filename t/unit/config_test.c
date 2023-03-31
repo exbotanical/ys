@@ -1,4 +1,4 @@
-#include "config.h"
+#include "config.c"
 
 #include "tap.c/tap.h"
 

@@ -3,7 +3,7 @@
 ## Pre-release
 - [ ] All best practices
 - [ ] All fixes
-- [ ] SSL support
+- [x] SSL support
 - [x] Cookies
 
 - [x] Clean up all objects w/ free where necessary
@@ -37,6 +37,7 @@
 - [ ] make all public structs opaque
 - [ ] Use method enum in CORS middleware helpers
 - [ ] Ensure everything opaque has getters and setters
+- [ ] Allowlist paths for middleware
 
 ## New Features
 - [x] ~~global hooks/interceptors (e.g. global HTTP headers)~~ just use middleware
@@ -67,7 +68,7 @@
 - [ ] Pass correct function pointers e.g. https://stackoverflow.com/questions/14134245/iso-c-void-and-function-pointers
 - [ ] `const` pointers
 - [ ] `const` structs
-- [ ] fix `const char CONSTANT[n]`
+- [x] fix `const char CONSTANT[n]`
 - [ ] `free` everywhere we can
 - [ ] mutexes in examples
 
@@ -84,7 +85,7 @@
 
 ## Misc Improvements
 - [ ] use a better regex engine than pcre
-- [ ] ~~make regex cache global (instead of per-trie-node)~~ bad idea
+- [x] ~~make regex cache global (instead of per-trie-node)~~ bad idea
 - [x] replace `LOG` macro calls with new logger
   - [x] fix log to stderr
   - [x] use function name macro instead of explicit string literals
