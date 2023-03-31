@@ -56,16 +56,9 @@ run_test () {
 }
 
 main () {
-  export USE_JSON=1
-  make
-
-  [[ $1 == 'integ' ]] && return
-
 	declare -a tests=($(ls $TESTING_DIR | filter not_test_file))
 
 	for_each run_test ${tests[*]}
-
-  unset USE_JSON
 }
 
 . "$(dirname "$(readlink -f "$BASH_SOURCE")")"/$UTIL_F

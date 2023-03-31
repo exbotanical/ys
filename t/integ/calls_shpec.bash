@@ -2,7 +2,7 @@ ROOT_DIR="$(dirname "$(readlink -f $BASH_SOURCE)")"
 
 source "$ROOT_DIR/shpec_util.bash"
 
-SERVER_ADDR='localhost:9000'
+SERVER_ADDR='localhost:6124'
 
 get_header () {
   sed -n "s/$1: //p" | tr -d '[:space:]'

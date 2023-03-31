@@ -7,7 +7,7 @@
 #include "deps/jsob/jsob.h"
 #include "libhttp.h"
 
-#define PORT 9000
+#define PORT 6124
 
 typedef struct record {
   char *key;
@@ -237,9 +237,8 @@ int main() {
   router_register(router, record_path, handle_post, METHOD_POST, NULL);
 
   tcp_server *server = server_init(router, PORT);
-  if (!server_start(server)) {
-    return EXIT_FAILURE;
-  }
+  server_start(server);
+  server_free(server);
 
   return EXIT_SUCCESS;
 }
