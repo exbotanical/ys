@@ -21,11 +21,8 @@ int main() {
 
   // passing PORT explicitly overrides config value if there is one
   tcp_server *server = server_init(router, PORT);
-  if (!server_start(server)) {
-    server_free(server);  // also frees router
-
-    return EXIT_FAILURE;
-  }
+  server_start(server);
+  server_free(server);
 
   return EXIT_SUCCESS;
 }

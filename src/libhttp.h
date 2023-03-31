@@ -265,9 +265,8 @@ tcp_server *server_init(http_router *router, int port);
  * server_start listens for client connections and executes routing
  *
  * @param server The server instance on which to start listening
- * @returns bool indicating whether this blocking operation failed
  */
-bool server_start(tcp_server *server);
+void server_start(tcp_server *server);
 
 /**
  * Deallocates a tcp_server's heap memory
@@ -277,8 +276,19 @@ bool server_start(tcp_server *server);
 void server_free(tcp_server *server);
 
 /**
- * req_get_parameter retrieves the parameter value matching `key`, or NULL if
- * not extant
+ * server_set_cert sets the cert and key filepaths for use with TLS.
+ * This has no effect whatsoever unless you've compiled with the `USE_TLS` flag
+ *
+ * @param server
+ * @param certfile
+ * @param keyfile
+ */
+void server_set_cert(tcp_server *server, const char *certfile,
+                     const char *keyfile);
+
+/**
+ * req_get_parameter retrieves the parameter value matching `key`, or NULL
+ * if not extant
  *
  * @param req
  * @param key

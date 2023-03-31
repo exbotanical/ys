@@ -6,6 +6,7 @@
 - [x] SSL support
 - [x] Cookies
 - [ ] Name this project: ys?
+- [ ] Lock deps versions
 
 - [x] Clean up all objects w/ free where necessary
 - [x] Validate NULLs and allocated objects
@@ -115,6 +116,7 @@
 - [ ] Address glibc malloc bug in ip
 - [ ] Do two route handlers with diff methods for the same /route get handled separately?
 - [ ] Does router handle URL fragments?
+- [ ] Why does http req hang when using TLS?
 
 ## Ecosystem
 - [ ] Addon / plugin libraries

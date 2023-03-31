@@ -1,6 +1,6 @@
 CC := gcc
 SRC := $(wildcard ./*.c) $(wildcard ./deps/*/*.c)
-TARGET := auth
+TARGET := demo
 
 all: $(TARGET)
 

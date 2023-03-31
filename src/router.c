@@ -5,7 +5,7 @@
 #include "config.h"
 #include "libutil/libutil.h"  // for s_copy, s_equals
 #include "logger.h"
-#include "response.h"  // for response_init, res_send
+#include "response.h"  // for response_init, response_send
 #include "xmalloc.h"
 
 static const char CONFIG_FILE_NAME[] = "libhttp.conf";
@@ -236,7 +236,7 @@ void router_run(router_internal *router, client_context *ctx, request *req) {
     }
   }
 
-  res_send(ctx, res_serialize(req, res));
+  response_send(ctx, response_serialize(req, res));
 }
 
 void router_free(http_router *router) { free(router); }

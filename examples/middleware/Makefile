@@ -1,6 +1,6 @@
 CC := gcc
 SRC := $(wildcard ./*.c)
-TARGET := middleware
+TARGET := demo
 
 all: $(TARGET)
 

@@ -12,7 +12,7 @@ DEPS := $(wildcard deps/*/*.c)
 TESTS := $(wildcard t/*/*.c)
 
 ifdef USE_TLS
-	CFLAGS += -lcrypto -I/usr/lib/openssl-1.1/ -lssl
+	CFLAGS += -lcrypto -I/usr/lib/openssl-1.1/ -lssl -DUSE_TLS=1
 endif
 
 ifdef DEBUG
@@ -21,6 +21,7 @@ ifdef DEBUG
 endif
 
 all:
+	$(info USE_TLS=$(USE_TLS) DEBUG=$(DEBUG))
 	$(CC) $(CFLAGS) $(DEPS) $(SRC) $(LDFLAGS) $(BIN)
 
 clean:

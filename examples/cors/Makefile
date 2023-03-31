@@ -1,6 +1,6 @@
 CC := gcc
 SRC := $(wildcard ./*.c)
-TARGET := cors
+TARGET := demo
 
 all: $(TARGET)
 

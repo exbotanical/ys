@@ -101,7 +101,11 @@ char *s_substr(const char *s, int start, int end, bool inclusive) {
   }
 
   int size_multiplier = end - start;
-  char *ret = malloc(sizeof(char) * size_multiplier);
+  // Fix: Fatal glibc error: malloc.c:2593 (sysmalloc): assertion failed:
+  // (old_top == initial_top (av) && old_size == 0) || ((unsigned long)
+  // (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end &
+  // (pagesize - 1)) == 0)
+  char *ret = malloc(sizeof(char) * size_multiplier + 1);
   if (!ret) {
     return NULL;
   }

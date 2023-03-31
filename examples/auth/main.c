@@ -237,11 +237,8 @@ int main() {
   router_register(router, "/style.css", css_handler, METHOD_GET, NULL);
 
   tcp_server *server = server_init(router, PORT);
-  if (!server_start(server)) {
-    server_free(server);
-
-    return EXIT_FAILURE;
-  }
+  server_start(server);
+  server_free(server);
 
   return EXIT_SUCCESS;
 }

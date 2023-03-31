@@ -75,7 +75,7 @@ void test_is_nocontent() {
   ok(is_nocontent(res) == false, "a 200 response is not a no content response");
 }
 
-void test_res_serialize() {
+void test_response_serialize() {
   typedef struct {
     char* name;
     char* expected;
@@ -150,7 +150,7 @@ void test_res_serialize() {
     set_body(res, test.body);
     set_status(res, test.status);
 
-    char* response = buffer_state(res_serialize(req, res));
+    char* response = buffer_state(response_serialize(req, res));
 
     is(response, test.expected,
        "the response string is serialized properly and compliant to RFC 7230");
@@ -164,7 +164,7 @@ int main() {
   test_is_informational();
   test_is_nocontent();
 
-  test_res_serialize();
+  test_response_serialize();
 
   done_testing();
 }

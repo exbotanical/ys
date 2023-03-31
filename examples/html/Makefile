@@ -1,6 +1,6 @@
 CC := gcc
 SRC := $(wildcard ./*.c)
-TARGET := html
+TARGET := demo
 
 all: $(TARGET)
 

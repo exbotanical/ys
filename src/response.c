@@ -39,14 +39,14 @@ static bool should_set_content_len(request *req, response *res) {
 }
 
 /**
- * res_serialize converts a user-defined response object into a buffer that
+ * response_serialize converts a user-defined response object into a buffer that
  * can be sent over the wire
  *
  * @param req
  * @param res
  * @return buffer_t*
  */
-buffer_t *res_serialize(request *req, response *res) {
+buffer_t *response_serialize(request *req, response *res) {
   buffer_t *buf = buffer_init(NULL);
   if (!buf) {
     DIE(EXIT_FAILURE, "[response::%s] could not allocate memory for buffer_t\n",
@@ -89,7 +89,7 @@ buffer_t *res_serialize(request *req, response *res) {
   return buf;
 }
 
-void res_send(client_context *ctx, buffer_t *resbuf) {
+void response_send(client_context *ctx, buffer_t *resbuf) {
   ssize_t total_sent = 0;
 
   while (total_sent < buffer_size(resbuf)) {
@@ -135,7 +135,7 @@ done:
   return;
 }
 
-void res_preempterr(client_context *ctx, parse_error err) {
+void response_send_error(client_context *ctx, parse_error err) {
   response *res = response_init();
 
   switch (err) {
@@ -156,7 +156,20 @@ void res_preempterr(client_context *ctx, parse_error err) {
       res->status = STATUS_INTERNAL_SERVER_ERROR;
   }
 
-  res_send(ctx, res_serialize(NULL, res));
+  response_send(ctx, response_serialize(NULL, res));
+}
+
+// TODO: cleanup + finalize
+void response_send_protocol_error(int sockfd) {
+  response *res = response_init();
+
+  res->status = STATUS_INTERNAL_SERVER_ERROR;
+  set_body(res, "invalid protocol");
+
+  buffer_t *resbuf = response_serialize(NULL, res);
+
+  write(sockfd, buffer_state(resbuf), buffer_size(resbuf));
+  close(sockfd);
 }
 
 response *response_init() {

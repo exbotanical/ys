@@ -18,6 +18,7 @@
 #include "xmalloc.h"
 
 #ifdef USE_TLS
+#include <openssl/err.h>
 #include <openssl/ssl.h>
 #endif
 
@@ -26,36 +27,31 @@ typedef struct {
   client_context *c;
 } thread_context;
 
+// "/home/goldmund/repositories/libhttp/localhost.pem"
+// "/home/goldmund/repositories/libhttp/localhost-key.pem"
 #ifdef USE_TLS
 SSL_CTX *create_context() {
-  const SSL_METHOD *method;
-  SSL_CTX *ctx;
+  const SSL_METHOD *method = TLS_server_method();
+  SSL_CTX *ctx = SSL_CTX_new(method);
 
-  method = TLS_server_method();
-
-  ctx = SSL_CTX_new(method);
   if (!ctx) {
-    perror("Unable to create SSL context");
     ERR_print_errors_fp(stderr);
-    exit(EXIT_FAILURE);
+    DIE(EXIT_FAILURE, "%s\n", "failed to create SSL context");
   }
 
   return ctx;
 }
 
-void configure_context(SSL_CTX *ctx) {
-  if (SSL_CTX_use_certificate_file(
-          ctx, "/home/goldmund/repositories/libhttp/localhost.pem",
-          SSL_FILETYPE_PEM) <= 0) {
+void configure_context(SSL_CTX *ctx, const char *certfile,
+                       const char *keyfile) {
+  if (SSL_CTX_use_certificate_file(ctx, certfile, SSL_FILETYPE_PEM) <= 0) {
     ERR_print_errors_fp(stderr);
-    exit(EXIT_FAILURE);
+    DIE(EXIT_FAILURE, "failed to read certificate file %s\n", certfile);
   }
 
-  if (SSL_CTX_use_PrivateKey_file(
-          ctx, "/home/goldmund/repositories/libhttp/localhost-key.pem",
-          SSL_FILETYPE_PEM) <= 0) {
+  if (SSL_CTX_use_PrivateKey_file(ctx, keyfile, SSL_FILETYPE_PEM) <= 0) {
     ERR_print_errors_fp(stderr);
-    exit(EXIT_FAILURE);
+    DIE(EXIT_FAILURE, "failed to read private key file %s\n", keyfile);
   }
 }
 #endif
@@ -79,7 +75,7 @@ static void *client_thread_handler(void *arg) {
               "Pre-empting response with internal error handler\n",
               __func__, maybe_req.err.code);
 
-    res_preempterr(ctx->c, maybe_req.err.code);
+    response_send_error(ctx->c, maybe_req.err.code);
     return NULL;
   }
 
@@ -93,75 +89,68 @@ static void *client_thread_handler(void *arg) {
   return NULL;
 }
 
-tcp_server *server_init(http_router *router, int port) {
-  if (port == -1) {
-    port = server_conf.port;
-  }
+static poll_client_connections(thread_pool_t *pool, server_internal *server,
+                               int server_sockfd, int port,
+                               struct sockaddr_in address, ssize_t addr_len) {
+  fd_set readfds;
+  int client_sockfd;
 
-  server_internal *server = xmalloc(sizeof(server_internal));
-  server->router = (router_internal *)router;
-  server->port = port;
+  while (true) {
+    FD_ZERO(&readfds);
+    FD_SET(server_sockfd, &readfds);
+
+    // TODO: handle error
+    select(server_sockfd + 1, &readfds, NULL, NULL, NULL);
+
+    if (FD_ISSET(server_sockfd, &readfds)) {
+      if ((client_sockfd = accept(server_sockfd, (struct sockaddr *)&address,
+                                  &addr_len)) < 0) {
+        perror("accept");
+        printlogf(LOG_INFO,
+                  "[server::%s] failed to accept client socket on %s:%d\n",
+                  __func__, address.sin_addr, port);
+
+        continue;
+      }
 
 #ifdef USE_TLS
-  server->sslctx = create_context();
-  configure_context(server->sslctx);
+      SSL *ssl = SSL_new(((server_internal *)server)->sslctx);
+      SSL_set_fd(ssl, client_sockfd);
+
+      if (SSL_accept(ssl) <= 0) {
+        ERR_print_errors_fp(stderr);
+
+        response_send_protocol_error(client_sockfd);
+        continue;
+      }
+
 #endif
 
-  return (tcp_server *)server;
+      printlogf(LOG_DEBUG,
+                "[server::%s] accepted connection from new client; spawning "
+                "handler thread...\n",
+                __func__);
+
+      client_context *ctx = xmalloc(sizeof(client_context));
+      ctx->sockfd = client_sockfd;
+
+#ifdef USE_TLS
+      ctx->ssl = ssl;
+#endif
+
+      thread_context *tc = xmalloc(sizeof(thread_context));
+      tc->c = ctx;
+      tc->r = ((server_internal *)server)->router;
+
+      if (!thread_pool_dispatch(pool, client_thread_handler, tc, true)) {
+        DIE(EXIT_FAILURE, "[server::%s] failed to dispatch thread from pool\n",
+            __func__);
+      }
+    }
+  }
 }
 
-bool server_start(tcp_server *server) {
-  int port = ((server_internal *)server)->port;
-  int server_sockfd;
-
-  if ((server_sockfd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == 0) {
-    printlogf(LOG_INFO,
-              "[server::%s] failed to initialize server socket on port %d\n",
-              __func__, port);
-    perror("socket");
-
-    return false;
-  }
-
-  int yes = 1;
-  // avoid the "Address already in use" error message
-  if (setsockopt(server_sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) ==
-      -1) {
-    printlogf(LOG_INFO, "[server::%s] failed to set sock opt\n", __func__);
-    perror("setsockopt");
-
-    return false;
-  }
-
-  struct sockaddr_in address;
-  socklen_t addr_len = sizeof(address);
-
-  memset((char *)&address, NULL_TERM, sizeof(address));
-  address.sin_family = AF_INET;
-  address.sin_addr.s_addr = INADDR_ANY;
-  address.sin_port = htons(port);
-
-  if (bind(server_sockfd, (struct sockaddr *)&address, sizeof(address)) < 0) {
-    printlogf(LOG_INFO, "[server::%s] failed to bind server socket on %s:%d\n",
-              __func__, address.sin_addr, port);
-    perror("bind");
-
-    return false;
-  }
-
-  if (listen(server_sockfd, MAX_QUEUED_CONNECTIONS) < 0) {
-    printlogf(LOG_INFO, "[server::%s] failed to listen on %s:%d\n", __func__,
-              address.sin_addr, port);
-    perror("listen");
-
-    return false;
-  }
-
-  printlogf(LOG_INFO, "[server::%s] Listening on port %d...\n", __func__, port);
-
-  fd_set readfds;
-  int client_socket;
-
+static thread_pool_t *setup_thread_pool() {
   thread_pool_t *pool = calloc(1, sizeof(thread_pool_t));
   if (!pool) {
     DIE(EXIT_FAILURE, "[server::%s] failed to initialized thread pool\n",
@@ -179,61 +168,82 @@ bool server_start(tcp_server *server) {
     thread_pool_insert(pool, client_thread);
   }
 
-  while (true) {
-    FD_ZERO(&readfds);
-    FD_SET(server_sockfd, &readfds);
+  return pool;
+}
 
-    select(server_sockfd + 1, &readfds, NULL, NULL, NULL);
+tcp_server *server_init(http_router *router, int port) {
+  if (port == -1) {
+    port = server_conf.port;
+  }
 
-    if (FD_ISSET(server_sockfd, &readfds)) {
-      if ((client_socket = accept(server_sockfd, (struct sockaddr *)&address,
-                                  &addr_len)) < 0) {
-        printlogf(LOG_INFO,
-                  "[server::%s] failed to accept client socket on %s:%d\n",
-                  __func__, address.sin_addr, port);
-        perror("accept");
-
-        return false;
-      }
+  server_internal *server = xmalloc(sizeof(server_internal));
+  server->router = (router_internal *)router;
+  server->port = port;
 
 #ifdef USE_TLS
-      SSL *ssl = SSL_new(((server_internal *)server)->sslctx);
-      SSL_set_fd(ssl, client_socket);
-
-      if (SSL_accept(ssl) <= 0) {
-        ERR_print_errors_fp(stderr);
-        continue;
-      }
+  printlogf(LOG_INFO, "Using TLS - initializing SSL context\n");
+  server->sslctx = create_context();
+  configure_context(server->sslctx);
 #endif
 
-      printlogf(LOG_DEBUG,
-                "[server::%s] accepted connection from new client; spawning "
-                "handler thread...\n",
-                __func__);
+  return (tcp_server *)server;
+}
 
-      client_context *ctx = xmalloc(sizeof(client_context));
-      ctx->sockfd = client_socket;
+void server_start(tcp_server *server) {
+  thread_pool_t *pool = setup_thread_pool();
+  int port = ((server_internal *)server)->port;
+  int server_sockfd;
 
-#ifdef USE_TLS
-      ctx->ssl = ssl;
-#endif
+  if ((server_sockfd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == 0) {
+    perror("socket");
+    DIE(EXIT_FAILURE,
+        "[server::%s] failed to initialize server socket on port %d\n",
+        __func__, port);
+  }
 
-      thread_context *tc = xmalloc(sizeof(thread_context));
-      tc->c = ctx;
-      tc->r = ((server_internal *)server)->router;
-
-      if (!thread_pool_dispatch(pool, client_thread_handler, tc, true)) {
-        DIE(EXIT_FAILURE, "[server::%s] failed to dispatch thread from pool\n",
-            __func__);
-      }
+  {
+    int yes = 1;
+    // avoid the "Address already in use" error message
+    if (setsockopt(server_sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
+                   sizeof(yes)) == -1) {
+      perror("setsockopt");
+      DIE(EXIT_FAILURE, "[server::%s] failed to set sock opt\n", __func__);
     }
   }
 
+  struct sockaddr_in address;
+  socklen_t addr_len = sizeof(address);
+
+  memset((char *)&address, NULL_TERM, addr_len);
+  address.sin_family = AF_INET;
+  address.sin_addr.s_addr = INADDR_ANY;
+  address.sin_port = htons(port);
+
+  if (bind(server_sockfd, (struct sockaddr *)&address, addr_len) < 0) {
+    perror("bind");
+    DIE(EXIT_FAILURE, "[server::%s] failed to bind server socket on %s:%d\n",
+        __func__, address.sin_addr, port);
+  }
+
+  if (listen(server_sockfd, MAX_QUEUED_CONNECTIONS) < 0) {
+    perror("listen");
+    DIE(EXIT_FAILURE, "[server::%s] failed to listen on %s:%d\n", __func__,
+        address.sin_addr, port);
+  }
+
+  printlogf(LOG_INFO, "[server::%s] Listening on port %d...\n", __func__, port);
+
+  poll_client_connections(pool, server, server_sockfd, port, address, addr_len);
   // TODO: interrupt cancel, kill sig
-  return true;
 }
 
 void server_free(tcp_server *server) {
   router_free((http_router *)((server_internal *)server)->router);
   free(server);
+}
+
+void server_set_cert(tcp_server *server, const char *certfile,
+                     const char *keyfile) {
+  ((server_internal *)server)->cert_path = certfile;
+  ((server_internal *)server)->key_path = keyfile;
 }
