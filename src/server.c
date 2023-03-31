@@ -1,5 +1,3 @@
-
-
 #include "server.h"
 
 #include <stdio.h>       // for perror
@@ -19,6 +17,49 @@
 #include "util.h"
 #include "xmalloc.h"
 
+#ifdef USE_TLS
+#include <openssl/ssl.h>
+#endif
+
+typedef struct {
+  router_internal *r;
+  client_context *c;
+} thread_context;
+
+#ifdef USE_TLS
+SSL_CTX *create_context() {
+  const SSL_METHOD *method;
+  SSL_CTX *ctx;
+
+  method = TLS_server_method();
+
+  ctx = SSL_CTX_new(method);
+  if (!ctx) {
+    perror("Unable to create SSL context");
+    ERR_print_errors_fp(stderr);
+    exit(EXIT_FAILURE);
+  }
+
+  return ctx;
+}
+
+void configure_context(SSL_CTX *ctx) {
+  if (SSL_CTX_use_certificate_file(
+          ctx, "/home/goldmund/repositories/libhttp/localhost.pem",
+          SSL_FILETYPE_PEM) <= 0) {
+    ERR_print_errors_fp(stderr);
+    exit(EXIT_FAILURE);
+  }
+
+  if (SSL_CTX_use_PrivateKey_file(
+          ctx, "/home/goldmund/repositories/libhttp/localhost-key.pem",
+          SSL_FILETYPE_PEM) <= 0) {
+    ERR_print_errors_fp(stderr);
+    exit(EXIT_FAILURE);
+  }
+}
+#endif
+
 /**
  * client_thread_handler handles client connections and executes the
  * user-defined router
@@ -26,9 +67,9 @@
  * @return void*
  */
 static void *client_thread_handler(void *arg) {
-  client_context *ctx = arg;
+  thread_context *ctx = arg;
 
-  maybe_request maybe_req = req_read_and_parse(ctx->sockfd);
+  maybe_request maybe_req = req_read_and_parse(ctx->c);
 
   // TODO: test + fix
   if (maybe_req.err.code == IO_ERR || maybe_req.err.code == PARSE_ERR ||
@@ -38,7 +79,7 @@ static void *client_thread_handler(void *arg) {
               "Pre-empting response with internal error handler\n",
               __func__, maybe_req.err.code);
 
-    res_preempterr(ctx->sockfd, maybe_req.err.code);
+    res_preempterr(ctx->c, maybe_req.err.code);
     return NULL;
   }
 
@@ -47,7 +88,7 @@ static void *client_thread_handler(void *arg) {
   printlogf(LOG_INFO, "[server::%s] client request received: %s %s\n", __func__,
             req->method, req->path);
 
-  router_run(ctx->router, ctx->sockfd, req);
+  router_run(ctx->r, ctx->c, req);
 
   return NULL;
 }
@@ -58,9 +99,13 @@ tcp_server *server_init(http_router *router, int port) {
   }
 
   server_internal *server = xmalloc(sizeof(server_internal));
-
   server->router = (router_internal *)router;
   server->port = port;
+
+#ifdef USE_TLS
+  server->sslctx = create_context();
+  configure_context(server->sslctx);
+#endif
 
   return (tcp_server *)server;
 }
@@ -151,6 +196,16 @@ bool server_start(tcp_server *server) {
         return false;
       }
 
+#ifdef USE_TLS
+      SSL *ssl = SSL_new(((server_internal *)server)->sslctx);
+      SSL_set_fd(ssl, client_socket);
+
+      if (SSL_accept(ssl) <= 0) {
+        ERR_print_errors_fp(stderr);
+        continue;
+      }
+#endif
+
       printlogf(LOG_DEBUG,
                 "[server::%s] accepted connection from new client; spawning "
                 "handler thread...\n",
@@ -158,10 +213,16 @@ bool server_start(tcp_server *server) {
 
       client_context *ctx = xmalloc(sizeof(client_context));
       ctx->sockfd = client_socket;
-      ctx->router = ((server_internal *)server)->router;
 
-      // TODO: UH, why are we blocking?
-      if (!thread_pool_dispatch(pool, client_thread_handler, ctx, true)) {
+#ifdef USE_TLS
+      ctx->ssl = ssl;
+#endif
+
+      thread_context *tc = xmalloc(sizeof(thread_context));
+      tc->c = ctx;
+      tc->r = ((server_internal *)server)->router;
+
+      if (!thread_pool_dispatch(pool, client_thread_handler, tc, true)) {
         DIE(EXIT_FAILURE, "[server::%s] failed to dispatch thread from pool\n",
             __func__);
       }

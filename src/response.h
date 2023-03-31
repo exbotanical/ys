@@ -26,11 +26,17 @@ buffer_t *res_serialize(request *req, response *res);
 /**
  * res_send writes the given response to the given socket
  *
- * @param sockfd
+ * @param ctx
  * @param resbuf
  */
-void res_send(int sockfd, buffer_t *resbuf);
+void res_send(client_context *ctx, buffer_t *resbuf);
 
-void res_preempterr(int sockfd, parse_error err);
+/**
+ * res_preempterr pre-empts res_send with an error response
+ *
+ * @param ctx
+ * @param err
+ */
+void res_preempterr(client_context *ctx, parse_error err);
 
 #endif /* RESPONSE_H */

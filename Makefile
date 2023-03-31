@@ -16,6 +16,10 @@ ifndef USE_JSON
 	DEPS := $(filter-out deps/yyjson%, $(DEPS))
 endif
 
+ifdef USE_TLS
+	CFLAGS += -lcrypto -I/usr/lib/openssl-1.1/ -lssl
+endif
+
 ifdef DEBUG
 	SRC += lib/debug.h
 	CFLAGS += -Ilib

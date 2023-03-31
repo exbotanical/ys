@@ -1,6 +1,7 @@
 #ifndef REQUEST_H
 #define REQUEST_H
 
+#include "client.h"
 #include "libhttp.h"
 
 #define REQ_BUFFER_SIZE 4096
@@ -16,6 +17,6 @@ typedef union {
   request* req;
 } maybe_request;
 
-maybe_request req_read_and_parse(int sockfd);
+maybe_request req_read_and_parse(client_context* ctx);
 
 #endif /* REQUEST_H */

@@ -12,6 +12,10 @@
 #include "util.h"
 #include "xmalloc.h"
 
+#ifdef USE_TLS
+#include <openssl/ssl.h>
+#endif
+
 static const char CRLF[3] = "\r\n";
 
 static bool is_2xx_connect(request *req, response *res) {
@@ -55,7 +59,7 @@ buffer_t *res_serialize(request *req, response *res) {
                 fmt_str("HTTP/1.1 %d %s", status, http_status_names[status]));
   buffer_append(buf, CRLF);
 
-  for (unsigned int i = 0; i < headers->capacity; i++) {
+  for (unsigned int i = 0; i < (unsigned int)headers->capacity; i++) {
     ht_record *header = headers->records[i];
     if (!header) continue;
 
@@ -69,7 +73,6 @@ buffer_t *res_serialize(request *req, response *res) {
   // server MUST NOT send a Content-Length header field in any 2xx
   // (Successful) response to a METHOD_CONNECT request (Section 4.3.6 of
   // [RFC7231]).
-
   if (req && should_set_content_len(req, res)) {
     buffer_append(buf, fmt_str("Content-Length: %d", body ? strlen(body) : 0));
     buffer_append(buf, CRLF);
@@ -84,12 +87,20 @@ buffer_t *res_serialize(request *req, response *res) {
   return buf;
 }
 
-void res_send(int sockfd, buffer_t *resbuf) {
+void res_send(client_context *ctx, buffer_t *resbuf) {
   ssize_t total_sent = 0;
 
   while (total_sent < buffer_size(resbuf)) {
-    ssize_t sent = write(sockfd, buffer_state(resbuf) + total_sent,
-                         buffer_size(resbuf) - total_sent);
+    ssize_t sent;
+
+#ifdef USE_TLS
+    sent = SSL_write(ctx->ssl, buffer_state(resbuf) + total_sent,
+                     buffer_size(resbuf) - total_sent);
+#else
+    sent = write(ctx->sockfd, buffer_state(resbuf) + total_sent,
+                 buffer_size(resbuf) - total_sent);
+#endif
+
     if (sent == -1) {
       if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) {
         // Try again later
@@ -97,7 +108,7 @@ void res_send(int sockfd, buffer_t *resbuf) {
       }
 
       printlogf(LOG_INFO, "[response::%s] failed to send response on sockfd %d",
-                __func__, sockfd);
+                __func__, ctx->sockfd);
       printlogf(LOG_DEBUG, "[response::%s] full response body: %s\n", __func__,
                 buffer_state(resbuf));
       goto done;
@@ -111,12 +122,18 @@ void res_send(int sockfd, buffer_t *resbuf) {
 
 done:
   buffer_free(resbuf);
-  close(sockfd);
+
+#ifdef USE_TLS
+  SSL_shutdown(ctx->ssl);
+  SSL_free(ctx->ssl);
+#endif
+
+  close(ctx->sockfd);
 
   return;
 }
 
-void res_preempterr(int sockfd, parse_error err) {
+void res_preempterr(client_context *ctx, parse_error err) {
   response *res = response_init();
 
   switch (err) {
@@ -137,7 +154,7 @@ void res_preempterr(int sockfd, parse_error err) {
       res->status = STATUS_INTERNAL_SERVER_ERROR;
   }
 
-  res_send(sockfd, res_serialize(NULL, res));
+  res_send(ctx, res_serialize(NULL, res));
 }
 
 response *response_init() {

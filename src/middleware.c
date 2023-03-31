@@ -36,7 +36,7 @@ void __middlewares(router_attr *attr, route_handler *mw, ...) {
 
 void use_cors(router_attr *attr, cors_opts *opts) {
   attr->use_cors = true;
-  cors_init(opts);
+  cors_init((cors_opts_internal *)opts);
 
   if (!has_elements(attr->middlewares)) {
     attr->middlewares = array_init();

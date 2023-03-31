@@ -1,4 +1,3 @@
-
 #include "request.h"
 
 #include <assert.h>
@@ -8,6 +7,7 @@
 #include <string.h>  // for memset
 #include <unistd.h>  // for read
 
+#include "client.h"
 #include "header.h"
 #include "libhash/libhash.h"  // for hash sets
 #include "libhttp.h"
@@ -16,12 +16,16 @@
 #include "request.h"
 #include "xmalloc.h"
 
-static const char CACHE_CONTROL[14] = "Cache-Control";
-static const char NO_CACHE[9] = "no-cache";
-static const char PRAGMA[7] = "Pragma";
-static const char CONTENT_TYPE[13] = "Content-Type";
-static const char ACCEPT[7] = "Accept";
-static const char USER_AGENT[11] = "User-Agent";
+#ifdef USE_TLS
+#include <openssl/ssl.h>
+#endif
+
+static const char CACHE_CONTROL[] = "Cache-Control";
+static const char NO_CACHE[] = "no-cache";
+static const char PRAGMA[] = "Pragma";
+static const char CONTENT_TYPE[] = "Content-Type";
+static const char ACCEPT[] = "Accept";
+static const char USER_AGENT[] = "User-Agent";
 
 /**
  * fix_pragma_cache_control implements RFC 7234, section 5.4:
@@ -37,7 +41,7 @@ static void fix_pragma_cache_control(hash_table* headers) {
 }
 
 // TODO: break up into two functions
-maybe_request req_read_and_parse(int sockfd) {
+maybe_request req_read_and_parse(client_context* ctx) {
   char* method = NULL;
   char* path = NULL;
 
@@ -50,10 +54,17 @@ maybe_request req_read_and_parse(int sockfd) {
   ssize_t bytes_read;
 
   while (true) {
-    while ((bytes_read = read(sockfd, buf + buflen, sizeof(buf) - buflen)) ==
-               -1 &&
+#ifdef USE_TLS
+    while ((bytes_read =
+                SSL_read(ctx->ssl, buf + buflen, sizeof(buf) - buflen)) == -1 &&
            errno == EINTR)
       ;
+#else
+    while ((bytes_read =
+                read(ctx->sockfd, buf + buflen, sizeof(buf) - buflen)) == -1 &&
+           errno == EINTR)
+      ;
+#endif
 
     if (bytes_read <= 0) {
       maybe_request meta = {.err = IO_ERR};

@@ -77,7 +77,7 @@ bool thread_pool_dispatch(thread_pool_t* pool, void* (*thread_routine)(void*),
 
   if (!thread) return false;
 
-  if (block_caller && !thread->semaphore) {
+  if (block_caller) {  // TODO: FIX
     thread->semaphore = malloc(sizeof(semaphore_t));
     semaphore_init(thread->semaphore, 0);
   }

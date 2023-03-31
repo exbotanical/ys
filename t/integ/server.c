@@ -180,7 +180,7 @@ response *handle_post(request *req, response *res) {
   return res;
 }
 
-request *meta_handler(request *req, response *res) {
+response *meta_handler(request *req, response *res) {
   char **movies = req_get_query(req, "movies");
 
   buffer_t *buf = buffer_init(NULL);

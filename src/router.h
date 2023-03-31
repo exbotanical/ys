@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+#include "client.h"
 #include "libhttp.h"
 #include "libutil/libutil.h"
 
@@ -32,9 +33,9 @@ typedef struct {
  * appropriate handler
  *
  * @param router
- * @param client_sockfd
- * @param r
+ * @param ctx
+ * @param req
  */
-void router_run(router_internal *router, int client_sockfd, request *r);
+void router_run(router_internal *router, client_context *ctx, request *req);
 
 #endif /* ROUTER_H */

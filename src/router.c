@@ -207,19 +207,17 @@ void router_register(http_router *router, const char *path,
   trie_insert(((router_internal *)router)->trie, methods, path, handler);
 }
 
-void router_run(router_internal *router, int client_sockfd, request *req) {
-  router_internal *internal_router = (router_internal *)router;
-  route_result *result =
-      trie_search(internal_router->trie, req->method, req->path);
+void router_run(router_internal *router, client_context *ctx, request *req) {
+  route_result *result = trie_search(router->trie, req->method, req->path);
 
   response *res = response_init();
 
   if (!result) {
-    res = internal_router->internal_error_handler(req, res);
+    res = router->internal_error_handler(req, res);
   } else if ((result->flags & NOT_FOUND_MASK) == NOT_FOUND_MASK) {
-    res = internal_router->not_found_handler(req, res);
+    res = router->not_found_handler(req, res);
   } else if ((result->flags & NOT_ALLOWED_MASK) == NOT_ALLOWED_MASK) {
-    res = internal_router->method_not_allowed_handler(req, res);
+    res = router->method_not_allowed_handler(req, res);
   } else {
     req->parameters = result->parameters;
     req->queries = result->queries;
@@ -238,7 +236,7 @@ void router_run(router_internal *router, int client_sockfd, request *req) {
     }
   }
 
-  res_send(client_sockfd, res_serialize(req, res));
+  res_send(ctx, res_serialize(req, res));
 }
 
 void router_free(http_router *router) { free(router); }
