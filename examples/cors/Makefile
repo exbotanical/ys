@@ -1,11 +1,11 @@
-CC=gcc
-OBJFILES=$(wildcard ./*.c)
-TARGET=demo
+CC := gcc
+SRC := $(wildcard ./*.c)
+TARGET := cors
 
 all: $(TARGET)
 
-$(TARGET): $(OBJFILES)
-	$(CC) -I../../src -I../../deps $(OBJFILES) -o $(TARGET) -L../../ -lhttp
+$(TARGET): $(SRC)
+	$(CC) -I../../src -I../../deps $(SRC) -o $(TARGET) -L../../ -lhttp
 
 clean:
 	rm $(TARGET)

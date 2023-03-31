@@ -1,11 +1,11 @@
-CC=gcc
-OBJFILES=$(wildcard ./*.c)
-TARGET=demo
+CC := gcc
+SRC := $(wildcard ./*.c) $(wildcard ./deps/*/*.c)
+TARGET := auth
 
 all: $(TARGET)
 
-$(TARGET): $(OBJFILES)
-	$(CC) -I../../src -I../../deps $(OBJFILES) -o $(TARGET) -L../../ -lhttp -luuid
+$(TARGET): $(SRC)
+	$(CC) $(SRC) -o $(TARGET) -I../../src -I../../deps -Ideps -L../../ -lhttp -luuid
 
 clean:
 	rm $(TARGET)

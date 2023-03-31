@@ -1,0 +1,21 @@
+{
+  "name": "jsob",
+  "version": "0.0.1",
+  "author": "Matthew Zito",
+  "repo": "exbotanical/jsob",
+  "license": "MIT",
+  "description": "A wrapper around yyjson for super simple JSON usage in C",
+  "keywords": ["json", "utility library"],
+  "src": [
+    "include/jsob.h",
+    "include/yyjson.h",
+    "src/jsob.c",
+    "deps/yyjson/yyjson.c"
+  ],
+  "dependencies": {
+    "exbotanical/libutil": "*"
+  },
+  "development": {
+    "thlorenz/tap.c": "*"
+  }
+}

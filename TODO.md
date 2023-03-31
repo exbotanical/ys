@@ -5,6 +5,7 @@
 - [ ] All fixes
 - [x] SSL support
 - [x] Cookies
+- [ ] Name this project: ys?
 
 - [x] Clean up all objects w/ free where necessary
 - [x] Validate NULLs and allocated objects
@@ -64,7 +65,7 @@
 - [x] ~~specific int types~~
 - [ ] check all instances of `strcmp` and see if `strncmp` makes more sense
 - [ ] Determine where we actually need to be passing by reference (currently, this is done everywhere)
-- [ ] Add LICENSE of yyjson
+- [x] ~~Add LICENSE of yyjson~~
 - [ ] Pass correct function pointers e.g. https://stackoverflow.com/questions/14134245/iso-c-void-and-function-pointers
 - [ ] `const` pointers
 - [ ] `const` structs
@@ -91,7 +92,7 @@
   - [x] use function name macro instead of explicit string literals
 - [ ] inline functions where reasonable
 - [x] ~~Change middleware chaining to use `next`, the next middleware in the chain. This will allow a current handler to *not* invoke `next`, thus ending the chain. Note: Figuring this out is going to be a challenge~~
-- [ ] relocate JSON to util library
+- [x] relocate JSON to util library
 
 ## DX
 - [ ] helper ??? `#define CAST(type, name, stmt) type *name = (type *)stmt`

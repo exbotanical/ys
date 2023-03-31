@@ -4,7 +4,7 @@
 #include <string.h>
 #include <uuid/uuid.h>
 
-#include "json.h"
+#include "deps/jsob/jsob.h"
 #include "libhash/libhash.h"
 #include "libhttp.h"
 
@@ -83,14 +83,14 @@ response *data_handler(request *req, response *res) {
 }
 
 response *register_handler(request *req, response *res) {
-  char *username = json_getstr(req->body, "username");
+  char *username = jsob_getstr(req->body, "username");
   if (!username) {
     set_status(res, STATUS_BAD_REQUEST);
     set_body(res, "Must provide a username");
     return res;
   }
 
-  char *password = json_getstr(req->body, "password");
+  char *password = jsob_getstr(req->body, "password");
   if (!password) {
     set_status(res, STATUS_BAD_REQUEST);
     set_body(res, "Must provide a password");
@@ -119,14 +119,14 @@ response *register_handler(request *req, response *res) {
 }
 
 response *login_handler(request *req, response *res) {
-  char *username = json_getstr(req->body, "username");
+  char *username = jsob_getstr(req->body, "username");
   if (!username) {
     set_status(res, STATUS_BAD_REQUEST);
     set_body(res, "Must provide a username");
     return res;
   }
 
-  char *password = json_getstr(req->body, "password");
+  char *password = jsob_getstr(req->body, "password");
   if (!password) {
     set_status(res, STATUS_BAD_REQUEST);
     set_body(res, "Must provide a password");

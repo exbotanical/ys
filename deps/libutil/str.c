@@ -101,8 +101,7 @@ char *s_substr(const char *s, int start, int end, bool inclusive) {
   }
 
   int size_multiplier = end - start;
-
-  char *ret = malloc(sizeof(char) * size_multiplier + 1);
+  char *ret = malloc(sizeof(char) * size_multiplier);
   if (!ret) {
     return NULL;
   }

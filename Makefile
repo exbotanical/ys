@@ -11,11 +11,6 @@ SRC := $(wildcard src/*.c)
 DEPS := $(wildcard deps/*/*.c)
 TESTS := $(wildcard t/*/*.c)
 
-ifndef USE_JSON
-	SRC := $(filter-out src/json.%, $(SRC))
-	DEPS := $(filter-out deps/yyjson%, $(DEPS))
-endif
-
 ifdef USE_TLS
 	CFLAGS += -lcrypto -I/usr/lib/openssl-1.1/ -lssl
 endif
@@ -42,7 +37,7 @@ unit_test:
 # make -s integ_test 2>/dev/null
 integ_test:
 	./scripts/test.bash integ
-	$(CC) t/integ/server.c -Isrc -Ideps -o $(INTEG_BIN) -L. -lhttp
+	$(CC) t/integ/server.c $(wildcard t/integ/deps/*/*.c) -Isrc -Ideps -o $(INTEG_BIN) -L. -lhttp
 	shpec
 	rm integ
 
