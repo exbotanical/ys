@@ -5,7 +5,7 @@
 - [ ] All fixes
 - [x] SSL support
 - [x] Cookies
-- [ ] Name this project: ys?
+- [ ] Name this project: Ys?
 - [ ] Lock deps versions
 
 - [x] Clean up all objects w/ free where necessary
@@ -28,7 +28,7 @@
 - [x] xmalloc that dies
 
 ## Testing
-- [ ] test handlers with a mocking library?
+- [x] ~~test handlers with a mocking library?~~ no need w/ integ
 - [ ] test with a real server (E2E)
 
 ## UX
@@ -36,8 +36,8 @@
   - [x] source strdup from dep
 - [ ] review all `include`d functions and replace any non-standard ones
 - [ ] documentation
-- [ ] make all public structs opaque
-- [ ] Use method enum in CORS middleware helpers
+- [x] make all public structs opaque
+- [x] Use method enum in CORS middleware helpers
 - [ ] Ensure everything opaque has getters and setters
 - [ ] Allowlist paths for middleware
 
@@ -49,8 +49,8 @@
 - [x] Cookies
 - [x] support erroneous (Request / Response)s
 - [x] use attr struct for fallback handlers
-- [ ] Figure out file routing. The problem here is we want the `response_t` type to be accessible to consumers without having to compile the entire library and link it.
-- [ ] SSL support
+- [x] ~~Figure out file routing. The problem here is we want the `response_t` type to be accessible to consumers without having to compile the entire library and link it.~~ Make this an addon
+- [x] SSL/TLS support
 - [x] JSON parsed body in context (decided to offer JSON opt-in utilities)
 - [ ] async i/o option using epoll
   - [ ] Evented server e.g. `onRequest`
@@ -69,7 +69,7 @@
 - [x] ~~Add LICENSE of yyjson~~
 - [ ] Pass correct function pointers e.g. https://stackoverflow.com/questions/14134245/iso-c-void-and-function-pointers
 - [ ] `const` pointers
-- [ ] `const` structs
+  - [ ] `const` in structs
 - [x] fix `const char CONSTANT[n]`
 - [ ] `free` everywhere we can
 - [ ] mutexes in examples

@@ -209,7 +209,7 @@ response *root_handler(request *req, response *res) {
 cors_opts *setup_cors() {
   cors_opts *opts = cors_opts_init();
 
-  set_allowed_methods(opts, "GET", "DELETE");
+  set_allowed_methods(opts, METHOD_GET, METHOD_DELETE);
   set_allowed_headers(opts, "X-Test-Header");
   set_expose_headers(opts, "X-Powered-By");
   set_allowed_origins(opts, "test.com");

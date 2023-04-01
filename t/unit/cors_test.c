@@ -517,7 +517,7 @@ void test_set_helpers() {
   const char *o3 = "o3";
   set_allowed_origins(o, o1, o2, o3);
 
-  set_allowed_methods(o, "GET", "PUT", "DELETE");
+  set_allowed_methods(o, METHOD_GET, METHOD_PUT, METHOD_DELETE);
 
   const char *h1 = "h1";
   const char *h2 = "h2";

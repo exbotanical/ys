@@ -412,7 +412,7 @@ void __set_allowed_origins(cors_opts *opts, array_t *origins);
  * this for you.
  *
  * @param opts cors_opts*
- * @param ... char*[]
+ * @param ... http_method*[]
  */
 #define set_allowed_methods(opts, ...) \
   __set_allowed_methods(opts, array_collect(__VA_ARGS__))

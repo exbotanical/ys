@@ -287,6 +287,9 @@ cors_opts *cors_opts_init() {
   opts->allow_credentials = false;
   opts->max_age = 0;
   opts->use_options_passthrough = false;
+  // TODO: why does this need to be pre-initialized but not other arrays (when
+  // using allow_x macros)
+  opts->allowed_methods = array_init();
 
   return (cors_opts *)opts;
 }
@@ -412,7 +415,12 @@ void __set_allowed_origins(cors_opts *opts, array_t *origins) {
 }
 
 void __set_allowed_methods(cors_opts *opts, array_t *methods) {
-  ((cors_opts_internal *)opts)->allowed_methods = methods;
+  array_t *allowed_methods = ((cors_opts_internal *)opts)->allowed_methods;
+
+  foreach (methods, i) {
+    array_push(allowed_methods,
+               http_method_names[(http_method)array_get(methods, i)]);
+  }
 }
 
 void __set_allowed_headers(cors_opts *opts, array_t *headers) {
