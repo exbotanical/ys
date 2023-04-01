@@ -73,6 +73,7 @@ maybe_request req_read_and_parse(client_context* ctx) {
     pret =
         phr_parse_request(buf, buflen, &method, &method_len, &path, &path_len,
                           &minor_version, headers, &num_headers, prev_buflen);
+
     if (pret > 0) {
       break;  // Successfully parsed the request
     }
@@ -93,7 +94,7 @@ maybe_request req_read_and_parse(client_context* ctx) {
     }
   }
 
-  request* req = xmalloc(sizeof(request));
+  request_internal* req = xmalloc(sizeof(request_internal));
   req->raw = s_copy(buf);
   req->body = s_copy(buf + pret);
   req->content_length = pret;
@@ -133,21 +134,27 @@ maybe_request req_read_and_parse(client_context* ctx) {
 }
 
 char* req_get_parameter(request* req, const char* key) {
-  if (!req->parameters) return NULL;
-  return ht_get(req->parameters, key);
+  request_internal* ri = (request_internal*)req;
+
+  if (!ri->parameters) return NULL;
+  return ht_get(ri->parameters, key);
 }
 
 unsigned int req_num_parameters(request* req) {
-  if (!req->parameters) return 0;
-  return req->parameters->count;
+  request_internal* ri = (request_internal*)req;
+
+  if (!ri->parameters) return 0;
+  return ri->parameters->count;
 }
 
 bool req_has_parameters(request* req) {
-  return req && req->parameters && req->parameters->count > 0;
+  request_internal* ri = (request_internal*)req;
+
+  return req && ri->parameters && ri->parameters->count > 0;
 }
 
 char** req_get_query(request* req, const char* key) {
-  array_t* arr = (array_t*)ht_get(req->queries, key);
+  array_t* arr = (array_t*)ht_get(((request_internal*)req)->queries, key);
   if (arr) {
     char** values = xmalloc(array_size(arr));
     foreach (arr, i) {
@@ -160,13 +167,58 @@ char** req_get_query(request* req, const char* key) {
 }
 
 bool req_has_query(request* req, const char* key) {
-  return req->queries && ht_search(req->queries, key);
+  request_internal* ri = (request_internal*)req;
+  return ri->queries && ht_search(ri->queries, key);
 }
 
 unsigned int req_num_queries(request* req, const char* key) {
   if (req_has_query(req, key)) {
-    return array_size((array_t*)ht_get(req->queries, key));
+    return array_size((array_t*)ht_get(((request_internal*)req)->queries, key));
   }
 
   return 0;
+}
+
+char* request_get_path(request* req) {
+  return s_copy(((request_internal*)req)->path);
+}
+
+char* request_get_method(request* req) {
+  return s_copy(((request_internal*)req)->method);
+}
+
+char* request_get_accept(request* req) {
+  return s_copy(((request_internal*)req)->accept);
+}
+
+char* request_get_body(request* req) {
+  return s_copy(((request_internal*)req)->body);
+}
+
+char* request_get_raw(request* req) {
+  return s_copy(((request_internal*)req)->raw);
+}
+
+char* request_get_host(request* req) {
+  return s_copy(((request_internal*)req)->host);
+}
+
+char* request_get_protocol(request* req) {
+  return s_copy(((request_internal*)req)->protocol);
+}
+
+char* request_get_user_agent(request* req) {
+  return s_copy(((request_internal*)req)->user_agent);
+}
+
+char* request_get_content_type(request* req) {
+  return s_copy(((request_internal*)req)->content_type);
+}
+
+char* request_get_version(request* req) {
+  return s_copy(((request_internal*)req)->version);
+}
+
+int request_get_content_length(request* req) {
+  return ((request_internal*)req)->content_length;
 }

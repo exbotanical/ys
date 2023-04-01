@@ -127,7 +127,7 @@ response *handle_put(request *req, response *res) {
     return res;
   }
 
-  char *v = jsob_getstr(req->body, "v");
+  char *v = jsob_getstr(request_get_body(req), "v");
   if (!v) {
     set_body(res, res_err("must provide a value"));
     set_status(res, STATUS_BAD_REQUEST);
@@ -158,7 +158,7 @@ response *handle_post(request *req, response *res) {
     return res;
   }
 
-  char *v = jsob_getstr(req->body, "v");
+  char *v = jsob_getstr(request_get_body(req), "v");
 
   if (!v) {
     set_body(res, res_err("must provide a value"));

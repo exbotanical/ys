@@ -6,6 +6,7 @@
 #include "client.h"
 #include "libhttp.h"
 #include "libutil/libutil.h"
+#include "request.h"
 
 /**
  * A route record
@@ -36,6 +37,7 @@ typedef struct {
  * @param ctx
  * @param req
  */
-void router_run(router_internal *router, client_context *ctx, request *req);
+void router_run(router_internal *router, client_context *ctx,
+                request_internal *req);
 
 #endif /* ROUTER_H */

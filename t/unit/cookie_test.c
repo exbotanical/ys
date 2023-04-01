@@ -205,7 +205,8 @@ void test_get_cookie() {
       tocookie(".testsite.com", "test", "ThisCookie", "/", 2257894000, 86400,
                SAME_SITE_LAX_MODE, false, true);
 
-  request* req = malloc(sizeof(request));  // TODO: request_init fn
+  request_internal* req =
+      malloc(sizeof(request_internal));  // TODO: request_init fn
   req->headers = ht_init(0);
   insert_header(req->headers, COOKIE, cookie_serialize(c));
   insert_header(req->headers, COOKIE, cookie_serialize(expected));

@@ -8,6 +8,8 @@
 #include "libutil/libutil.h"
 #include "trie.h"
 
+/***************************** Constants *****************************/
+
 /**
  * Mappings of HTTP status enums to string literal names
  */
@@ -107,184 +109,13 @@ typedef enum {
   STATUS_NETWORK_AUTHENTICATION_REQUIRED = 511,  // RFC 6585, 6
 } http_status;
 
+/***************************** Request *****************************/
+
 /**
  * A request contains request data such as the path, method, body, any route or
  * query parameters, etc.
  */
-typedef struct {
-  const char *path;
-  const char *method;
-  const char *accept;
-  const char *body;
-  const char *raw;
-  const char *host;
-  const char *protocol;
-  const char *user_agent;
-  const char *content_type;
-  const char *version;
-  hash_table *parameters;
-  hash_table *queries;
-  hash_table *headers;
-  int content_length;
-} request;  // TODO: opaque
-
-/**
- * A response holds the necessary metadata for the response that will be sent to
- * the client. Client handlers should use the library-provided helpers to set
- * the desired properties e.g. status, body, and headers.
- */
-typedef struct {
-  /**
-   * A flag used by middleware - setting this to true will stop the middleware
-   * chain and prevent subsequent middlewares from being run
-   */
-  bool done;
-
-  /**
-   * HTTP status code - if not set, will default to 200 OK
-   */
-  http_status status;
-
-  /**
-   * HTTP headers - optional, but you should pass content-type if sending a body
-   */
-  hash_table *headers;
-
-  /**
-   * response body - optional; Content-length header will be set for you
-   */
-  char *body;
-} response;  // TODO: opaque
-
-/**
- * An alias type for request handlers
- */
-typedef response *route_handler(request *, response *);
-
-/**
- * CORS configuration options
- */
-typedef struct cors_opts_internal cors_opts;
-
-/**
- * A router / HTTP multiplexer
- */
-typedef struct router_internal *http_router;
-
-/**
- * An attributes object for configuring a http_router
- */
-typedef struct {
-  bool use_cors;
-  route_handler *not_found_handler;
-  route_handler *internal_error_handler;
-  route_handler *method_not_allowed_handler;
-  array_t *middlewares;
-} router_attr;  // TODO: opaque
-
-/**
- * A server configuration object that stores settings for the HTTP server
- */
-typedef struct server_internal *tcp_server;
-
-/**
- * set_header inserts the given key/value pair as a header on the response
- *
- * @param res
- * @param key
- * @param value
- * @return true if adding the header succeeded
- * @return false if adding the header failed; this would indicate an OOM error
- */
-bool set_header(response *res, const char *key, const char *value);
-
-/**
- * set_body sets the given body on the given response
- *
- * @param res
- * @param body
- */
-void set_body(response *res, const char *body);
-
-/**
- * set_status sets the given status code on the given response
- *
- * @param res
- * @param status
- */
-void set_status(response *res, http_status status);
-
-/**
- * router_free deallocates memory for http_router `router`
- *
- * @param router
- */
-void router_free(http_router *router);
-
-/**
- * Initialize a router attributes object
- *
- * @return router_attr*
- */
-router_attr *router_attr_init();
-
-/**
- * router_init allocates memory for a new router and its `trie` member;
- * sets the handlers for 404 and 405 (if none provided, defaults will be
- * used).
- * @param router_attr* Router attributes to apply to the new http_router
- * instance
- * @return http_router*
- */
-http_router *router_init(router_attr *attr);
-
-/**
- * router_register registers a new route record. Registered routes will be
- * matched against when used with `router_run`
- *
- * @param router The router instance in which to register the route
- * @param path The path to associate with the route
- * @param handler The handler to associate with the route
- * @param method
- * @param ... Methods to associate with the route. You must pass a NULL sentinel
- * to indicate the end of the list e.g.
- * `router_register(...args, METHOD_GET, METHOD_POST, NULL)`
- */
-void router_register(http_router *router, const char *path,
-                     route_handler *handler, http_method method, ...);
-
-/**
- * server_init allocates the necessary memory for a `tcp_server`
- *
- * @param router The router instance to run on new client connections
- * @param port The port on which the server will listen for incoming connections
- */
-tcp_server *server_init(http_router *router, int port);
-
-/**
- * server_start listens for client connections and executes routing
- *
- * @param server The server instance on which to start listening
- */
-void server_start(tcp_server *server);
-
-/**
- * Deallocates a tcp_server's heap memory
- *
- * @param server
- */
-void server_free(tcp_server *server);
-
-/**
- * server_set_cert sets the cert and key filepaths for use with TLS.
- * This has no effect whatsoever unless you've compiled with the `USE_TLS` flag
- *
- * @param server
- * @param certfile
- * @param keyfile
- */
-void server_set_cert(tcp_server *server, const char *certfile,
-                     const char *keyfile);
+typedef struct request_internal *request;
 
 /**
  * req_get_parameter retrieves the parameter value matching `key`, or NULL
@@ -347,6 +178,188 @@ bool req_has_query(request *req, const char *key);
  */
 unsigned int req_num_queries(request *req, const char *key);
 
+char *request_get_path(request *req);
+char *request_get_method(request *req);
+char *request_get_accept(request *req);
+char *request_get_body(request *req);
+char *request_get_raw(request *req);
+char *request_get_host(request *req);
+char *request_get_protocol(request *req);
+char *request_get_user_agent(request *req);
+char *request_get_content_type(request *req);
+char *request_get_version(request *req);
+int request_get_content_length(request *req);
+
+/***************************** Response *****************************/
+
+/**
+ * A response holds the necessary metadata for the response that will be sent to
+ * the client. Client handlers should use the library-provided helpers to set
+ * the desired properties e.g. status, body, and headers.
+ */
+typedef struct {
+  /**
+   * A flag used by middleware - setting this to true will stop the middleware
+   * chain and prevent subsequent middlewares from being run
+   */
+  bool done;
+
+  /**
+   * HTTP status code - if not set, will default to 200 OK
+   */
+  http_status status;
+
+  /**
+   * HTTP headers - optional, but you should pass content-type if sending a body
+   */
+  hash_table *headers;
+
+  /**
+   * response body - optional; Content-length header will be set for you
+   */
+  char *body;
+} response;  // TODO: opaque
+
+/**
+ * set_header inserts the given key/value pair as a header on the response
+ *
+ * @param res
+ * @param key
+ * @param value
+ * @return true if adding the header succeeded
+ * @return false if adding the header failed; this would indicate an OOM error
+ */
+bool set_header(response *res, const char *key, const char *value);
+
+/**
+ * set_body sets the given body on the given response
+ *
+ * @param res
+ * @param body
+ */
+void set_body(response *res, const char *body);
+
+/**
+ * set_status sets the given status code on the given response
+ *
+ * @param res
+ * @param status
+ */
+void set_status(response *res, http_status status);
+
+/**
+ * from_file reads a file into a string buffer, which may then be passed
+ * directly to `set_body` e.g. set_body(res, from_file("./index.html"));
+ *
+ * @param filename
+ * @return char*
+ */
+char *from_file(const char *filename);
+
+/***************************** Router *****************************/
+
+/**
+ * An alias type for request handlers
+ */
+typedef response *route_handler(request *, response *);
+
+/**
+ * A router / HTTP multiplexer
+ */
+typedef struct router_internal *http_router;
+
+/**
+ * An attributes object for configuring a http_router
+ */
+typedef struct {
+  bool use_cors;
+  route_handler *not_found_handler;
+  route_handler *internal_error_handler;
+  route_handler *method_not_allowed_handler;
+  array_t *middlewares;
+} router_attr;  // TODO: opaque
+
+/**
+ * Initialize a router attributes object
+ *
+ * @return router_attr*
+ */
+router_attr *router_attr_init();
+
+/**
+ * router_init allocates memory for a new router and its `trie` member;
+ * sets the handlers for 404 and 405 (if none provided, defaults will be
+ * used).
+ * @param router_attr* Router attributes to apply to the new http_router
+ * instance
+ * @return http_router*
+ */
+http_router *router_init(router_attr *attr);
+
+/**
+ * router_register registers a new route record. Registered routes will be
+ * matched against when used with `router_run`
+ *
+ * @param router The router instance in which to register the route
+ * @param path The path to associate with the route
+ * @param handler The handler to associate with the route
+ * @param method
+ * @param ... Methods to associate with the route. You must pass a NULL sentinel
+ * to indicate the end of the list e.g.
+ * `router_register(...args, METHOD_GET, METHOD_POST, NULL)`
+ */
+void router_register(http_router *router, const char *path,
+                     route_handler *handler, http_method method, ...);
+
+/**
+ * router_free deallocates memory for http_router `router`
+ *
+ * @param router
+ */
+void router_free(http_router *router);
+
+/***************************** Server *****************************/
+
+/**
+ * A server configuration object that stores settings for the HTTP server
+ */
+typedef struct server_internal *tcp_server;
+
+/**
+ * server_init allocates the necessary memory for a `tcp_server`
+ *
+ * @param router The router instance to run on new client connections
+ * @param port The port on which the server will listen for incoming connections
+ */
+tcp_server *server_init(http_router *router, int port);
+
+/**
+ * server_start listens for client connections and executes routing
+ *
+ * @param server The server instance on which to start listening
+ */
+void server_start(tcp_server *server);
+
+/**
+ * server_set_cert sets the cert and key filepaths for use with TLS.
+ * This has no effect whatsoever unless you've compiled with the `USE_TLS` flag
+ *
+ * @param server
+ * @param certfile
+ * @param keyfile
+ */
+void server_set_cert(tcp_server *server, const char *certfile,
+                     const char *keyfile);
+
+/**
+ * Deallocates a tcp_server's heap memory
+ *
+ * @param server
+ */
+void server_free(tcp_server *server);
+
+/***************************** Middleware *****************************/
+
 /**
  * middlewares binds n middleware handlers to the router attributes instance.
  * You do not need to pass a NULL sentinel to terminate the list; this macro
@@ -370,6 +383,28 @@ void __middlewares(router_attr *attr, route_handler *mw, ...);
  * @param mw
  */
 void add_middleware(router_attr *attr, route_handler *mw);
+
+/***************************** CORS *****************************/
+
+/**
+ * CORS configuration options
+ */
+typedef struct cors_opts_internal cors_opts;
+
+/**
+ * cors_opts_init initializes a new CORS options object
+ *
+ * @return cors_opts*
+ */
+cors_opts *cors_opts_init();
+
+/**
+ * use_cors binds the CORS global middleware to the router attributes instance
+ *
+ * @param attr
+ * @param opts
+ */
+void use_cors(router_attr *attr, cors_opts *opts);
 
 /**
  * set_allowed_origins sets allowed origins on given the cors_opts. You do not
@@ -436,13 +471,6 @@ void __set_allowed_headers(cors_opts *opts, array_t *headers);
 void __set_expose_headers(cors_opts *opts, array_t *headers);
 
 /**
- * cors_opts_init initializes a new CORS options object
- *
- * @return cors_opts*
- */
-cors_opts *cors_opts_init();
-
-/**
  * set_allow_credentials sets the cors_opts allowed_credentials option
  *
  * @param opts
@@ -475,24 +503,7 @@ void set_max_age(cors_opts *opts, int max_age);
  */
 cors_opts *cors_allow_all();
 
-/**
- * use_cors binds the CORS global middleware to the router attributes instance
- *
- * @param attr
- * @param opts
- */
-void use_cors(router_attr *attr, cors_opts *opts);
-
-/**
- * from_file reads a file into a string buffer, which may then be passed
- * directly to `set_body` e.g. set_body(res, from_file("./index.html"));
- *
- * @param filename
- * @return char*
- */
-char *from_file(const char *filename);
-
-/* Cookies */
+/***************************** Cookies *****************************/
 
 typedef enum {
   SAME_SITE_DEFAULT_MODE,
@@ -606,6 +617,8 @@ char *cookie_get_path(cookie *c);
 same_site_mode cookie_get_same_site(cookie *c);
 
 bool cookie_get_secure(cookie *c);
+
+/***************************** Utilities *****************************/
 
 /* Time Helpers */
 time_t n_minutes_from_now(unsigned int n);

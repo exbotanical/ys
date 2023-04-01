@@ -36,7 +36,7 @@ hash_table* to_headers(header* h, ...) {
 }
 
 void test_is_2xx_connect() {
-  request* req = malloc(sizeof(req));
+  request_internal* req = malloc(sizeof(req));
   response* res = response_init();
 
   req->method = "CONNECT";
@@ -142,7 +142,7 @@ void test_response_serialize() {
   for (unsigned int i = 0; i < sizeof(tests) / sizeof(test_case); i++) {
     test_case test = tests[i];
 
-    request* req = malloc(sizeof(request));
+    request_internal* req = malloc(sizeof(request_internal));
     req->method = test.method;
 
     response* res = response_init();

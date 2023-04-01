@@ -21,7 +21,7 @@ response *response_init();
  * @param res
  * @return buffer_t*
  */
-buffer_t *response_serialize(request *req, response *res);
+buffer_t *response_serialize(request_internal *req, response *res);
 
 /**
  * response_send writes the given response to the given socket

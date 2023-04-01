@@ -32,7 +32,7 @@ static void setup_env() {
  * @param mws
  * @return void* The response pointer
  */
-static bool invoke_chain(request *req, response *res, array_t *mws) {
+static bool invoke_chain(request_internal *req, response *res, array_t *mws) {
   for (unsigned int i = array_size(mws); i > 0; i--) {
     ((route_handler *)array_get(mws, i - 1))(req, res);
 
@@ -51,7 +51,8 @@ static bool invoke_chain(request *req, response *res, array_t *mws) {
  * @param res
  * @return void*
  */
-static response *default_internal_error_handler(request *req, response *res) {
+static response *default_internal_error_handler(request_internal *req,
+                                                response *res) {
   printlogf(LOG_INFO, "[router::%s] 500 handler in effect at request path %s\n",
             __func__, req->path);
 
@@ -67,7 +68,8 @@ static response *default_internal_error_handler(request *req, response *res) {
  * @param res
  * @return void*
  */
-static response *default_not_found_handler(request *req, response *res) {
+static response *default_not_found_handler(request_internal *req,
+                                           response *res) {
   printlogf(LOG_INFO,
             "[router::%s] default 404 handler in effect "
             "at request path %s\n",
@@ -85,7 +87,7 @@ static response *default_not_found_handler(request *req, response *res) {
  * @param res
  * @return void*
  */
-static response *default_method_not_allowed_handler(request *req,
+static response *default_method_not_allowed_handler(request_internal *req,
                                                     response *res) {
   printlogf(LOG_INFO,
             "[router::%s] default 405 handler in "
@@ -207,7 +209,8 @@ void router_register(http_router *router, const char *path,
   trie_insert(((router_internal *)router)->trie, methods, path, handler);
 }
 
-void router_run(router_internal *router, client_context *ctx, request *req) {
+void router_run(router_internal *router, client_context *ctx,
+                request_internal *req) {
   route_result *result = trie_search(router->trie, req->method, req->path);
 
   response *res = response_init();

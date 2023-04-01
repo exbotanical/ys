@@ -145,7 +145,7 @@ static bool are_headers_allowed(cors_config *c, array_t *headers) {
  * @param req
  * @return bool
  */
-static bool is_preflight_request(request *req) {
+static bool is_preflight_request(request_internal *req) {
   bool is_options_req =
       s_equals(req->method, http_method_names[METHOD_OPTIONS]);
   bool has_origin_header = !s_nullish(get_header(req->headers, ORIGIN_HEADER));
@@ -164,7 +164,7 @@ static bool is_preflight_request(request *req) {
  *
  * TODO: test
  */
-static void handle_request(request *req, response *res) {
+static void handle_request(request_internal *req, response *res) {
   char *origin = get_header(req->headers, ORIGIN_HEADER);
   // Set the "vary" header to prevent proxy servers from sending cached
   // responses for one client to another
@@ -212,7 +212,7 @@ static void handle_request(request *req, response *res) {
  *
  * TODO: test
  */
-static void handle_preflight_request(request *req, response *res) {
+static void handle_preflight_request(request_internal *req, response *res) {
   char *origin = get_header(req->headers, ORIGIN_HEADER);
 
   // Set the "vary" header to prevent proxy servers from sending cached
@@ -376,7 +376,7 @@ cors_opts *cors_allow_all() {
   return (cors_opts *)opts;
 }
 
-response *cors_handler(request *req, response *res) {
+response *cors_handler(request_internal *req, response *res) {
   if (is_preflight_request(req)) {
     handle_preflight_request(req, res);
 

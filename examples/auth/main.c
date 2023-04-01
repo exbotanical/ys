@@ -90,14 +90,14 @@ response *data_handler(request *req, response *res) {
 }
 
 response *register_handler(request *req, response *res) {
-  char *username = jsob_getstr(req->body, "username");
+  char *username = jsob_getstr(request_get_body(req), "username");
   if (!username) {
     set_status(res, STATUS_BAD_REQUEST);
     set_body(res, "Must provide a username");
     return res;
   }
 
-  char *password = jsob_getstr(req->body, "password");
+  char *password = jsob_getstr(request_get_body(req), "password");
   if (!password) {
     set_status(res, STATUS_BAD_REQUEST);
     set_body(res, "Must provide a password");
@@ -126,14 +126,14 @@ response *register_handler(request *req, response *res) {
 }
 
 response *login_handler(request *req, response *res) {
-  char *username = jsob_getstr(req->body, "username");
+  char *username = jsob_getstr(request_get_body(req), "username");
   if (!username) {
     set_status(res, STATUS_BAD_REQUEST);
     set_body(res, "Must provide a username");
     return res;
   }
 
-  char *password = jsob_getstr(req->body, "password");
+  char *password = jsob_getstr(request_get_body(req), "password");
   if (!password) {
     set_status(res, STATUS_BAD_REQUEST);
     set_body(res, "Must provide a password");
@@ -196,8 +196,10 @@ response *logout_handler(request *req, response *res) {
 
 response *auth_middleware(request *req, response *res) {
   set_header(res, "X-Authorized-By", "TheDemoApp");
-  if (eq(req->path, "/") || eq(req->path, "/style.css") ||
-      eq(req->path, "/login") || eq(req->path, "/register")) {
+  if (eq(request_get_path(req), "/") ||
+      eq(request_get_path(req), "/style.css") ||
+      eq(request_get_path(req), "/login") ||
+      eq(request_get_path(req), "/register")) {
     return res;
   }
 

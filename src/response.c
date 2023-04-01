@@ -20,7 +20,7 @@
 
 static const char CRLF[] = "\r\n";
 
-static bool is_2xx_connect(request *req, response *res) {
+static bool is_2xx_connect(request_internal *req, response *res) {
   return (res->status >= 200 && res->status < 300) &&
          s_equals(req->method, http_method_names[METHOD_CONNECT]);
 }
@@ -33,7 +33,7 @@ static bool is_nocontent(response *res) {
   return res->status == STATUS_NO_CONTENT;
 }
 
-static bool should_set_content_len(request *req, response *res) {
+static bool should_set_content_len(request_internal *req, response *res) {
   return !is_nocontent(res) && !is_informational(res) &&
          !is_2xx_connect(req, res);
 }
@@ -46,7 +46,7 @@ static bool should_set_content_len(request *req, response *res) {
  * @param res
  * @return buffer_t*
  */
-buffer_t *response_serialize(request *req, response *res) {
+buffer_t *response_serialize(request_internal *req, response *res) {
   buffer_t *buf = buffer_init(NULL);
   if (!buf) {
     DIE(EXIT_FAILURE, "[response::%s] could not allocate memory for buffer_t\n",

@@ -10,6 +10,7 @@
 #include "libhash/libhash.h"
 #include "libutil/libutil.h"
 #include "logger.h"
+#include "request.h"
 #include "util.h"
 #include "xmalloc.h"
 
@@ -581,7 +582,7 @@ same_site_mode cookie_get_same_site(cookie* c) {
 bool cookie_get_secure(cookie* c) { return ((cookie_internal*)c)->secure; }
 
 cookie* get_cookie(request* req, const char* name) {
-  array_t* cookies = read_cookies(req->headers);
+  array_t* cookies = read_cookies(((request_internal*)req)->headers);
 
   foreach (cookies, i) {
     cookie_internal* c = (cookie_internal*)array_get(cookies, i);

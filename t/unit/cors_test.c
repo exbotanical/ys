@@ -45,7 +45,7 @@ inline static array_t *toheaders(char *s, ...) {
   return arr;
 }
 
-request *toreq(http_method method, array_t *headers) {
+request_internal *toreq(http_method method, array_t *headers) {
   hash_table *ht = ht_init(0);
   foreach (headers, i) {
     header_pair *h = array_get(headers, i);
@@ -53,14 +53,14 @@ request *toreq(http_method method, array_t *headers) {
     ht_insert(ht, h->key, array_collect(h->value));
   }
 
-  request *req = malloc(sizeof(request));
+  request_internal *req = malloc(sizeof(request_internal));
   req->method = http_method_names[method];
   req->headers = ht;
 
   return req;
 }
 
-static void insert_headers(request *req, array_t *headers) {
+static void insert_headers(request_internal *req, array_t *headers) {
   foreach (headers, i) {
     header_pair *h = array_get(headers, i);
 
@@ -303,7 +303,7 @@ void test_cors_middleware() {
     test_case test = tests[i];
 
     // Build mock request
-    request *req = &(request){
+    request_internal *req = &(request_internal){
         .method = http_method_names[test.method],
     };
     req->headers = ht_init(0);

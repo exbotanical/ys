@@ -6,13 +6,13 @@
 #include "tap.c/tap.h"
 
 static request *make_req() {
-  request *req = malloc(sizeof(request));
+  request_internal *req = malloc(sizeof(request));
   req->parameters = ht_init(0);
 
   ht_insert(req->parameters, "k1", "v1");
   ht_insert(req->parameters, "k2", "v2");
 
-  return req;
+  return (request *)req;
 }
 
 void test_fix_pragma_cache_control() {

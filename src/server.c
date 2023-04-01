@@ -77,7 +77,7 @@ static void *client_thread_handler(void *arg) {
     return NULL;
   }
 
-  request *req = maybe_req.req;
+  request_internal *req = maybe_req.req;
 
   printlogf(LOG_INFO, "[server::%s] client request received: %s %s\n", __func__,
             req->method, req->path);
