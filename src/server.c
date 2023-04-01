@@ -34,7 +34,7 @@ SSL_CTX *create_context() {
 
   if (!ctx) {
     ERR_print_errors_fp(stderr);
-    DIE(EXIT_FAILURE, "%s\n", "failed to create SSL context");
+    DIE("failed to create SSL context\n");
   }
 
   return ctx;
@@ -44,12 +44,12 @@ void configure_context(SSL_CTX *ctx, const char *certfile,
                        const char *keyfile) {
   if (SSL_CTX_use_certificate_file(ctx, certfile, SSL_FILETYPE_PEM) <= 0) {
     ERR_print_errors_fp(stderr);
-    DIE(EXIT_FAILURE, "failed to read certificate file %s\n", certfile);
+    DIE("failed to read certificate file %s\n", certfile);
   }
 
   if (SSL_CTX_use_PrivateKey_file(ctx, keyfile, SSL_FILETYPE_PEM) <= 0) {
     ERR_print_errors_fp(stderr);
-    DIE(EXIT_FAILURE, "failed to read private key file %s\n", keyfile);
+    DIE("failed to read private key file %s\n", keyfile);
   }
 }
 #endif
@@ -141,8 +141,7 @@ static poll_client_connections(thread_pool_t *pool, server_internal *server,
       tc->r = ((server_internal *)server)->router;
 
       if (!thread_pool_dispatch(pool, client_thread_handler, tc, true)) {
-        DIE(EXIT_FAILURE, "[server::%s] failed to dispatch thread from pool\n",
-            __func__);
+        DIE("[server::%s] failed to dispatch thread from pool\n", __func__);
       }
     }
   }
@@ -151,8 +150,7 @@ static poll_client_connections(thread_pool_t *pool, server_internal *server,
 static thread_pool_t *setup_thread_pool() {
   thread_pool_t *pool = calloc(1, sizeof(thread_pool_t));
   if (!pool) {
-    DIE(EXIT_FAILURE, "[server::%s] failed to initialized thread pool\n",
-        __func__);
+    DIE("[server::%s] failed to initialized thread pool\n", __func__);
   }
 
   const int num_threads = server_conf.threads;
@@ -200,8 +198,7 @@ void server_start(tcp_server *server) {
 
   if ((server_sockfd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == 0) {
     perror("socket");
-    DIE(EXIT_FAILURE,
-        "[server::%s] failed to initialize server socket on port %d\n",
+    DIE("[server::%s] failed to initialize server socket on port %d\n",
         __func__, port);
   }
 
@@ -211,7 +208,7 @@ void server_start(tcp_server *server) {
     if (setsockopt(server_sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
                    sizeof(yes)) == -1) {
       perror("setsockopt");
-      DIE(EXIT_FAILURE, "[server::%s] failed to set sock opt\n", __func__);
+      DIE("[server::%s] failed to set sock opt\n", __func__);
     }
   }
 
@@ -225,14 +222,14 @@ void server_start(tcp_server *server) {
 
   if (bind(server_sockfd, (struct sockaddr *)&address, addr_len) < 0) {
     perror("bind");
-    DIE(EXIT_FAILURE, "[server::%s] failed to bind server socket on %s:%d\n",
-        __func__, address.sin_addr, port);
+    DIE("[server::%s] failed to bind server socket on %s:%d\n", __func__,
+        address.sin_addr, port);
   }
 
   if (listen(server_sockfd, MAX_QUEUED_CONNECTIONS) < 0) {
     perror("listen");
-    DIE(EXIT_FAILURE, "[server::%s] failed to listen on %s:%d\n", __func__,
-        address.sin_addr, port);
+    DIE("[server::%s] failed to listen on %s:%d\n", __func__, address.sin_addr,
+        port);
   }
 
   printlogf(LOG_INFO, "[server::%s] Listening on port %d...\n", __func__, port);

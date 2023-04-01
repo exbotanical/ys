@@ -50,8 +50,7 @@ static bool should_set_content_len(request_internal *req,
 buffer_t *response_serialize(request_internal *req, response_internal *res) {
   buffer_t *buf = buffer_init(NULL);
   if (!buf) {
-    DIE(EXIT_FAILURE, "[response::%s] could not allocate memory for buffer_t\n",
-        __func__);
+    DIE("[response::%s] could not allocate memory for buffer_t\n", __func__);
   }
 
   hash_table *headers = res->headers;

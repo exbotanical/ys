@@ -254,7 +254,7 @@ bool insert_header(hash_table* headers, const char* key, const char* value) {
     // along with the first value
     array_t* values = array_init();
     if (!values) {
-      DIE(EXIT_FAILURE, "[header::%s] failed to allocate array\n", __func__);
+      DIE("[header::%s] failed to allocate array\n", __func__);
     }
 
     array_push(values, (void*)value);

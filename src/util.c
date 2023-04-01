@@ -37,8 +37,7 @@ array_t *split(const char *s, const char *delim) {
   array_t *tokens = array_init();
   if (tokens == NULL) {
     free(tokens);
-    DIE(EXIT_FAILURE, "[path::%s] failed to allocate array_t `tokens`\n",
-        __func__);
+    DIE("[path::%s] failed to allocate array_t `tokens`\n", __func__);
   }
 
   // If the input doesn't even contain the delimiter, return early and avoid

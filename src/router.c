@@ -17,7 +17,7 @@ static const char CONFIG_FILE_NAME[] = "libhttp.conf";
  */
 static void setup_env() {
   if (!parse_config(CONFIG_FILE_NAME)) {
-    DIE(EXIT_FAILURE, "%s\n", "Invalid config file");
+    DIE("Invalid config file\n");
   }
 
   setup_logging();
@@ -172,8 +172,7 @@ void router_register(http_router *router, const char *path,
                      route_handler *handler, http_method method, ...) {
   array_t *methods = array_init();
   if (!methods) {
-    DIE(EXIT_FAILURE,
-        "[router::%s] failed to allocate methods array via array_init\n",
+    DIE("[router::%s] failed to allocate methods array via array_init\n",
         __func__);
   }
 
@@ -183,8 +182,7 @@ void router_register(http_router *router, const char *path,
   while (method != 0) {
     if (!array_push(methods, s_copy(http_method_names[method]))) {
       free(methods);
-      DIE(EXIT_FAILURE, "[router::%s] failed to insert into methods array\n",
-          __func__);
+      DIE("[router::%s] failed to insert into methods array\n", __func__);
     }
 
     method = va_arg(args, http_method);
@@ -193,8 +191,7 @@ void router_register(http_router *router, const char *path,
   va_end(args);
 
   if (!router || !methods || !path || !handler) {
-    DIE(EXIT_FAILURE,
-        "[router::%s] invariant violation - router_register arguments cannot "
+    DIE("[router::%s] invariant violation - router_register arguments cannot "
         "be NULL\n",
         __func__);
   }

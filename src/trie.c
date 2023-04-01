@@ -30,15 +30,13 @@ static trie_node *node_init() {
 
   node->children = ht_init(0);
   if (!node->children) {
-    DIE(EXIT_FAILURE,
-        "[trie::%s] failed to initialize hash table for node children\n",
+    DIE("[trie::%s] failed to initialize hash table for node children\n",
         __func__);
   }
 
   node->actions = ht_init(0);
   if (!node->actions) {
-    DIE(EXIT_FAILURE,
-        "[trie::%s] failed to initialize hash table for node actions\n",
+    DIE("[trie::%s] failed to initialize hash table for node actions\n",
         __func__);
   }
 
@@ -51,8 +49,7 @@ route_trie *trie_init() {
   trie->root = node_init();
   trie->regex_cache = ht_init(0);
   if (!trie->regex_cache) {
-    DIE(EXIT_FAILURE,
-        "[trie::%s] failed to initialize hash table for trie regex cache\n",
+    DIE("[trie::%s] failed to initialize hash table for trie regex cache\n",
         __func__);
   }
 

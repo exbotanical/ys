@@ -15,8 +15,7 @@
 char *from_file(const char *filename) {
   FILE *fp = fopen(filename, "r");
   if (!fp) {
-    DIE(EXIT_FAILURE,
-        "Unable to open file %s. Are you sure the path is correct?\n",
+    DIE("Unable to open file %s. Are you sure the path is correct?\n",
         filename);
   }
 
