@@ -106,7 +106,8 @@ static void vlog(int level, int fd, const char *fmt, va_list va) {
       host_name[0] = 0;  // gethostname failed
     }
 
-    char *header = fmt_str("%s %s %s\t", gen_timestamp(), host_name, LOG_IDENT);
+    char *header =
+        fmt_str("%s %s %s\t\t", gen_timestamp(), host_name, LOG_IDENT);
 
     char buf[LOG_BUFFER];
 

@@ -2,12 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "deps/jsob/jsob.h"
 #include "libhttp.h"
 
 #define PORT 6124
+#define CWD_SIZE 1024
 
 typedef struct record {
   char *key;
@@ -237,6 +237,10 @@ int main() {
   router_register(router, record_path, handle_post, METHOD_POST, NULL);
 
   tcp_server *server = server_init(router, PORT);
+
+  server_set_cert(server, "./t/integ/certs/localhost.pem",
+                  "./t/integ/certs/localhost-key.pem");
+
   server_start(server);
   server_free(server);
 

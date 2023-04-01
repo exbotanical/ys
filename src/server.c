@@ -27,8 +27,6 @@ typedef struct {
   client_context *c;
 } thread_context;
 
-// "/home/goldmund/repositories/libhttp/localhost.pem"
-// "/home/goldmund/repositories/libhttp/localhost-key.pem"
 #ifdef USE_TLS
 SSL_CTX *create_context() {
   const SSL_METHOD *method = TLS_server_method();
@@ -183,13 +181,19 @@ tcp_server *server_init(http_router *router, int port) {
 #ifdef USE_TLS
   printlogf(LOG_INFO, "Using TLS - initializing SSL context\n");
   server->sslctx = create_context();
-  configure_context(server->sslctx);
 #endif
 
   return (tcp_server *)server;
 }
 
 void server_start(tcp_server *server) {
+#ifdef USE_TLS
+  server_internal *s = (server_internal *)server;
+  printlogf(LOG_INFO, "Loading TLS cert %s and key %s\n", s->cert_path,
+            s->key_path);
+  configure_context(s->sslctx, s->cert_path, s->key_path);
+#endif
+
   thread_pool_t *pool = setup_thread_pool();
   int port = ((server_internal *)server)->port;
   int server_sockfd;
