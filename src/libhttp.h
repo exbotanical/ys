@@ -197,28 +197,7 @@ int request_get_content_length(request *req);
  * the client. Client handlers should use the library-provided helpers to set
  * the desired properties e.g. status, body, and headers.
  */
-typedef struct {
-  /**
-   * A flag used by middleware - setting this to true will stop the middleware
-   * chain and prevent subsequent middlewares from being run
-   */
-  bool done;
-
-  /**
-   * HTTP status code - if not set, will default to 200 OK
-   */
-  http_status status;
-
-  /**
-   * HTTP headers - optional, but you should pass content-type if sending a body
-   */
-  hash_table *headers;
-
-  /**
-   * response body - optional; Content-length header will be set for you
-   */
-  char *body;
-} response;  // TODO: opaque
+typedef struct response_internal *response;
 
 /**
  * set_header inserts the given key/value pair as a header on the response
@@ -246,6 +225,11 @@ void set_body(response *res, const char *body);
  * @param status
  */
 void set_status(response *res, http_status status);
+
+// TODO:
+bool get_done(response *res);
+// TODO:
+void set_done(response *res, bool done);
 
 /**
  * from_file reads a file into a string buffer, which may then be passed

@@ -7,6 +7,7 @@
 
 #include "libhttp.h"
 #include "libutil/libutil.h"  // for s_equals
+#include "response.h"
 #include "util.h"
 #include "xmalloc.h"
 
@@ -229,7 +230,8 @@ char** req_header_values(hash_table* headers, const char* key) {
 }
 
 bool set_header(response* res, const char* key, const char* value) {
-  return insert_header(res->headers, key, value);  // TODO: singleton check
+  return insert_header(((response_internal*)res)->headers, key,
+                       value);  // TODO: singleton check
 }
 
 // TODO: should check singleton flag so we can use w/response

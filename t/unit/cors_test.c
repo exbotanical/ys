@@ -6,6 +6,7 @@
 
 #include "libhash/libhash.h"
 #include "libhttp.h"
+#include "response.h"
 #include "tap.c/tap.h"
 
 /**
@@ -73,7 +74,7 @@ static void insert_headers(request_internal *req, array_t *headers) {
   }
 }
 
-static void check_status_code(response *res, int expected_status) {
+static void check_status_code(response_internal *res, int expected_status) {
   if (expected_status != res->status) {
     fail("expected status code to be %d but got %d. ", expected_status,
          res->status);
@@ -311,7 +312,7 @@ void test_cors_middleware() {
     // Add headers to mock request
     insert_headers(req, test.req_headers);
 
-    response *res = malloc(sizeof(response));
+    response_internal *res = malloc(sizeof(response_internal));
     res->headers = ht_init(0);
 
     // Run CORS handler

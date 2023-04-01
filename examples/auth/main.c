@@ -173,7 +173,7 @@ response *logout_handler(request *req, response *res) {
   cookie *c = get_cookie(req, COOKIE_ID);
   if (!c) {
     set_status(res, STATUS_UNAUTHORIZED);
-    res->done = true;  // TODO: just don't return?
+    set_done(res, true);  // TODO: just don't return?
 
     return res;
   }
@@ -181,7 +181,7 @@ response *logout_handler(request *req, response *res) {
   char *sid = cookie_get_value(c);
   if (!sid) {
     set_status(res, STATUS_UNAUTHORIZED);
-    res->done = true;
+    set_done(res, true);
 
     return res;
   }
@@ -207,7 +207,7 @@ response *auth_middleware(request *req, response *res) {
 
   if (!c) {
     set_status(res, STATUS_UNAUTHORIZED);
-    res->done = true;  // TODO: just don't return?
+    set_done(res, true);  // TODO: just don't return?
 
     return res;
   }
@@ -217,7 +217,7 @@ response *auth_middleware(request *req, response *res) {
   char *username = ht_get(session_store, sid);
   if (!username || !user_exists(username)) {
     set_status(res, STATUS_UNAUTHORIZED);
-    res->done = true;
+    set_done(res, true);
 
     return res;
   }

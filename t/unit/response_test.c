@@ -37,7 +37,7 @@ hash_table* to_headers(header* h, ...) {
 
 void test_is_2xx_connect() {
   request_internal* req = malloc(sizeof(req));
-  response* res = response_init();
+  response_internal* res = response_init();
 
   req->method = "CONNECT";
   set_status(res, STATUS_NO_CONTENT);
@@ -56,7 +56,7 @@ void test_is_2xx_connect() {
 }
 
 void test_is_informational() {
-  response* res = response_init();
+  response_internal* res = response_init();
 
   set_status(res, STATUS_EARLY_HINTS);
   ok(is_informational(res) == true, "a 1xx response is informational");
@@ -66,7 +66,7 @@ void test_is_informational() {
 }
 
 void test_is_nocontent() {
-  response* res = response_init();
+  response_internal* res = response_init();
 
   set_status(res, STATUS_NO_CONTENT);
   ok(is_nocontent(res) == true, "a 204 response is a no content response");
@@ -145,7 +145,7 @@ void test_response_serialize() {
     request_internal* req = malloc(sizeof(request_internal));
     req->method = test.method;
 
-    response* res = response_init();
+    response_internal* res = response_init();
     res->headers = test.headers;
     set_body(res, test.body);
     set_status(res, test.status);

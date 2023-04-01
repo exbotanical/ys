@@ -385,7 +385,7 @@ response *cors_handler(request_internal *req, response *res) {
     } else {
       set_status(res, STATUS_NO_CONTENT);
       // We're done
-      res->done = true;
+      set_done(res, true);
     }
   } else {
     handle_request(req, res);

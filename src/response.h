@@ -5,12 +5,35 @@
 #include "libutil/libutil.h"
 #include "request.h"
 
+typedef struct {
+  /**
+   * A flag used by middleware - setting this to true will stop the middleware
+   * chain and prevent subsequent middlewares from being run
+   */
+  bool done;
+
+  /**
+   * HTTP status code - if not set, will default to 200 OK
+   */
+  http_status status;
+
+  /**
+   * HTTP headers - optional, but you should pass content-type if sending a body
+   */
+  hash_table *headers;
+
+  /**
+   * response body - optional; Content-length header will be set for you
+   */
+  char *body;
+} response_internal;
+
 /**
  * response_init initializes a new response object
  *
- * @return response*
+ * @return response_internal*
  */
-response *response_init();
+response_internal *response_init();
 
 /**
  * response_serialize converts a user-defined response object into a buffer that
@@ -21,7 +44,7 @@ response *response_init();
  * @param res
  * @return buffer_t*
  */
-buffer_t *response_serialize(request_internal *req, response *res);
+buffer_t *response_serialize(request_internal *req, response_internal *res);
 
 /**
  * response_send writes the given response to the given socket

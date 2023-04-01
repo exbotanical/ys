@@ -36,7 +36,7 @@ static bool invoke_chain(request_internal *req, response *res, array_t *mws) {
   for (unsigned int i = array_size(mws); i > 0; i--) {
     ((route_handler *)array_get(mws, i - 1))(req, res);
 
-    if (res->done) {
+    if (get_done(res)) {
       return true;
     }
   }
@@ -52,7 +52,7 @@ static bool invoke_chain(request_internal *req, response *res, array_t *mws) {
  * @return void*
  */
 static response *default_internal_error_handler(request_internal *req,
-                                                response *res) {
+                                                response_internal *res) {
   printlogf(LOG_INFO, "[router::%s] 500 handler in effect at request path %s\n",
             __func__, req->path);
 
@@ -69,7 +69,7 @@ static response *default_internal_error_handler(request_internal *req,
  * @return void*
  */
 static response *default_not_found_handler(request_internal *req,
-                                           response *res) {
+                                           response_internal *res) {
   printlogf(LOG_INFO,
             "[router::%s] default 404 handler in effect "
             "at request path %s\n",
@@ -88,7 +88,7 @@ static response *default_not_found_handler(request_internal *req,
  * @return void*
  */
 static response *default_method_not_allowed_handler(request_internal *req,
-                                                    response *res) {
+                                                    response_internal *res) {
   printlogf(LOG_INFO,
             "[router::%s] default 405 handler in "
             "effect at request path %s\n",
@@ -213,7 +213,7 @@ void router_run(router_internal *router, client_context *ctx,
                 request_internal *req) {
   route_result *result = trie_search(router->trie, req->method, req->path);
 
-  response *res = response_init();
+  response_internal *res = response_init();
 
   if (!result) {
     res = router->internal_error_handler(req, res);

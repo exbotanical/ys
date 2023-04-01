@@ -242,7 +242,7 @@ void test_set_cookie() {
   cookie* c = tocookie(".testsite.com", "test", "ThisCookie", "/", 2257894000,
                        86400, SAME_SITE_LAX_MODE, false, true);
 
-  response* res = response_init();
+  response_internal* res = response_init();
   set_cookie(res, c);
 
   const char* actual = get_header(res->headers, SET_COOKIE);

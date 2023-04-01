@@ -20,20 +20,21 @@
 
 static const char CRLF[] = "\r\n";
 
-static bool is_2xx_connect(request_internal *req, response *res) {
+static bool is_2xx_connect(request_internal *req, response_internal *res) {
   return (res->status >= 200 && res->status < 300) &&
          s_equals(req->method, http_method_names[METHOD_CONNECT]);
 }
 
-static bool is_informational(response *res) {
+static bool is_informational(response_internal *res) {
   return res->status >= 100 && res->status < 200;
 }
 
-static bool is_nocontent(response *res) {
+static bool is_nocontent(response_internal *res) {
   return res->status == STATUS_NO_CONTENT;
 }
 
-static bool should_set_content_len(request_internal *req, response *res) {
+static bool should_set_content_len(request_internal *req,
+                                   response_internal *res) {
   return !is_nocontent(res) && !is_informational(res) &&
          !is_2xx_connect(req, res);
 }
@@ -46,7 +47,7 @@ static bool should_set_content_len(request_internal *req, response *res) {
  * @param res
  * @return buffer_t*
  */
-buffer_t *response_serialize(request_internal *req, response *res) {
+buffer_t *response_serialize(request_internal *req, response_internal *res) {
   buffer_t *buf = buffer_init(NULL);
   if (!buf) {
     DIE(EXIT_FAILURE, "[response::%s] could not allocate memory for buffer_t\n",
@@ -136,7 +137,7 @@ done:
 }
 
 void response_send_error(client_context *ctx, parse_error err) {
-  response *res = response_init();
+  response_internal *res = response_init();
 
   switch (err) {
     case IO_ERR:
@@ -161,7 +162,7 @@ void response_send_error(client_context *ctx, parse_error err) {
 
 // TODO: cleanup + finalize
 void response_send_protocol_error(int sockfd) {
-  response *res = response_init();
+  response_internal *res = response_init();
 
   res->status = STATUS_INTERNAL_SERVER_ERROR;
   set_body(res, "invalid protocol");
@@ -172,8 +173,8 @@ void response_send_protocol_error(int sockfd) {
   close(sockfd);
 }
 
-response *response_init() {
-  response *res = xmalloc(sizeof(response));
+response_internal *response_init() {
+  response_internal *res = xmalloc(sizeof(response));
 
   res->headers = ht_init(0);
   res->body = NULL;
@@ -183,10 +184,16 @@ response *response_init() {
   return res;
 }
 
-void set_body(response *response, const char *body) {
-  response->body = s_copy(body);
+void set_body(response *res, const char *body) {
+  ((response_internal *)res)->body = s_copy(body);
 }
 
-void set_status(response *response, http_status status) {
-  response->status = status;
+void set_status(response *res, http_status status) {
+  ((response_internal *)res)->status = status;
+}
+
+bool get_done(response *res) { return ((response_internal *)res)->done; }
+
+void set_done(response *res, bool done) {
+  ((response_internal *)res)->done = done;
 }
