@@ -12,7 +12,9 @@ LDFLAGS := -shared
 LINTER := clang-format
 INTEG_RUNNER := shpec
 
-BIN := libhttp.so
+SO_TARGET := libhttp.so
+STATIC_TARGET := libhttp.a
+
 INTEG_BASE_BIN := integ
 INTEG_AUTH_BIN := auth
 
@@ -29,12 +31,22 @@ ifdef DEBUG
 	CFLAGS += -I$(LIB_DIR)
 endif
 
+%.o: $(SRC_DIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+%.o: $(DEP_DIR)/%/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
 all:
 	$(info USE_TLS=$(USE_TLS) DEBUG=$(DEBUG))
-	$(CC) $(CFLAGS) $(DEPS) $(SRC) $(LDFLAGS) -o $(BIN)
+	$(CC) $(CFLAGS) $(DEPS) $(SRC) $(LDFLAGS) -o $(SO_TARGET)
+
+$(STATIC_TARGET): $(patsubst %.c,%.o,$(SRC)) $(patsubst %.c,%.o,$(DEPS))
+	$(info USE_TLS=$(USE_TLS) DEBUG=$(DEBUG))
+	ar rcs $@ $^
 
 clean:
-	rm -f $(filter-out %.h, $(SRC:.c=.o)) $(BIN) $(INTEG_AUTH_BIN) $(INTEG_BASE_BIN) main*
+	rm -f $(filter-out %.h, $(SRC:.c=.o)) $(SO_TARGET) $(INTEG_AUTH_BIN) $(INTEG_BASE_BIN) main*
 
 test:
 	$(MAKE) unit_test

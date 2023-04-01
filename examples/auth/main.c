@@ -51,11 +51,14 @@ bool user_exists(char *username) {
 // This is for the demo ONLY! Do NOT use this for actual auth - it is NOT
 // secure!!!
 char *hash_password(char *pw) {
-  char ret[sizeof(pw)];
+  char ret[sizeof(pw) + 1];
 
-  for (int i = 0; i < strlen(pw); i++) {
+  int i = 0;
+  for (; i < strlen(pw); i++) {
     ret[i] = (pw[i] ^ PASSWORD_HASH_KEY);
   }
+
+  ret[i] = '\0';
 
   return strdup(ret);
 }
@@ -75,7 +78,11 @@ response *css_handler(request *req, response *res) {
 }
 
 response *data_handler(request *req, response *res) {
-  set_body(res, "{ \"data\": \"Hello World!\" }");
+  cookie *c = get_cookie(req, COOKIE_ID);
+  char *sid = cookie_get_value(c);
+  char *username = ht_get(session_store, sid);
+
+  set_body(res, fmt_str("{ \"data\": \"Hello, %s!\" }", username));
   set_header(res, "Content-Type", "application/json");
   set_status(res, STATUS_OK);
 
@@ -141,6 +148,7 @@ response *login_handler(request *req, response *res) {
   }
 
   user *u = (char *)ht_get(user_store, username);
+
   if (!u || !s_equals(hash_password(u->password), password)) {
     set_status(res, STATUS_BAD_REQUEST);
     set_body(res, "invalid credentials");

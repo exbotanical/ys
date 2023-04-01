@@ -2,6 +2,7 @@ demo
 main
 auth
 integ
+*.a
 *.o
 *.so
 .vscode

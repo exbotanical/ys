@@ -1,22 +1,22 @@
 body {
   display: flex;
   justify-content: center;
-  background-color: cadetblue;
+  background-color: #3f8b8e;
 }
 
 input {
-  background-color: lightgray;
+  background-color: #a8a8a8;
 }
 
 button {
-  background: #fa7e4a;
+  background: #ef762fd4;
   border-radius: 6px;
   border: none;
   padding: 6px;
 }
 
 button:hover:enabled {
-  background-color: #fb986e !important;
+  background-color: #ff8139 !important;
   cursor: pointer;
 }
 
@@ -30,4 +30,14 @@ button:hover:enabled {
 
 .logout-btn {
   margin-top: 60px;
+}
+
+.field {
+  margin: 12px 0;
+}
+
+.form-error {
+  position: absolute;
+  color: rgb(129, 15, 15);
+  font-size: 0.6rem;
 }
