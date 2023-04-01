@@ -1,7 +1,6 @@
 demo
 main
-auth
-integ
+*_bin
 *.a
 *.o
 *.so

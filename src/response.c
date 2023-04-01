@@ -177,6 +177,7 @@ response_internal *response_init() {
   response_internal *res = xmalloc(sizeof(response));
 
   res->headers = ht_init(0);
+  insert_header(res->headers, "X-Powered-By", "libhttp");
   res->body = NULL;
   res->status = STATUS_OK;  // Default
   res->done = false;

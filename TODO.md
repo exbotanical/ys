@@ -58,7 +58,7 @@
 - [ ] multiple routers
 - [ ] handle signals for graceful shutdown
 - [x] query strings
-- [ ] wildcard routing
+- [x] ~~wildcard routing~~ just use middleware
 - [ ] serve entire dir
 - [ ] set X-Powered-By
 

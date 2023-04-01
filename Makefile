@@ -15,8 +15,8 @@ INTEG_RUNNER := shpec
 SO_TARGET := libhttp.so
 STATIC_TARGET := libhttp.a
 
-INTEG_BASE_BIN := integ
-INTEG_AUTH_BIN := auth
+INTEG_BASE_BIN := basic_bin
+INTEG_AUTH_BIN := auth_bin
 
 SRC := $(wildcard $(SRC_DIR)/*.c)
 DEPS := $(wildcard $(DEPS_DIR)/*/*.c)
@@ -62,7 +62,7 @@ integ_test:
 	$(MAKE) all # TODO: if not .so
 
 	$(CC) $(INTEG_DIR)/auth.c $(wildcard $(INTEG_DIR)/deps/*/*.c) -I$(SRC_DIR) -I$(DEPS_DIR) -L. -lhttp -o $(INTEG_AUTH_BIN)
-	$(CC) $(INTEG_DIR)/server.c $(wildcard $(INTEG_DIR)/deps/*/*.c) -I$(SRC_DIR) -I$(DEPS_DIR) -L. -lhttp -o $(INTEG_BASE_BIN)
+	$(CC) $(INTEG_DIR)/basic.c $(wildcard $(INTEG_DIR)/deps/*/*.c) -I$(SRC_DIR) -I$(DEPS_DIR) -L. -lhttp -o $(INTEG_BASE_BIN)
 
 	$(INTEG_RUNNER)
 	$(MAKE) clean
