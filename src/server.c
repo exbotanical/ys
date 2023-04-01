@@ -14,6 +14,7 @@
 #include "request.h"  // for deserialize_req
 #include "response.h"
 #include "router.h"
+#include "signal.h"
 #include "util.h"
 #include "xmalloc.h"
 
@@ -191,6 +192,9 @@ void server_start(tcp_server *server) {
             s->key_path);
   configure_context(s->sslctx, s->cert_path, s->key_path);
 #endif
+
+  setup_sigint_handler();
+  setup_sigsegv_handler();
 
   thread_pool_t *pool = setup_thread_pool();
   int port = ((server_internal *)server)->port;
