@@ -8,6 +8,7 @@
 #include "libhttp.h"
 #include "response.h"
 #include "tap.c/tap.h"
+#include "test_util.h"
 
 /**
  * A key/value pair for response headers

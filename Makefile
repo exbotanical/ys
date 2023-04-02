@@ -20,6 +20,7 @@ INTEG_AUTH_BIN := auth_bin
 
 SRC := $(wildcard $(SRC_DIR)/*.c)
 DEPS := $(wildcard $(DEPS_DIR)/*/*.c)
+LIB := $(wildcard $(LIB_DIR)/*.c)
 TESTS := $(wildcard $(TEST_DIR)/*/*.c)
 
 ifdef USE_TLS
@@ -53,7 +54,7 @@ test:
 	$(MAKE) integ_test
 
 unit_test:
-	$(MAKE) all
+	$(CC) $(CFLAGS) $(DEPS) $(SRC) $(LIB) $(LDFLAGS) -o $(SO_TARGET)
 	./scripts/test.bash
 	$(MAKE) clean
 

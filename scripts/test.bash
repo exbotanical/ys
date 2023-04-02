@@ -47,7 +47,6 @@ run_test () {
 	gcc -w -Ideps -Isrc -Ilib -c "$TESTING_DIR/$file_name" -o main.o
 	gcc -o main main.o -L./ -l$REPO_DIR -lm -lpcre
 
-	export LD_LIBRARY_PATH=$(pwd)/src/:$(pwd)/include/:$LD_LIBRARY_PATH
 	green "\n[+] Running test $file_name...\n\n"
 
 	./main
@@ -56,6 +55,8 @@ run_test () {
 }
 
 main () {
+	export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+
 	declare -a tests=($(ls $TESTING_DIR | filter not_test_file))
 
 	for_each run_test ${tests[*]}

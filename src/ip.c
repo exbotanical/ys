@@ -16,10 +16,10 @@
 const int BIG = 0xFFFFFF;
 
 // IP address lengths (bytes)
-const int IPv4len = 4;
-const int IPv6len = 16;
+const int IPV4_LEN = 4;
+const int IPV6_LEN = 16;
 
-const int v4InV6Prefix[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff};
+const int V4_AS_V6_PREFIX[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff};
 
 /**
  * xtoi performs a hexadecimal to int conversion.
@@ -116,10 +116,10 @@ static int* dtoi(const char* s) {
  * @return int* An int array representing the IPv4 address
  */
 static int* to_ipv4(int a, int b, int c, int d) {
-  int* p = xmalloc(IPv6len * sizeof(int));
+  int* p = xmalloc(IPV6_LEN * sizeof(int));
 
   for (int i = 0; i < 12; i++) {
-    p[i] = v4InV6Prefix[i];
+    p[i] = V4_AS_V6_PREFIX[i];
   }
 
   p[12] = a;
@@ -141,8 +141,8 @@ static int* parse_ipv4(const char* s) {
   int* ret = NULL;
   char* cp = s_copy(s);
 
-  char p[IPv4len];
-  for (int i = 0; i < IPv4len; i++) {
+  char p[IPV4_LEN];
+  for (int i = 0; i < IPV4_LEN; i++) {
     if (strlen(cp) == 0) {
       // Missing octets
       goto done;
@@ -199,7 +199,7 @@ done:
  */
 static bool validate_ipv6(const char* s) {
   char* cp = s_copy(s);
-  int* ip = xmalloc(IPv6len * sizeof(int));
+  int* ip = xmalloc(IPV6_LEN * sizeof(int));
 
   bool ret = false;
   int ellipsis = -1;  // Position of ellipsis in ip
@@ -218,7 +218,7 @@ static bool validate_ipv6(const char* s) {
 
   // Loop, parsing hex numbers followed by colon
   int i = 0;
-  while (i < IPv6len) {
+  while (i < IPV6_LEN) {
     // Hex number
     int* digits = xtoi(cp);
     int n = digits[0];
@@ -232,12 +232,12 @@ static bool validate_ipv6(const char* s) {
 
     // If followed by dot, might be in trailing IPv4
     if (c < (int)strlen(cp) && cp[c] == '.') {
-      if (ellipsis < 0 && i != IPv6len - IPv4len) {
+      if (ellipsis < 0 && i != IPV6_LEN - IPV4_LEN) {
         // Not the right place
         goto done;
       }
 
-      if (i + IPv4len > IPv6len) {
+      if (i + IPV4_LEN > IPV6_LEN) {
         // Not enough room
         goto done;
       }
@@ -254,7 +254,7 @@ static bool validate_ipv6(const char* s) {
       free(ipv4);
 
       strcpy(cp, "");
-      i += IPv4len;
+      i += IPV4_LEN;
       break;
     }
 
@@ -299,12 +299,12 @@ static bool validate_ipv6(const char* s) {
   }
 
   // If didn't parse enough, expand ellipsis
-  if (i < IPv6len) {
+  if (i < IPV6_LEN) {
     if (ellipsis < 0) {
       goto done;
     }
 
-    int n = IPv6len - i;
+    int n = IPV6_LEN - i;
     for (int j = i - 1; j >= ellipsis; j--) {
       ip[j + n] = ip[j];
     }
