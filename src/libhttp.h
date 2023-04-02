@@ -255,13 +255,7 @@ typedef struct router_internal *http_router;
 /**
  * An attributes object for configuring a http_router
  */
-typedef struct {
-  bool use_cors;
-  route_handler *not_found_handler;
-  route_handler *internal_error_handler;
-  route_handler *method_not_allowed_handler;
-  array_t *middlewares;
-} router_attr;  // TODO: opaque
+typedef struct router_attr_internal router_attr;
 
 /**
  * Initialize a router attributes object

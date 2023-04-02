@@ -100,24 +100,25 @@ static response *default_method_not_allowed_handler(request_internal *req,
 }
 
 router_attr *router_attr_init() {
-  router_attr *attr = xmalloc(sizeof(router_attr));
+  router_attr_internal *attr = xmalloc(sizeof(router_attr_internal));
   attr->use_cors = false;
   attr->middlewares = NULL;
 
-  return attr;
+  return (router_attr *)attr;
 }
 
 http_router *router_init(router_attr *attr) {
+  router_attr_internal *attr_internal = (router_attr_internal *)attr;
   // Initialize config opts
   setup_env();
 
   router_internal *router = xmalloc(sizeof(router_internal));
 
   router->trie = trie_init();
-  router->middlewares = attr->middlewares;
-  router->use_cors = attr->use_cors;
+  router->middlewares = attr_internal->middlewares;
+  router->use_cors = attr_internal->use_cors;
 
-  if (!attr->not_found_handler) {
+  if (!attr_internal->not_found_handler) {
     printlogf(LOG_DEBUG,
               "[router::%s] not_found_handler is NULL, registering fallback "
               "handler\n",
@@ -129,10 +130,10 @@ http_router *router_init(router_attr *attr) {
               "[router::%s] registering user-defined not_found_handler\n",
               __func__);
 
-    router->not_found_handler = attr->not_found_handler;
+    router->not_found_handler = attr_internal->not_found_handler;
   }
 
-  if (!attr->method_not_allowed_handler) {
+  if (!attr_internal->method_not_allowed_handler) {
     printlogf(LOG_DEBUG,
               "[router::%s] method_not_allowed_handler is NULL, registering "
               "fallback handler\n",
@@ -145,10 +146,11 @@ http_router *router_init(router_attr *attr) {
         "[router::%s] registering user-defined method_not_allowed_handler\n",
         __func__);
 
-    router->method_not_allowed_handler = attr->method_not_allowed_handler;
+    router->method_not_allowed_handler =
+        attr_internal->method_not_allowed_handler;
   }
 
-  if (!attr->internal_error_handler) {
+  if (!attr_internal->internal_error_handler) {
     printlogf(LOG_DEBUG,
               "[router::%s] internal_error_handler is NULL, registering "
               "fallback handler\n",
@@ -160,7 +162,7 @@ http_router *router_init(router_attr *attr) {
               "[router::%s] registering user-defined internal_error_handler\n",
               __func__);
 
-    router->internal_error_handler = attr->internal_error_handler;
+    router->internal_error_handler = attr_internal->internal_error_handler;
   }
 
   return (http_router *)router;

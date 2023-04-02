@@ -17,6 +17,14 @@ typedef struct {
   void *(*handler)(void *, void *);
 } route_record;
 
+typedef struct {
+  bool use_cors;
+  route_handler *not_found_handler;
+  route_handler *internal_error_handler;
+  route_handler *method_not_allowed_handler;
+  array_t *middlewares;
+} router_attr_internal;
+
 /**
  * A router / HTTP multiplexer
  */

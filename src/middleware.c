@@ -2,13 +2,16 @@
 
 #include "cors.h"
 #include "libhttp.h"
+#include "router.h"
 
 void add_middleware(router_attr *attr, route_handler *mw) {
-  if (!has_elements(attr->middlewares)) {
-    attr->middlewares = array_init();
+  router_attr_internal *attr_internal = (router_attr_internal *)attr;
+
+  if (!has_elements(attr_internal->middlewares)) {
+    attr_internal->middlewares = array_init();
   }
 
-  array_push(attr->middlewares, mw);
+  array_push(attr_internal->middlewares, mw);
 }
 
 void __middlewares(router_attr *attr, route_handler *mw, ...) {
@@ -30,16 +33,18 @@ void __middlewares(router_attr *attr, route_handler *mw, ...) {
 
   va_end(args);
 
-  attr->middlewares = mws;
+  ((router_attr_internal *)attr)->middlewares = mws;
 }
 
 void use_cors(router_attr *attr, cors_opts *opts) {
-  attr->use_cors = true;
+  router_attr_internal *attr_internal = (router_attr_internal *)attr;
+
+  attr_internal->use_cors = true;
   cors_init((cors_opts_internal *)opts);
 
-  if (!has_elements(attr->middlewares)) {
-    attr->middlewares = array_init();
+  if (!has_elements(attr_internal->middlewares)) {
+    attr_internal->middlewares = array_init();
   }
 
-  array_push(attr->middlewares, cors_handler);
+  array_push(attr_internal->middlewares, cors_handler);
 }

@@ -252,8 +252,15 @@ void test_set_cookie() {
       "00:46:40 GMT; Max-Age=86400; Secure; SameSite=Lax";
 }
 
+void test_cookie_free() {
+  cookie* c = tocookie(".testsite.com", "test", "ThisCookie", "/", 2257894000,
+                       86400, SAME_SITE_LAX_MODE, false, true);
+
+  lives_ok({ cookie_free(c); }, "cookie_free does not segfault");
+}
+
 int main() {
-  plan(69);
+  plan(70);
 
   test_read_cookies();
   test_sanitize_cookie_value();
@@ -261,6 +268,7 @@ int main() {
   test_cookie_serialize();
   test_get_cookie();
   test_set_cookie();
+  test_cookie_free();
 
   done_testing();
 }

@@ -46,7 +46,7 @@ $(STATIC_TARGET): $(patsubst %.c,%.o,$(SRC)) $(patsubst %.c,%.o,$(DEPS))
 	ar rcs $@ $^
 
 clean:
-	rm -f $(filter-out %.h, $(SRC:.c=.o)) $(SO_TARGET) $(INTEG_AUTH_BIN) $(INTEG_BASE_BIN) main*
+	rm -f $(filter-out %.h, $(SRC:.c=.o)) $(filter-out %.h, $(DEPS:.c=.o)) $(SO_TARGET) $(INTEG_AUTH_BIN) $(INTEG_BASE_BIN) main*
 
 test:
 	$(MAKE) unit_test
