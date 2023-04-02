@@ -39,7 +39,7 @@ char *str_join(array_t *sarr, const char *delim);
  * str_cut slices s around the first instance of sep, returning the text before
  * and after sep in a 2-element array. If sep does not appear in s, str_cut
  * returns NULL.
- * TODO: test
+ *
  * @param s
  * @param sep
  * @return array_t*
@@ -90,8 +90,6 @@ char *tostr(char c);
  * @param c
  * @return true if the character is printable
  * @return false if the character is non-printable
- *
- * TODO: test
  */
 bool is_ascii(char c);
 

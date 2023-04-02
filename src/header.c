@@ -81,7 +81,6 @@ static void init_common_headers() {
  * init_singleton_headers initializes the singleton headers hash set. A
  * singleton header is a header that cannot be duplicated for a request per
  * RFC 7230.
- * TODO: test
  * TODO: case sensitive?
  */
 static void init_singleton_headers() {
@@ -230,8 +229,7 @@ char** req_header_values(hash_table* headers, const char* key) {
 }
 
 bool set_header(response* res, const char* key, const char* value) {
-  return insert_header(((response_internal*)res)->headers, key,
-                       value);  // TODO: singleton check
+  return insert_header(((response_internal*)res)->headers, key, value);
 }
 
 // TODO: should check singleton flag so we can use w/response

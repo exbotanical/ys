@@ -153,7 +153,6 @@ bool req_has_parameters(request* req) {
   return req && ri->parameters && ri->parameters->count > 0;
 }
 
-// TODO: free method
 char** req_get_query(request* req, const char* key) {
   array_t* arr = (array_t*)ht_get(((request_internal*)req)->queries, key);
   if (arr) {

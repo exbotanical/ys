@@ -602,6 +602,8 @@ same_site_mode cookie_get_same_site(cookie *c);
 
 bool cookie_get_secure(cookie *c);
 
+void cookie_free(cookie *c);
+
 /***************************** Utilities *****************************/
 
 /* Time Helpers */

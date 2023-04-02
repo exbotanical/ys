@@ -161,8 +161,6 @@ static bool is_preflight_request(request_internal *req) {
  *
  * @param req
  * @param res
- *
- * TODO: test
  */
 static void handle_request(request_internal *req, response *res) {
   char *origin = get_header(req->headers, ORIGIN_HEADER);
@@ -209,8 +207,6 @@ static void handle_request(request_internal *req, response *res) {
  *
  * @param req
  * @param res
- *
- * TODO: test
  */
 static void handle_preflight_request(request_internal *req, response *res) {
   char *origin = get_header(req->headers, ORIGIN_HEADER);

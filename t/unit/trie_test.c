@@ -151,11 +151,7 @@ void test_trie_search_ok() {
              "%s test - accessible handler with %s", test.name,
              test.search.path);
 
-    lives_ok(
-        {
-          h("TEST", "TEST");  // TODO: pass route context and test
-        },
-        "%s test - callable handler", test.name);
+    lives_ok({ h("TEST", "TEST"); }, "%s test - callable handler", test.name);
   }
 
   free(trie);

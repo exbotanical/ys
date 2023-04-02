@@ -224,8 +224,6 @@ void router_run(router_internal *router, client_context *ctx,
 
     route_handler *h = (route_handler *)result->action->handler;
 
-    // TODO: wrap other handlers - for example, if auth or CORS err, caller
-    // should not see 404 and 405
     array_t *mws = router->middlewares;
     if (mws && array_size(mws) > 0) {
       res->done = invoke_chain(req, res, mws);

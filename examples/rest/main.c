@@ -174,7 +174,7 @@ response *handle_post(request *req, response *res) {
 
   add_record(id, v);
 
-  set_status(res, STATUS_CREATED);  // TODO: default to 200
+  set_status(res, STATUS_CREATED);
 
   return res;
 }

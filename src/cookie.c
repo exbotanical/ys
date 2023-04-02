@@ -347,7 +347,6 @@ static char* cookie_serialize(cookie_internal* c) {
 
   switch (c->same_site) {
     case SAME_SITE_DEFAULT_MODE:
-      // TODO: test
       break;
 
     case SAME_SITE_NONE_MODE:
@@ -621,4 +620,10 @@ void set_cookie(response* res, cookie* c) {
   set_header(res, SET_COOKIE, cookie_serialize((cookie_internal*)c));
 }
 
-// TODO: cookie_free
+void cookie_free(cookie* c) {
+  cookie_internal* ci = (cookie_internal*)c;
+
+  free(ci->name);
+  free(ci->value);
+  free(ci);
+}

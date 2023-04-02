@@ -162,7 +162,6 @@ void response_send_error(client_context *ctx, parse_error err) {
   free(res);
 }
 
-// TODO: cleanup + finalize
 void response_send_protocol_error(int sockfd) {
   response_internal *res = response_init();
 

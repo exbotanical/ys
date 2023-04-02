@@ -242,7 +242,6 @@ void server_start(tcp_server *server) {
   printlogf(LOG_INFO, "[server::%s] Listening on port %d...\n", __func__, port);
 
   poll_client_connections(pool, server, server_sockfd, port, address, addr_len);
-  // TODO: interrupt cancel, kill sig
 }
 
 void server_free(tcp_server *server) {
