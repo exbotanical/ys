@@ -98,13 +98,11 @@ hash_table* parse_query(const char* query) {
     char* value = array_get(kv_pair, 1);
 
     key = unescape(key);
-
     if (!key) {
       continue;
     }
 
     value = unescape(value);
-
     if (!value) {
       continue;
     }

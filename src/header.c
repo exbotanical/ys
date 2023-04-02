@@ -305,5 +305,6 @@ array_t* derive_headers(const char* header_str) {
     }
   }
 
+  array_free(tmp);
   return headers;
 }

@@ -157,6 +157,9 @@ void response_send_error(client_context *ctx, parse_error err) {
   }
 
   response_send(ctx, response_serialize(NULL, res));
+
+  free(ctx);
+  free(res);
 }
 
 // TODO: cleanup + finalize
@@ -170,6 +173,9 @@ void response_send_protocol_error(int sockfd) {
 
   write(sockfd, buffer_state(resbuf), buffer_size(resbuf));
   close(sockfd);
+
+  free(res);
+  free(resbuf);
 }
 
 response_internal *response_init() {

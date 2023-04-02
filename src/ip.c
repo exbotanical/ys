@@ -27,7 +27,7 @@ const int v4InV6Prefix[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff};
  * @param s
  * @return int* An int array of [retval, n chars consumed, ok]
  */
-static int* xtoi(char* s) {
+static int* xtoi(const char* s) {
   int* ret = xmalloc(3 * sizeof(int));
 
   int n = 0;
@@ -74,7 +74,7 @@ static int* xtoi(char* s) {
  * @param s
  * @return int* An int array of [retval, n chars consumed, ok]
  */
-static int* dtoi(char* s) {
+static int* dtoi(const char* s) {
   int* ret = xmalloc(3 * sizeof(int));
 
   int n = 0;
@@ -138,21 +138,22 @@ static int* to_ipv4(int a, int b, int c, int d) {
  * @return int*
  */
 static int* parse_ipv4(const char* s) {
+  int* ret = NULL;
   char* cp = s_copy(s);
 
   char p[IPv4len];
   for (int i = 0; i < IPv4len; i++) {
     if (strlen(cp) == 0) {
       // Missing octets
-      return NULL;
+      goto done;
     }
 
     if (i > 0) {
       if (cp[0] != '.') {
-        return NULL;
+        goto done;
       }
 
-      cp = s_substr(cp, 1, strlen(cp), true);
+      strcpy(cp, s_substr(cp, 1, strlen(cp), true));
     }
 
     int* digits = dtoi(cp);
@@ -160,26 +161,32 @@ static int* parse_ipv4(const char* s) {
     int n = digits[0];
     int c = digits[1];
     int ok = digits[2];
+    free(digits);
 
     if (!ok || n > 0xFF) {
-      return NULL;
+      goto done;
     }
 
     if (c > 1 && cp[0] == '0') {
       // Reject non-zero components with leading zeroes
-      return NULL;
+      goto done;
     }
 
-    cp = s_substr(cp, c, strlen(cp), true);
+    strcpy(cp, s_substr(cp, c, strlen(cp), true));
 
     p[i] = n;
   }
 
   if (strlen(cp) != 0) {
-    return NULL;
+    goto done;
   }
 
-  return to_ipv4(p[0], p[1], p[2], p[3]);
+  ret = to_ipv4(p[0], p[1], p[2], p[3]);
+  goto done;
+
+done:
+  free(cp);
+  return ret;
 }
 
 /**
@@ -194,15 +201,18 @@ static bool validate_ipv6(const char* s) {
   char* cp = s_copy(s);
   int* ip = xmalloc(IPv6len * sizeof(int));
 
+  bool ret = false;
   int ellipsis = -1;  // Position of ellipsis in ip
 
   // Might have leading ellipsis
   if (strlen(cp) >= 2 && cp[0] == ':' && cp[1] == ':') {
     ellipsis = 0;
-    cp = s_substr(cp, 2, strlen(cp), true);
+    strcpy(cp, s_substr(cp, 2, strlen(cp), true));
+
     // Might be only ellipsis
     if (strlen(cp) == 0) {
-      return true;
+      ret = true;
+      goto done;
     }
   }
 
@@ -214,34 +224,36 @@ static bool validate_ipv6(const char* s) {
     int n = digits[0];
     int c = digits[1];
     int ok = digits[2];
+    free(digits);
 
     if (!ok || n > 0xFFFF) {
-      return false;
+      goto done;
     }
 
     // If followed by dot, might be in trailing IPv4
     if (c < (int)strlen(cp) && cp[c] == '.') {
       if (ellipsis < 0 && i != IPv6len - IPv4len) {
         // Not the right place
-        return false;
+        goto done;
       }
 
       if (i + IPv4len > IPv6len) {
         // Not enough room
-        return false;
+        goto done;
       }
 
-      int* ip4 = parse_ipv4(cp);
-      if (!ip4) {
-        return false;
+      int* ipv4 = parse_ipv4(cp);
+      if (!ipv4) {
+        goto done;
       }
 
-      ip[i] = ip4[12];
-      ip[i + 1] = ip4[13];
-      ip[i + 2] = ip4[14];
-      ip[i + 3] = ip4[15];
+      ip[i] = ipv4[12];
+      ip[i + 1] = ipv4[13];
+      ip[i + 2] = ipv4[14];
+      ip[i + 3] = ipv4[15];
+      free(ipv4);
 
-      cp = "";
+      strcpy(cp, "");
       i += IPv4len;
       break;
     }
@@ -252,27 +264,28 @@ static bool validate_ipv6(const char* s) {
     i += 2;
 
     // Stop at end of string
-    cp = s_substr(cp, c, strlen(cp), true);
+    strcpy(cp, s_substr(cp, c, strlen(cp), true));
     if (strlen(cp) == 0) {
       break;
     }
 
     // Otherwise must be followed by colon and more
     if (cp[0] != ':' || strlen(cp) == 1) {
-      return false;
+      goto done;
     }
 
-    cp = s_substr(cp, 1, strlen(cp), true);
-    // TODO: free cp
+    strcpy(cp, s_substr(cp, 1, strlen(cp), true));
+
     //  Look for ellipsis
     if (cp[0] == ':') {
       if (ellipsis >= 0) {
         // Already have one
-        return false;
+        goto done;
       }
 
       ellipsis = i;
-      cp = s_substr(cp, 1, strlen(cp), true);
+      strcpy(cp, s_substr(cp, 1, strlen(cp), true));
+
       if (strlen(cp) == 0) {
         // Can be at end
         break;
@@ -282,13 +295,13 @@ static bool validate_ipv6(const char* s) {
 
   // Must have used entire string
   if (strlen(cp) != 0) {
-    return false;
+    goto done;
   }
 
   // If didn't parse enough, expand ellipsis
   if (i < IPv6len) {
     if (ellipsis < 0) {
-      return false;
+      goto done;
     }
 
     int n = IPv6len - i;
@@ -301,17 +314,26 @@ static bool validate_ipv6(const char* s) {
     }
   } else if (ellipsis >= 0) {
     // Ellipsis must represent at least one 0 group
-    return false;
+    goto done;
   }
 
-  return true;
+  ret = true;
+  goto done;
+
+done:
+  free(ip);
+  free(cp);
+  return ret;
 }
 
 bool validate_ip(const char* s) {
   for (int i = 0; i < (int)strlen(s); i++) {
     switch (s[i]) {
       case '.':
-        return !!parse_ipv4(s);
+        int* ipv4 = parse_ipv4(s);
+        bool ret = !!ipv4;
+        free(ipv4);
+        return ret;
       case ':':
         return validate_ipv6(s);
     }

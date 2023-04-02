@@ -115,6 +115,7 @@ static bool is_valid_cookie_domain_name(const char* s) {
   if (strlen(s) == 0) {
     return false;
   }
+
   if (strlen(s) > 255) {
     return false;
   }
@@ -123,7 +124,7 @@ static bool is_valid_cookie_domain_name(const char* s) {
 
   if (cp[0] == '.') {
     // A cookie a domain attribute may start with a leading dot
-    cp = s_substr(cp, 1, strlen(cp), false);
+    strcpy(cp, s_substr(cp, 1, strlen(cp), false));
   }
 
   // The previous character
@@ -147,15 +148,18 @@ static bool is_valid_cookie_domain_name(const char* s) {
       if (prev == '.') {
         goto done;
       }
+
       component_len++;
     } else if (c == '.') {
       // Character preceding a dot cannot be another dot or dash
       if (prev == '.' || prev == '-') {
         goto done;
       }
+
       if (component_len > 63 || component_len == 0) {
         goto done;
       }
+
       component_len = 0;
     } else {
       goto done;
@@ -229,7 +233,7 @@ static char* parse_cookie_value(const char* raw, bool allow_dbl_quote) {
   // Strip the quotes, if present
   if (allow_dbl_quote && strlen(cp) > 1 && cp[0] == '"' &&
       cp[strlen(cp) - 1] == '"') {
-    cp = s_substr(cp, 1, strlen(cp) - 1, false);
+    strcpy(cp, s_substr(cp, 1, strlen(cp) - 1, false));
   }
 
   for (unsigned int i = 0; i < strlen(cp); i++) {
@@ -255,7 +259,9 @@ static char* sanitize_cookie_value(char* v) {
   }
 
   if (strstr(v, ",") || strstr(v, " ")) {
-    return fmt_str("\"%s\"", v);
+    char* ret = fmt_str("\"%s\"", v);
+    free(v);
+    return ret;
   }
 
   return v;
@@ -376,6 +382,7 @@ static array_t* read_browser_cookie(hash_table* headers) {
 
       char* part = array_get(split, 0);
       line = array_get(split, 1);
+      array_free(split);
 
       if (s_nullish(part)) {
         continue;
@@ -384,6 +391,7 @@ static array_t* read_browser_cookie(hash_table* headers) {
       array_t* pair = str_cut(part, "=");
       char* name = array_get(pair, 0);
       char* value = array_get(pair, 1);
+      array_free(pair);
 
       if (!is_valid_cookie_name(name)) {
         continue;
@@ -396,6 +404,7 @@ static array_t* read_browser_cookie(hash_table* headers) {
 
       array_push(cookies, cookie_init(name, value));
     }
+    free(line);
   }
 
   return cookies;
@@ -422,10 +431,12 @@ static array_t* read_cookies(hash_table* headers) {
 
     array_t* parts = split(s_trim(cstr), ";");
     if (array_size(parts) == 0) {
+      array_free(parts);
       return read_browser_cookie(headers);  // TODO: test
     }
 
     if (array_size(parts) == 1 && s_nullish(array_get(parts, 0))) {
+      array_free(parts);
       continue;
     }
 
@@ -433,18 +444,25 @@ static array_t* read_cookies(hash_table* headers) {
 
     array_t* sub_parts = str_cut(array_get(parts, 0), "=");
 
-    if (!sub_parts) {
+    if (array_size(sub_parts) == 0) {
+      array_free(parts);
+      array_free(sub_parts);
       continue;
     }
 
     char* name = array_get(sub_parts, 0);
     if (!is_valid_cookie_name(name)) {
+      array_free(parts);
+      array_free(sub_parts);
       continue;
     }
 
     char* value = array_get(sub_parts, 1);
     value = parse_cookie_value(value, true);
+    array_free(sub_parts);
+
     if (!value) {
+      array_free(parts);
       continue;
     }
 
@@ -461,6 +479,7 @@ static array_t* read_cookies(hash_table* headers) {
 
       char* attr = array_get(attrs, 0);
       char* value = array_get(attrs, 1);
+      array_free(attrs);
 
       value = parse_cookie_value(value, false);
       if (!value) {
@@ -487,6 +506,7 @@ static array_t* read_cookies(hash_table* headers) {
         c->domain = value;
       } else if (s_casecmp(attr, "max-age")) {
         int seconds = atoi(value);
+
         if (!seconds || (seconds != 0 && value[0] == '0')) {
           printlogf(LOG_DEBUG, "max_age value %s is invalid", seconds);
         } else {
@@ -508,6 +528,8 @@ static array_t* read_cookies(hash_table* headers) {
         c->path = value;
       }
     }
+
+    array_free(parts);
 
     array_push(ret, c);
   }
@@ -598,3 +620,5 @@ cookie* get_cookie(request* req, const char* name) {
 void set_cookie(response* res, cookie* c) {
   set_header(res, SET_COOKIE, cookie_serialize((cookie_internal*)c));
 }
+
+// TODO: cookie_free

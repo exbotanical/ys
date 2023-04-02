@@ -229,7 +229,6 @@ static void handle_preflight_request(request_internal *req, response *res) {
   // If the origin is not in the allow list, deny
   if (!is_origin_allowed(cors_conf, origin)) {
     set_status(res, STATUS_FORBIDDEN);
-
     return;
   }
 
@@ -246,6 +245,7 @@ static void handle_preflight_request(request_internal *req, response *res) {
 
   array_t *reqd_headers = derive_headers(header_str);
   if (!are_headers_allowed(cors_conf, reqd_headers)) {
+    array_free(reqd_headers);
     return;
   }
 
@@ -280,6 +280,8 @@ static void handle_preflight_request(request_internal *req, response *res) {
   if (cors_conf->max_age > 0) {
     set_header(res, MAX_AGE_HEADER, fmt_str("%d", cors_conf->max_age));
   }
+
+  array_free(reqd_headers);
 }
 
 cors_opts *cors_opts_init() {

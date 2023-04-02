@@ -106,6 +106,8 @@ void trie_insert(route_trie *trie, array_t *methods, const char *path,
       break;
     }
   }
+
+  array_free(paths);
 }
 
 route_result *trie_search(route_trie *trie, const char *method,
@@ -125,6 +127,8 @@ route_result *trie_search(route_trie *trie, const char *method,
     realpath = array_get(arr, 0);
     // Grab query and parse it into key/value[] pairs
     result->queries = parse_query(array_get(arr, 1));
+
+    array_free(arr);
   }
 
   array_t *paths = expand_path(realpath);
@@ -210,6 +214,7 @@ route_result *trie_search(route_trie *trie, const char *method,
       return result;
     }
   }
+  array_free(paths);
 
   if (s_equals(realpath, PATH_ROOT)) {
     // No matching handler

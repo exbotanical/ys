@@ -237,6 +237,12 @@ void router_run(router_internal *router, client_context *ctx,
   }
 
   response_send(ctx, response_serialize(req, res));
+
+  // TODO: free ht
+  free(req);
+  free(res);
+  free(ctx);
+  free(result);
 }
 
 void router_free(http_router *router) { free(router); }

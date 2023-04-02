@@ -40,6 +40,7 @@
 - [x] Use method enum in CORS middleware helpers
 - [ ] Ensure everything opaque has getters and setters
 - [ ] Allowlist paths for middleware
+- [ ] middleware ordering - before err handlers?
 
 ## New Features
 - [x] ~~global hooks/interceptors (e.g. global HTTP headers)~~ just use middleware
@@ -56,11 +57,11 @@
   - [ ] Evented server e.g. `onRequest`
 - [x] global middlewares
 - [ ] multiple routers
-- [ ] handle signals for graceful shutdown
+- [x] handle signals for graceful shutdown
 - [x] query strings
 - [x] ~~wildcard routing~~ just use middleware
 - [ ] serve entire dir
-- [ ] set X-Powered-By
+- [x] ~~set X-Powered-By~~ nah, better to be less invasive
 
 ## Best Practices
 - [x] ~~specific int types~~
@@ -70,7 +71,7 @@
 - [ ] Pass correct function pointers e.g. https://stackoverflow.com/questions/14134245/iso-c-void-and-function-pointers
 - [ ] `const` pointers
   - [ ] `const` in structs
-- [x] fix `const char CONSTANT[n]`
+- [x] fix `const char CONSTANT[n],m`
 - [ ] `free` everywhere we can
 - [ ] mutexes in examples
 

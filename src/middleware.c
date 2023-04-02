@@ -2,7 +2,6 @@
 
 #include "cors.h"
 #include "libhttp.h"
-#include "xmalloc.h"
 
 void add_middleware(router_attr *attr, route_handler *mw) {
   if (!has_elements(attr->middlewares)) {

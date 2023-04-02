@@ -75,6 +75,8 @@ static void *client_thread_handler(void *arg) {
               __func__, maybe_req.err.code);
 
     response_send_error(ctx->c, maybe_req.err.code);
+
+    free(ctx);
     return NULL;
   }
 
@@ -85,6 +87,7 @@ static void *client_thread_handler(void *arg) {
 
   router_run(ctx->r, ctx->c, req);
 
+  free(ctx);
   return NULL;
 }
 
