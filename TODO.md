@@ -7,6 +7,7 @@
 - [x] Cookies
 - [ ] Name this project: Ys?
 - [ ] Lock deps versions
+- [ ] Document
 
 - [x] Clean up all objects w/ free where necessary
 - [x] Validate NULLs and allocated objects
@@ -115,10 +116,10 @@
 - [x] Urls with `-` segfault e.g. `/feed_meta/index-0.json`
   - [ ] Add test
 - [ ] curl - Connection #0 to host localhost left intact?
-- [ ] Address glibc malloc bug in ip
+- [x] Address glibc malloc bug in ip
 - [ ] Do two route handlers with diff methods for the same /route get handled separately?
 - [ ] Does router handle URL fragments?
-- [ ] Why does http req hang when using TLS?
+- [x] Why does http req hang when using TLS?
 
 ## Ecosystem
 - [ ] Addon / plugin libraries
