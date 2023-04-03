@@ -115,7 +115,7 @@
 - [x] Allow OPTIONS requests by default in router when CORS enabled
 - [x] Urls with `-` segfault e.g. `/feed_meta/index-0.json`
   - [ ] Add test
-- [ ] curl - Connection #0 to host localhost left intact?
+- [x] ~~curl - Connection #0 to host localhost left intact?~~ (see https://stackoverflow.com/a/72045706)
 - [x] Address glibc malloc bug in ip
 - [ ] Do two route handlers with diff methods for the same /route get handled separately?
 - [ ] Does router handle URL fragments?
