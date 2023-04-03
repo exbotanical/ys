@@ -36,7 +36,7 @@ static bool is_nocontent(response_internal *res) {
 static bool should_set_content_len(request_internal *req,
                                    response_internal *res) {
   return !is_nocontent(res) && !is_informational(res) &&
-         !is_2xx_connect(req, res);
+         (req ? !is_2xx_connect(req, res) : true);
 }
 
 /**
@@ -75,7 +75,7 @@ buffer_t *response_serialize(request_internal *req, response_internal *res) {
   // server MUST NOT send a Content-Length header field in any 2xx
   // (Successful) response to a METHOD_CONNECT request (Section 4.3.6 of
   // [RFC7231]).
-  if (req && should_set_content_len(req, res)) {
+  if (should_set_content_len(req, res)) {
     buffer_append(buf, fmt_str("Content-Length: %d", body ? strlen(body) : 0));
     buffer_append(buf, CRLF);
   }

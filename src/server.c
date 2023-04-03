@@ -124,9 +124,9 @@ static void poll_client_connections(thread_pool_t *pool,
         ERR_print_errors_fp(stderr);
 
         response_send_protocol_error(client_sockfd);
+        SSL_free(ssl);
         continue;
       }
-
 #endif
 
       printlogf(LOG_DEBUG,
