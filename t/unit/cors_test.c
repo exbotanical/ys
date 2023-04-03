@@ -325,6 +325,9 @@ void test_cors_middleware() {
     check_headers(test.name, res->headers, test.res_headers);
 
     // check_status_code(res, (int)test.code); // TODO:
+
+    array_free(test.req_headers);
+    array_free(test.res_headers);
   }
 }
 
@@ -373,7 +376,11 @@ void test_are_headers_allowed() {
       bool actual = are_headers_allowed(t.cors, c->test_headers);
       ok(actual == c->is_allowed, "%s - headers are %s", t.name,
          c->is_allowed ? "allowed" : "not allowed");
+
+      array_free(c->test_headers);
     }
+
+    array_free(t.cases);
   }
 }
 
@@ -412,6 +419,8 @@ void test_is_method_allowed() {
       ok(actual == c->is_allowed, "%s - method %s is %s", t.name, c->method,
          c->is_allowed ? "allowed" : "not allowed");
     }
+
+    array_free(t.cases);
   }
 }
 
@@ -454,6 +463,7 @@ void test_origin_is_allowed() {
 
   for (unsigned int i = 0; i < sizeof(tests) / sizeof(test); i++) {
     test t = tests[i];
+
     foreach (t.cases, j) {
       test_case *c = (test_case *)array_get(t.cases, j);
 
@@ -461,6 +471,8 @@ void test_origin_is_allowed() {
       ok(actual == c->is_allowed, "%s - origin %s is %s", t.name, c->origin,
          c->is_allowed ? "allowed" : "not allowed");
     }
+
+    array_free(t.cases);
   }
 }
 

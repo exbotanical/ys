@@ -60,6 +60,40 @@ void test_derive_parameter_key() {
   }
 }
 
+void test_path_split_first_slash() {
+  typedef struct {
+    char *input;
+    array_t *expected;
+  } test_case;
+
+  test_case tests[] = {
+      {.input = "/api", .expected = array_init()},
+      {.input = "/api/demo", .expected = array_collect("/api", "/demo")},
+      {.input = "/api/demo/cookie",
+       .expected = array_collect("/api", "/demo/cookie")},
+      {.input = "/", .expected = array_init()},
+      {.input = "", .expected = array_init()},
+      {.input = "api", .expected = array_init()},
+      {.input = "api/", .expected = array_init()},
+      {.input = "api/demo", .expected = array_collect("api", "/demo")}};
+
+  for (unsigned int i = 0; i < sizeof(tests) / sizeof(test_case); i++) {
+    test_case test = tests[i];
+
+    array_t *actual = path_split_first_slash(test.input);
+    if (array_size(test.expected) == 0) {
+      ok(array_size(actual) == 0, "");
+    } else {
+      ok(array_size(actual) == array_size(test.expected), "");
+      is(array_get(actual, 0), array_get(test.expected, 0), "");
+      is(array_get(actual, 1), array_get(test.expected, 1), "");
+    }
+
+    array_free(test.expected);
+    array_free(actual);
+  }
+}
+
 int main() {
   plan(14);
 

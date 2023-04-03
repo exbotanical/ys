@@ -94,6 +94,8 @@ void test_get_header() {
 
   is(get_header(ht, k1), v1, "retrieves the first header value");
   is(get_header(ht, v1), NULL, "returns NULL if the header key does not exist");
+
+  array_free(arr);
 }
 
 void test_req_header_values() {
@@ -120,6 +122,8 @@ void test_req_header_values() {
 
   is(req_header_values(ht, v1), NULL,
      "returns NULL if the header key does not exist");
+
+  array_free(arr);
 }
 
 void test_insert_header() {
@@ -153,6 +157,9 @@ void test_derive_headers() {
 
     is(e, a, "derive_headers - expected %s to equal %s", e, a);
   }
+
+  array_free(expected);
+  array_free(actual);
 }
 
 int main() {

@@ -101,7 +101,10 @@ void test_parse_query() {
         is(array_get(vs, k), v, "each value is in the hash table for key %s",
            p->key);
       }
+
+      array_free(vs);
     }
+    array_free(test.expected);
   }
 }
 

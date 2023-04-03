@@ -58,6 +58,8 @@ void test_str_join() {
 
   char *ret = str_join(arr, ",");
   is(ret, "a,b,c");
+
+  array_free(arr);
 }
 
 void test_str_cut() {
@@ -76,6 +78,9 @@ void test_str_cut() {
      "first element is the string before the first instance of the delimiter");
   is(array_get(pair2, 1), "string=world",
      "second element is the string after the first instance of the delimiter");
+
+  array_free(pair);
+  array_free(pair2);
 }
 
 void test_str_cut_nomatch() {
@@ -84,6 +89,8 @@ void test_str_cut_nomatch() {
   array_t *pair = str_cut(ts, "?");
   is(array_get(pair, 0), ts,
      "returns string as-is in first element when no match");
+
+  array_free(pair);
 }
 
 void test_str_cut_halfmatch() {
@@ -102,6 +109,9 @@ void test_str_cut_halfmatch() {
      "first element is NULL when the string begins with the delimiter");
   is(array_get(pair2, 1), "test",
      "second element is the string after the delimiter");
+
+  array_free(pair);
+  array_free(pair2);
 }
 
 void test_str_contains_ctl_char() {

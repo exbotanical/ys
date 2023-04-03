@@ -102,7 +102,13 @@ void test_read_cookies() {
       ok(actual->same_site == expected->same_site,
          "samesite flag is correctly deserialized - actual is %d",
          actual->same_site);
+
+      cookie_free(actual);
+      cookie_free(expected);
     }
+
+    array_free(cookies);
+    array_free(test.expected);
   }
 }
 
@@ -163,6 +169,7 @@ void test_cookie_serialize() {
   const char* actual = cookie_serialize(c);
 
   is(actual, expected, "serializes cookie as expected");
+  cookie_free(c);
 }
 
 void test_get_cookie() {
@@ -207,6 +214,11 @@ void test_get_cookie() {
   ok(actual->same_site == expected->same_site,
      "retrieved cookie samesite flag (%d) matches what was inserted",
      actual->same_site);
+
+  cookie_free(c);
+  cookie_free(c2);
+  cookie_free(actual);
+  cookie_free(expected);
 }
 
 void test_set_cookie() {
@@ -221,6 +233,8 @@ void test_set_cookie() {
   const char* expected =
       "ThisCookie=test; Path=/; Domain=testsite.com; Expires=Sat, 20 Jul 2041 "
       "00:46:40 GMT; Max-Age=86400; Secure; SameSite=Lax";
+
+  cookie_free(c);
 }
 
 void test_cookie_free() {
@@ -233,13 +247,14 @@ void test_cookie_free() {
 int main() {
   plan(70);
 
+  test_cookie_free();
+
   test_read_cookies();
   test_sanitize_cookie_value();
   test_sanitize_cookie_path();
   test_cookie_serialize();
   test_get_cookie();
   test_set_cookie();
-  test_cookie_free();
 
   done_testing();
 }

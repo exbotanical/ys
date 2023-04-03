@@ -72,6 +72,8 @@ void test_trie_insert() {
 
     lives_ok({ trie_insert(trie, route.methods, route.path, route.handler); },
              "inserts the trie node");
+
+    array_free(route.methods);
   }
 }
 
@@ -137,6 +139,8 @@ void test_trie_search_ok() {
   for (i = 0; i < sizeof(records) / sizeof(route_record); i++) {
     route_record record = records[i];
     trie_insert(trie, record.methods, record.path, record.handler);
+
+    array_free(record.methods);
   }
 
   for (i = 0; i < sizeof(tests) / sizeof(test_case); i++) {
