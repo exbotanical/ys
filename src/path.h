@@ -51,4 +51,5 @@ char *derive_label_pattern(const char *label);
  */
 char *derive_parameter_key(const char *label);
 
+array_t *path_split_first_delim(const char *p);
 #endif /* PATH_H */

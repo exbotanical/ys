@@ -56,6 +56,11 @@ describe 'libhttp TLS integration tests'
     status="$(get_status <<< "$res")"
     assert equal "$status" '200 OK'
   ti
+
+  it 'GET request to nested path returns payload'
+    res="$(curl "$SERVER_ADDR/api")"
+    assert equal 'api root' "$res"
+  ti
 end_describe
 
 kill $!

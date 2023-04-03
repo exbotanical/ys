@@ -99,6 +99,7 @@ maybe_request req_read_and_parse(client_context* ctx) {
   req->body = s_copy(buf + pret);
   req->method = fmt_str("%.*s", (int)method_len, method);
   req->path = fmt_str("%.*s", (int)path_len, path);
+  req->route_path = s_copy(req->path);
   req->version = fmt_str("1.%d\n", minor_version);
 
   // This is where we deal with the really quite complicated mess of HTTP

@@ -72,6 +72,16 @@ response *set_global_headers(request *req, response *res) {
   return res;
 }
 
+response *handle_api_root(request *req, response *res) {
+  set_body(res, "api root");
+  return res;
+}
+
+response *handle_api_demo(request *req, response *res) {
+  set_body(res, request_get_body(req));
+  return res;
+}
+
 response *handle_get(request *req, response *res) {
   set_header(res, "Content-Type", "application/json");
 
@@ -234,6 +244,10 @@ int main() {
   router_register(router, record_path, handle_delete, METHOD_DELETE, NULL);
   router_register(router, record_path, handle_put, METHOD_PUT, NULL);
   router_register(router, record_path, handle_post, METHOD_POST, NULL);
+
+  http_router *api_router = router_register_sub(router, attr, "/api");
+  router_register(api_router, "/", handle_api_root, METHOD_GET, NULL);
+  router_register(api_router, "/demo", handle_api_demo, METHOD_POST, NULL);
 
   tcp_server *server = server_init(router, PORT);
 

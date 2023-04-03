@@ -62,8 +62,6 @@ char* to_canonical_mime_header_key(char* key);
  * @param headers
  * @param key
  * @return char*
- *
- * TODO: public
  */
 char* get_header(hash_table* headers, const char* key);
 

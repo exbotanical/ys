@@ -60,33 +60,40 @@ void test_derive_parameter_key() {
   }
 }
 
-void test_path_split_first_slash() {
+void test_path_split_first_delim() {
   typedef struct {
     char *input;
     array_t *expected;
   } test_case;
 
   test_case tests[] = {
-      {.input = "/api", .expected = array_init()},
+      {.input = "/api", .expected = array_collect("/api", "/")},
       {.input = "/api/demo", .expected = array_collect("/api", "/demo")},
       {.input = "/api/demo/cookie",
        .expected = array_collect("/api", "/demo/cookie")},
       {.input = "/", .expected = array_init()},
       {.input = "", .expected = array_init()},
-      {.input = "api", .expected = array_init()},
-      {.input = "api/", .expected = array_init()},
-      {.input = "api/demo", .expected = array_collect("api", "/demo")}};
+      {.input = "api", .expected = array_collect("/api", "/")},
+      {.input = "api/", .expected = array_collect("/api", "/")},
+      {.input = "api/demo", .expected = array_collect("api", "/demo")},
+      {.input = "/api/", .expected = array_collect("/api", "/")}
+
+  };
 
   for (unsigned int i = 0; i < sizeof(tests) / sizeof(test_case); i++) {
     test_case test = tests[i];
 
-    array_t *actual = path_split_first_slash(test.input);
+    array_t *actual = path_split_first_delim(test.input);
     if (array_size(test.expected) == 0) {
-      ok(array_size(actual) == 0, "");
+      ok(array_size(actual) == 0,
+         "returns an empty array if the path could not be split on a slash");
     } else {
-      ok(array_size(actual) == array_size(test.expected), "");
-      is(array_get(actual, 0), array_get(test.expected, 0), "");
-      is(array_get(actual, 1), array_get(test.expected, 1), "");
+      ok(array_size(actual) == array_size(test.expected),
+         "returns a tuple if the path was split on a slash");
+      is(array_get(actual, 0), array_get(test.expected, 0),
+         "returns the expected 'prefix'");
+      is(array_get(actual, 1), array_get(test.expected, 1),
+         "returns the expected 'suffix'");
     }
 
     array_free(test.expected);
@@ -95,13 +102,15 @@ void test_path_split_first_slash() {
 }
 
 int main() {
-  plan(14);
+  plan(37);
 
   test_expand_path_ok();
   test_expand_no_match();
 
   test_derive_label_pattern();
   test_derive_parameter_key();
+
+  test_path_split_first_delim();
 
   done_testing();
 }

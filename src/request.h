@@ -7,6 +7,7 @@
 typedef enum { IO_ERR = 1, PARSE_ERR, REQ_TOO_LONG, DUP_HDR } parse_error;
 
 typedef struct {
+  char *route_path;
   const char *path;
   const char *method;
   const char *body;

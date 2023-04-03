@@ -233,6 +233,14 @@ char *request_get_protocol(request *req);
  */
 char *request_get_version(request *req);
 
+/**
+ * request_get_header retrieves the first value for a given header key on
+ * the request or NULL if not found
+ *
+ *  @param req
+ * @param key
+ * @return char*
+ */
 char *request_get_header(request *req, const char *key);
 
 /**********************************************************
@@ -273,9 +281,21 @@ void set_body(response *res, const char *body);
  */
 void set_status(response *res, http_status status);
 
-// TODO:
+/**
+ * get_done returns the done status of the response
+ *
+ * @param res
+ * @return true
+ * @return false
+ */
 bool get_done(response *res);
-// TODO:
+
+/**
+ * set_done sets the done status of the response to true. This operation is
+ * idempotent.
+ *
+ * @param res
+ */
 void set_done(response *res);
 
 /**
@@ -287,6 +307,14 @@ void set_done(response *res);
  */
 char *from_file(const char *filename);
 
+/**
+ * response_get_header retrieves the first value for a given header key on
+ * the response or NULL if not found
+ *
+ * @param res
+ * @param key
+ * @return char*
+ */
 char *response_get_header(response *res, const char *key);
 
 /**********************************************************
@@ -346,6 +374,10 @@ void router_register(http_router *router, const char *path,
  * @param router
  */
 void router_free(http_router *router);
+
+// TODO: t + d
+http_router *router_register_sub(http_router *parent_router, router_attr *attr,
+                                 const char *subpath);
 
 /**********************************************************
  * Server

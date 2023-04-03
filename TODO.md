@@ -41,6 +41,7 @@
 - [ ] Ensure everything opaque has getters and setters
 - [ ] Allowlist paths for middleware
 - [ ] middleware ordering - before err handlers?
+- [ ] ask users - should CORS be inherited by sub-routers automatically?
 
 ## New Features
 - [x] ~~global hooks/interceptors (e.g. global HTTP headers)~~ just use middleware
@@ -56,7 +57,7 @@
 - [ ] async i/o option using epoll
   - [ ] Evented server e.g. `onRequest`
 - [x] global middlewares
-- [ ] multiple routers
+- [x] multiple routers
 - [x] handle signals for graceful shutdown
 - [x] query strings
 - [x] ~~wildcard routing~~ just use middleware
@@ -65,14 +66,14 @@
 
 ## Best Practices
 - [x] ~~specific int types~~
-- [ ] check all instances of `strcmp` and see if `strncmp` makes more sense
+- [x] check all instances of `strcmp` and see if `strncmp` makes more sense
 - [ ] Determine where we actually need to be passing by reference (currently, this is done everywhere)
 - [x] ~~Add LICENSE of yyjson~~
 - [ ] Pass correct function pointers e.g. https://stackoverflow.com/questions/14134245/iso-c-void-and-function-pointers
 - [ ] `const` pointers
   - [ ] `const` in structs
 - [x] fix `const char CONSTANT[n],m`
-- [ ] `free` everywhere we can
+- [x] `free` everywhere we can
 - [ ] mutexes in examples
 
 ## Spec Compliance
@@ -97,9 +98,9 @@
 - [x] relocate JSON to util library
 
 ## DX
-- [ ] helper ??? `#define CAST(type, name, stmt) type *name = (type *)stmt`
+- [x] ~~helper ??? `#define CAST(type, name, stmt) type *name = (type *)stmt`~~
 - [x] Setup linter that uses Google's C/C++ style guide
-- [ ] `@return` doc for `true` and `false` cases instead of just `bool`
+- [x] `@return` doc for `true` and `false` cases instead of just `bool`
 - [x] pick a style for struct types
 - [x] Debug helpers e.g.
   ```c
@@ -107,7 +108,7 @@
   #define checkpoint() printf("CHECKPOINT %d\n", c++)
   #define isnull(thing) printf("IS NULL? %s\n", thing == NULL ? "yes" : "no")
   ```
-- [ ] Shared test utils
+- [x] Shared test utils
 
 ## Fixes
 - [x] Allow OPTIONS requests by default in router when CORS enabled

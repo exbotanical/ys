@@ -1,10 +1,12 @@
 #include "router.h"
 
 #include <stdarg.h>  // for variadic args functions
+#include <string.h>  // for strcpy
 
 #include "config.h"
 #include "libutil/libutil.h"  // for s_copy, s_equals
 #include "logger.h"
+#include "path.h"      // for path_split_first_slash
 #include "response.h"  // for response_init, response_send
 #include "xmalloc.h"
 
@@ -97,6 +99,44 @@ static response *default_method_not_allowed_handler(request_internal *req,
   res->status = STATUS_METHOD_NOT_ALLOWED;
 
   return res;
+}
+
+/**
+ * router_run_sub runs a sub-router against nested paths
+ *
+ * @param router
+ * @param ctx
+ * @param req
+ * @return true A sub-route was matched and the router was run
+ * @return false A sub-route was not matched and we should continue to running
+ * the router on the full path
+ */
+static bool router_run_sub(router_internal *router, client_context *ctx,
+                           request_internal *req) {
+  if (router->sub_routers && router->sub_routers->count) {
+    array_t *paths = path_split_first_delim(req->route_path);
+    char *prefix = array_get(paths, 0);
+    char *suffix = array_get(paths, 1);
+
+    if (prefix) {
+      router_internal *sub_router = ht_get(router->sub_routers, prefix);
+      if (sub_router) {
+        char *sub_path = suffix ? suffix : "/";
+        strcpy(req->route_path, sub_path);
+        printlogf(LOG_DEBUG, "matched sub-router at path %s and sub-path %s\n",
+                  prefix, req->route_path);
+
+        router_run(sub_router, ctx, req);
+
+        array_free(paths);
+        return true;
+      }
+    }
+
+    array_free(paths);
+  }
+
+  return false;
 }
 
 router_attr *router_attr_init() {
@@ -210,7 +250,12 @@ void router_register(http_router *router, const char *path,
 
 void router_run(router_internal *router, client_context *ctx,
                 request_internal *req) {
-  route_result *result = trie_search(router->trie, req->method, req->path);
+  if (router_run_sub(router, ctx, req)) {
+    return;
+  }
+
+  route_result *result =
+      trie_search(router->trie, req->method, req->route_path);
 
   response_internal *res = response_init();
 
@@ -245,4 +290,18 @@ void router_run(router_internal *router, client_context *ctx,
   free(result);
 }
 
-void router_free(http_router *router) { free(router); }
+void router_free(http_router *router) {
+  free(router);
+  // TODO: free sub-routers
+}
+
+http_router *router_register_sub(http_router *parent_router, router_attr *attr,
+                                 const char *subpath) {
+  ((router_internal *)parent_router)->sub_routers = ht_init(0);
+
+  router_internal *sub_router = router_init(attr);
+  ht_insert(((router_internal *)parent_router)->sub_routers, subpath,
+            sub_router);
+
+  return (http_router *)sub_router;
+}

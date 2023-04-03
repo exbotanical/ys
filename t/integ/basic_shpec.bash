@@ -194,4 +194,50 @@ describe 'query and route parameters'
   ti
 end_describe
 
+describe 'sub-router functionality'
+  it 'GET request to nested path returns payload'
+    res="$(curl "$SERVER_ADDR/api")"
+    assert equal 'api root' "$res"
+  ti
+
+  it 'GET request to nested path returns 200 status'
+    res="$(curl -s -i "$SERVER_ADDR/api")"
+
+    status="$(get_status <<< "$res")"
+    assert equal "$status" '200 OK'
+  ti
+
+  it 'POST request to nested path returns payload'
+    expected='the body'
+    res="$(curl "$SERVER_ADDR/api/demo" -d "$expected")"
+
+    assert equal "$expected" "$res"
+  ti
+
+  it 'POST request to nested path returns 200 status'
+    res="$(curl -s -i "$SERVER_ADDR/api/demo" -d "$expected")"
+
+    status="$(get_status <<< "$res")"
+    assert equal "$status" '200 OK'
+  ti
+
+  it 'returns a 405 for unsupported methods'
+    declare -a invalid_methods=('POST' 'PUT' 'PATCH' 'DELETE' 'HEAD' 'TRACE' 'CONNECT')
+
+    for method in "${invalid_methods[@]}"; do
+      res="$(curl -s -i -X "$method" "$SERVER_ADDR/api")"
+
+      status="$(get_status <<< "$res")"
+      assert equal "$status" '405 Method Not Allowed'
+    done
+  ti
+
+  it 'returns 404 for invalid routes'
+    res="$(curl -s -i "$SERVER_ADDR/api/invalid")"
+
+    status="$(get_status <<< "$res")"
+    assert equal "$status" '404 Not Found'
+  ti
+end_describe
+
 kill $!

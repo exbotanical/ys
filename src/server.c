@@ -91,9 +91,10 @@ static void *client_thread_handler(void *arg) {
   return NULL;
 }
 
-static poll_client_connections(thread_pool_t *pool, server_internal *server,
-                               int server_sockfd, int port,
-                               struct sockaddr_in address, ssize_t addr_len) {
+static void poll_client_connections(thread_pool_t *pool,
+                                    server_internal *server, int server_sockfd,
+                                    int port, struct sockaddr_in address,
+                                    ssize_t addr_len) {
   fd_set readfds;
   int client_sockfd;
 
