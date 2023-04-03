@@ -199,6 +199,8 @@ void set_status(response *res, http_status status) {
 
 bool get_done(response *res) { return ((response_internal *)res)->done; }
 
-void set_done(response *res, bool done) {
-  ((response_internal *)res)->done = done;
+void set_done(response *res) { ((response_internal *)res)->done = true; }
+
+char *response_get_header(response *res, const char *key) {
+  return get_header(((response_internal *)res)->headers, key);
 }

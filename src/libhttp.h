@@ -4,11 +4,13 @@
 #include <stdbool.h>
 #include <time.h>
 
-#include "libhash/libhash.h"  // for hash tables
+#include "libhash/libhash.h"
 #include "libutil/libutil.h"
 #include "trie.h"
 
-/***************************** Constants *****************************/
+/**********************************************************
+ * Constants
+ **********************************************************/
 
 /**
  * Mappings of HTTP status enums to string literal names
@@ -109,7 +111,9 @@ typedef enum {
   STATUS_NETWORK_AUTHENTICATION_REQUIRED = 511,  // RFC 6585, 6
 } http_status;
 
-/***************************** Request *****************************/
+/**********************************************************
+ * Request
+ **********************************************************/
 
 /**
  * A request contains request data such as the path, method, body, any route or
@@ -178,24 +182,67 @@ bool req_has_query(request *req, const char *key);
  */
 unsigned int req_num_queries(request *req, const char *key);
 
+/**
+ * request_get_path returns the request path / URL
+ *
+ * @param req
+ * @return char*
+ */
 char *request_get_path(request *req);
-char *request_get_method(request *req);
-char *request_get_accept(request *req);
-char *request_get_body(request *req);
-char *request_get_raw(request *req);
-char *request_get_host(request *req);
-char *request_get_protocol(request *req);
-char *request_get_user_agent(request *req);
-char *request_get_content_type(request *req);
-char *request_get_version(request *req);
-int request_get_content_length(request *req);
-
-/***************************** Response *****************************/
 
 /**
- * A response holds the necessary metadata for the response that will be sent to
- * the client. Client handlers should use the library-provided helpers to set
- * the desired properties e.g. status, body, and headers.
+ * request_get_method returns the request method
+ *
+ * @param req
+ * @return char*
+ */
+char *request_get_method(request *req);
+
+/**
+ * request_get_body returns the full request body
+ *
+ * @param req
+ * @return char*
+ */
+char *request_get_body(request *req);
+
+/**
+ * request_get_raw returns the entire, raw request as it was received by the
+ * server
+ *
+ * @param req
+ * @return char*
+ */
+char *request_get_raw(request *req);
+
+/**
+ * request_get_protocol returns the full protocol version string included in the
+ * request
+ *
+ * @param req
+ * @return char*
+ */
+char *request_get_protocol(request *req);
+
+/**
+ * request_get_content_type returns the value of the request's content-type
+ * header
+ *
+ * @param req
+ * @return char*
+ */
+char *request_get_version(request *req);
+
+char *request_get_header(request *req, const char *key);
+
+/**********************************************************
+ * Response
+ **********************************************************/
+
+/**
+ * A response holds the necessary metadata for the response that will be
+ * sent to the client. Client handlers should use the library-provided
+ * helpers to set the desired properties e.g. status, body, and headers.
  */
 typedef struct response_internal *response;
 
@@ -229,7 +276,7 @@ void set_status(response *res, http_status status);
 // TODO:
 bool get_done(response *res);
 // TODO:
-void set_done(response *res, bool done);
+void set_done(response *res);
 
 /**
  * from_file reads a file into a string buffer, which may then be passed
@@ -240,7 +287,11 @@ void set_done(response *res, bool done);
  */
 char *from_file(const char *filename);
 
-/***************************** Router *****************************/
+char *response_get_header(response *res, const char *key);
+
+/**********************************************************
+ * Router
+ **********************************************************/
 
 /**
  * An alias type for request handlers
@@ -296,7 +347,9 @@ void router_register(http_router *router, const char *path,
  */
 void router_free(http_router *router);
 
-/***************************** Server *****************************/
+/**********************************************************
+ * Server
+ **********************************************************/
 
 /**
  * A server configuration object that stores settings for the HTTP server
@@ -336,7 +389,9 @@ void server_set_cert(tcp_server *server, const char *certfile,
  */
 void server_free(tcp_server *server);
 
-/***************************** Middleware *****************************/
+/**********************************************************
+ * Middleware
+ **********************************************************/
 
 /**
  * middlewares binds n middleware handlers to the router attributes instance.
@@ -362,7 +417,9 @@ void __middlewares(router_attr *attr, route_handler *mw, ...);
  */
 void add_middleware(router_attr *attr, route_handler *mw);
 
-/***************************** CORS *****************************/
+/**********************************************************
+ * CORS
+ **********************************************************/
 
 /**
  * CORS configuration options
@@ -481,7 +538,9 @@ void set_max_age(cors_opts *opts, int max_age);
  */
 cors_opts *cors_allow_all();
 
-/***************************** Cookies *****************************/
+/**********************************************************
+ * Cookies
+ **********************************************************/
 
 typedef enum {
   SAME_SITE_DEFAULT_MODE,
@@ -598,7 +657,9 @@ bool cookie_get_secure(cookie *c);
 
 void cookie_free(cookie *c);
 
-/***************************** Utilities *****************************/
+/**********************************************************
+ * Utilities
+ **********************************************************/
 
 /* Time Helpers */
 time_t n_minutes_from_now(unsigned int n);

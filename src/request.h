@@ -9,18 +9,13 @@ typedef enum { IO_ERR = 1, PARSE_ERR, REQ_TOO_LONG, DUP_HDR } parse_error;
 typedef struct {
   const char *path;
   const char *method;
-  const char *accept;
   const char *body;
   const char *raw;
-  const char *host;
   const char *protocol;
-  const char *user_agent;
-  const char *content_type;
   const char *version;
   hash_table *parameters;
   hash_table *queries;
   hash_table *headers;
-  int content_length;
 } request_internal;
 
 typedef struct {

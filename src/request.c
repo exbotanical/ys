@@ -97,7 +97,6 @@ maybe_request req_read_and_parse(client_context* ctx) {
   request_internal* req = xmalloc(sizeof(request_internal));
   req->raw = s_copy(buf);
   req->body = s_copy(buf + pret);
-  req->content_length = pret;
   req->method = fmt_str("%.*s", (int)method_len, method);
   req->path = fmt_str("%.*s", (int)path_len, path);
   req->version = fmt_str("1.%d\n", minor_version);
@@ -114,16 +113,6 @@ maybe_request req_read_and_parse(client_context* ctx) {
     if (!insert_header(req->headers, header_key, header_val)) {
       maybe_request meta = {.err = DUP_HDR};
       return meta;
-    }
-
-    // Now we handle special metadata fields on the request that we expose to
-    // the consumer for quick reference
-    if (s_casecmp(header_val, CONTENT_TYPE)) {
-      req->content_type = header_val;
-    } else if (s_casecmp(header_val, ACCEPT)) {
-      req->accept = header_val;
-    } else if (s_casecmp(header_val, USER_AGENT)) {
-      req->user_agent = header_val;
     }
   }
 
@@ -187,10 +176,6 @@ char* request_get_method(request* req) {
   return s_copy(((request_internal*)req)->method);
 }
 
-char* request_get_accept(request* req) {
-  return s_copy(((request_internal*)req)->accept);
-}
-
 char* request_get_body(request* req) {
   return s_copy(((request_internal*)req)->body);
 }
@@ -199,26 +184,14 @@ char* request_get_raw(request* req) {
   return s_copy(((request_internal*)req)->raw);
 }
 
-char* request_get_host(request* req) {
-  return s_copy(((request_internal*)req)->host);
-}
-
 char* request_get_protocol(request* req) {
   return s_copy(((request_internal*)req)->protocol);
-}
-
-char* request_get_user_agent(request* req) {
-  return s_copy(((request_internal*)req)->user_agent);
-}
-
-char* request_get_content_type(request* req) {
-  return s_copy(((request_internal*)req)->content_type);
 }
 
 char* request_get_version(request* req) {
   return s_copy(((request_internal*)req)->version);
 }
 
-int request_get_content_length(request* req) {
-  return ((request_internal*)req)->content_length;
+char* request_get_header(request* req, const char* key) {
+  return get_header(((request_internal*)req)->headers, key);
 }
