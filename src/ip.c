@@ -329,7 +329,8 @@ done:
 bool validate_ip(const char* s) {
   for (int i = 0; i < (int)strlen(s); i++) {
     switch (s[i]) {
-      case '.':
+      case '.':;  // labels must be followed by statements, not declarations -
+                  // so we add a ;
         int* ipv4 = parse_ipv4(s);
         bool ret = !!ipv4;
         free(ipv4);

@@ -166,7 +166,7 @@ void response_send_protocol_error(int sockfd) {
   response_internal *res = response_init();
 
   res->status = STATUS_INTERNAL_SERVER_ERROR;
-  set_body(res, "invalid protocol");
+  res->body = "invalid protocol";
 
   buffer_t *resbuf = response_serialize(NULL, res);
 

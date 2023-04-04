@@ -411,8 +411,7 @@ void server_start(tcp_server *server);
  * @param certfile
  * @param keyfile
  */
-void server_set_cert(tcp_server *server, const char *certfile,
-                     const char *keyfile);
+void server_set_cert(tcp_server *server, char *certfile, char *keyfile);
 
 /**
  * Deallocates a tcp_server's heap memory

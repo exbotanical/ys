@@ -9,6 +9,9 @@
 response *handler(request *req, response *res) {
   printf("handler\n");
 
+  char *key = req_get_parameter(req, "key");
+  printf("key=%s\n", key);
+
   set_header(res, "Content-Type", "text/plain");
   set_header(res, "X-Powered-By", "demo");
 
@@ -43,5 +46,3 @@ int main() {
 
   return EXIT_SUCCESS;
 }
-
-// curl localhost:9000/9 -v

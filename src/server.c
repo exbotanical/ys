@@ -107,7 +107,7 @@ static void poll_client_connections(thread_pool_t *pool,
 
     if (FD_ISSET(server_sockfd, &readfds)) {
       if ((client_sockfd = accept(server_sockfd, (struct sockaddr *)&address,
-                                  &addr_len)) < 0) {
+                                  (socklen_t *)&addr_len)) < 0) {
         perror("accept");
         printlogf(LOG_INFO,
                   "[server::%s] failed to accept client socket on %s:%d\n",
@@ -242,7 +242,8 @@ void server_start(tcp_server *server) {
 
   printlogf(LOG_INFO, "[server::%s] Listening on port %d...\n", __func__, port);
 
-  poll_client_connections(pool, server, server_sockfd, port, address, addr_len);
+  poll_client_connections(pool, (server_internal *)server, server_sockfd, port,
+                          address, addr_len);
 }
 
 void server_free(tcp_server *server) {
@@ -250,8 +251,7 @@ void server_free(tcp_server *server) {
   free(server);
 }
 
-void server_set_cert(tcp_server *server, const char *certfile,
-                     const char *keyfile) {
+void server_set_cert(tcp_server *server, char *certfile, char *keyfile) {
   ((server_internal *)server)->cert_path = certfile;
   ((server_internal *)server)->key_path = keyfile;
 }

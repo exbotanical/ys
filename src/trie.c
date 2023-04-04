@@ -57,7 +57,7 @@ route_trie *trie_init() {
 }
 
 void trie_insert(route_trie *trie, array_t *methods, const char *path,
-                 void *(*handler)(void *, void *)) {
+                 generic_handler *handler) {
   char *realpath = s_copy(path);
   trie_node *curr = trie->root;
 

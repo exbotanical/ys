@@ -85,7 +85,7 @@
   - [ ] keep-alive
   - [ ] cache-control
   - [ ] transfer-encoding
-- [ ] Test URL fragments
+- [x] Test URL fragments
 - [x] URL queries
 
 ## Misc Improvements
@@ -118,9 +118,9 @@
 - [x] ~~curl - Connection #0 to host localhost left intact?~~ (see https://stackoverflow.com/a/72045706)
 - [x] Address glibc malloc bug in ip
 - [x] ~~Do two route handlers with diff methods for the same /route get handled separately?~~ Yes, it's per route/method. With GET / handlera and GET / handlerb, the most-recently registered will overwrite.
-- [ ] Does router handle URL fragments?
-  - [ ] Failed curl localhost:9000/?cookie
-  - [ ] Failed curl 'localhost:9000/?cookie=1&value=1'
+- [x] Does router handle URL fragments?
+  - [x] Failed curl localhost:9000/?cookie
+  - [x] Failed curl 'localhost:9000/?cookie=1&value=1'
 - [x] Why does http req hang when using TLS?
 
 ## Ecosystem

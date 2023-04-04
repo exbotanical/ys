@@ -16,6 +16,8 @@ extern const unsigned int NOT_FOUND_MASK;
 // Route not allowed flag
 extern const unsigned int NOT_ALLOWED_MASK;
 
+typedef void *generic_handler(void *, void *);
+
 typedef struct {
   char *label;
   hash_table *children;
@@ -30,7 +32,7 @@ typedef struct {
 
 // Stores a route's handler
 typedef struct {
-  void *(*handler)(void *, void *);
+  generic_handler *handler;
 } route_action;
 
 // Trie search result record
@@ -60,7 +62,7 @@ route_trie *trie_init();
  * @param handler The handler to be associated with the inserted node
  */
 void trie_insert(route_trie *trie, array_t *methods, const char *path,
-                 void *(*handler)(void *, void *));
+                 generic_handler *handler);
 
 /**
  * trie_search searches a trie for a node matching the given method and path

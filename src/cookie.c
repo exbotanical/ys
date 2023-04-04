@@ -368,7 +368,7 @@ static char* cookie_serialize(cookie_internal* c) {
 static array_t* read_browser_cookie(hash_table* headers) {
   array_t* cookies = array_init();
 
-  array_t* lines = ht_get(headers, COOKIE);
+  array_t* lines = (array_t*)ht_get(headers, COOKIE);
   if (!has_elements(lines)) {
     return cookies;
   }

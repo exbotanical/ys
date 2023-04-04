@@ -10,6 +10,9 @@
 #include "response.h"  // for response_init, response_send
 #include "xmalloc.h"
 
+#define CR(op) (response_internal *)op
+#define CRR(req, res) (request *)req, (response *)res
+
 static const char CONFIG_FILE_NAME[] = "libhttp.conf";
 
 /**
@@ -32,13 +35,14 @@ static void setup_env() {
  * @param req
  * @param res
  * @param mws
- * @return void* The response pointer
+ * @return bool indicating whether the `done` flag should be set
  */
-static bool invoke_chain(request_internal *req, response *res, array_t *mws) {
+static bool invoke_chain(request_internal *req, response_internal *res,
+                         array_t *mws) {
   for (unsigned int i = array_size(mws); i > 0; i--) {
-    ((route_handler *)array_get(mws, i - 1))(req, res);
+    ((route_handler *)array_get(mws, i - 1))(CRR(req, res));
 
-    if (get_done(res)) {
+    if (res->done) {
       return true;
     }
   }
@@ -51,14 +55,13 @@ static bool invoke_chain(request_internal *req, response *res, array_t *mws) {
  *
  * @param req
  * @param res
- * @return void*
+ * @return response*
  */
-static response *default_internal_error_handler(request_internal *req,
-                                                response_internal *res) {
+static response *default_internal_error_handler(request *req, response *res) {
   printlogf(LOG_INFO, "[router::%s] 500 handler in effect at request path %s\n",
-            __func__, req->path);
+            __func__, request_get_path(req));
 
-  res->status = STATUS_INTERNAL_SERVER_ERROR;
+  set_status(res, STATUS_INTERNAL_SERVER_ERROR);
 
   return res;
 }
@@ -68,16 +71,15 @@ static response *default_internal_error_handler(request_internal *req,
  *
  * @param req
  * @param res
- * @return void*
+ * @return response*
  */
-static response *default_not_found_handler(request_internal *req,
-                                           response_internal *res) {
+static response *default_not_found_handler(request *req, response *res) {
   printlogf(LOG_INFO,
             "[router::%s] default 404 handler in effect "
             "at request path %s\n",
-            __func__, req->path);
+            __func__, request_get_path(req));
 
-  res->status = STATUS_NOT_FOUND;
+  set_status(res, STATUS_NOT_FOUND);
 
   return res;
 }
@@ -87,16 +89,16 @@ static response *default_not_found_handler(request_internal *req,
  *
  * @param req
  * @param res
- * @return void*
+ * @return response*
  */
-static response *default_method_not_allowed_handler(request_internal *req,
-                                                    response_internal *res) {
+static response *default_method_not_allowed_handler(request *req,
+                                                    response *res) {
   printlogf(LOG_INFO,
             "[router::%s] default 405 handler in "
             "effect at request path %s\n",
-            __func__, req->path);
+            __func__, request_get_path(req));
 
-  res->status = STATUS_METHOD_NOT_ALLOWED;
+  set_status(res, STATUS_METHOD_NOT_ALLOWED);
 
   return res;
 }
@@ -119,7 +121,8 @@ static bool router_run_sub(router_internal *router, client_context *ctx,
     char *suffix = array_get(paths, 1);
 
     if (prefix) {
-      router_internal *sub_router = ht_get(router->sub_routers, prefix);
+      router_internal *sub_router =
+          (router_internal *)ht_get(router->sub_routers, prefix);
       if (sub_router) {
         char *sub_path = suffix ? suffix : "/";
         strcpy(req->route_path, sub_path);
@@ -149,6 +152,7 @@ router_attr *router_attr_init() {
 
 http_router *router_init(router_attr *attr) {
   router_attr_internal *attr_internal = (router_attr_internal *)attr;
+
   // Initialize config opts
   setup_env();
 
@@ -245,7 +249,8 @@ void router_register(http_router *router, const char *path,
     array_push(methods, options);
   }
 
-  trie_insert(((router_internal *)router)->trie, methods, path, handler);
+  trie_insert(((router_internal *)router)->trie, methods, path,
+              (generic_handler *)handler);
 }
 
 void router_run(router_internal *router, client_context *ctx,
@@ -260,11 +265,11 @@ void router_run(router_internal *router, client_context *ctx,
   response_internal *res = response_init();
 
   if (!result) {
-    res = router->internal_error_handler(req, res);
+    res = CR(router->internal_error_handler(CRR(req, res)));
   } else if ((result->flags & NOT_FOUND_MASK) == NOT_FOUND_MASK) {
-    res = router->not_found_handler(req, res);
+    res = CR(router->not_found_handler(CRR(req, res)));
   } else if ((result->flags & NOT_ALLOWED_MASK) == NOT_ALLOWED_MASK) {
-    res = router->method_not_allowed_handler(req, res);
+    res = CR(router->method_not_allowed_handler(CRR(req, res)));
   } else {
     req->parameters = result->parameters;
     req->queries = result->queries;
@@ -277,7 +282,7 @@ void router_run(router_internal *router, client_context *ctx,
     }
 
     if (!res->done) {
-      res = h(req, res);
+      res = CR(h(CRR(req, res)));
     }
   }
 
@@ -299,7 +304,7 @@ http_router *router_register_sub(http_router *parent_router, router_attr *attr,
                                  const char *subpath) {
   ((router_internal *)parent_router)->sub_routers = ht_init(0);
 
-  router_internal *sub_router = router_init(attr);
+  router_internal *sub_router = (router_internal *)router_init(attr);
   ht_insert(((router_internal *)parent_router)->sub_routers, subpath,
             sub_router);
 
