@@ -120,13 +120,17 @@ route_result *trie_search(route_trie *trie, const char *method,
   result->flags = INITIAL_FLAG_STATE;
 
   trie_node *curr = trie->root;
-
+#include <stdio.h>
   if (has_query_string(search_path)) {
     array_t *arr = str_cut(realpath, "?");
     // Remove query from path
     realpath = array_get(arr, 0);
     // Grab query and parse it into key/value[] pairs
-    result->queries = parse_query(array_get(arr, 1));
+    char *query = array_get(arr, 1);
+
+    if (query) {
+      result->queries = parse_query(query);
+    }
 
     array_free(arr);
   }

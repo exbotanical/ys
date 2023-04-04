@@ -262,8 +262,24 @@ void test_trie_search_with_queries() {
   free(trie);
 }
 
+void test_trie_search_april2023_bugs() {
+  route_trie *trie = trie_init();
+
+  trie_insert(trie, array_collect("GET"), "/", test_handler);
+  route_result *r = trie_search(trie, "GET", "/?cookie");
+
+  ok(r->queries->count == 0,
+     "query count is zero when invalid query (missing value)");
+  ok(r->action->handler == test_handler,
+     "returns the root path handler, ignoring the query");
+
+  route_result *r2 = trie_search(trie, "GET", "/?cookie=1&noop&value=2");
+  ok(r2->queries->count == 2,
+     "query count is commensurate with number of valid queries");
+}
+
 int main() {
-  plan(43);
+  plan(46);
 
   test_trie_init();
   test_trie_insert();
@@ -271,6 +287,8 @@ int main() {
   test_trie_search_no_match();
   test_trie_search_ignore_trailing_slash();
   test_trie_search_with_queries();
+
+  test_trie_search_april2023_bugs();
 
   done_testing();
 }

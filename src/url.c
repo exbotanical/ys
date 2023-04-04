@@ -81,6 +81,7 @@ hash_table* parse_query(const char* query) {
 
     char* key = array_get(pair, 0);
     query = array_get(pair, 1);
+
     if (strchr(key, ';')) {
       continue;
     }
@@ -96,6 +97,9 @@ hash_table* parse_query(const char* query) {
 
     key = array_get(kv_pair, 0);
     char* value = array_get(kv_pair, 1);
+    if (!value || !key) {
+      continue;
+    }
 
     key = unescape(key);
     if (!key) {

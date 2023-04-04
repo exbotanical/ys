@@ -8,7 +8,7 @@ response *handler(request *req, response *res) {
   set_header(res, "Content-Type", "text/plain");
   set_header(res, "X-Powered-By", "demo");
 
-  set_body(res, "Hello World!");
+  set_body(res, "Hello TLS!");
   set_status(res, STATUS_OK);
 
   return res;

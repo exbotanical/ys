@@ -94,7 +94,7 @@
 - [x] replace `LOG` macro calls with new logger
   - [x] fix log to stderr
   - [x] use function name macro instead of explicit string literals
-- [ ] inline functions where reasonable
+- [x] ~~inline functions where reasonable~~
 - [x] ~~Change middleware chaining to use `next`, the next middleware in the chain. This will allow a current handler to *not* invoke `next`, thus ending the chain. Note: Figuring this out is going to be a challenge~~
 - [x] relocate JSON to util library
 
@@ -117,8 +117,10 @@
   - [ ] Add test
 - [x] ~~curl - Connection #0 to host localhost left intact?~~ (see https://stackoverflow.com/a/72045706)
 - [x] Address glibc malloc bug in ip
-- [ ] Do two route handlers with diff methods for the same /route get handled separately?
+- [x] ~~Do two route handlers with diff methods for the same /route get handled separately?~~ Yes, it's per route/method. With GET / handlera and GET / handlerb, the most-recently registered will overwrite.
 - [ ] Does router handle URL fragments?
+  - [ ] Failed curl localhost:9000/?cookie
+  - [ ] Failed curl 'localhost:9000/?cookie=1&value=1'
 - [x] Why does http req hang when using TLS?
 
 ## Ecosystem
