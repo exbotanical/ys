@@ -51,5 +51,22 @@ char *derive_label_pattern(const char *label);
  */
 char *derive_parameter_key(const char *label);
 
+/**
+ * path_split_first_delim splits the string p on the first PATH_DELIMITER
+ * character and returns the resulting two strings
+ *
+ * @param p
+ * @return array_t*
+ */
 array_t *path_split_first_delim(const char *p);
+
+/**
+ * path_get_pure returns the "pure" path, or the path p sans any query strings
+ * or fragments
+ *
+ * @param path
+ * @return char*
+ */
+char *path_get_pure(const char *p);
+
 #endif /* PATH_H */

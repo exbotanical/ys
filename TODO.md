@@ -40,7 +40,10 @@
 - [x] make all public structs opaque
 - [x] Use method enum in CORS middleware helpers
 - [ ] Ensure everything opaque has getters and setters
-- [ ] Allowlist paths for middleware
+- [ ] Deny list paths for middleware
+  - [ ] Store URL in struct
+  - [ ] Allow the deny list to use regex
+  - [ ] Handle paths with params etc
 - [ ] middleware ordering - before err handlers?
 - [ ] ask users - should CORS be inherited by sub-routers automatically?
 
@@ -70,7 +73,11 @@
 - [x] check all instances of `strcmp` and see if `strncmp` makes more sense
 - [ ] Determine where we actually need to be passing by reference (currently, this is done everywhere)
 - [x] ~~Add LICENSE of yyjson~~
-- [ ] Pass correct function pointers e.g. https://stackoverflow.com/questions/14134245/iso-c-void-and-function-pointers
+- [ ] Pass correct function pointers see:
+  * https://stackoverflow.com/questions/14134245/iso-c-void-and-function-pointers
+  * https://stackoverflow.com/questions/5579835/c-function-pointer-casting-to-void-pointer/5579907#5579907
+  * https://stackoverflow.com/questions/36645660/why-cant-i-cast-a-function-pointer-to-void
+
 - [ ] `const` pointers
   - [ ] `const` in structs
 - [x] fix `const char CONSTANT[n],m`
@@ -89,7 +96,7 @@
 - [x] URL queries
 
 ## Misc Improvements
-- [ ] use a better regex engine than pcre
+- [x] ~~use a better regex engine than pcre~~ it's fine
 - [x] ~~make regex cache global (instead of per-trie-node)~~ bad idea
 - [x] replace `LOG` macro calls with new logger
   - [x] fix log to stderr

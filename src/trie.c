@@ -7,6 +7,7 @@
 #include "libutil/libutil.h"  // for s_copy, s_equals
 #include "logger.h"
 #include "path.h"
+#include "regexpr.h"
 #include "url.h"
 #include "util.h"
 #include "xmalloc.h"
@@ -120,7 +121,7 @@ route_result *trie_search(route_trie *trie, const char *method,
   result->flags = INITIAL_FLAG_STATE;
 
   trie_node *curr = trie->root;
-#include <stdio.h>
+
   if (has_query_string(search_path)) {
     array_t *arr = str_cut(realpath, "?");
     // Remove query from path
@@ -182,11 +183,7 @@ route_result *trie_search(route_trie *trie, const char *method,
           return NULL;  // 500
         }
 
-        int ovecsize = 30;  // TODO: size
-        int ovector[ovecsize];
-
-        if (pcre_exec(re, NULL, path, strlen(path), 0, 0, ovector, ovecsize) <
-            0) {
+        if (!regex_match(re, path)) {
           // No parameter match
           result->flags |= NOT_FOUND_MASK;
           return result;

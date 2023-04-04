@@ -69,6 +69,8 @@ bool delete_record(char *id) {
 
 response *set_global_headers(request *req, response *res) {
   set_header(res, "X-Powered-By", "demo");
+  set_header(res, "X-Middleware", "test");
+
   return res;
 }
 
@@ -231,7 +233,8 @@ int main() {
 
   router_attr *attr = router_attr_init();
 
-  add_middleware(attr, set_global_headers);
+  add_middleware_with_opts(attr, set_global_headers, "^/ignore");
+
   use_cors(attr, setup_cors());
 
   http_router *router = router_init(attr);

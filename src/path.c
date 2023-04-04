@@ -69,3 +69,16 @@ array_t *path_split_first_delim(const char *p) {
 
   return array_collect(f, s);
 }
+
+char *path_get_pure(const char *path) {
+  char *cp = s_copy(path);
+
+  char *q = strchr(cp, '?');
+  if (!q) {
+    return cp;
+  }
+
+  cp[strlen(cp) - strlen(q)] = '\0';
+
+  return cp;
+}

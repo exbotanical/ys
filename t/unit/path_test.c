@@ -101,8 +101,21 @@ void test_path_split_first_delim() {
   }
 }
 
+void test_path_get_pure() {
+  char *p = "/some/path/with/query?remove=me";
+  is(path_get_pure(p), "/some/path/with/query", "extracts the path sans query");
+  is(p, "/some/path/with/query?remove=me",
+     "leaves the original path unmodified");
+}
+
+void test_path_get_pure_no_query() {
+  char *p = "/some/path/with/query";
+  is(path_get_pure(p), "/some/path/with/query", "returns the path as-is");
+  is(p, "/some/path/with/query", "leaves the original path unmodified");
+}
+
 int main() {
-  plan(37);
+  plan(41);
 
   test_expand_path_ok();
   test_expand_no_match();
@@ -111,6 +124,8 @@ int main() {
   test_derive_parameter_key();
 
   test_path_split_first_delim();
+  test_path_get_pure();
+  test_path_get_pure_no_query();
 
   done_testing();
 }

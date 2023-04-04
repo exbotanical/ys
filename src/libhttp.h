@@ -183,12 +183,22 @@ bool req_has_query(request *req, const char *key);
 unsigned int req_num_queries(request *req, const char *key);
 
 /**
- * request_get_path returns the request path / URL
+ * request_get_path returns the full request path
  *
  * @param req
  * @return char*
  */
 char *request_get_path(request *req);
+
+/**
+ * request_get_route_path returns the request path segment that was matched on
+ * the router. For sub-routers, this will be the sub-path
+ * e.g. path = /api/demo, route_path = /demo
+ *
+ * @param req
+ * @return char*
+ */
+char *request_get_route_path(request *req);
 
 /**
  * request_get_method returns the request method
@@ -438,6 +448,39 @@ void server_free(tcp_server *server);
  * @internal
  */
 void __middlewares(router_attr *attr, route_handler *mw, ...);
+
+/**
+ * add_middleware_with_opts binds a new middleware - along with ignore
+ * paths - to the routes attributes object. When handling a request, if the
+ * request path matches one of the include paths for a middleware, that
+ * middleware will not be invoked. Think of ignore paths as a disallow-list.
+ *
+ * Ignore paths are compared in full, even for sub-routers. If the request is
+ * /api/path and a sub-router matches on /api (making the route_path /path),
+ * /api/path is compared to the ignore paths.
+ *
+ * @example
+ * ignore_paths = [/internal, /internal/app, /private/request]
+ *
+ * request->path = /demo -> middleware runs
+ * request->path = /internal -> middleware does not run
+ * request->path = /internal/app -> middleware does not run
+ * request->path = /internal/request -> middleware runs
+ * request->path = /private -> middleware runs
+ * request->path = /private/request -> middleware does not run
+ *
+ * @param router_attr*
+ * @param route_handler*[]
+ * @param char*... A list of ignore paths. Does not need to be null-terminated.
+ */
+#define add_middleware_with_opts(attr, mw, ...) \
+  __add_middleware_with_opts(attr, mw, __VA_ARGS__, NULL)
+
+/**
+ * @internal
+ */
+void __add_middleware_with_opts(router_attr *attr, route_handler *mw,
+                                char *ignore_path, ...);
 
 /**
  * add_middleware binds a new middleware to the routes attributes object.

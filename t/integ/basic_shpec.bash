@@ -240,4 +240,22 @@ describe 'sub-router functionality'
   ti
 end_describe
 
+describe 'middleware'
+  it 'skips the middleware on ignored paths'
+    res="$(curl -i -s "$SERVER_ADDR/ignore" | get_header 'X-Middleware')"
+    assert equal '' "$res"
+  ti
+
+  it 'skips the middleware on ignored paths (no end regex)'
+    res="$(curl -i -s "$SERVER_ADDR/ignoreblablabla" | get_header 'X-Middleware')"
+    assert equal '' "$res"
+  ti
+
+
+  it 'triggers the middleware on non-ignored paths'
+    res="$(curl -i -s "$SERVER_ADDR/" | get_header 'X-Middleware')"
+    assert equal 'test' "$res"
+  ti
+end_describe
+
 kill $!

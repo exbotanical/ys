@@ -1,12 +1,15 @@
 #include "router.h"
 
+#include <pcre.h>
 #include <stdarg.h>  // for variadic args functions
 #include <string.h>  // for strcpy
 
 #include "config.h"
 #include "libutil/libutil.h"  // for s_copy, s_equals
 #include "logger.h"
-#include "path.h"      // for path_split_first_slash
+#include "middleware.h"
+#include "path.h"  // for path_split_first_slash
+#include "regexpr.h"
 #include "response.h"  // for response_init, response_send
 #include "xmalloc.h"
 
@@ -40,11 +43,25 @@ static void setup_env() {
 static bool invoke_chain(request_internal *req, response_internal *res,
                          array_t *mws) {
   for (unsigned int i = array_size(mws); i > 0; i--) {
-    ((route_handler *)array_get(mws, i - 1))(CRR(req, res));
+    middleware_handler *mh = (middleware_handler *)array_get(mws, i - 1);
+
+    if (has_elements(mh->ignore_paths)) {
+      foreach (mh->ignore_paths, j) {
+        pcre *re = array_get(mh->ignore_paths, j);
+
+        if (regex_match(re, req->pure_path)) {
+          goto continue_outer;
+        }
+      }
+    }
+
+    mh->handler(CRR(req, res));
 
     if (res->done) {
       return true;
     }
+
+  continue_outer:;
   }
 
   return false;
@@ -277,7 +294,7 @@ void router_run(router_internal *router, client_context *ctx,
     route_handler *h = (route_handler *)result->action->handler;
 
     array_t *mws = router->middlewares;
-    if (mws && array_size(mws) > 0) {
+    if (has_elements(mws)) {
       res->done = invoke_chain(req, res, mws);
     }
 

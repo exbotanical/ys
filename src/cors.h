@@ -51,6 +51,6 @@ cors_config *cors_init(cors_opts_internal *opts);
  * @param res
  * @return response*
  */
-response *cors_handler(request_internal *req, response *res);
+response *cors_handler(request *req, response *res);
 
 #endif /* CORS_H */

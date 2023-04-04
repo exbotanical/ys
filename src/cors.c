@@ -377,9 +377,11 @@ cors_opts *cors_allow_all() {
   return (cors_opts *)opts;
 }
 
-response *cors_handler(request_internal *req, response *res) {
-  if (is_preflight_request(req)) {
-    handle_preflight_request(req, res);
+response *cors_handler(request *req, response *res) {
+  request_internal *reqi = (request_internal *)req;
+
+  if (is_preflight_request(reqi)) {
+    handle_preflight_request(reqi, res);
 
     if (cors_conf->use_options_passthrough) {
       // Do nothing i.e. allow next handler to run
@@ -389,7 +391,7 @@ response *cors_handler(request_internal *req, response *res) {
       set_done(res);
     }
   } else {
-    handle_request(req, res);
+    handle_request(reqi, res);
     // Do nothing i.e. allow next handler to run
   }
 

@@ -35,9 +35,8 @@ typedef struct {
   route_handler *method_not_allowed_handler;
   route_handler *internal_error_handler;
 
-  // route_handler*[]
+  // middleware_handler*[]
   array_t *middlewares;
-
   // <char*, router_internal*>
   hash_table *sub_routers;
 } router_internal;

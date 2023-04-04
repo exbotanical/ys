@@ -196,15 +196,8 @@ response *logout_handler(request *req, response *res) {
 
 response *auth_middleware(request *req, response *res) {
   set_header(res, "X-Authorized-By", "TheDemoApp");
-  if (eq(request_get_path(req), "/") ||
-      eq(request_get_path(req), "/style.css") ||
-      eq(request_get_path(req), "/login") ||
-      eq(request_get_path(req), "/register")) {
-    return res;
-  }
 
   cookie *c = get_cookie(req, COOKIE_ID);
-
   if (!c) {
     set_status(res, STATUS_UNAUTHORIZED);
     set_done(res);
@@ -234,7 +227,8 @@ int main() {
   user_store = ht_init(0);
 
   router_attr *attr = router_attr_init();
-  add_middleware(attr, auth_middleware);
+  add_middleware_with_opts(attr, auth_middleware, "^/$", "^/style.css$",
+                           "^/login$", "^/register$");
 
   http_router *router = router_init(attr);
 

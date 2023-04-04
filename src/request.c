@@ -12,6 +12,7 @@
 #include "libhash/libhash.h"  // for hash sets
 #include "libhttp.h"
 #include "libutil/libutil.h"  // for s_casecmp, s_equals, fmt_str
+#include "path.h"             // for path_get_pure
 #include "picohttpparser/picohttpparser.h"
 #include "request.h"
 #include "xmalloc.h"
@@ -100,6 +101,7 @@ maybe_request req_read_and_parse(client_context* ctx) {
   req->method = fmt_str("%.*s", (int)method_len, method);
   req->path = fmt_str("%.*s", (int)path_len, path);
   req->route_path = s_copy(req->path);
+  req->pure_path = path_get_pure(req->path);
   req->version = fmt_str("1.%d\n", minor_version);
 
   // This is where we deal with the really quite complicated mess of HTTP
@@ -171,6 +173,10 @@ unsigned int req_num_queries(request* req, const char* key) {
 
 char* request_get_path(request* req) {
   return s_copy(((request_internal*)req)->path);
+}
+
+char* request_get_route_path(request* req) {
+  return s_copy(((request_internal*)req)->route_path);
 }
 
 char* request_get_method(request* req) {

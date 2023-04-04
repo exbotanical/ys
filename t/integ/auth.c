@@ -57,10 +57,6 @@ response *logout_handler(request *req, response *res) {
 
 response *auth_middleware(request *req, response *res) {
   set_header(res, "X-Authorized-By", "TheDemoApp");
-  if (eq(request_get_path(req), "/login") ||
-      eq(request_get_path(req), "/register")) {
-    return res;
-  }
 
   cookie *c = get_cookie(req, COOKIE_ID);
 
@@ -80,7 +76,7 @@ response *auth_middleware(request *req, response *res) {
 // TODO: cors
 int main() {
   router_attr *attr = router_attr_init();
-  add_middleware(attr, auth_middleware);
+  add_middleware_with_opts(attr, auth_middleware, "^/login$", "^/register$");
 
   http_router *router = router_init(attr);
 
