@@ -61,8 +61,18 @@ char *derive_parameter_key(const char *label);
 array_t *path_split_first_delim(const char *p);
 
 /**
- * path_get_pure returns the "pure" path, or the path p sans any query strings
- * or fragments
+ * path_split_dir splits the string p on the last PATH_DELIMITER
+ * character and returns the resulting strings. If no PATH_DELIMITER is present,
+ * the first element will be NULL and the second will be the full path
+ *
+ * @param p
+ * @return array_t* [dir, filename]
+ */
+array_t *path_split_dir(const char *p);
+
+/**
+ * path_get_pure returns the "pure" path, or the path p sans any query
+ * strings or fragments
  *
  * @param path
  * @return char*

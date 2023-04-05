@@ -101,6 +101,44 @@ void test_path_split_first_delim() {
   }
 }
 
+void test_path_split_dir() {
+  typedef struct {
+    char *input;
+    array_t *expected;
+  } test_case;
+
+  test_case tests[] = {
+      {.input = "/api", .expected = array_collect("/", "api")},
+      {.input = "/api/demo", .expected = array_collect("/api/", "demo")},
+      {.input = "/api/demo/cookie",
+       .expected = array_collect("/api/demo/", "cookie")},
+      {.input = "/", .expected = array_collect("/", NULL)},
+      {.input = "", .expected = array_init()},
+      {.input = "api", .expected = array_collect(NULL, "api")},
+      {.input = "api/", .expected = array_collect("api/", NULL)},
+      {.input = "api/demo", .expected = array_collect("api/", "demo")},
+      {.input = "/api/", .expected = array_collect("/api/", NULL)},
+      {.input = "./api/demo/cookie",
+       .expected = array_collect("./api/demo/", "cookie")}
+
+  };
+
+  for (unsigned int i = 0; i < sizeof(tests) / sizeof(test_case); i++) {
+    test_case test = tests[i];
+
+    array_t *actual = path_split_dir(test.input);
+
+    ok(array_size(actual) == 2, "returns a tuple");
+    is(array_get(actual, 0), array_get(test.expected, 0),
+       "returns the expected 'prefix'");
+    is(array_get(actual, 1), array_get(test.expected, 1),
+       "returns the expected 'suffix'");
+
+    array_free(test.expected);
+    array_free(actual);
+  }
+}
+
 void test_path_get_pure() {
   char *p = "/some/path/with/query?remove=me";
   is(path_get_pure(p), "/some/path/with/query", "extracts the path sans query");
@@ -115,7 +153,7 @@ void test_path_get_pure_no_query() {
 }
 
 int main() {
-  plan(41);
+  plan(71);
 
   test_expand_path_ok();
   test_expand_no_match();
@@ -124,6 +162,8 @@ int main() {
   test_derive_parameter_key();
 
   test_path_split_first_delim();
+  test_path_split_dir();
+
   test_path_get_pure();
   test_path_get_pure_no_query();
 

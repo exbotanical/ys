@@ -70,6 +70,23 @@ array_t *path_split_first_delim(const char *p) {
   return array_collect(f, s);
 }
 
+array_t *path_split_dir(const char *p) {
+  char *cp = s_copy(p);
+  array_t *paths = array_init();
+
+  int i = strlen(cp);
+  // TODO: handle windows volume if on windows
+  while (i >= 0 && cp[i] != '/') {
+    i--;
+  }
+
+  array_push(paths, s_substr(cp, 0, i + 1, false));
+  array_push(paths, s_substr(cp, i + 1, strlen(cp), false));
+
+  free(cp);
+  return paths;
+}
+
 char *path_get_pure(const char *path) {
   char *cp = s_copy(path);
 

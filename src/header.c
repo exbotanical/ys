@@ -209,7 +209,18 @@ char* get_header(hash_table* headers, const char* key) {
     return NULL;
   }
 
-  return array_get(header->value, 0);
+  array_t* values = get_header_values(headers, key);
+  if (!values) return NULL;
+  return array_get(values, 0);
+}
+
+array_t* get_header_values(hash_table* headers, const char* key) {
+  ht_record* header = ht_search(headers, key);
+  if (!header) {
+    return NULL;
+  }
+
+  return (array_t*)header->value;
 }
 
 char** req_header_values(hash_table* headers, const char* key) {

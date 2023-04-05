@@ -55,6 +55,9 @@ bool is_valid_header_field_char(int c);
  */
 char* to_canonical_mime_header_key(char* key);
 
+// TODO: d + t
+array_t* get_header_values(hash_table* headers, const char* key);
+
 /**
  * get_header retrieves the first value for a given header key from
  * `headers`, or NULL if not found
