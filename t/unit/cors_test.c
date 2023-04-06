@@ -1,8 +1,8 @@
 #include "cors.c"
 
 #include <stdarg.h>
-#include <stdlib.h>  // for malloc
-#include <string.h>  // for strcmp
+#include <stdlib.h>
+#include <string.h>
 
 #include "libhash/libhash.h"
 #include "libhttp.h"

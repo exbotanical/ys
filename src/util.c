@@ -1,12 +1,11 @@
 #include "util.h"
 
-#include <ctype.h>   // for toupper
-#include <stdarg.h>  // for variadic args functions
-#include <stdio.h>   // for snprintf
-#include <string.h>  // for strtok, strstr
+#include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
 
-#include "libutil/libutil.h"  // for s_copy, s_equals
-#include "logger.h"           // for DIE
+#include "libutil/libutil.h"
+#include "logger.h"
 #include "xmalloc.h"
 
 const char NULL_TERM = '\0';

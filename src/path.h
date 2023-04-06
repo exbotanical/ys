@@ -1,9 +1,9 @@
 #ifndef PATH_H
 #define PATH_H
 
-#include <stdbool.h>  // For boolean aliases
+#include <stdbool.h>
 
-#include "libutil/libutil.h"  // For array_t
+#include "libutil/libutil.h"
 
 // Default root path e.g. /
 extern const char PATH_ROOT[];

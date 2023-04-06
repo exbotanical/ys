@@ -6,7 +6,7 @@
 #include "ip.h"
 
 #include <stdlib.h>
-#include <string.h>  // for strlen
+#include <string.h>
 
 #include "libutil/libutil.h"
 #include "util.h"

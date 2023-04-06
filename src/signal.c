@@ -1,7 +1,7 @@
 #include "signal.h"
 
 #include <signal.h>
-#include <stdlib.h>  // for exit code macros
+#include <stdlib.h>
 
 #include "logger.h"
 

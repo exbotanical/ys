@@ -1,7 +1,7 @@
 #ifndef XMALLOC_H
 #define XMALLOC_H
 
-#include <stdlib.h>  // for size_t, malloc
+#include <stdlib.h>
 
 /**
  * xmalloc is a malloc wrapper that exits the program if out of memory

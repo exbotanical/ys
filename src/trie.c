@@ -1,10 +1,9 @@
 #include "trie.h"
 
-#include <pcre.h>    // This library relies on the ability to utilize PCRE regex
-#include <string.h>  // for strlen
+#include <pcre.h>
 
-#include "cache.h"            // for regex_cache_get
-#include "libutil/libutil.h"  // for s_copy, s_equals
+#include "cache.h"
+#include "libutil/libutil.h"
 #include "logger.h"
 #include "path.h"
 #include "regexpr.h"
@@ -20,6 +19,21 @@ const unsigned int NOT_FOUND_MASK = 0x01;
 
 // Route not allowed flag
 const unsigned int NOT_ALLOWED_MASK = 0x02;
+
+static route_action *action_init(generic_handler *handler) {
+  route_action *action = xmalloc(sizeof(route_action));
+  action->handler = handler;
+
+  return action;
+}
+
+static route_result *result_init() {
+  route_result *result = xmalloc(sizeof(route_result));
+  result->parameters = ht_init(0);
+  result->flags = INITIAL_FLAG_STATE;
+
+  return result;
+}
 
 /**
  * node_init allocates memory for a new node, its children and action members
@@ -67,9 +81,7 @@ void trie_insert(route_trie *trie, array_t *methods, const char *path,
     curr->label = realpath;
 
     foreach (methods, i) {
-      route_action *action = xmalloc(sizeof(route_action));
-      action->handler = handler;
-
+      route_action *action = action_init(handler);
       ht_insert(curr->actions, array_get(methods, i), action);
     }
 
@@ -98,9 +110,7 @@ void trie_insert(route_trie *trie, array_t *methods, const char *path,
       foreach (methods, j) {
         char *method = array_get(methods, j);
 
-        route_action *action = xmalloc(sizeof(route_action));
-        action->handler = handler;
-
+        route_action *action = action_init(handler);
         ht_insert(curr->actions, method, action);
       }
 
@@ -115,11 +125,7 @@ route_result *trie_search(route_trie *trie, const char *method,
                           const char *search_path) {
   // Extract query string, if present
   char *realpath = s_copy(search_path);
-
-  route_result *result = xmalloc(sizeof(route_result));
-  result->parameters = ht_init(0);
-  result->flags = INITIAL_FLAG_STATE;
-
+  route_result *result = result_init();
   trie_node *curr = trie->root;
 
   if (has_query_string(search_path)) {

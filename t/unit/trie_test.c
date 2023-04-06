@@ -1,6 +1,6 @@
 #include "trie.h"
 
-#include "libutil/libutil.h"  // for s_copy
+#include "libutil/libutil.h"
 #include "path.h"
 #include "router.h"
 #include "tap.c/tap.h"

@@ -1,6 +1,6 @@
 #include "middleware.h"
 
-#include <stdarg.h>  // for variadic args functions
+#include <stdarg.h>
 
 #include "cors.h"
 #include "libhttp.h"

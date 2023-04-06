@@ -1,7 +1,7 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
-#include <arpa/inet.h>  // for socklen_t
+#include <arpa/inet.h>
 
 #ifdef USE_TLS
 #include <openssl/ssl.h>

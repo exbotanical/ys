@@ -1,17 +1,15 @@
 #include "server.h"
 
-#include <stdio.h>       // for perror
-#include <stdlib.h>      // for exit
-#include <string.h>      // for strlen, strtok
-#include <sys/select.h>  // for fd_set
-#include <unistd.h>      // for write, close
+#include <stdio.h>
+#include <string.h>
+#include <sys/select.h>
 
-#include "client.h"                // for client_context
-#include "config.h"                // for server_conf
-#include "lib.thread/libthread.h"  // for thread pools
+#include "client.h"
+#include "config.h"
+#include "lib.thread/libthread.h"
 #include "libhttp.h"
 #include "logger.h"
-#include "request.h"  // for deserialize_req
+#include "request.h"
 #include "response.h"
 #include "router.h"
 #include "signal.h"
@@ -102,8 +100,11 @@ static void poll_client_connections(thread_pool_t *pool,
     FD_ZERO(&readfds);
     FD_SET(server_sockfd, &readfds);
 
-    // TODO: handle error
-    select(server_sockfd + 1, &readfds, NULL, NULL, NULL);
+    if (select(server_sockfd + 1, &readfds, NULL, NULL, NULL) == -1) {
+      perror("select");
+      printlogf(LOG_DEBUG, "[server::%s] select failed; retrying...\n",
+                __func__);
+    }
 
     if (FD_ISSET(server_sockfd, &readfds)) {
       if ((client_sockfd = accept(server_sockfd, (struct sockaddr *)&address,
@@ -158,10 +159,10 @@ static thread_pool_t *setup_thread_pool() {
     DIE("[server::%s] failed to initialized thread pool\n", __func__);
   }
 
-  const int num_threads = server_conf.threads;
+  const unsigned int num_threads = server_conf.threads;
   thread_pool_init(pool);
 
-  for (int i = 0; i < num_threads; i++) {
+  for (unsigned int i = 0; i < num_threads; i++) {
     thread_t *client_thread = thread_init(0, "client thread");
 
     // Make this a detached thread
@@ -202,8 +203,8 @@ void server_start(tcp_server *server) {
 
   thread_pool_t *pool = setup_thread_pool();
   int port = ((server_internal *)server)->port;
-  int server_sockfd;
 
+  int server_sockfd;
   if ((server_sockfd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == 0) {
     perror("socket");
     DIE("[server::%s] failed to initialize server socket on port %d\n",

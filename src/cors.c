@@ -3,11 +3,11 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include <string.h>  // for strlen
+#include <string.h>
 
-#include "header.h"           // for get_header, set_header, derive_headers
-#include "libutil/libutil.h"  // for s_*
-#include "util.h"             // for str_join
+#include "header.h"
+#include "libutil/libutil.h"
+#include "util.h"
 #include "xmalloc.h"
 
 // Set by server and specifies the allowed origin. Must be a single value, or a

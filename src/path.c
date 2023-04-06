@@ -1,11 +1,11 @@
 #include "path.h"
 
-#include <stdlib.h>  // for exit
-#include <string.h>  // strlen, strtok, strstr
+#include <stdlib.h>
+#include <string.h>
 
-#include "libutil/libutil.h"  // for s_copy, s_indexof, s_substr
+#include "libutil/libutil.h"
 #include "logger.h"
-#include "util.h"  // for split
+#include "util.h"
 
 const char PATH_ROOT[] = "/";
 const char PATH_DELIMITER[] = "/";

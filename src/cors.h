@@ -2,7 +2,7 @@
 #define CORS_H
 
 #include "libhttp.h"
-#include "libutil/libutil.h"  // for arrays
+#include "libutil/libutil.h"
 #include "request.h"
 
 /**

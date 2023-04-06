@@ -1,12 +1,12 @@
 #include "header.h"
 
-#include <ctype.h>    // for tolower
-#include <pthread.h>  // for pthread_once
+#include <ctype.h>
+#include <pthread.h>
 #include <stdbool.h>
-#include <string.h>  // for strlen
+#include <string.h>
 
 #include "libhttp.h"
-#include "libutil/libutil.h"  // for s_equals
+#include "libutil/libutil.h"
 #include "response.h"
 #include "util.h"
 #include "xmalloc.h"

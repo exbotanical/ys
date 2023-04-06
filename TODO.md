@@ -117,6 +117,7 @@
   #define isnull(thing) printf("IS NULL? %s\n", thing == NULL ? "yes" : "no")
   ```
 - [x] Shared test utils
+- [ ] Consolidate integ test servers
 
 ## Fixes
 - [x] Allow OPTIONS requests by default in router when CORS enabled
@@ -137,8 +138,6 @@
 
 # Style Guide
 - Use [Go Doc-style](https://tip.golang.org/doc/comment) for doc  comments e.g. `// function_name does thing`
-
-- comment what is used from an include header where possible
 
 # Desired API
 - Router

@@ -4,15 +4,15 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <stdbool.h>
-#include <string.h>  // for memset
-#include <unistd.h>  // for read
+#include <string.h>
+#include <unistd.h>
 
 #include "client.h"
 #include "header.h"
-#include "libhash/libhash.h"  // for hash sets
+#include "libhash/libhash.h"
 #include "libhttp.h"
-#include "libutil/libutil.h"  // for s_casecmp, s_equals, fmt_str
-#include "path.h"             // for path_get_pure
+#include "libutil/libutil.h"
+#include "path.h"
 #include "picohttpparser/picohttpparser.h"
 #include "request.h"
 #include "xmalloc.h"

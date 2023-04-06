@@ -1,16 +1,16 @@
 #include "router.h"
 
 #include <pcre.h>
-#include <stdarg.h>  // for variadic args functions
-#include <string.h>  // for strcpy
+#include <stdarg.h>
+#include <string.h>
 
 #include "config.h"
-#include "libutil/libutil.h"  // for s_copy, s_equals
+#include "libutil/libutil.h"
 #include "logger.h"
 #include "middleware.h"
-#include "path.h"  // for path_split_first_slash
+#include "path.h"
 #include "regexpr.h"
-#include "response.h"  // for response_init, response_send
+#include "response.h"
 #include "xmalloc.h"
 
 #define CR(op) (response_internal *)op

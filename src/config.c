@@ -1,12 +1,12 @@
 #include "config.h"
 
-#include <stdio.h>   // for FILE
-#include <stdlib.h>  // for free
-#include <string.h>  // for strcspn
-#include <unistd.h>  // for access + F_OK
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "logger.h"
-#include "util.h"  // for s_equals, s_copy
+#include "util.h"
 
 // Maximum number of queued connections allowed for server
 const short MAX_QUEUED_CONNECTIONS = 100;

@@ -1,8 +1,8 @@
 #ifndef HEADER_H
 #define HEADER_H
 
-#include "libhash/libhash.h"  // for hash sets and hash tables
-#include "libutil/libutil.h"  // for arrays
+#include "libhash/libhash.h"
+#include "libutil/libutil.h"
 
 extern const char CACHE_CONTROL[];
 extern const char NO_CACHE[];

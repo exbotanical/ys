@@ -2,13 +2,13 @@
 
 #include <errno.h>
 #include <stdbool.h>
-#include <stdlib.h>  // for EXIT_FAILURE
-#include <string.h>  // for strlen
-#include <unistd.h>  // for ssize_t
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "header.h"
-#include "libutil/libutil.h"  // for s_equals, s_copy
-#include "logger.h"           // for DIE
+#include "libutil/libutil.h"
+#include "logger.h"
 #include "util.h"
 #include "xmalloc.h"
 
@@ -18,7 +18,7 @@
 
 #define REQ_BUFFER_SIZE 4096
 
-static const char CRLF[] = "\r\n";
+static const char *CRLF = "\r\n";
 
 static bool is_2xx_connect(request_internal *req, response_internal *res) {
   return (res->status >= 200 && res->status < 300) &&
@@ -71,10 +71,10 @@ buffer_t *response_serialize(request_internal *req, response_internal *res) {
   }
 
   // A server MUST NOT send a Content-Length header field in any response
-  // with a status code of 1xx (Informational) or 204 (No Content).  A
-  // server MUST NOT send a Content-Length header field in any 2xx
+  // with a status code of 1xx (Informational) or 204 (No Content).
+  // A server MUST NOT send a Content-Length header field in any 2xx
   // (Successful) response to a METHOD_CONNECT request (Section 4.3.6 of
-  // [RFC7231]).
+  // RFC7231).
   if (should_set_content_len(req, res)) {
     buffer_append(buf, fmt_str("Content-Length: %d", body ? strlen(body) : 0));
     buffer_append(buf, CRLF);
@@ -89,18 +89,18 @@ buffer_t *response_serialize(request_internal *req, response_internal *res) {
   return buf;
 }
 
-void response_send(client_context *ctx, buffer_t *resbuf) {
+void response_send(client_context *ctx, buffer_t *buf) {
   ssize_t total_sent = 0;
 
-  while (total_sent < buffer_size(resbuf)) {
+  while (total_sent < buffer_size(buf)) {
     ssize_t sent;
 
 #ifdef USE_TLS
-    sent = SSL_write(ctx->ssl, buffer_state(resbuf) + total_sent,
-                     buffer_size(resbuf) - total_sent);
+    sent = SSL_write(ctx->ssl, buffer_state(buf) + total_sent,
+                     buffer_size(buf) - total_sent);
 #else
-    sent = write(ctx->sockfd, buffer_state(resbuf) + total_sent,
-                 buffer_size(resbuf) - total_sent);
+    sent = write(ctx->sockfd, buffer_state(buf) + total_sent,
+                 buffer_size(buf) - total_sent);
 #endif
 
     if (sent == -1) {
@@ -112,7 +112,7 @@ void response_send(client_context *ctx, buffer_t *resbuf) {
       printlogf(LOG_INFO, "[response::%s] failed to send response on sockfd %d",
                 __func__, ctx->sockfd);
       printlogf(LOG_DEBUG, "[response::%s] full response body: %s\n", __func__,
-                buffer_state(resbuf));
+                buffer_state(buf));
       goto done;
 
     } else {
@@ -123,7 +123,7 @@ void response_send(client_context *ctx, buffer_t *resbuf) {
   goto done;
 
 done:
-  buffer_free(resbuf);
+  buffer_free(buf);
 
 #ifdef USE_TLS
   SSL_shutdown(ctx->ssl);

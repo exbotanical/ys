@@ -50,9 +50,9 @@ buffer_t *response_serialize(request_internal *req, response_internal *res);
  * response_send writes the given response to the given socket
  *
  * @param ctx
- * @param resbuf
+ * @param buf
  */
-void response_send(client_context *ctx, buffer_t *resbuf);
+void response_send(client_context *ctx, buffer_t *buf);
 
 /**
  * response_send_error pre-empts response_send with an error response
