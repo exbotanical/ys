@@ -1,5 +1,10 @@
 # TODOs
 
+## Docs
+- [ ] replace - with em dash
+- [ ] name header file
+- [ ] ensure all examples run
+
 ## Pre-release
 - [x] SSL support
 - [x] Cookies
@@ -44,6 +49,14 @@
   - [x] Handle paths with params etc
 - [ ] middleware ordering - before err handlers?
 - [ ] ask users - should CORS be inherited by sub-routers automatically?
+- [ ] Non-param path regex
+- [ ] Offer Content-Types
+- [ ] Use hash set for headers to de-duplicate
+- [ ] Comma-delimit duplicate response headers
+- [ ] Use user-defined content length header OR overwrite it - but handle it
+- [ ] fmt string in `set_body`
+- [ ] Default Content-Type to text/plain?
+- [ ] Remove the need for null-terminator everywhere else (incl `router_register`)
 
 ## New Features
 - [x] ~~global hooks/interceptors (e.g. global HTTP headers)~~ just use middleware

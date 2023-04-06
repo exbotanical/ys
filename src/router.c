@@ -11,12 +11,13 @@
 #include "path.h"
 #include "regexpr.h"
 #include "response.h"
+#include "trie.h"
 #include "xmalloc.h"
 
 #define CR(op) (response_internal *)op
 #define CRR(req, res) (request *)req, (response *)res
 
-static const char CONFIG_FILE_NAME[] = "libhttp.conf";
+static const char CONFIG_FILE_NAME[] = "ys.conf";  //
 
 /**
  * setup_env configures the `server_conf` and logger for the current runtime

@@ -191,10 +191,6 @@ char* request_get_raw(request* req) {
   return s_copy(((request_internal*)req)->raw);
 }
 
-char* request_get_protocol(request* req) {
-  return s_copy(((request_internal*)req)->protocol);
-}
-
 char* request_get_version(request* req) {
   return s_copy(((request_internal*)req)->version);
 }

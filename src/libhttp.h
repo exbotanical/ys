@@ -6,7 +6,6 @@
 
 #include "libhash/libhash.h"
 #include "libutil/libutil.h"
-#include "trie.h"
 
 /**********************************************************
  * Constants
@@ -127,7 +126,7 @@ typedef struct request_internal *request;
  *
  * @param req
  * @param key
- * @return void*
+ * @return char*
  */
 char *req_get_parameter(request *req, const char *key);
 
@@ -226,17 +225,8 @@ char *request_get_body(request *req);
 char *request_get_raw(request *req);
 
 /**
- * request_get_protocol returns the full protocol version string included in the
+ * request_get_version returns the protocol version string included in the
  * request
- *
- * @param req
- * @return char*
- */
-char *request_get_protocol(request *req);
-
-/**
- * request_get_content_type returns the value of the request's content-type
- * header
  *
  * @param req
  * @return char*
@@ -276,7 +266,7 @@ typedef struct response_internal *response;
 bool set_header(response *res, const char *key, const char *value);
 
 /**
- * set_body sets the given body on the given response
+ * set_body sets the given body on the response
  *
  * @param res
  * @param body
@@ -284,7 +274,7 @@ bool set_header(response *res, const char *key, const char *value);
 void set_body(response *res, const char *body);
 
 /**
- * set_status sets the given status code on the given response
+ * set_status sets the given status code on the response
  *
  * @param res
  * @param status
@@ -318,7 +308,7 @@ void set_done(response *res);
 char *from_file(const char *filename);
 
 /**
- * response_get_header retrieves the first value for a given header key on
+ * response_get_header retrieves the first header value for a given key on
  * the response or NULL if not found
  *
  * @param res
@@ -347,7 +337,7 @@ typedef struct router_internal *http_router;
 typedef struct router_attr_internal router_attr;
 
 /**
- * Initialize a router attributes object
+ * router_attr_init initializes a new router attributes object
  *
  * @return router_attr*
  */
@@ -424,7 +414,7 @@ void server_start(tcp_server *server);
 void server_set_cert(tcp_server *server, char *certfile, char *keyfile);
 
 /**
- * Deallocates a tcp_server's heap memory
+ * server_free deallocates memory for the provided tcp_server* instance
  *
  * @param server
  */
@@ -452,7 +442,7 @@ void __middlewares(router_attr *attr, route_handler *mw, ...);
 /**
  * add_middleware_with_opts binds a new middleware - along with ignore
  * paths - to the routes attributes object. When handling a request, if the
- * request path matches one of the include paths for a middleware, that
+ * request path matches one of the ignore paths for a middleware, that
  * middleware will not be invoked. Think of ignore paths as a disallow-list.
  *
  * Ignore paths are compared in full, even for sub-routers. If the request is
@@ -471,7 +461,8 @@ void __middlewares(router_attr *attr, route_handler *mw, ...);
  *
  * @param router_attr*
  * @param route_handler*[]
- * @param char*... A list of ignore paths. Does not need to be null-terminated.
+ * @param char*... A list of ignore paths. Does not need to be
+ * sentinel-terminated.
  */
 #define add_middleware_with_opts(attr, mw, ...) \
   __add_middleware_with_opts(attr, mw, __VA_ARGS__, NULL)
@@ -626,9 +617,9 @@ typedef enum {
 typedef struct cookie_internal *cookie;
 
 /**
- * Initialize a new Cookie with a given name and value. All other fields will be
- * initialized to NULL or field-equivalent values such that the field is
- * ignored. Use the cookie_set_* helpers to set the other attributes.
+ * cookie_init initializes a new Cookie with a given name and value. All other
+ * fields will be initialized to NULL or field-equivalent values such that the
+ * field is ignored. Use the cookie_set_* helpers to set the other attributes.
  *
  * @param name
  * @param value
@@ -637,7 +628,7 @@ typedef struct cookie_internal *cookie;
 cookie *cookie_init(const char *name, const char *value);
 
 /**
- * Set the given Cookie's domain attribute
+ * cookie_set_domain sets the given Cookie's domain attribute
  *
  * @param c
  * @param domain
@@ -645,7 +636,7 @@ cookie *cookie_init(const char *name, const char *value);
 void cookie_set_domain(cookie *c, const char *domain);
 
 /**
- * Set the given Cookie's expires attribute
+ * cookie_set_expires sets the given Cookie's expires attribute
  *
  * @param c
  * @param when
@@ -653,7 +644,7 @@ void cookie_set_domain(cookie *c, const char *domain);
 void cookie_set_expires(cookie *c, time_t when);
 
 /**
- * Set the given Cookie's http_only attribute
+ * cookie_set_http_only sets the given Cookie's http_only attribute
  *
  * @param c
  * @param http_only
@@ -661,7 +652,7 @@ void cookie_set_expires(cookie *c, time_t when);
 void cookie_set_http_only(cookie *c, bool http_only);
 
 /**
- * Set the given Cookie's age attribute
+ * cookie_set_max_age sets the given Cookie's age attribute
  *
  * @param c
  * @param age
@@ -669,7 +660,7 @@ void cookie_set_http_only(cookie *c, bool http_only);
 void cookie_set_max_age(cookie *c, int age);
 
 /**
- * Set the given Cookie's path attribute
+ * cookie_set_path sets the given Cookie's path attribute
  *
  * @param c
  * @param path
@@ -677,7 +668,7 @@ void cookie_set_max_age(cookie *c, int age);
 void cookie_set_path(cookie *c, const char *path);
 
 /**
- * Set the given Cookie's same_site attribute
+ * cookie_set_same_site sets the given Cookie's same_site attribute
  *
  * @param c
  * @param mode
@@ -685,7 +676,7 @@ void cookie_set_path(cookie *c, const char *path);
 void cookie_set_same_site(cookie *c, same_site_mode mode);
 
 /**
- * Set the given Cookie's secure attribute
+ * cookie_set_secure sets the the Cookie's secure attribute to `secure`
  *
  * @param c
  * @param secure
