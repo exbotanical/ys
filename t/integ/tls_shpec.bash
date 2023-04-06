@@ -7,7 +7,7 @@ SERVER_ADDR='https://localhost:6124'
 make USE_TLS=1
 export LD_LIBRARY_PATH=.
 
-./basic_bin >/dev/null &
+./test_server_bin >/dev/null &
 
 describe 'libhttp TLS integration tests'
   it 'GET request returns payload'

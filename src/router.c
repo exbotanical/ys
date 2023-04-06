@@ -178,6 +178,7 @@ http_router *router_init(router_attr *attr) {
   router->trie = trie_init();
   router->middlewares = attr_internal->middlewares;
   router->use_cors = attr_internal->use_cors;
+  router->sub_routers = NULL;
 
   if (!attr_internal->not_found_handler) {
     printlogf(LOG_DEBUG,
@@ -319,11 +320,14 @@ void router_free(http_router *router) {
 
 http_router *router_register_sub(http_router *parent_router, router_attr *attr,
                                  const char *subpath) {
-  ((router_internal *)parent_router)->sub_routers = ht_init(0);
+  router_internal *parent = (router_internal *)parent_router;
+
+  if (!parent->sub_routers) {
+    parent->sub_routers = ht_init(0);
+  }
 
   router_internal *sub_router = (router_internal *)router_init(attr);
-  ht_insert(((router_internal *)parent_router)->sub_routers, subpath,
-            sub_router);
+  ht_insert(parent->sub_routers, subpath, sub_router);
 
   return (http_router *)sub_router;
 }

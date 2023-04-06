@@ -7,7 +7,6 @@
 #include "libhttp.h"
 
 #define PORT 6124
-#define CWD_SIZE 1024
 
 typedef struct record {
   char *key;
@@ -16,6 +15,8 @@ typedef struct record {
 
 db_record *records = NULL;
 int num_records = 0;
+
+char *COOKIE_ID = "TestCookie";
 
 db_record *search_records(char *key) {
   for (size_t i = 0; i < num_records; i++) {
@@ -65,6 +66,68 @@ bool delete_record(char *id) {
 
   num_records--;
   return true;
+}
+
+response *data_handler(request *req, response *res) {
+  set_body(res, "{ \"data\": \"Hello World!\" }");
+  set_header(res, "Content-Type", "application/json");
+  set_status(res, STATUS_OK);
+
+  return res;
+}
+
+response *login_handler(request *req, response *res) {
+  char *session_id = "200";
+
+  cookie *c = cookie_init(COOKIE_ID, session_id);
+  cookie_set_expires(c, n_minutes_from_now(1));
+  cookie_set_path(c, "/");
+  set_cookie(res, c);
+
+  set_status(res, STATUS_OK);
+
+  return res;
+}
+
+response *logout_handler(request *req, response *res) {
+  cookie *c = get_cookie(req, COOKIE_ID);
+  if (!c) {
+    set_status(res, STATUS_UNAUTHORIZED);
+    set_done(res);
+
+    return res;
+  }
+
+  char *sid = cookie_get_value(c);
+  if (!sid) {
+    set_status(res, STATUS_UNAUTHORIZED);
+    set_done(res);
+
+    return res;
+  }
+
+  cookie_set_max_age(c, -1);
+  set_cookie(res, c);
+
+  return res;
+}
+
+response *auth_middleware(request *req, response *res) {
+  set_header(res, "X-Authorized-By", "TheDemoApp");
+
+  cookie *c = get_cookie(req, COOKIE_ID);
+
+  if (!c) {
+    set_status(res, STATUS_UNAUTHORIZED);
+    set_done(res);
+
+    return res;
+  }
+
+  cookie_set_expires(c, n_minutes_from_now(1));
+  set_cookie(res, c);
+
+  return res;
 }
 
 response *set_global_headers(request *req, response *res) {
@@ -231,11 +294,11 @@ cors_opts *setup_cors() {
 int main() {
   records = malloc(sizeof(db_record));
 
+  /* Root Router */
   router_attr *attr = router_attr_init();
-
   add_middleware_with_opts(attr, set_global_headers, "^/ignore");
-
-  use_cors(attr, setup_cors());
+  cors_opts *cors = setup_cors();
+  use_cors(attr, cors);
 
   http_router *router = router_init(attr);
   char *record_path = "/records/:id[^\\d+$]";
@@ -248,9 +311,21 @@ int main() {
   router_register(router, record_path, handle_put, METHOD_PUT, NULL);
   router_register(router, record_path, handle_post, METHOD_POST, NULL);
 
+  /* API Router */
   http_router *api_router = router_register_sub(router, attr, "/api");
   router_register(api_router, "/", handle_api_root, METHOD_GET, NULL);
   router_register(api_router, "/demo", handle_api_demo, METHOD_POST, NULL);
+
+  /* Auth Router */
+  router_attr *auth_attr = router_attr_init();
+  add_middleware_with_opts(auth_attr, auth_middleware, "^/auth/login$",
+                           "^/auth/register$");
+  use_cors(auth_attr, cors);
+
+  http_router *auth_router = router_register_sub(router, auth_attr, "/auth");
+  router_register(auth_router, "/login", login_handler, METHOD_POST, NULL);
+  router_register(auth_router, "/logout", logout_handler, METHOD_POST, NULL);
+  router_register(auth_router, "/data", data_handler, METHOD_GET, NULL);
 
   tcp_server *server = server_init(router, PORT);
 

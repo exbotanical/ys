@@ -6,7 +6,7 @@ SERVER_ADDR='localhost:6124'
 
 export LD_LIBRARY_PATH=.
 
-./basic_bin >/dev/null &
+./test_server_bin >/dev/null &
 
 describe 'libhttp basic integration tests'
   it 'GET request returns payload'
