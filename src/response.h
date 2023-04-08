@@ -1,8 +1,8 @@
 #ifndef RESPONSE_H
 #define RESPONSE_H
 
-#include "libhttp.h"
 #include "libutil/libutil.h"
+#include "libys.h"
 #include "request.h"
 
 typedef struct {

@@ -9,7 +9,7 @@ export LD_LIBRARY_PATH=.
 
 ./test_server_bin >/dev/null &
 
-describe 'libhttp TLS integration tests'
+describe 'libys TLS integration tests'
   it 'GET request returns payload'
     res="$(curl "$SERVER_ADDR")"
     assert equal 'Hello World!' "$res"
@@ -29,7 +29,7 @@ describe 'libhttp TLS integration tests'
 
   it 'sets multiple X-powered-by headers'
     res="$(curl -i -s "$SERVER_ADDR" | get_header 'X-Powered-By')"
-    assert equal 'libhttp,demo,integ-test' "$res"
+    assert equal 'libys,demo,integ-test' "$res"
   ti
 
   it 'returns a 405 for unsupported methods'

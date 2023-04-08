@@ -14,7 +14,7 @@ hero:
       link: /guide/what-is-ys
     - theme: alt
       text: View on GitHub
-      link: https://github.com/exbotanical/libhttp
+      link: https://github.com/exbotanical/libys
 
 features:
   - title: Focus on Building Your App

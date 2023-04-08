@@ -1,8 +1,8 @@
 {
-  "name": "libhttp",
+  "name": "libys",
   "version": "0.0.1",
   "author": "Matthew Zito",
-  "repo": "exbotanical/libhttp",
+  "repo": "exbotanical/libys",
   "license": "MIT",
   "description": "A C server framework",
   "keywords": [
@@ -13,7 +13,7 @@
     "concurrency"
   ],
   "src": [
-    "src/libhttp.h",
+    "src/libys.h",
 
     "src/cache.c",
     "src/cache.h",

@@ -1,5 +1,5 @@
-#ifndef LIBHTTP_H
-#define LIBHTTP_H
+#ifndef libys_H
+#define libys_H
 
 #include <stdbool.h>
 #include <time.h>
@@ -740,4 +740,4 @@ time_t n_minutes_from_now(unsigned int n);
 time_t n_hours_from_now(unsigned int n);
 time_t n_days_from_now(unsigned int n);
 
-#endif /* LIBHTTP_H */
+#endif /* libys_H */

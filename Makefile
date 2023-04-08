@@ -12,8 +12,8 @@ LDFLAGS := -shared
 LINTER := clang-format
 INTEG_RUNNER := shpec
 
-SO_TARGET := libhttp.so
-STATIC_TARGET := libhttp.a
+SO_TARGET := libys.so
+STATIC_TARGET := libys.a
 
 INTEG_BASE_BIN := test_server_bin
 INTEG_AUTH_BIN := auth_bin
@@ -63,7 +63,7 @@ unit_test:
 # make -s integ_test 2>/dev/null
 integ_test:
 	$(MAKE) all
-	$(CC) $(INTEG_DIR)/test_server.c $(wildcard $(INTEG_DIR)/deps/*/*.c) -I$(SRC_DIR) -I$(DEPS_DIR) -L. -lhttp -o $(INTEG_BASE_BIN)
+	$(CC) $(INTEG_DIR)/test_server.c $(wildcard $(INTEG_DIR)/deps/*/*.c) -I$(SRC_DIR) -I$(DEPS_DIR) -L. -lys -o $(INTEG_BASE_BIN)
 	$(INTEG_RUNNER)
 	$(MAKE) clean
 

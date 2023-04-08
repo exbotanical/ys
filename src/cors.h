@@ -1,8 +1,8 @@
 #ifndef CORS_H
 #define CORS_H
 
-#include "libhttp.h"
 #include "libutil/libutil.h"
+#include "libys.h"
 #include "request.h"
 
 /**

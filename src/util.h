@@ -1,7 +1,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include "libhttp.h"
+#include "libys.h"
 
 // ENUM_NAME extracts the name of an enum as a string literal
 #define ENUM_NAME(x) [x] = #x

@@ -2,7 +2,7 @@
 #define REQUEST_H
 
 #include "client.h"
-#include "libhttp.h"
+#include "libys.h"
 
 typedef enum { IO_ERR = 1, PARSE_ERR, REQ_TOO_LONG, DUP_HDR } parse_error;
 

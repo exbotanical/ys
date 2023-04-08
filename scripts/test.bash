@@ -3,7 +3,7 @@ IFS=$'\n'
 
 TESTING_DIR=t/unit
 UTIL_F=util.bash
-REPO_DIR=http
+LIB=ys
 
 declare -a SKIP_FILES=(
   # 'cache_test.c'
@@ -45,7 +45,7 @@ run_test () {
 	local file_name="$1"
 
 	gcc -w -Ideps -Isrc -Ilib -c "$TESTING_DIR/$file_name" -o main.o
-	gcc -o main main.o -L./ -l$REPO_DIR -lm -lpcre
+	gcc -o main main.o -L./ -l$LIB -lm -lpcre
 
 	green "\n[+] Running test $file_name...\n\n"
 

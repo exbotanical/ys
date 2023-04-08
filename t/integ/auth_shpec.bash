@@ -10,7 +10,7 @@ export LD_LIBRARY_PATH=.
 
 COOKIE='TestCookie=100; Expires=Sat, 01 Apr 2023 02:02:26 GMT'
 
-describe 'libhttp auth integration tests'
+describe 'libys auth integration tests'
   it 'returns a 401 when not authenticated'
     res="$(curl -s -i "$SERVER_ADDR/auth/data")"
 

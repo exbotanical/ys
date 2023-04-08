@@ -18,7 +18,7 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/exbotanical/libhttp' },
+      { icon: 'github', link: 'https://github.com/exbotanical/libys' },
     ],
   },
 })
