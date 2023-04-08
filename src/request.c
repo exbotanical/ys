@@ -114,6 +114,11 @@ maybe_request req_read_and_parse(client_context* ctx) {
         fmt_str("%.*s", (int)headers[i].value_len, headers[i].value);
 
     if (!insert_header(req->headers, header_key, header_val)) {
+      // TODO: t
+      free(req->body);
+      free(req->raw);
+      free(req->route_path);
+      free(req);
       maybe_request meta = {.err = DUP_HDR};
       return meta;
     }

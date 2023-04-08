@@ -7,6 +7,7 @@
 #include "libhttp.h"
 #include "libutil/libutil.h"
 #include "request.h"
+#include "trie.h"
 
 /**
  * A route record

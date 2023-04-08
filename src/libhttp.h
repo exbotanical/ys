@@ -379,6 +379,15 @@ void router_free(http_router *router);
 http_router *router_register_sub(http_router *parent_router, router_attr *attr,
                                  const char *subpath);
 
+// TODO: t + d
+void router_register_404_handler(router_attr *attr, route_handler *h);
+
+// TODO: t + d
+void router_register_405_handler(router_attr *attr, route_handler *h);
+
+// TODO: t + d
+void router_register_500_handler(router_attr *attr, route_handler *h);
+
 /**********************************************************
  * Server
  **********************************************************/

@@ -7,6 +7,7 @@
 
 #include "libhttp.h"
 #include "libutil/libutil.h"
+#include "logger.h"
 #include "response.h"
 #include "util.h"
 #include "xmalloc.h"

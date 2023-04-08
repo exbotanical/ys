@@ -46,14 +46,10 @@ function sidebarMain() {
       text: 'Documentation',
       collapsed: false,
       items: [
-        { text: 'Routing', link: '/routing' },
+        { text: 'Routing and Middleware', link: '/documentation/routing' },
         {
           text: 'HTTPs Support',
           link: '/documentation/https-support',
-        },
-        {
-          text: 'Middleware',
-          link: '/documentation/middleware',
         },
         {
           text: 'CORS',
@@ -65,7 +61,7 @@ function sidebarMain() {
         },
         {
           text: 'Configuration and Logging',
-          link: '/docuconfiguration-and-loggingmentation/configuration-and-logging',
+          link: '/documentation/configuration-and-logging',
         },
       ],
     },

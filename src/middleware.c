@@ -65,6 +65,6 @@ void add_middleware(router_attr *attr, route_handler *mw) {
 void use_cors(router_attr *attr, cors_opts *opts) {
   ((router_attr_internal *)attr)->use_cors = true;
   cors_init((cors_opts_internal *)opts);
-
+  // TODO: ensure CORS runs first for OPTIONS requests
   add_middleware(attr, cors_handler);
 }

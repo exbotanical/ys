@@ -23,7 +23,6 @@ int main() {
   server_set_cert(server, "./certs/localhost.pem", "./certs/localhost-key.pem");
 
   server_start(server);
-  server_free(server);
 
   return EXIT_SUCCESS;
 }

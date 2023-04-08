@@ -12,3 +12,21 @@ router_attr *router_attr_init();
 
 `router_attr_init` initializes a new router attributes object. This stores data such as the 404, 405, and 500 handlers as well as any middleware set by the user.
 For more details, see [the middleware reference](./middleware.md).
+
+## router_register_404_handler
+
+```c
+void router_register_404_handler(router_attr *attr, route_handler *h);
+```
+
+## router_register_405_handler
+
+```c
+void router_register_405_handler(router_attr *attr, route_handler *h);
+```
+
+## router_register_500_handler
+
+```c
+void router_register_500_handler(router_attr *attr, route_handler *h);
+```

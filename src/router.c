@@ -314,11 +314,6 @@ void router_run(router_internal *router, client_context *ctx,
   free(result);
 }
 
-void router_free(http_router *router) {
-  free(router);
-  // TODO: free sub-routers
-}
-
 http_router *router_register_sub(http_router *parent_router, router_attr *attr,
                                  const char *subpath) {
   router_internal *parent = (router_internal *)parent_router;
@@ -331,4 +326,21 @@ http_router *router_register_sub(http_router *parent_router, router_attr *attr,
   ht_insert(parent->sub_routers, subpath, sub_router);
 
   return (http_router *)sub_router;
+}
+
+void router_register_404_handler(router_attr *attr, route_handler *h) {
+  ((router_attr_internal *)attr)->not_found_handler = h;
+}
+
+void router_register_405_handler(router_attr *attr, route_handler *h) {
+  ((router_attr_internal *)attr)->method_not_allowed_handler = h;
+}
+
+void router_register_500_handler(router_attr *attr, route_handler *h) {
+  ((router_attr_internal *)attr)->internal_error_handler = h;
+}
+
+void router_free(http_router *router) {
+  free(router);
+  // TODO: free sub-routers
 }
