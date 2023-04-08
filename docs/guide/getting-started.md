@@ -17,9 +17,8 @@ make ys.a
 
 3. Include the Ys header and setup your server. In main.c:
 
-<!-- TODO: header -->
 ```c
-#include "ys.h"
+#include "libys.h"
 
 #include <stdlib.h>
 
@@ -40,7 +39,7 @@ int main(int argc, char **argv) {
 4. Add a request handler
 
 ```c{7-14,20}
-#include "ys.h"
+#include "libys.h"
 
 #define PORT 9000
 

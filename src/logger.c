@@ -16,16 +16,13 @@
 #define SMALL_BUFFER 256  // small buffer size
 
 #define LOG_IDENT "libys"
-#define LOG_LEVEL LOG_NOTICE
+#define LOG_LEVEL YS_LOG_INFO
 #define TIMESTAMP_FORMAT "%Y-%m-%d %H:%M:%S"
 
 #define EDWARD_THE_FOURTH 1461
 
-// Standard syslog log levels
-// TODO: use less levels
-const char *log_levels[] = {"emerg",   "alert",  "crit", "err",
-                            "warning", "notice", "info", "debug",
-                            "panic",   "error",  "warn", NULL};
+// Available log levels
+const char *log_levels[] = {"info", "debug", "silly", NULL};
 
 // Log level to use
 short log_level = LOG_LEVEL;
@@ -143,47 +140,23 @@ static void setup_log_level() {
 
   unsigned int i;
   for (i = 0; log_levels[i]; i++) {
-    if (strncmp(lvl, log_levels[i], strlen(log_levels[i])) == 0) {
+    if (s_casecmp(lvl, log_levels[i])) {
       break;
     }
   }
 
   switch (i) {
-    case 0:
-    case 8:
-      // system is unusable
-      log_level = LOG_EMERG;
-      break;
-    case 1:
-      // action must be taken immediately *]
-      log_level = LOG_ALERT;
-      break;
-    case 2:
-      // critical conditions *]
-      log_level = LOG_CRIT;
-      break;
-    case 3:
-    case 9:
-      // error conditions
-      log_level = LOG_ERR;
-      break;
-    case 4:
-    case 10:
-      // warning conditions
-      log_level = LOG_WARNING;
-      break;
-    case 5:
-      // normal but significant condition
-      log_level = LOG_NOTICE;
-      break;
     case 6:
-      // informational
-      log_level = LOG_INFO;
+      log_level = YS_LOG_INFO;
       break;
     case 7:
-      // debug-level messages
-      log_level = LOG_DEBUG;
+      log_level = YS_LOG_DEBUG;
       break;
+    case 10:
+      log_level = YS_LOG_SILLY;
+      break;
+    default:
+      log_level = YS_LOG_INFO;
   }
 }
 
@@ -201,7 +174,7 @@ void setup_logging() {
       int n = errno;
       fdprintf(2, "failed to open logfile '%s', reason: %s",
                server_conf.log_file, strerror(n));
-      // TODO: ???
+      exit(1);
     }
   }
 }

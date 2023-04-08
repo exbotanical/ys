@@ -16,7 +16,7 @@ This means middleware handlers have an opportunity to intercept route handlers a
 ## Initializing Router Attributes
 
 ```c{4}
-#include "ys.h"
+#include "libys.h"
 
 int main () {
   router_attr *attr = router_attr_init();
@@ -27,7 +27,7 @@ int main () {
 ## Initializing a Router
 
 ```c{5}
-#include "ys.h"
+#include "libys.h"
 
 int main () {
   router_attr *attr = router_attr_init();
@@ -45,7 +45,7 @@ When invoked, each route handler is passed the `request*` and a pre-initialized 
 Each route handler should return the response so it may be passed to the next handler.
 
 ```c{3-6,12}
-#include "ys.h"
+#include "libys.h"
 
 response* handler(request* req, response* res) {
   // ...
@@ -67,7 +67,7 @@ Here, `handler` will be invoked for any `GET` or `POST` request at `/`. Non-rout
 
 ## Registering a Parameterized Route Handler
 ```c{3-6,12}
-#include "ys.h"
+#include "libys.h"
 
 response* handler(request* req, response* res) {
   char *id = req_get_parameter(req, "id");
@@ -114,7 +114,7 @@ URL queries are not matched during routing. When matching a request path, anythi
 ## Registering Multiple Routes
 
 ```c{3-6,12}
-#include "ys.h"
+#include "libys.h"
 
 response* get_handler(request* req, response* res) {
   // ...
@@ -142,7 +142,7 @@ Here, we've registered two separate route handlers at `/` - one for `GET` reques
 ## Registering a Custom Fallback Handlers
 
 ```c{3-6,12}
-#include "ys.h"
+#include "libys.h"
 
 response* handler(request* req, response* res) {
   // ...

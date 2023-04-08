@@ -5,7 +5,7 @@ Let's break down the simple server example as seen in the [Getting Started](./ge
 First we include the Ys header.
 
 ```c
-#include "ys.h"
+#include "libys.h"
 ```
 
 This is the only header file you'll need to include in order to have access to the full Ys feature-set. All of the constants and APIs in the Ys header file are documented with Doxygen doc comments so you can access documentation from your IDE.
@@ -13,7 +13,7 @@ This is the only header file you'll need to include in order to have access to t
 First, we'll define a `PORT` macro — this will be the port number on which the Ys server will listen for client connections. The port number must be outside of the range of standard reserved ports i.e. it must be greater than 1024 and less than 65535.
 
 ```c{3}
-#include "ys.h"
+#include "libys.h"
 
 #define PORT 9000
 ```
@@ -21,7 +21,7 @@ First, we'll define a `PORT` macro — this will be the port number on which the
 Let's define our main function and initialize a new router.
 
 ```c{5-10}
-#include "ys.h"
+#include "libys.h"
 
 #define PORT 9000
 
@@ -44,7 +44,7 @@ The `http_router` struct accepts as an argument a router attributes object `rout
 Now that we have our root router, let's create our first request handler.
 
 ```c{5-7,13}
-#include "ys.h"
+#include "libys.h"
 
 #define PORT 9000
 
@@ -79,7 +79,7 @@ Notice Ys handles 404 Not Found and 405 Method Not Allowed by default. You can l
 Next, let's discuss the `root_handler` function and implement some server logic.
 
 ```c{5-7}
-#include "ys.h"
+#include "libys.h"
 
 #define PORT 9000
 
@@ -109,7 +109,7 @@ Let's look at a few setters that will allow us to craft the HTTP response return
 
 
 ```c{6,8-9}
-#include "ys.h"
+#include "libys.h"
 
 #define PORT 9000
 
