@@ -4,6 +4,7 @@
 - [ ] replace - with em dash
 - [ ] name header file
 - [ ] ensure all examples run
+- [ ] Use Fathom analytics
 
 ## Pre-release
 - [x] SSL support
