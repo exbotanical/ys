@@ -617,7 +617,7 @@ cookie* get_cookie(request* req, const char* name) {
 }
 
 void set_cookie(response* res, cookie* c) {
-  set_header(res, SET_COOKIE, cookie_serialize((cookie_internal*)c));
+  res_set_header(res, SET_COOKIE, cookie_serialize((cookie_internal*)c));
 }
 
 void cookie_free(cookie* c) {

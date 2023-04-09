@@ -176,30 +176,30 @@ unsigned int req_num_queries(request* req, const char* key) {
   return 0;
 }
 
-char* request_get_path(request* req) {
+char* req_get_path(request* req) {
   return s_copy(((request_internal*)req)->path);
 }
 
-char* request_get_route_path(request* req) {
+char* req_get_route_path(request* req) {
   return s_copy(((request_internal*)req)->route_path);
 }
 
-char* request_get_method(request* req) {
+char* req_get_method(request* req) {
   return s_copy(((request_internal*)req)->method);
 }
 
-char* request_get_body(request* req) {
+char* req_get_body(request* req) {
   return s_copy(((request_internal*)req)->body);
 }
 
-char* request_get_raw(request* req) {
+char* req_get_raw(request* req) {
   return s_copy(((request_internal*)req)->raw);
 }
 
-char* request_get_version(request* req) {
+char* req_get_version(request* req) {
   return s_copy(((request_internal*)req)->version);
 }
 
-char* request_get_header(request* req, const char* key) {
+char* req_get_header(request* req, const char* key) {
   return get_header(((request_internal*)req)->headers, key);
 }

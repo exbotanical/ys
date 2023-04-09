@@ -3,11 +3,11 @@
 #include "libys.h"
 
 response *handler(request *req, response *res) {
-  set_header(res, "Content-Type", "text/plain");
-  set_header(res, "X-Powered-By", "demo");
+  res_set_header(res, "Content-Type", "text/plain");
+  res_set_header(res, "X-Powered-By", "demo");
 
-  set_body(res, "Hello World!");
-  set_status(res, STATUS_OK);
+  res_set_body(res, "Hello World!");
+  res_set_status(res, STATUS_OK);
 
   return res;
 }

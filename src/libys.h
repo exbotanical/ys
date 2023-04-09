@@ -1,5 +1,5 @@
-#ifndef libys_H
-#define libys_H
+#ifndef LIB_YS_H
+#define LIB_YS_H
 
 #include <stdbool.h>
 #include <time.h>
@@ -182,66 +182,66 @@ bool req_has_query(request *req, const char *key);
 unsigned int req_num_queries(request *req, const char *key);
 
 /**
- * request_get_path returns the full request path
+ * req_get_path returns the full request path
  *
  * @param req
  * @return char*
  */
-char *request_get_path(request *req);
+char *req_get_path(request *req);
 
 /**
- * request_get_route_path returns the request path segment that was matched on
+ * req_get_route_path returns the request path segment that was matched on
  * the router. For sub-routers, this will be the sub-path
  * e.g. path = /api/demo, route_path = /demo
  *
  * @param req
  * @return char*
  */
-char *request_get_route_path(request *req);
+char *req_get_route_path(request *req);
 
 /**
- * request_get_method returns the request method
+ * req_get_method returns the request method
  *
  * @param req
  * @return char*
  */
-char *request_get_method(request *req);
+char *req_get_method(request *req);
 
 /**
- * request_get_body returns the full request body
+ * req_get_body returns the full request body
  *
  * @param req
  * @return char*
  */
-char *request_get_body(request *req);
+char *req_get_body(request *req);
 
 /**
- * request_get_raw returns the entire, raw request as it was received by the
+ * req_get_raw returns the entire, raw request as it was received by the
  * server
  *
  * @param req
  * @return char*
  */
-char *request_get_raw(request *req);
+char *req_get_raw(request *req);
 
 /**
- * request_get_version returns the protocol version string included in the
+ * req_get_version returns the protocol version string included in the
  * request
  *
  * @param req
  * @return char*
  */
-char *request_get_version(request *req);
+char *req_get_version(request *req);
 
 /**
- * request_get_header retrieves the first value for a given header key on
+ * req_get_header retrieves the first value for a given header key on
  * the request or NULL if not found
  *
  *  @param req
  * @param key
  * @return char*
  */
-char *request_get_header(request *req, const char *key);
+char *req_get_header(request *req, const char *key);
 
 /**********************************************************
  * Response
@@ -255,7 +255,7 @@ char *request_get_header(request *req, const char *key);
 typedef struct response_internal *response;
 
 /**
- * set_header inserts the given key/value pair as a header on the response
+ * res_set_header inserts the given key/value pair as a header on the response
  *
  * @param res
  * @param key
@@ -263,59 +263,59 @@ typedef struct response_internal *response;
  * @return true if adding the header succeeded
  * @return false if adding the header failed; this would indicate an OOM error
  */
-bool set_header(response *res, const char *key, const char *value);
+bool res_set_header(response *res, const char *key, const char *value);
 
 /**
- * set_body sets the given body on the response
+ * res_set_body sets the given body on the response
  *
  * @param res
  * @param body
  */
-void set_body(response *res, const char *body);
+void res_set_body(response *res, const char *body);
 
 /**
- * set_status sets the given status code on the response
+ * res_set_status sets the given status code on the response
  *
  * @param res
  * @param status
  */
-void set_status(response *res, http_status status);
+void res_set_status(response *res, http_status status);
 
 /**
- * get_done returns the done status of the response
+ * res_get_done returns the done status of the response
  *
  * @param res
  * @return true
  * @return false
  */
-bool get_done(response *res);
+bool res_get_done(response *res);
 
 /**
- * set_done sets the done status of the response to true. This operation is
+ * res_set_done sets the done status of the response to true. This operation is
  * idempotent.
  *
  * @param res
  */
-void set_done(response *res);
+void res_set_done(response *res);
 
 /**
- * from_file reads a file into a string buffer, which may then be passed
- * directly to `set_body` e.g. set_body(res, from_file("./index.html"));
- *
- * @param filename
- * @return char*
- */
-char *from_file(const char *filename);
-
-/**
- * response_get_header retrieves the first header value for a given key on
+ * res_get_header retrieves the first header value for a given key on
  * the response or NULL if not found
  *
  * @param res
  * @param key
  * @return char*
  */
-char *response_get_header(response *res, const char *key);
+char *res_get_header(response *res, const char *key);
+
+/**
+ * from_file reads a file into a string buffer, which may then be passed
+ * directly to `res_set_body` e.g. res_set_body(res, from_file("./index.html"));
+ *
+ * @param filename
+ * @return char*
+ */
+char *from_file(const char *filename);
 
 /**********************************************************
  * Router
@@ -375,17 +375,47 @@ void router_register(http_router *router, const char *path,
  */
 void router_free(http_router *router);
 
-// TODO: t + d
+/**
+ * router_register_sub registers a sub-router for routing requests based off of
+ * a specific path.
+ *
+ * @param parent_router
+ * @param attr
+ * @param subpath
+ * @return http_router*
+ * TODO: t
+ */
 http_router *router_register_sub(http_router *parent_router, router_attr *attr,
                                  const char *subpath);
 
-// TODO: t + d
+/**
+ * router_register_404_handler registers the handler to be used for handling
+ * requests to a non-registered route.
+ *
+ * @param attr
+ * @param h
+ * TODO: t
+ */
 void router_register_404_handler(router_attr *attr, route_handler *h);
 
-// TODO: t + d
+/**
+ * router_register_405_handler registers the handler to be used for handling
+ * requests to a non-registered method for a registered path.
+ *
+ * @param attr
+ * @param h
+ * TODO: t
+ */
 void router_register_405_handler(router_attr *attr, route_handler *h);
 
-// TODO: t + d
+/**
+ * router_register_500_handler registers the handler to be used for handling
+ * erroneous requests.
+ *
+ * @param attr
+ * @param h
+ * TODO: t
+ */
 void router_register_500_handler(router_attr *attr, route_handler *h);
 
 /**********************************************************
@@ -711,24 +741,86 @@ cookie *get_cookie(request *req, const char *name);
  */
 void set_cookie(response *res, cookie *c);
 
+/**
+ * cookie_get_name returns the cookie's name
+ *
+ * @param c
+ * @return char*
+ */
 char *cookie_get_name(cookie *c);
 
+/**
+ * cookie_get_value returns the cookie's value
+ *
+ * @param c
+ * @return char*
+ */
 char *cookie_get_value(cookie *c);
 
+/**
+ * cookie_get_domain returns the cookie's domain
+ *
+ * @param c
+ * @return char*
+ */
 char *cookie_get_domain(cookie *c);
 
+/**
+ * cookie_get_expires returns the cookie's expiry
+ *
+ * @param c
+ * @return time_t
+ */
 time_t cookie_get_expires(cookie *c);
 
+/**
+ * cookie_get_http_only returns a boolean indicating whether the cookie is http
+ * only
+ *
+ * @param c
+ * @return true
+ * @return false
+ */
 bool cookie_get_http_only(cookie *c);
 
+/**
+ * cookie_get_max_age returns the value of the cookie's max_age property
+ *
+ * @param c
+ * @return int
+ */
 int cookie_get_max_age(cookie *c);
 
+/**
+ * cookie_get_path returns the value of the cookie's path property
+ *
+ * @param c
+ * @return char*
+ */
 char *cookie_get_path(cookie *c);
 
+/**
+ * cookie_get_same_site returns the value of the cookie's same_site property
+ *
+ * @param c
+ * @return same_site_mode
+ */
 same_site_mode cookie_get_same_site(cookie *c);
 
+/**
+ * cookie_get_secure returns the value of the cookie's secure property
+ *
+ * @param c
+ * @return true
+ * @return false
+ */
 bool cookie_get_secure(cookie *c);
 
+/**
+ * cookie_free frees all cookie* heap memory
+ *
+ * @param c
+ */
 void cookie_free(cookie *c);
 
 /**********************************************************
@@ -740,4 +832,4 @@ time_t n_minutes_from_now(unsigned int n);
 time_t n_hours_from_now(unsigned int n);
 time_t n_days_from_now(unsigned int n);
 
-#endif /* libys_H */
+#endif /* LIB_YS_H */

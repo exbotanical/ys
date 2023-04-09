@@ -189,18 +189,18 @@ response_internal *response_init() {
   return res;
 }
 
-void set_body(response *res, const char *body) {
+void res_set_body(response *res, const char *body) {
   ((response_internal *)res)->body = s_copy(body);
 }
 
-void set_status(response *res, http_status status) {
+void res_set_status(response *res, http_status status) {
   ((response_internal *)res)->status = status;
 }
 
-bool get_done(response *res) { return ((response_internal *)res)->done; }
+bool res_get_done(response *res) { return ((response_internal *)res)->done; }
 
-void set_done(response *res) { ((response_internal *)res)->done = true; }
+void res_set_done(response *res) { ((response_internal *)res)->done = true; }
 
-char *response_get_header(response *res, const char *key) {
+char *res_get_header(response *res, const char *key) {
   return get_header(((response_internal *)res)->headers, key);
 }

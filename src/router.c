@@ -77,9 +77,9 @@ static bool invoke_chain(request_internal *req, response_internal *res,
  */
 static response *default_internal_error_handler(request *req, response *res) {
   printlogf(LOG_INFO, "[router::%s] 500 handler in effect at request path %s\n",
-            __func__, request_get_path(req));
+            __func__, req_get_path(req));
 
-  set_status(res, STATUS_INTERNAL_SERVER_ERROR);
+  res_set_status(res, STATUS_INTERNAL_SERVER_ERROR);
 
   return res;
 }
@@ -95,9 +95,9 @@ static response *default_not_found_handler(request *req, response *res) {
   printlogf(LOG_INFO,
             "[router::%s] default 404 handler in effect "
             "at request path %s\n",
-            __func__, request_get_path(req));
+            __func__, req_get_path(req));
 
-  set_status(res, STATUS_NOT_FOUND);
+  res_set_status(res, STATUS_NOT_FOUND);
 
   return res;
 }
@@ -114,9 +114,9 @@ static response *default_method_not_allowed_handler(request *req,
   printlogf(LOG_INFO,
             "[router::%s] default 405 handler in "
             "effect at request path %s\n",
-            __func__, request_get_path(req));
+            __func__, req_get_path(req));
 
-  set_status(res, STATUS_METHOD_NOT_ALLOWED);
+  res_set_status(res, STATUS_METHOD_NOT_ALLOWED);
 
   return res;
 }

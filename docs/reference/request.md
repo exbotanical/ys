@@ -80,21 +80,21 @@ unsigned int req_num_queries(request *req, const char *key);
 `req_num_queries` returns the number of values associated with a given query key
 `key`.
 
-## request_get_path
+## req_get_path
 
 ```c
-char *request_get_path(request *req);
+char *req_get_path(request *req);
 ```
 
-`request_get_path` returns the full request path.
+`req_get_path` returns the full request path.
 
-## request_get_route_path
+## req_get_route_path
 
 ```c
-char *request_get_route_path(request *req);
+char *req_get_route_path(request *req);
 ```
 
-`request_get_route_path` returns the request path segment that was matched on
+`req_get_route_path` returns the request path segment that was matched on
 the router. For sub-routers, this will be the sub-path. For example,
 
 ```sh
@@ -102,45 +102,45 @@ path = /api/demo
 route_path = /demo
 ```
 
-## request_get_method
+## req_get_method
 
 ```c
-char *request_get_method(request *req);
+char *req_get_method(request *req);
 ```
 
-`request_get_method` returns the request method.
+`req_get_method` returns the request method.
 
-## request_get_body
+## req_get_body
 
 ```c
-char *request_get_body(request *req);
+char *req_get_body(request *req);
 ```
 
-`request_get_body` returns the full request body.
+`req_get_body` returns the full request body.
 
-## request_get_raw
+## req_get_raw
 
 ```c
-char *request_get_raw(request *req);
+char *req_get_raw(request *req);
 ```
 
-`request_get_raw` returns the entire, raw request as it was received by the
+`req_get_raw` returns the entire, raw request as it was received by the
 server.
 
 ## request_get_protocol
 
 ```c
-char *request_get_version(request *req);
+char *req_get_version(request *req);
 ```
 
-`request_get_version` returns the protocol version string included in the
+`req_get_version` returns the protocol version string included in the
 request.
 
-## request_get_header
+## req_get_header
 
 ```c
-char *request_get_header(request *req, const char *key);
+char *req_get_header(request *req, const char *key);
 ```
 
-`request_get_header` retrieves the first value for a given header key on
+`req_get_header` retrieves the first value for a given header key on
 the request or `NULL` if not found.

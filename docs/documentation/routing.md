@@ -10,7 +10,7 @@ If the trie search does yield a result, but the request method does not match an
 
 Finally, if the trie search yields a result and the request method is valid, the matching route handler is invoked, but not before any registered middlewares. Middlewares are invoked in a LIFO fashion, with the actual route handler executed last.
 
-This means middleware handlers have an opportunity to intercept route handlers and perform tasks such as authorization, apply a CORS policy, etc. In order to stop a request handler chain, you can set the `done` flag on the `response*` with `set_done`. If a middleware handler sets the `done` flag, no subsequent handlers will be invoked; instead, the response will be serialized and sent back to the client.
+This means middleware handlers have an opportunity to intercept route handlers and perform tasks such as authorization, apply a CORS policy, etc. In order to stop a request handler chain, you can set the `done` flag on the `response*` with `res_set_done`. If a middleware handler sets the `done` flag, no subsequent handlers will be invoked; instead, the response will be serialized and sent back to the client.
 
 
 ## Initializing Router Attributes
@@ -151,7 +151,7 @@ response* handler(request* req, response* res) {
 
 response* not_found_handler(request* req, response* res) {
   // Do stuff...
-  set_status(res, STATUS_NOT_FOUND);
+  res_set_status(res, STATUS_NOT_FOUND);
   return res;
 }
 

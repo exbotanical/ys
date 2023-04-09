@@ -240,7 +240,7 @@ char** req_header_values(hash_table* headers, const char* key) {
   return headers_list;
 }
 
-bool set_header(response* res, const char* key, const char* value) {
+bool res_set_header(response* res, const char* key, const char* value) {
   return insert_header(((response_internal*)res)->headers, key, value);
 }
 

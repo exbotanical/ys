@@ -166,7 +166,7 @@ static void handle_request(request_internal *req, response *res) {
   char *origin = get_header(req->headers, ORIGIN_HEADER);
   // Set the "vary" header to prevent proxy servers from sending cached
   // responses for one client to another
-  set_header(res, VARY_HEADER, ORIGIN_HEADER);
+  res_set_header(res, VARY_HEADER, ORIGIN_HEADER);
 
   // If no origin was specified, this is not a valid CORS request
   if (s_nullish(origin)) {
@@ -175,30 +175,30 @@ static void handle_request(request_internal *req, response *res) {
 
   // If the origin is not in the allow list, deny
   if (!is_origin_allowed(cors_conf, origin)) {
-    set_status(res, STATUS_FORBIDDEN);
+    res_set_status(res, STATUS_FORBIDDEN);
     return;
   }
 
   if (cors_conf->allow_all_origins) {
     // If all origins are allowed, use the wildcard value
-    set_header(res, ALLOW_ORIGINS_HEADER, "*");
+    res_set_header(res, ALLOW_ORIGINS_HEADER, "*");
   } else {
     // Otherwise, set the origin to the request origin
-    set_header(res, ALLOW_ORIGINS_HEADER, origin);
+    res_set_header(res, ALLOW_ORIGINS_HEADER, origin);
   }
 
   // If we've exposed headers, set them
   // If the consumer specified headers that are exposed by default, we'll still
   // include them - this is spec compliant
   if (has_elements(cors_conf->exposed_headers)) {
-    set_header(res, EXPOSE_HEADERS_HEADER,
-               str_join(cors_conf->exposed_headers, ", "));
+    res_set_header(res, EXPOSE_HEADERS_HEADER,
+                   str_join(cors_conf->exposed_headers, ", "));
   }
 
   // Allow the client to send credentials. If making an XHR request, the client
   // must set `with_credentials` to `true`
   if (cors_conf->allow_credentials) {
-    set_header(res, ALLOW_CREDENTIALS_HEADER, "true");
+    res_set_header(res, ALLOW_CREDENTIALS_HEADER, "true");
   }
 }
 
@@ -213,9 +213,9 @@ static void handle_preflight_request(request_internal *req, response *res) {
 
   // Set the "vary" header to prevent proxy servers from sending cached
   // responses for one client to another
-  set_header(res, VARY_HEADER,
-             fmt_str("%s,%s,%s", ORIGIN_HEADER, REQUEST_METHOD_HEADER,
-                     REQUEST_HEADERS_HEADER));
+  res_set_header(res, VARY_HEADER,
+                 fmt_str("%s,%s,%s", ORIGIN_HEADER, REQUEST_METHOD_HEADER,
+                         REQUEST_HEADERS_HEADER));
 
   // If no origin was specified, this is not a valid CORS request
   if (s_nullish(origin)) {
@@ -224,7 +224,7 @@ static void handle_preflight_request(request_internal *req, response *res) {
 
   // If the origin is not in the allow list, deny
   if (!is_origin_allowed(cors_conf, origin)) {
-    set_status(res, STATUS_FORBIDDEN);
+    res_set_status(res, STATUS_FORBIDDEN);
     return;
   }
 
@@ -247,34 +247,34 @@ static void handle_preflight_request(request_internal *req, response *res) {
 
   if (cors_conf->allow_all_origins) {
     // If all origins are allowed, use the wildcard value
-    set_header(res, ALLOW_ORIGINS_HEADER, "*");
+    res_set_header(res, ALLOW_ORIGINS_HEADER, "*");
   } else {
     // Otherwise, set the origin to the request origin
-    set_header(res, ALLOW_ORIGINS_HEADER, origin);
+    res_set_header(res, ALLOW_ORIGINS_HEADER, origin);
   }
 
   // Set the allowed methods, as a Preflight may have been sent if the client
   // included non-simple methods
-  set_header(res, ALLOW_METHODS_HEADER, reqd_method);
+  res_set_header(res, ALLOW_METHODS_HEADER, reqd_method);
 
   // Set the allowed headers, as a Preflight may have been sent if the client
   // included non-simple headers.
   if (has_elements(reqd_headers)) {
-    set_header(res, ALLOW_HEADERS_HEADER,
-               str_join(cors_conf->allowed_headers, ", "));
+    res_set_header(res, ALLOW_HEADERS_HEADER,
+                   str_join(cors_conf->allowed_headers, ", "));
   }
 
   // Allow the client to send credentials. If making an XHR request, the client
   // must set `with_credentials` to `true`.
   if (cors_conf->allow_credentials) {
-    set_header(res, ALLOW_CREDENTIALS_HEADER, "true");
+    res_set_header(res, ALLOW_CREDENTIALS_HEADER, "true");
   }
 
   // Set the Max Age. This is only necessary for Preflights given the Max Age
   // refers to server-suggested duration, in seconds, a response should stay in
   // the browser's cache before another Preflight is made
   if (cors_conf->max_age > 0) {
-    set_header(res, MAX_AGE_HEADER, fmt_str("%d", cors_conf->max_age));
+    res_set_header(res, MAX_AGE_HEADER, fmt_str("%d", cors_conf->max_age));
   }
 
   array_free(reqd_headers);
@@ -386,9 +386,9 @@ response *cors_handler(request *req, response *res) {
     if (cors_conf->use_options_passthrough) {
       // Do nothing i.e. allow next handler to run
     } else {
-      set_status(res, STATUS_NO_CONTENT);
+      res_set_status(res, STATUS_NO_CONTENT);
       // We're done
-      set_done(res);
+      res_set_done(res);
     }
   } else {
     handle_request(reqi, res);
