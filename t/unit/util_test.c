@@ -56,8 +56,8 @@ void test_str_join() {
   array_push(arr, "b");
   array_push(arr, "c");
 
-  char *ret = str_join(arr, ",");
-  is(ret, "a,b,c");
+  char *ret = str_join(arr, ", ");
+  is(ret, "a, b, c");
 
   array_free(arr);
 }

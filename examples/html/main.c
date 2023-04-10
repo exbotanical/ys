@@ -49,7 +49,6 @@ int main() {
 
   tcp_server *server = server_init(router, PORT);
   server_start(server);
-  server_free(server);
 
   return EXIT_SUCCESS;
 }

@@ -19,7 +19,7 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/exbotanical/libys' },
+      { icon: 'github', link: 'https://github.com/exbotanical/ys' },
     ],
   },
 })
@@ -27,7 +27,7 @@ export default defineConfig({
 function nav() {
   return [
     { text: 'Home', link: '/' },
-    { text: 'Recipes', link: '/recipes/' },
+    { text: 'Examples', link: 'https://github.com/exbotanical/ys/examples' },
   ]
 }
 
@@ -67,23 +67,6 @@ function sidebarMain() {
       ],
     },
 
-    {
-      text: 'Recipes',
-      collapsed: false,
-      items: [
-        { text: 'Simple Server', link: '/recipes/simple-recipe' },
-        { text: 'Authentication', link: '/recipes/auth-recipe' },
-        {
-          text: 'Custom Configurations',
-          link: '/recipes/custom-config-recipe',
-        },
-        { text: 'CORS Server', link: '/recipes/cors-recipe' },
-        { text: 'Middleware', link: '/recipes/middleware-recipe' },
-        { text: 'Nested Routing', link: '/recipes/nested-routing-recipe' },
-        { text: 'REST Server', link: '/recipes/rest-recipe' },
-        { text: 'HTTPs Server', link: '/recipes/https-recipe' },
-      ],
-    },
     {
       text: 'API Reference',
       link: '/reference/',

@@ -223,9 +223,9 @@ Let's compile, run, and try sending a request to our new server!
 
 ```sh
 # Compile Ys into a statically-linked library
-make ys.a
+make libys.a
 # Compile our server program, linking it to Ys
-gcc main.c ys.a -o main
+gcc main.c libys.a -o main
 # Run the server program
 ./main
 # In a separate terminal, send a request to the server using curl

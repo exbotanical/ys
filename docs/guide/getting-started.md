@@ -12,7 +12,7 @@ git clone https://github.com/exbotanical/ys.git
 
 Compile Ys as a static library:
 ```sh [gcc]
-make ys.a
+make libys.a
 ```
 
 3. Include the Ys header and setup your server. In main.c:
@@ -30,7 +30,6 @@ int main(int argc, char **argv) {
 
   tcp_server *server = server_init(router, PORT);
   server_start(server);
-  server_free(server);
 
   return EXIT_SUCCESS;
 }
@@ -68,7 +67,7 @@ int main(int argc, char **argv) {
 5. Compile and run!
 
 ```sh
-gcc main.c ys.a -o main
+gcc main.c libys.a -o main
 
 ./main
 

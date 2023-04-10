@@ -6,7 +6,7 @@ Ys ships with support for TLS from openssl. Requirements
 * Compile Ys with the `USE_TLS` flag set to a non-zero value
 
 ```sh
-make ys.a USE_TLS=1
+make libys.a USE_TLS=1
 ```
 
 Once compiled, modify your server code to include your TLS cert and key files.

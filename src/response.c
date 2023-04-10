@@ -66,7 +66,7 @@ buffer_t *response_serialize(request_internal *req, response_internal *res) {
     if (!header) continue;
 
     buffer_append(buf, fmt_str("%s: %s", header->key,
-                               str_join((array_t *)header->value, ",")));
+                               str_join((array_t *)header->value, ", ")));
     buffer_append(buf, CRLF);
   }
 

@@ -7,14 +7,14 @@ titleTemplate: The Modern Web Application Framework for C
 hero:
   name: Ys
   text: The Modern Web Application Framework for C
-  tagline: The most
+  tagline:
   actions:
     - theme: brand
       text: Get Started
       link: /guide/what-is-ys
     - theme: alt
       text: View on GitHub
-      link: https://github.com/exbotanical/libys
+      link: https://github.com/exbotanical/ys
 
 features:
   - title: Focus on Building Your App

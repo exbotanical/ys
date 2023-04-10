@@ -2,16 +2,16 @@
 
 ## Docs
 - [ ] replace - with em dash
-- [ ] name header file
+- [x] name header file
 - [ ] ensure all examples run
 - [ ] Use Fathom analytics
 
 ## Pre-release
 - [x] SSL support
 - [x] Cookies
-- [ ] Name this project: Ys?
+- [x] Name this project: Ys?
 - [ ] Lock deps versions
-- [ ] Document
+- [x] Document
 
 - [x] Clean up all objects w/ free where necessary
 - [x] Validate NULLs and allocated objects
@@ -40,7 +40,7 @@
 - [ ] cross-OS compatibility
   - [x] source strdup from dep
 - [ ] review all `include`d functions and replace any non-standard ones
-- [ ] documentation
+- [x] documentation
 - [x] make all public structs opaque
 - [x] Use method enum in CORS middleware helpers
 - [ ] Ensure everything opaque has getters and setters
@@ -53,7 +53,7 @@
 - [ ] Non-param path regex
 - [ ] Offer Content-Types
 - [ ] Use hash set for headers to de-duplicate
-- [ ] Comma-delimit duplicate response headers
+- [x] Comma-delimit duplicate response headers
 - [ ] Use user-defined content length header OR overwrite it - but handle it
 - [ ] fmt string in `res_set_body`
 - [ ] Default Content-Type to text/plain?

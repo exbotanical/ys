@@ -29,7 +29,7 @@ describe 'libys TLS integration tests'
 
   it 'sets multiple X-powered-by headers'
     res="$(curl -i -s "$SERVER_ADDR" | get_header 'X-Powered-By')"
-    assert equal 'libys,demo,integ-test' "$res"
+    assert equal 'libys, demo, integ-test' "$res"
   ti
 
   it 'returns a 405 for unsupported methods'
