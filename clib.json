@@ -27,7 +27,7 @@
     "src/fs_router.h",
     "src/header.c",
     "src/header.h",
-    "src/http.c",
+    "src/const.c",
     "src/json.c",
     "src/json.h",
     "src/logger.c",
