@@ -93,9 +93,11 @@ char** req_header_values(hash_table* headers, const char* key);
  * @param headers
  * @param key
  * @param value
+ * @param bool
  * @return bool
  */
-bool insert_header(hash_table* headers, const char* key, const char* value);
+bool insert_header(hash_table* headers, const char* key, const char* value,
+                   bool is_request);
 
 /**
  * derive_headers extracts the comma-delimited headers in the value of the

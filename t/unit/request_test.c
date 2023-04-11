@@ -18,7 +18,7 @@ static request *make_req() {
 void test_fix_pragma_cache_control() {
   hash_table *headers = ht_init(0);
 
-  insert_header(headers, PRAGMA, NO_CACHE);
+  insert_header(headers, PRAGMA, NO_CACHE, true);
   fix_pragma_cache_control(headers);
 
   is(get_header(headers, CACHE_CONTROL), NO_CACHE,
@@ -34,8 +34,8 @@ void test_fix_pragma_cache_control() {
 void test_fix_pragma_cache_control_has_cache_control() {
   hash_table *headers = ht_init(0);
 
-  insert_header(headers, PRAGMA, NO_CACHE);
-  insert_header(headers, CACHE_CONTROL, "whatever");
+  insert_header(headers, PRAGMA, NO_CACHE, true);
+  insert_header(headers, CACHE_CONTROL, "whatever", true);
 
   fix_pragma_cache_control(headers);
 

@@ -22,7 +22,7 @@ char* from_file(const char* filename) {
   fread(buf, fsize, 1, fp);
   fclose(fp);
 
-  buf[fsize] = NULL_TERM;
+  buf[fsize] = NULL_TERMINATOR;
 
   return buf;
 }

@@ -76,7 +76,7 @@ bool parse_config(const char* filename) {
       goto cleanup;
     }
 
-    value[strcspn(value, "\r\n")] = NULL_TERM;  // remove trailing newline
+    value[strcspn(value, "\r\n")] = NULL_TERMINATOR;  // remove trailing newline
 
     if (s_equals(name, SERVER_PORT_KEY)) {
       port = atoi(value);

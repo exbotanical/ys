@@ -133,16 +133,21 @@ void test_insert_header() {
 
   hash_table *ht = ht_init(0);
 
-  ok(insert_header(ht, k1, v1) == 1,
+  ok(insert_header(ht, k1, v1, true) == 1,
      "successfully inserts the header into the headers hash table");
-  is(ht_get(ht, k1), v1, "gets the header value that was just inserted");
+  is(array_get(ht_get(ht, k1), 0), v1,
+     "gets the header value that was just inserted");
 
-  ok(insert_header(ht, singleton, v1) == 1,
+  ok(insert_header(ht, singleton, v1, true) == 1,
      "successfully inserts the header into the headers hash table");
-  is(ht_get(ht, singleton), v1, "gets the header value that was just inserted");
+  is(array_get(ht_get(ht, singleton), 0), v1,
+     "gets the header value that was just inserted");
 
-  ok(insert_header(ht, singleton, v1) == 0,
+  ok(insert_header(ht, singleton, v1, true) == 0,
      "fails to insert duplicate header of singleton type");
+
+  ok(insert_header(ht, singleton, v1, false) == 1,
+     "ignores duplicate header of singleton type if is_request=false");
 }
 
 void test_derive_headers() {
@@ -163,7 +168,7 @@ void test_derive_headers() {
 }
 
 int main() {
-  plan(24);
+  plan(30);
 
   test_token_table();
   test_to_canonical_mime_header_key();
@@ -171,6 +176,8 @@ int main() {
   test_get_header();
   test_req_header_values();
   test_derive_headers();
+
+  test_insert_header();
 
   done_testing();
 }

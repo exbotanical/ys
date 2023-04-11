@@ -8,7 +8,7 @@
 #include "logger.h"
 #include "xmalloc.h"
 
-const char NULL_TERM = '\0';
+const char NULL_TERMINATOR = '\0';
 
 char *safe_itoa(int x) {
   int length = snprintf(NULL, 0, "%d", x);
@@ -127,7 +127,7 @@ char unhex(char c) {
 
 char *tostr(char c) {
   char *strp = xmalloc(2);
-  char str[2] = {c, NULL_TERM};
+  char str[2] = {c, NULL_TERMINATOR};
   memcpy(strp, str, 2);
   return strp;
 }

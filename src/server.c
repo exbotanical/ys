@@ -224,7 +224,7 @@ void server_start(tcp_server *server) {
   struct sockaddr_in address;
   socklen_t addr_len = sizeof(address);
 
-  memset((char *)&address, NULL_TERM, addr_len);
+  memset((char *)&address, NULL_TERMINATOR, addr_len);
   address.sin_family = AF_INET;
   address.sin_addr.s_addr = INADDR_ANY;
   address.sin_port = htons(port);

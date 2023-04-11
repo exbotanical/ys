@@ -186,9 +186,9 @@ void test_get_cookie() {
   request_internal* req =
       malloc(sizeof(request_internal));  // TODO: request_init fn
   req->headers = ht_init(0);
-  insert_header(req->headers, COOKIE, cookie_serialize(c));
-  insert_header(req->headers, COOKIE, cookie_serialize(expected));
-  insert_header(req->headers, COOKIE, cookie_serialize(c2));
+  insert_header(req->headers, COOKIE, cookie_serialize(c), true);
+  insert_header(req->headers, COOKIE, cookie_serialize(expected), true);
+  insert_header(req->headers, COOKIE, cookie_serialize(c2), true);
 
   cookie_internal* actual = (cookie_internal*)get_cookie(req, "ThisCookie");
 

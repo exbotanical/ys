@@ -31,7 +31,7 @@
 static void fix_pragma_cache_control(hash_table* headers) {
   if (s_equals(get_header(headers, PRAGMA), NO_CACHE)) {
     if (!ht_search(headers, CACHE_CONTROL)) {
-      insert_header(headers, CACHE_CONTROL, NO_CACHE);
+      insert_header(headers, CACHE_CONTROL, NO_CACHE, true);
     }
   }
 }
@@ -113,7 +113,7 @@ maybe_request req_read_and_parse(client_context* ctx) {
     char* header_val =
         fmt_str("%.*s", (int)headers[i].value_len, headers[i].value);
 
-    if (!insert_header(req->headers, header_key, header_val)) {
+    if (!insert_header(req->headers, header_key, header_val, true)) {
       // TODO: t
       free(req->body);
       free(req->raw);

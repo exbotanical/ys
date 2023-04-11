@@ -167,7 +167,7 @@ static char* canonical_mime_header_key(char* key) {
     unsigned int l = strlen(key);
     char* ca = xmalloc(l + 1);
     strncpy(ca, key, l);
-    ca[l] = NULL_TERM;
+    ca[l] = NULL_TERMINATOR;
     ca[i] = c;
     key = ca;
 
@@ -241,12 +241,12 @@ char** req_header_values(hash_table* headers, const char* key) {
 }
 
 bool res_set_header(response* res, const char* key, const char* value) {
-  return insert_header(((response_internal*)res)->headers, key, value);
+  return insert_header(((response_internal*)res)->headers, key, value, false);
 }
 
-// TODO: should check singleton flag so we can use w/response
 // TODO: does get_header handle header=value1;value2 ?
-bool insert_header(hash_table* headers, const char* key, const char* value) {
+bool insert_header(hash_table* headers, const char* key, const char* value,
+                   bool is_request) {
   // Check if we've already encountered this header key. Some headers cannot
   // be duplicated e.g. Content-Type, so we'll need to handle those as well
   ht_record* existing_headers = ht_search(headers, key);
@@ -254,12 +254,19 @@ bool insert_header(hash_table* headers, const char* key, const char* value) {
     // Disallow duplicates where necessary e.g. multiple Content-Type headers is
     // a 400 This follows Section 4.2 of RFC 7230 to ensure we handle multiples
     // of the same header correctly
-    if (is_singleton_header(key)) {
+    if (is_request && is_singleton_header(key)) {
       return false;
     }
 
     array_push(existing_headers->value, (void*)value);
   } else {
+    if (!is_request) {
+      // Ignore duplicate content-length
+      if (s_casecmp("Content-Length", key)) {
+        return false;
+      }
+    }
+
     // We haven't encountered this header before; insert into the hash table
     // along with the first value
     array_t* values = array_init();
@@ -305,7 +312,7 @@ array_t* derive_headers(const char* header_str) {
           v[i] = (char)array_get(tmp, i);
         }
 
-        v[i + 1] = NULL_TERM;
+        v[i + 1] = NULL_TERMINATOR;
 
         array_push(headers, v);
 

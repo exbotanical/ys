@@ -6,7 +6,7 @@
 // ENUM_NAME extracts the name of an enum as a string literal
 #define ENUM_NAME(x) [x] = #x
 
-extern const char NULL_TERM;
+extern const char NULL_TERMINATOR;
 
 /**
  * safe_itoa safely converts an int into a string
