@@ -214,7 +214,7 @@ static void handle_preflight_request(request_internal *req, response *res) {
   // Set the "vary" header to prevent proxy servers from sending cached
   // responses for one client to another
   res_set_header(res, VARY_HEADER,
-                 fmt_str("%s,%s,%s", ORIGIN_HEADER, REQUEST_METHOD_HEADER,
+                 fmt_str("%s, %s, %s", ORIGIN_HEADER, REQUEST_METHOD_HEADER,
                          REQUEST_HEADERS_HEADER));
 
   // If no origin was specified, this is not a valid CORS request

@@ -28,7 +28,7 @@ describe 'libys basic integration tests'
 
   it 'sets multiple X-powered-by headers'
     res="$(curl -i -s "$SERVER_ADDR" | get_header 'X-Powered-By')"
-    assert equal 'libys, demo, integ-test' "$res"
+    assert equal 'libys,demo,integ-test' "$res"
   ti
 
   it 'returns a 405 for unsupported methods'
@@ -66,7 +66,7 @@ describe 'CORS functionality'
     res="$(curl "$SERVER_ADDR" -s -i -H "Access-Control-Request-Method: $ALLOWED_METHOD" -H 'Access-Control-Request-Headers: X-Requested-With' -H "Origin: $ALLOWED_ORIGIN" -X OPTIONS)"
 
     vary_header=$(get_header 'Vary' <<< "$res")
-    assert equal "$vary_header" 'Origin, Access-Control-Request-Method, Access-Control-Request-Headers'
+    assert equal "$vary_header" 'Origin,Access-Control-Request-Method,Access-Control-Request-Headers'
 
     status=$(get_status <<< "$res")
     assert equal "$status" '204 No Content'
@@ -76,7 +76,7 @@ describe 'CORS functionality'
     res="$(curl "$SERVER_ADDR" -s -i -H "Access-Control-Request-Method: $ALLOWED_METHOD" -H "Access-Control-Request-Headers: $ALLOWED_HEADER" -H 'Origin: https://invalid.com' -X OPTIONS)"
 
     vary_header=$(get_header 'Vary' <<< "$res")
-    assert equal "$vary_header" 'Origin, Access-Control-Request-Method, Access-Control-Request-Headers'
+    assert equal "$vary_header" 'Origin,Access-Control-Request-Method,Access-Control-Request-Headers'
 
     status=$(get_status <<< "$res")
     assert equal "$status" '204 No Content'
@@ -86,7 +86,7 @@ describe 'CORS functionality'
     res="$(curl "$SERVER_ADDR" -s -i -H 'Access-Control-Request-Method: PATCH' -H "Access-Control-Request-Headers: $ALLOWED_HEADER" -H "Origin: $ALLOWED_ORIGIN" -X OPTIONS)"
 
     vary_header=$(get_header 'Vary' <<< "$res")
-    assert equal "$vary_header" 'Origin, Access-Control-Request-Method, Access-Control-Request-Headers'
+    assert equal "$vary_header" 'Origin,Access-Control-Request-Method,Access-Control-Request-Headers'
 
     status=$(get_status <<< "$res")
     assert equal "$status" '204 No Content'
@@ -96,7 +96,7 @@ describe 'CORS functionality'
     res="$(curl -s -i "$SERVER_ADDR" -H "Access-Control-Request-Method: $ALLOWED_METHOD" -H "Access-Control-Request-Headers: $ALLOWED_HEADER" -H "Origin: $ALLOWED_ORIGIN" -X OPTIONS)"
 
     vary_header=$(get_header 'Vary' <<< "$res")
-    assert equal "$vary_header" 'Origin, Access-Control-Request-Method, Access-Control-Request-Headers'
+    assert equal "$vary_header" 'Origin,Access-Control-Request-Method,Access-Control-Request-Headers'
 
     allow_origin_header=$(get_header 'Access-Control-Allow-Origin' <<< "$res")
     assert equal "$allow_origin_header" "$ALLOWED_ORIGIN"

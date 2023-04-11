@@ -189,7 +189,7 @@ void test_cors_middleware() {
                                 "Access-Control-Request-Method",
                                 http_method_names[METHOD_DELETE], NULL),
        .res_headers = toheaders("Vary",
-                                "Origin,Access-Control-Request-Method,Access-"
+                                "Origin, Access-Control-Request-Method, Access-"
                                 "Control-Request-Headers",
                                 "Access-Control-Allow-Origin", "*",
                                 "Access-Control-Allow-Methods",
@@ -205,7 +205,7 @@ void test_cors_middleware() {
            "X-Testing", NULL),
        .res_headers = toheaders(
            "Vary",
-           "Origin,Access-Control-Request-Method,"
+           "Origin, Access-Control-Request-Method, "
            "Access-Control-Request-Headers",
            "Access-Control-Allow-Origin", "*", "Access-Control-Allow-Headers",
            "X-Testing, Origin", "Access-Control-Allow-Methods",
@@ -223,7 +223,7 @@ void test_cors_middleware() {
            "X-Testing, X-Testing-2, X-Testing-3", NULL),
        .res_headers = toheaders(
            "Vary",
-           "Origin,Access-Control-Request-Method,"
+           "Origin, Access-Control-Request-Method, "
            "Access-Control-Request-Headers",
            "Access-Control-Allow-Origin", "*", "Access-Control-Allow-Headers",
            "X-Testing, X-Testing-2, X-Testing-3, Origin",
@@ -236,7 +236,7 @@ void test_cors_middleware() {
                                 "Access-Control-Request-Method",
                                 http_method_names[METHOD_GET], NULL),
        .res_headers = toheaders("Vary",
-                                "Origin,Access-Control-Request-Method,"
+                                "Origin, Access-Control-Request-Method, "
                                 "Access-Control-Request-Headers",
                                 "Access-Control-Allow-Credentials", "true",
                                 "Access-Control-Allow-Origin", "*",
@@ -284,7 +284,7 @@ void test_cors_middleware() {
                                 "Access-Control-Request-Method",
                                 http_method_names[METHOD_DELETE], NULL),
        .res_headers = toheaders("Vary",
-                                "Origin,Access-Control-Request-Method,"
+                                "Origin, Access-Control-Request-Method, "
                                 "Access-Control-Request-Headers",
                                 NULL),
        .code = STATUS_NO_CONTENT},
@@ -296,7 +296,7 @@ void test_cors_middleware() {
            http_method_names[METHOD_GET], "Access-Control-Request-Headers",
            "X-Testing", NULL),
        .res_headers = toheaders("Vary",
-                                "Origin,Access-Control-Request-Method,"
+                                "Origin, Access-Control-Request-Method, "
                                 "Access-Control-Request-Headers",
                                 NULL),
        .code = STATUS_NO_CONTENT}};

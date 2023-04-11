@@ -78,7 +78,7 @@ void test_response_serialize() {
            NULL),
        .expected =
            "HTTP/1.1 202 Accepted\r\nVary: "
-           "Origin,Request-Method,Etc\r\nContent-Length: 4\r\n\r\nbody"},
+           "Origin, Request-Method, Etc\r\nContent-Length: 4\r\n\r\nbody"},
 
       {.name = "OmitContentLength_For204",
        .body = "body",
