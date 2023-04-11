@@ -22,6 +22,9 @@ export default defineConfig({
       { icon: 'github', link: 'https://github.com/exbotanical/ys' },
     ],
   },
+  markdown: {
+    theme: 'rose-pine-moon',
+  },
 })
 
 function nav() {

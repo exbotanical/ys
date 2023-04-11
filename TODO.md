@@ -150,3 +150,29 @@
 
 # Style Guide
 - Use [Go Doc-style](https://tip.golang.org/doc/comment) for doc  comments e.g. `// function_name does thing`
+
+# Cross Platform
+
+## Macos
+
+```sh
+brew install pcre
+sudo ln -s /opt/homebrew/include/pcre.h /usr/local/include
+```
+```c
+int none; // end of response_internal
+```
+
+`export DYLD_LIBRARY_PATH=...`
+
+## AL2 Linux
+
+1. const in server_conf
+2. Install pcre `yum install pcre-devel`
+3. Install openssl `yum install openssl-devel`
+4. /usr/include/openssl (not working)
+
+## Ubuntu
+1. install pcre `apt install libpcre3-dev`
+2. add -lm -lpcre to examples' Makefiles (why?)
+3. integ tests source util doesnt work

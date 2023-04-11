@@ -12,7 +12,7 @@ cookie *c = cookie_init("cookie_name", "cookie_value");
 
 We initialize a `cookie*` with the only required values, its name and value. `cookie_init` initializes all other Cookie fields to their `NULL` equivalents; `max_age` is set to zero, for example, which means `Max-Age` shall be omitted entirely from the resulting Cookie.
 
-But of course, you will typically want to configure the Cookie. Ys offers several `cookie_set_*` APIs. A full accounting of these APIs can be found in the [Cookies API Reference](../reference/cookies.md).
+But of course, you will typically want to configure the Cookie. Ys offers several `cookie_set_*` APIs to that end. A full accounting of these APIs can be found in the [Cookies API Reference](../reference/cookies.md).
 
 ::: warning NOTE
 From the Ys user's perspective, setting a Cookie's Max-Age to -1 with `cookie_set_max_age` means the actual Max-Age in the serialized Cookie will be set to 0. Setting the Max-Age to 0 with `cookie_set_max_age` means the actual Max-Age will be omitted entirely.

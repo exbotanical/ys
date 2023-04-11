@@ -1,16 +1,16 @@
 # Routing and Middleware
 
-Under the hood, a router in Ys is implemented as a trie data structure. When you register routes, the corresponding route records are inserted into the trie.
+Under the hood, the Ys router is implemented as a trie data structure. When you register routes, the corresponding route records are inserted into the trie.
 
-When a request is received, a thread is dispatched from the thread pool. The request is parsed into a `request*` object and a trie search is performed using the request path.
+When a request is received, it is parsed into a `request*` object and a trie search is performed using the request path.
 
-If the trie search yields no result, the 404 handler is invoked. If the user does not attach one to the `router_attr*` used to initialize the router, the default handler will be used (likewise for 405 and 500 handling).
+If the trie search yields no result, the 404 handler is invoked. If the user does not attach a custom 404 handler to the router, the default handler will be used (likewise for 405 and 500 handling).
 
-If the trie search does yield a result, but the request method does not match any request method registered in the route record, the 405 handler is invoked.
+If the trie search *does* yield a result, but the request method does not match any request method registered in the route record, the 405 handler is invoked.
 
 Finally, if the trie search yields a result and the request method is valid, the matching route handler is invoked, but not before any registered middlewares. Middlewares are invoked in a LIFO fashion, with the actual route handler executed last.
 
-This means middleware handlers have an opportunity to intercept route handlers and perform tasks such as authorization, apply a CORS policy, etc. In order to stop a request handler chain, you can set the `done` flag on the `response*` with `set_done`. If a middleware handler sets the `done` flag, no subsequent handlers will be invoked; instead, the response will be serialized and sent back to the client.
+This means middleware handlers have an opportunity to intercept route handlers and perform tasks such as authorization, apply a CORS policy, etc. In order to stop a request handler chain, you can set the `done` flag on the `response*` with `set_done`. If a middleware handler sets the `done` flag, no subsequent handlers will be invoked; instead, the response will immediately be serialized and sent back to the client.
 
 
 ## Initializing Router Attributes
@@ -62,7 +62,7 @@ int main () {
 }
 ```
 
-Here, `handler` will be invoked for any `GET` or `POST` request at `/`. Non-route matches will trigger the 404 handler. Route matches with an un-registered HTTP method will trigger the 405 handler. Errors will be diverted into the 500 handler. [TODO link to handlers]
+Here, `handler` will be invoked for any `GET` or `POST` request at `/`. Non-route matches will trigger the 404 handler. Route matches with an un-registered HTTP method will trigger the 405 handler. Errors will be diverted to the 500 handler. See [Registering Custom Fallback Handlers](#registering-custom-fallback-handlers).
 
 
 ## Registering a Parameterized Route Handler
@@ -139,7 +139,7 @@ int main () {
 
 Here, we've registered two separate route handlers at `/` - one for `GET` requests, and one for `POST` requests.
 
-## Registering a Custom Fallback Handlers
+## Registering Custom Fallback Handlers
 
 ```c{3-6,12}
 #include "libys.h"
