@@ -61,9 +61,14 @@ buffer_t *response_serialize(request_internal *req, response_internal *res) {
                 fmt_str("HTTP/1.1 %d %s", status, http_status_names[status]));
   buffer_append(buf, CRLF);
 
+  bool has_content_type;
   for (unsigned int i = 0; i < (unsigned int)headers->capacity; i++) {
     ht_record *header = headers->records[i];
     if (!header) continue;
+
+    if (!has_content_type && s_casecmp(CONTENT_TYPE, header->key)) {
+      has_content_type = true;
+    }
 
     buffer_append(buf, fmt_str("%s: %s", header->key,
                                str_join((array_t *)header->value, ", ")));
@@ -76,14 +81,22 @@ buffer_t *response_serialize(request_internal *req, response_internal *res) {
   // (Successful) response to a METHOD_CONNECT request (Section 4.3.6 of
   // RFC7231).
   if (should_set_content_len(req, res)) {
+    // Default to text/plain if we've a body and Content-Type not set by user
+    if (body && !has_content_type) {
+      buffer_append(buf, fmt_str("%s: %s", CONTENT_TYPE, MIME_TYPE_TXT));
+      buffer_append(buf, CRLF);
+    }
+
     buffer_append(buf, fmt_str("Content-Length: %d", body ? strlen(body) : 0));
     buffer_append(buf, CRLF);
-  }
 
-  buffer_append(buf, CRLF);
+    buffer_append(buf, CRLF);
 
-  if (body) {
-    buffer_append(buf, body);
+    if (body) {
+      buffer_append(buf, body);
+    }
+  } else {
+    buffer_append(buf, CRLF);
   }
 
   return buf;

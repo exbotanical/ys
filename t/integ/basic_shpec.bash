@@ -21,7 +21,7 @@ describe 'libys basic integration tests'
     assert equal "$status" '200 OK'
   ti
 
-  it 'sets the Content-Type header'
+  it 'sets the Content-Type header to text/plain by default if a body is present'
     res="$(curl -i -s "$SERVER_ADDR" | get_header 'Content-Type')"
     assert equal 'text/plain' "$res"
   ti

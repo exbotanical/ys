@@ -56,7 +56,7 @@
 - [x] Comma-delimit duplicate response headers
 - [x] Use user-defined content length header OR overwrite it - but handle it
 - [ ] fmt string in `res_set_body`
-- [ ] Default Content-Type to text/plain?
+- [x] Default Content-Type to text/plain?
 - [ ] Remove the need for null-terminator everywhere else (incl `router_register`)
 
 ## New Features

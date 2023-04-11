@@ -270,7 +270,6 @@ response *meta_handler(request *req, response *res) {
 }
 
 response *root_handler(request *req, response *res) {
-  res_set_header(res, "Content-Type", "text/plain");
   res_set_header(res, "X-Powered-By", "integ-test");
   res_set_header(res, "X-Not-Exposed", "integ-test");
 

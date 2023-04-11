@@ -65,9 +65,9 @@ void test_response_serialize() {
            to_header("X-Powered-By", array_collect("Unit-Test")), NULL),
        .method = "GET",
        .status = STATUS_OK,
-       .expected =
-           "HTTP/1.1 200 OK\r\nVary: Origin\r\nX-Powered-By: "
-           "Unit-Test\r\nContent-Length: 15\r\n\r\n{\"test\":\"body\"}"},
+       .expected = "HTTP/1.1 200 OK\r\nVary: Origin\r\nX-Powered-By: "
+                   "Unit-Test\r\nContent-Type: text/plain\r\nContent-Length: "
+                   "15\r\n\r\n{\"test\":\"body\"}"},
 
       {.name = "MultipleValuesSameHeaderKey",
        .body = "body",
@@ -76,23 +76,23 @@ void test_response_serialize() {
        .headers = to_headers(
            to_header("Vary", array_collect("Origin", "Request-Method", "Etc")),
            NULL),
-       .expected =
-           "HTTP/1.1 202 Accepted\r\nVary: "
-           "Origin, Request-Method, Etc\r\nContent-Length: 4\r\n\r\nbody"},
+       .expected = "HTTP/1.1 202 Accepted\r\nVary: "
+                   "Origin, Request-Method, Etc\r\nContent-Type: "
+                   "text/plain\r\nContent-Length: 4\r\n\r\nbody"},
 
       {.name = "OmitContentLength_For204",
        .body = "body",
        .status = STATUS_NO_CONTENT,
        .method = "OPTIONS",
        .headers = ht_init(0),
-       .expected = "HTTP/1.1 204 No Content\r\n\r\nbody"},
+       .expected = "HTTP/1.1 204 No Content\r\n\r\n"},
 
       {.name = "OmitContentLength_ForInformational",
        .body = "test",
        .status = STATUS_SWITCHING_PROTOCOLS,
        .method = "HEAD",
        .headers = ht_init(0),
-       .expected = "HTTP/1.1 101 Switching Protocols\r\n\r\ntest"},
+       .expected = "HTTP/1.1 101 Switching Protocols\r\n\r\n"},
 
       {.name = "ContentLengthZero_WhenNoBody",
        .body = NULL,
@@ -109,7 +109,13 @@ void test_response_serialize() {
        .status = STATUS_NO_CONTENT,
        .method = "CONNECT",
        .headers = ht_init(0),
-       .expected = "HTTP/1.1 204 No Content\r\n\r\nbody"}};
+       .expected = "HTTP/1.1 204 No Content\r\n\r\n"},
+      {.name = "AddsTextPlainContentType_WhenGivenBodyAndNotSet",
+       .body = "body",
+       .status = STATUS_OK,
+       .method = "CONNECT",
+       .headers = ht_init(0),
+       .expected = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n"}};
 
   for (unsigned int i = 0; i < sizeof(tests) / sizeof(test_case); i++) {
     test_case test = tests[i];
