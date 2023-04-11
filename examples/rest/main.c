@@ -68,113 +68,113 @@ bool delete_record(char *id) {
 }
 
 response *set_global_headers(request *req, response *res) {
-  res_set_header(res, "X-Powered-By", "demo");
+  set_header(res, "X-Powered-By", "demo");
   return res;
 }
 
 response *handle_get(request *req, response *res) {
-  res_set_header(res, "Content-Type", "application/json");
+  set_header(res, "Content-Type", "application/json");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {
-    res_set_body(res, res_err("must provide an id"));
-    res_set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, res_err("must provide an id"));
+    set_status(res, STATUS_BAD_REQUEST);
     return res;
   }
 
   db_record *record = search_records(id);
   if (!record) {
-    res_set_body(res, res_err("no matching record"));
-    res_set_status(res, STATUS_NOT_FOUND);
+    set_body(res, res_err("no matching record"));
+    set_status(res, STATUS_NOT_FOUND);
     return res;
   }
 
-  res_set_body(res, res_ok(fmt_str("{\"key\":\"%s\",\"value\":\"%s\"}",
-                                   record->key, record->value)));
-  res_set_status(res, STATUS_OK);
+  set_body(res, res_ok(fmt_str("{\"key\":\"%s\",\"value\":\"%s\"}", record->key,
+                               record->value)));
+  set_status(res, STATUS_OK);
   return res;
 }
 
 response *handle_delete(request *req, response *res) {
-  res_set_header(res, "Content-Type", "application/json");
+  set_header(res, "Content-Type", "application/json");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {
-    res_set_body(res, res_err("must provide an id"));
-    res_set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, res_err("must provide an id"));
+    set_status(res, STATUS_BAD_REQUEST);
     return res;
   }
 
   bool ok = delete_record(id);
   if (!ok) {
-    res_set_body(res, res_err("no matching record"));
-    res_set_status(res, STATUS_NOT_FOUND);
+    set_body(res, res_err("no matching record"));
+    set_status(res, STATUS_NOT_FOUND);
     return res;
   }
 
-  res_set_status(res, STATUS_OK);
+  set_status(res, STATUS_OK);
 
   return res;
 }
 
 response *handle_put(request *req, response *res) {
-  res_set_header(res, "Content-Type", "application/json");
+  set_header(res, "Content-Type", "application/json");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {
-    res_set_body(res, res_err("must provide an id"));
-    res_set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, res_err("must provide an id"));
+    set_status(res, STATUS_BAD_REQUEST);
     return res;
   }
 
   char *v = jsob_getstr(req_get_body(req), "v");
   if (!v) {
-    res_set_body(res, res_err("must provide a value"));
-    res_set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, res_err("must provide a value"));
+    set_status(res, STATUS_BAD_REQUEST);
     return res;
   }
 
   int idx = search_records_idx(id);
   if (idx == -1) {
-    res_set_body(res, res_err("no matching record"));
-    res_set_status(res, STATUS_NOT_FOUND);
+    set_body(res, res_err("no matching record"));
+    set_status(res, STATUS_NOT_FOUND);
     return res;
   }
 
   db_record *record = &records[idx];
   memcpy(record->value, v, sizeof(v));
 
-  res_set_status(res, STATUS_OK);
+  set_status(res, STATUS_OK);
   return res;
 }
 
 response *handle_post(request *req, response *res) {
-  res_set_header(res, "Content-Type", "application/json");
+  set_header(res, "Content-Type", "application/json");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {
-    res_set_body(res, res_err("must provide an id"));
-    res_set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, res_err("must provide an id"));
+    set_status(res, STATUS_BAD_REQUEST);
     return res;
   }
 
   char *v = jsob_getstr(req_get_body(req), "v");
   if (!v) {
-    res_set_body(res, res_err("must provide a value"));
-    res_set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, res_err("must provide a value"));
+    set_status(res, STATUS_BAD_REQUEST);
     return res;
   }
 
   db_record *record = search_records(id);
   if (record) {
-    res_set_body(res, res_err("record exists"));
-    res_set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, res_err("record exists"));
+    set_status(res, STATUS_BAD_REQUEST);
     return res;
   }
 
   add_record(id, v);
 
-  res_set_status(res, STATUS_CREATED);
+  set_status(res, STATUS_CREATED);
 
   return res;
 }

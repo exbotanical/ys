@@ -12,14 +12,14 @@ With Ys you can do something like this
 // ...
 
 response *handler(request *req, response *res) {
-  res_set_header(res, "Content-Type", "text/plain");
+  set_header(res, "Content-Type", "text/plain");
 
   cookie *c = cookie_init(COOKIE_ID, sid);
   cookie_set_expires(c, n_minutes_from_now(10));
   set_cookie(res, c);
 
-  res_set_body(res, "Hello World!");
-  res_set_status(res, STATUS_OK);
+  set_body(res, "Hello World!");
+  set_status(res, STATUS_OK);
 
   return res;
 }

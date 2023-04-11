@@ -69,9 +69,9 @@ bool delete_record(char *id) {
 }
 
 response *data_handler(request *req, response *res) {
-  res_set_body(res, "{ \"data\": \"Hello World!\" }");
-  res_set_header(res, "Content-Type", "application/json");
-  res_set_status(res, STATUS_OK);
+  set_body(res, "{ \"data\": \"Hello World!\" }");
+  set_header(res, "Content-Type", "application/json");
+  set_status(res, STATUS_OK);
 
   return res;
 }
@@ -84,7 +84,7 @@ response *login_handler(request *req, response *res) {
   cookie_set_path(c, "/");
   set_cookie(res, c);
 
-  res_set_status(res, STATUS_OK);
+  set_status(res, STATUS_OK);
 
   return res;
 }
@@ -92,16 +92,16 @@ response *login_handler(request *req, response *res) {
 response *logout_handler(request *req, response *res) {
   cookie *c = get_cookie(req, COOKIE_ID);
   if (!c) {
-    res_set_status(res, STATUS_UNAUTHORIZED);
-    res_set_done(res);
+    set_status(res, STATUS_UNAUTHORIZED);
+    set_done(res);
 
     return res;
   }
 
   char *sid = cookie_get_value(c);
   if (!sid) {
-    res_set_status(res, STATUS_UNAUTHORIZED);
-    res_set_done(res);
+    set_status(res, STATUS_UNAUTHORIZED);
+    set_done(res);
 
     return res;
   }
@@ -113,13 +113,13 @@ response *logout_handler(request *req, response *res) {
 }
 
 response *auth_middleware(request *req, response *res) {
-  res_set_header(res, "X-Authorized-By", "TheDemoApp");
+  set_header(res, "X-Authorized-By", "TheDemoApp");
 
   cookie *c = get_cookie(req, COOKIE_ID);
 
   if (!c) {
-    res_set_status(res, STATUS_UNAUTHORIZED);
-    res_set_done(res);
+    set_status(res, STATUS_UNAUTHORIZED);
+    set_done(res);
 
     return res;
   }
@@ -131,126 +131,126 @@ response *auth_middleware(request *req, response *res) {
 }
 
 response *set_global_headers(request *req, response *res) {
-  res_set_header(res, "X-Powered-By", "demo");
-  res_set_header(res, "X-Middleware", "test");
+  set_header(res, "X-Powered-By", "demo");
+  set_header(res, "X-Middleware", "test");
 
   return res;
 }
 
 response *handle_api_root(request *req, response *res) {
-  res_set_body(res, "api root");
+  set_body(res, "api root");
   return res;
 }
 
 response *handle_api_demo(request *req, response *res) {
-  res_set_body(res, req_get_body(req));
+  set_body(res, req_get_body(req));
   return res;
 }
 
 response *handle_get(request *req, response *res) {
-  res_set_header(res, "Content-Type", "application/json");
+  set_header(res, "Content-Type", "application/json");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {
-    res_set_body(res, res_err("must provide an id"));
-    res_set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, res_err("must provide an id"));
+    set_status(res, STATUS_BAD_REQUEST);
     return res;
   }
 
   db_record *record = search_records(id);
   if (!record) {
-    res_set_body(res, res_err("no matching record"));
-    res_set_status(res, STATUS_NOT_FOUND);
+    set_body(res, res_err("no matching record"));
+    set_status(res, STATUS_NOT_FOUND);
     return res;
   }
 
-  res_set_body(res, res_ok(fmt_str("{\"key\":\"%s\",\"value\":\"%s\"}",
-                                   record->key, record->value)));
-  res_set_status(res, STATUS_OK);
+  set_body(res, res_ok(fmt_str("{\"key\":\"%s\",\"value\":\"%s\"}", record->key,
+                               record->value)));
+  set_status(res, STATUS_OK);
   return res;
 }
 
 response *handle_delete(request *req, response *res) {
-  res_set_header(res, "Content-Type", "application/json");
+  set_header(res, "Content-Type", "application/json");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {
-    res_set_body(res, res_err("must provide an id"));
-    res_set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, res_err("must provide an id"));
+    set_status(res, STATUS_BAD_REQUEST);
     return res;
   }
 
   bool ok = delete_record(id);
   if (!ok) {
-    res_set_body(res, res_err("no matching record"));
-    res_set_status(res, STATUS_NOT_FOUND);
+    set_body(res, res_err("no matching record"));
+    set_status(res, STATUS_NOT_FOUND);
     return res;
   }
 
-  res_set_status(res, STATUS_OK);
+  set_status(res, STATUS_OK);
 
   return res;
 }
 
 response *handle_put(request *req, response *res) {
-  res_set_header(res, "Content-Type", "application/json");
+  set_header(res, "Content-Type", "application/json");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {
-    res_set_body(res, res_err("must provide an id"));
-    res_set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, res_err("must provide an id"));
+    set_status(res, STATUS_BAD_REQUEST);
     return res;
   }
 
   char *v = jsob_getstr(req_get_body(req), "v");
   if (!v) {
-    res_set_body(res, res_err("must provide a value"));
-    res_set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, res_err("must provide a value"));
+    set_status(res, STATUS_BAD_REQUEST);
     return res;
   }
 
   int idx = search_records_idx(id);
   if (idx == -1) {
-    res_set_body(res, res_err("no matching record"));
-    res_set_status(res, STATUS_NOT_FOUND);
+    set_body(res, res_err("no matching record"));
+    set_status(res, STATUS_NOT_FOUND);
     return res;
   }
 
   db_record *record = &records[idx];
   memcpy(record->value, v, strlen(v));
 
-  res_set_status(res, STATUS_OK);
+  set_status(res, STATUS_OK);
   return res;
 }
 
 response *handle_post(request *req, response *res) {
-  res_set_header(res, "Content-Type", "application/json");
+  set_header(res, "Content-Type", "application/json");
 
   char *id = req_get_parameter(req, "id");
   if (!id) {
-    res_set_body(res, res_err("must provide an id"));
-    res_set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, res_err("must provide an id"));
+    set_status(res, STATUS_BAD_REQUEST);
     return res;
   }
 
   char *v = jsob_getstr(req_get_body(req), "v");
 
   if (!v) {
-    res_set_body(res, res_err("must provide a value"));
-    res_set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, res_err("must provide a value"));
+    set_status(res, STATUS_BAD_REQUEST);
     return res;
   }
 
   db_record *record = search_records(id);
   if (record) {
-    res_set_body(res, res_err("record exists"));
-    res_set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, res_err("record exists"));
+    set_status(res, STATUS_BAD_REQUEST);
     return res;
   }
 
   add_record(id, v);
 
-  res_set_status(res, STATUS_CREATED);
+  set_status(res, STATUS_CREATED);
 
   return res;
 }
@@ -263,18 +263,18 @@ response *meta_handler(request *req, response *res) {
     buffer_append(buf, movies[i]);
   }
 
-  res_set_body(res, buffer_state(buf));
+  set_body(res, buffer_state(buf));
 
   // status defaults to 200 when not set explicitly
   return res;
 }
 
 response *root_handler(request *req, response *res) {
-  res_set_header(res, "X-Powered-By", "integ-test");
-  res_set_header(res, "X-Not-Exposed", "integ-test");
+  set_header(res, "X-Powered-By", "integ-test");
+  set_header(res, "X-Not-Exposed", "integ-test");
 
-  res_set_body(res, "Hello World!");
-  res_set_status(res, STATUS_OK);
+  set_body(res, "Hello World!");
+  set_status(res, STATUS_OK);
 
   return res;
 }

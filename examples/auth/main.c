@@ -64,15 +64,15 @@ char *hash_password(char *pw) {
 }
 
 response *index_handler(request *req, response *res) {
-  res_set_status(res, STATUS_OK);
-  res_set_body(res, from_file("./index.html"));
+  set_status(res, STATUS_OK);
+  set_body(res, from_file("./index.html"));
 
   return res;
 }
 
 response *css_handler(request *req, response *res) {
-  res_set_status(res, STATUS_OK);
-  res_set_body(res, from_file("./style.css"));
+  set_status(res, STATUS_OK);
+  set_body(res, from_file("./style.css"));
 
   return res;
 }
@@ -82,9 +82,9 @@ response *data_handler(request *req, response *res) {
   char *sid = cookie_get_value(c);
   char *username = ht_get(session_store, sid);
 
-  res_set_body(res, fmt_str("{ \"data\": \"Hello, %s!\" }", username));
-  res_set_header(res, "Content-Type", "application/json");
-  res_set_status(res, STATUS_OK);
+  set_body(res, fmt_str("{ \"data\": \"Hello, %s!\" }", username));
+  set_header(res, "Content-Type", "application/json");
+  set_status(res, STATUS_OK);
 
   return res;
 }
@@ -92,21 +92,21 @@ response *data_handler(request *req, response *res) {
 response *register_handler(request *req, response *res) {
   char *username = jsob_getstr(req_get_body(req), "username");
   if (!username) {
-    res_set_status(res, STATUS_BAD_REQUEST);
-    res_set_body(res, "Must provide a username");
+    set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, "Must provide a username");
     return res;
   }
 
   char *password = jsob_getstr(req_get_body(req), "password");
   if (!password) {
-    res_set_status(res, STATUS_BAD_REQUEST);
-    res_set_body(res, "Must provide a password");
+    set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, "Must provide a password");
     return res;
   }
 
   if (user_exists(username)) {
-    res_set_status(res, STATUS_BAD_REQUEST);
-    res_set_body(res, fmt_str("Username %s exists", username));  // TODO: fmt
+    set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, fmt_str("Username %s exists", username));  // TODO: fmt
     return res;
   }
 
@@ -121,28 +121,28 @@ response *register_handler(request *req, response *res) {
 
   set_cookie(res, c);
 
-  res_set_status(res, STATUS_CREATED);
+  set_status(res, STATUS_CREATED);
   return res;
 }
 
 response *login_handler(request *req, response *res) {
   char *username = jsob_getstr(req_get_body(req), "username");
   if (!username) {
-    res_set_status(res, STATUS_BAD_REQUEST);
-    res_set_body(res, "Must provide a username");
+    set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, "Must provide a username");
     return res;
   }
 
   char *password = jsob_getstr(req_get_body(req), "password");
   if (!password) {
-    res_set_status(res, STATUS_BAD_REQUEST);
-    res_set_body(res, "Must provide a password");
+    set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, "Must provide a password");
     return res;
   }
 
   if (!user_exists(username)) {
-    res_set_status(res, STATUS_BAD_REQUEST);
-    res_set_body(res, "invalid credentials");
+    set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, "invalid credentials");
 
     return res;
   }
@@ -150,8 +150,8 @@ response *login_handler(request *req, response *res) {
   user *u = (char *)ht_get(user_store, username);
 
   if (!u || !s_equals(hash_password(u->password), password)) {
-    res_set_status(res, STATUS_BAD_REQUEST);
-    res_set_body(res, "invalid credentials");
+    set_status(res, STATUS_BAD_REQUEST);
+    set_body(res, "invalid credentials");
 
     return res;
   }
@@ -164,7 +164,7 @@ response *login_handler(request *req, response *res) {
   cookie_set_path(c, "/");
   set_cookie(res, c);
 
-  res_set_status(res, STATUS_OK);
+  set_status(res, STATUS_OK);
 
   return res;
 }
@@ -172,16 +172,16 @@ response *login_handler(request *req, response *res) {
 response *logout_handler(request *req, response *res) {
   cookie *c = get_cookie(req, COOKIE_ID);
   if (!c) {
-    res_set_status(res, STATUS_UNAUTHORIZED);
-    res_set_done(res);
+    set_status(res, STATUS_UNAUTHORIZED);
+    set_done(res);
 
     return res;
   }
 
   char *sid = cookie_get_value(c);
   if (!sid) {
-    res_set_status(res, STATUS_UNAUTHORIZED);
-    res_set_done(res);
+    set_status(res, STATUS_UNAUTHORIZED);
+    set_done(res);
 
     return res;
   }
@@ -195,12 +195,12 @@ response *logout_handler(request *req, response *res) {
 }
 
 response *auth_middleware(request *req, response *res) {
-  res_set_header(res, "X-Authorized-By", "TheDemoApp");
+  set_header(res, "X-Authorized-By", "TheDemoApp");
 
   cookie *c = get_cookie(req, COOKIE_ID);
   if (!c) {
-    res_set_status(res, STATUS_UNAUTHORIZED);
-    res_set_done(res);
+    set_status(res, STATUS_UNAUTHORIZED);
+    set_done(res);
 
     return res;
   }
@@ -209,8 +209,8 @@ response *auth_middleware(request *req, response *res) {
 
   char *username = ht_get(session_store, sid);
   if (!username || !user_exists(username)) {
-    res_set_status(res, STATUS_UNAUTHORIZED);
-    res_set_done(res);
+    set_status(res, STATUS_UNAUTHORIZED);
+    set_done(res);
 
     return res;
   }

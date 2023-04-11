@@ -391,7 +391,7 @@ char* req_get_header(request* req, const char* key);
 typedef struct response_internal* response;
 
 /**
- * res_set_header inserts the given key/value pair as a header on the response
+ * set_header inserts the given key/value pair as a header on the response
  *
  * @param res
  * @param key
@@ -399,54 +399,54 @@ typedef struct response_internal* response;
  * @return true if adding the header succeeded
  * @return false if adding the header failed; this would indicate an OOM error
  */
-bool res_set_header(response* res, const char* key, const char* value);
+bool set_header(response* res, const char* key, const char* value);
 
 /**
- * res_set_body sets the given body on the response
+ * set_body sets the given body on the response
  *
  * @param res
  * @param body
  */
-void res_set_body(response* res, const char* body);
+void set_body(response* res, const char* body);
 
 /**
- * res_set_status sets the given status code on the response
+ * set_status sets the given status code on the response
  *
  * @param res
  * @param status
  */
-void res_set_status(response* res, http_status status);
+void set_status(response* res, http_status status);
 
 /**
- * res_get_done returns the done status of the response
+ * get_done returns the done status of the response
  *
  * @param res
  * @return true
  * @return false
  */
-bool res_get_done(response* res);
+bool get_done(response* res);
 
 /**
- * res_set_done sets the done status of the response to true. This operation is
+ * set_done sets the done status of the response to true. This operation is
  * idempotent.
  *
  * @param res
  */
-void res_set_done(response* res);
+void set_done(response* res);
 
 /**
- * res_get_header retrieves the first header value for a given key on
+ * get_header retrieves the first header value for a given key on
  * the response or NULL if not found
  *
  * @param res
  * @param key
  * @return char*
  */
-char* res_get_header(response* res, const char* key);
+char* get_header(response* res, const char* key);
 
 /**
  * from_file reads a file into a string buffer, which may then be passed
- * directly to `res_set_body` e.g. res_set_body(res, from_file("./index.html"));
+ * directly to `set_body` e.g. set_body(res, from_file("./index.html"));
  *
  * @param filename
  * @return char*

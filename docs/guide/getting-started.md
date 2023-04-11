@@ -43,10 +43,10 @@ int main(int argc, char **argv) {
 #define PORT 9000
 
 response *root_handler(request *req, response *res) {
-  res_set_header(res, "Content-Type", "text/plain");
+  set_header(res, "Content-Type", "text/plain");
 
-  res_set_body(res, "Hello World!");
-  res_set_status(res, STATUS_OK);
+  set_body(res, "Hello World!");
+  set_status(res, STATUS_OK);
 
   return res;
 }

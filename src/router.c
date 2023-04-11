@@ -79,7 +79,7 @@ static response *default_internal_error_handler(request *req, response *res) {
   printlogf(LOG_INFO, "[router::%s] 500 handler in effect at request path %s\n",
             __func__, req_get_path(req));
 
-  res_set_status(res, STATUS_INTERNAL_SERVER_ERROR);
+  set_status(res, STATUS_INTERNAL_SERVER_ERROR);
 
   return res;
 }
@@ -97,7 +97,7 @@ static response *default_not_found_handler(request *req, response *res) {
             "at request path %s\n",
             __func__, req_get_path(req));
 
-  res_set_status(res, STATUS_NOT_FOUND);
+  set_status(res, STATUS_NOT_FOUND);
 
   return res;
 }
@@ -116,7 +116,7 @@ static response *default_method_not_allowed_handler(request *req,
             "effect at request path %s\n",
             __func__, req_get_path(req));
 
-  res_set_status(res, STATUS_METHOD_NOT_ALLOWED);
+  set_status(res, STATUS_METHOD_NOT_ALLOWED);
 
   return res;
 }

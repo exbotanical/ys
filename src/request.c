@@ -29,7 +29,7 @@
  * @param header
  */
 static void fix_pragma_cache_control(hash_table* headers) {
-  if (s_equals(get_header(headers, PRAGMA), NO_CACHE)) {
+  if (s_equals(get_first_header(headers, PRAGMA), NO_CACHE)) {
     if (!ht_search(headers, CACHE_CONTROL)) {
       insert_header(headers, CACHE_CONTROL, NO_CACHE, true);
     }
@@ -201,5 +201,5 @@ char* req_get_version(request* req) {
 }
 
 char* req_get_header(request* req, const char* key) {
-  return get_header(((request_internal*)req)->headers, key);
+  return get_first_header(((request_internal*)req)->headers, key);
 }

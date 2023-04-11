@@ -21,11 +21,11 @@ void test_fix_pragma_cache_control() {
   insert_header(headers, PRAGMA, NO_CACHE, true);
   fix_pragma_cache_control(headers);
 
-  is(get_header(headers, CACHE_CONTROL), NO_CACHE,
+  is(get_first_header(headers, CACHE_CONTROL), NO_CACHE,
      "sets the Cache-Control header to no-cache if Pragma: no-cache and no "
      "Cache-Control header present");
 
-  is(get_header(headers, PRAGMA), NO_CACHE,
+  is(get_first_header(headers, PRAGMA), NO_CACHE,
      "keeps the Pragma: no-cache header");
 
   ok(headers->count == 2, "has two header keys");
@@ -39,10 +39,10 @@ void test_fix_pragma_cache_control_has_cache_control() {
 
   fix_pragma_cache_control(headers);
 
-  is(get_header(headers, CACHE_CONTROL), "whatever",
+  is(get_first_header(headers, CACHE_CONTROL), "whatever",
      "leaves the Cache-Control header as-is");
 
-  is(get_header(headers, PRAGMA), NO_CACHE,
+  is(get_first_header(headers, PRAGMA), NO_CACHE,
      "keeps the Pragma: no-cache header");
 
   ok(headers->count == 2, "has two header keys");
@@ -53,7 +53,7 @@ void test_fix_pragma_cache_control_no_pragma() {
 
   fix_pragma_cache_control(headers);
 
-  is(get_header(headers, PRAGMA), NULL, "does not modify the headers");
+  is(get_first_header(headers, PRAGMA), NULL, "does not modify the headers");
 
   ok(headers->count == 0, "has no header keys");
 }

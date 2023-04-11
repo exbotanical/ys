@@ -204,7 +204,7 @@ char* to_canonical_mime_header_key(char* key) {
   return key;
 }
 
-char* get_header(hash_table* headers, const char* key) {
+char* get_first_header(hash_table* headers, const char* key) {
   ht_record* header = ht_search(headers, key);
   if (!header) {
     return NULL;
@@ -240,11 +240,11 @@ char** req_header_values(hash_table* headers, const char* key) {
   return headers_list;
 }
 
-bool res_set_header(response* res, const char* key, const char* value) {
+bool set_header(response* res, const char* key, const char* value) {
   return insert_header(((response_internal*)res)->headers, key, value, false);
 }
 
-// TODO: does get_header handle header=value1;value2 ?
+// TODO: does get_first_header handle header=value1;value2 ?
 bool insert_header(hash_table* headers, const char* key, const char* value,
                    bool is_request) {
   // Check if we've already encountered this header key. Some headers cannot

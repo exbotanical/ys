@@ -45,7 +45,7 @@ response *login_handler(request *req, response *res) {
   cookie_set_path(c, "/");
   set_cookie(res, c);
 
-  res_set_status(res, STATUS_OK);
+  set_status(res, STATUS_OK);
 
   return res;
 }
@@ -61,8 +61,8 @@ We can also use `cookie_get_value` to retrieve the `value` of the Cookie:
 response *authorize_handler(request *req, response *res) {
   cookie *c = get_cookie(req, COOKIE_ID);
   if (!c) {
-    res_set_status(res, STATUS_UNAUTHORIZED);
-    res_set_done(res);
+    set_status(res, STATUS_UNAUTHORIZED);
+    set_done(res);
 
     return res;
   }

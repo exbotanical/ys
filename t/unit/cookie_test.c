@@ -228,7 +228,7 @@ void test_set_cookie() {
   response_internal* res = response_init();
   set_cookie(res, c);
 
-  const char* actual = get_header(res->headers, SET_COOKIE);
+  const char* actual = get_first_header(res->headers, SET_COOKIE);
 
   const char* expected =
       "ThisCookie=test; Path=/; Domain=testsite.com; Expires=Sat, 20 Jul 2041 "

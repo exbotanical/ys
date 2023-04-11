@@ -22,21 +22,21 @@ const char *html =
     "</html>";
 
 response *handler(request *req, response *res) {
-  res_set_header(res, "Content-Type", "text/html");
-  res_set_header(res, "X-Powered-By", "demo");
+  set_header(res, "Content-Type", "text/html");
+  set_header(res, "X-Powered-By", "demo");
 
-  res_set_body(res, html);
-  res_set_status(res, STATUS_OK);
+  set_body(res, html);
+  set_status(res, STATUS_OK);
 
   return res;
 }
 
 response *css_handler(request *req, response *res) {
-  res_set_header(res, "Content-Type", "text/css");
-  res_set_header(res, "X-Powered-By", "demo");
+  set_header(res, "Content-Type", "text/css");
+  set_header(res, "X-Powered-By", "demo");
 
-  res_set_body(res, from_file("./style.css"));
-  res_set_status(res, STATUS_OK);
+  set_body(res, from_file("./style.css"));
+  set_status(res, STATUS_OK);
 
   return res;
 }

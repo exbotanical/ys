@@ -114,10 +114,10 @@ Let's look at a few setters that will allow us to craft the HTTP response return
 #define PORT 9000
 
 response *root_handler(request *req, response *res) {
-  res_set_header(res, "Content-Type", "text/plain");
+  set_header(res, "Content-Type", "text/plain");
 
-  res_set_body(res, "Hello World!");
-  res_set_status(res, STATUS_OK);
+  set_body(res, "Hello World!");
+  set_status(res, STATUS_OK);
 
   return res;
 }
@@ -132,14 +132,14 @@ int main(int argc, char **argv) {
 }
 ```
 
-First, we have the `res_set_header` function. `res_set_header` - as its name would suggest - sets a key/value pair on the response's headers. Under the hood, Ys will handle formatting the header and encompassing response into a RFC 7230-compliant format. All we need to do here is set the key and value.
+First, we have the `set_header` function. `set_header` - as its name would suggest - sets a key/value pair on the response's headers. Under the hood, Ys will handle formatting the header and encompassing response into a RFC 7230-compliant format. All we need to do here is set the key and value.
 
 ```c{2}
 response *root_handler(request *req, response *res) {
-  res_set_header(res, "Content-Type", "text/plain");
+  set_header(res, "Content-Type", "text/plain");
 
-  res_set_body(res, "Hello World!");
-  res_set_status(res, STATUS_OK);
+  set_body(res, "Hello World!");
+  set_status(res, STATUS_OK);
 
   return res;
 }
@@ -147,53 +147,55 @@ response *root_handler(request *req, response *res) {
 
 Here, we're setting the `Content-Type` to `text/plain`.
 
-Speaking of RFC 7230, most HTTP headers are allowed to have multiple values corresponding to the same key. Were we to call `res_set_header` twice with the same key but different values, Ys will use both values in the response.
+Speaking of RFC 7230, most HTTP headers are allowed to have multiple values corresponding to the same key. Were we to call `set_header` twice with the same key but different values, Ys will use both values in the response.
 
 For example
 
 ```c{2-3}
 response *root_handler(request *req, response *res) {
-  res_set_header(res, "X-Header", "value-1");
-  res_set_header(res, "X-Header", "value-2");
+  set_header(res, "X-Header", "value-1");
+  set_header(res, "X-Header", "value-2");
   // ...
   return res; // X-Header: value-1, value-2
 }
 ```
 
-Next, we set the body of the response using the aptly-named `res_set_body` function. In Ys, you *do not need to set `Content-Length`* - Ys will compute this header for you when serializing the response by determining the correct size of the response body. If you do not set a body, `Content-Length` will be set to `0` ([see exceptions](../reference/)).
+Next, we set the body of the response using the aptly-named `set_body` function. In Ys, you *do not need to set `Content-Length`* - Ys will compute this header for you when serializing the response by determining the correct size of the response body. If you do not set a body, `Content-Length` will be set to `0` ([see exceptions](../reference/)).
 
 ```c{4}
 response *root_handler(request *req, response *res) {
-  res_set_header(res, "Content-Type", "text/plain");
+  set_header(res, "Content-Type", "text/plain");
 
-  res_set_body(res, "Hello World!");
-  res_set_status(res, STATUS_OK);
+  set_body(res, "Hello World!");
+  set_status(res, STATUS_OK);
 
   return res;
 }
 ```
 
-Next, we explicitly set the response status to `200 OK` using the `res_set_status` function and `STATUS_OK` enum. As aforementioned, the response is set to `200 OK` by default if you do not call `res_set_status`, but we're including it here for illustrative purposes.
+Next, we explicitly set the response status to `200 OK` using the `set_status` function and `STATUS_OK` enum. As aforementioned, the response is set to `200 OK` by default if you do not call `set_status`, but we're including it here for illustrative purposes.
 
 ```c{5}
 response *root_handler(request *req, response *res) {
-  res_set_header(res, "Content-Type", "text/plain");
+  set_header(res, "Content-Type", "text/plain");
 
-  res_set_body(res, "Hello World!");
-  res_set_status(res, STATUS_OK);
+  set_body(res, "Hello World!");
+  set_status(res, STATUS_OK);
 
   return res;
 }
 ```
+
+Similarly, if you set a body but do not set a `Content-Type` header, Ys will default the `Content-Type` to `text/plain`.
 
 Finally, we return the response object with our modifications so it can be serialized by Ys and sent back to the client.
 
 ```c{7}
 response *root_handler(request *req, response *res) {
-  res_set_header(res, "Content-Type", "text/plain");
+  set_header(res, "Content-Type", "text/plain");
 
-  res_set_body(res, "Hello World!");
-  res_set_status(res, STATUS_OK);
+  set_body(res, "Hello World!");
+  set_status(res, STATUS_OK);
 
   return res;
 }

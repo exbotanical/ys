@@ -59,14 +59,14 @@ char* to_canonical_mime_header_key(char* key);
 array_t* get_header_values(hash_table* headers, const char* key);
 
 /**
- * get_header retrieves the first value for a given header key from
+ * get_first_header retrieves the first value for a given header key from
  * `headers`, or NULL if not found
  *
  * @param headers
  * @param key
  * @return char*
  */
-char* get_header(hash_table* headers, const char* key);
+char* get_first_header(hash_table* headers, const char* key);
 
 /**
  * req_header_values returns a char array of all values for the given header key

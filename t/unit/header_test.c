@@ -92,8 +92,9 @@ void test_get_header() {
 
   ht_insert(ht, k1, arr);
 
-  is(get_header(ht, k1), v1, "retrieves the first header value");
-  is(get_header(ht, v1), NULL, "returns NULL if the header key does not exist");
+  is(get_first_header(ht, k1), v1, "retrieves the first header value");
+  is(get_first_header(ht, v1), NULL,
+     "returns NULL if the header key does not exist");
 
   array_free(arr);
 }
