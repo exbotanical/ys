@@ -115,7 +115,7 @@ void test_response_serialize() {
        .status = STATUS_OK,
        .method = "CONNECT",
        .headers = ht_init(0),
-       .expected = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n"}};
+       .expected = "HTTP/1.1 200 OK\r\n\r\n"}};
 
   for (unsigned int i = 0; i < sizeof(tests) / sizeof(test_case); i++) {
     test_case test = tests[i];
@@ -136,7 +136,7 @@ void test_response_serialize() {
 }
 
 int main() {
-  plan(13);
+  plan(14);
 
   test_is_2xx_connect();
   test_is_informational();
