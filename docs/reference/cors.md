@@ -4,6 +4,27 @@
 
 `cors_opts*` stores CORS configuration options used to execute a CORS policy on applicable requests.
 
+
+## cors_opts_init
+
+`cors_opts_init` initializes a new CORS options object. Use the `cors_set_*` utilities to build a custom CORS policy.
+
+## cors_allow_all
+
+```c
+cors_opts *cors_allow_all();
+```
+
+`cors_allow_all` initializes a new CORS options object with sensibly liberal defaults.
+
+## use_cors
+
+```c
+void use_cors(router_attr *attr, cors_opts *opts);
+```
+
+`use_cors` binds the CORS global middleware to the [router attributes](./router-attr.md) instance.
+
 ## set_allowed_origins
 
 ```c
@@ -68,19 +89,3 @@ void set_max_age(cors_opts *opts, int max_age);
 ```
 
 `set_max_age` sets the `cors_opts*` max age to `max_age` seconds.
-
-## cors_allow_all
-
-```c
-cors_opts *cors_allow_all();
-```
-
-`cors_allow_all` initializes a new CORS options object with sensibly liberal defaults.
-
-## use_cors
-
-```c
-void use_cors(router_attr *attr, cors_opts *opts);
-```
-
-`use_cors` binds the CORS global middleware to the [router attributes](./router-attr.md) instance.
