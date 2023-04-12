@@ -142,8 +142,8 @@
   - [x] Failed curl localhost:9000/?cookie
   - [x] Failed curl 'localhost:9000/?cookie=1&value=1'
 - [x] Why does http req hang when using TLS?
-- [ ] Don't fallthrough to route handler on OPTIONS req
-  - [ ] Middleware should run before the fallback handlers and routing - that will fix this.
+- [x] Don't fallthrough to route handler on OPTIONS req
+  - [x] Middleware should run before the fallback handlers and routing - that will fix this.
 
 ## Ecosystem
 - [ ] Addon / plugin libraries

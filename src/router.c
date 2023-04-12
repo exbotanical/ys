@@ -261,13 +261,6 @@ void router_register(http_router *router, const char *path,
         __func__);
   }
 
-  // OPTIONS should always be allowed if we're using CORS
-  char *options = s_copy(http_method_names[METHOD_OPTIONS]);
-  if (((router_internal *)router)->use_cors &&
-      !array_includes(methods, has, options)) {
-    array_push(methods, options);
-  }
-
   trie_insert(((router_internal *)router)->trie, methods, path,
               (generic_handler *)handler);
 }
@@ -278,10 +271,19 @@ void router_run(router_internal *router, client_context *ctx,
     return;
   }
 
+  response_internal *res = response_init();
+
+  array_t *mws = router->middlewares;
+  if (has_elements(mws)) {
+    res->done = invoke_chain(req, res, mws);
+  }
+
+  if (router->use_cors && res->done) {
+    goto done;
+  }
+
   route_result *result =
       trie_search(router->trie, req->method, req->route_path);
-
-  response_internal *res = response_init();
 
   if (!result) {
     res = CR(router->internal_error_handler(CRR(req, res)));
@@ -295,23 +297,21 @@ void router_run(router_internal *router, client_context *ctx,
 
     route_handler *h = (route_handler *)result->action->handler;
 
-    array_t *mws = router->middlewares;
-    if (has_elements(mws)) {
-      res->done = invoke_chain(req, res, mws);
-    }
-
     if (!res->done) {
       res = CR(h(CRR(req, res)));
     }
   }
 
+  free(result);
+  goto done;
+
+done:
   response_send(ctx, response_serialize(req, res));
 
   // TODO: free ht
   free(req);
   free(res);
   free(ctx);
-  free(result);
 }
 
 http_router *router_register_sub(http_router *parent_router, router_attr *attr,
