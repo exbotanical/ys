@@ -415,3 +415,29 @@
   --vp-carbon-ads-hover-text-color: var(--vp-c-brand);
   --vp-carbon-ads-hover-poweredby-color: var(--vp-c-text-1);
 }
+
+body {
+  position: relative;
+}
+
+.noise {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+  position: absolute;
+  z-index: 980;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  animation: fade-in 4s;
+  background-size: calc(1.5px * 64);
+  opacity: 0.012;
+  pointer-events: none;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
