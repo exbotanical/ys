@@ -256,6 +256,11 @@ describe 'middleware'
     res="$(curl -i -s "$SERVER_ADDR/" | get_header 'X-Middleware')"
     assert equal 'test' "$res"
   ti
+
+  it 'allows OPTIONS requests for CORS but does not fall through to route'
+    res="$(curl -i -s "$SERVER_ADDR/" -X OPTIONS | get_header 'X-Root-Handler')"
+    assert equal '' "$res"
+  ti
 end_describe
 
 kill $!

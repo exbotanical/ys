@@ -272,6 +272,7 @@ response *meta_handler(request *req, response *res) {
 response *root_handler(request *req, response *res) {
   set_header(res, "X-Powered-By", "integ-test");
   set_header(res, "X-Not-Exposed", "integ-test");
+  set_header(res, "X-Root-Handler", "test");
 
   set_body(res, "Hello World!");
   set_status(res, STATUS_OK);
