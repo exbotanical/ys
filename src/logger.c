@@ -22,7 +22,7 @@
 #define EDWARD_THE_FOURTH 1461
 
 // Available log levels
-const char *log_levels[] = {"info", "debug", "silly", NULL};
+const char *log_levels[] = {"info", "debug", "verbose", NULL};
 
 // Log level to use
 short log_level = LOG_LEVEL;
@@ -153,7 +153,7 @@ static void setup_log_level() {
       log_level = YS_LOG_DEBUG;
       break;
     case 10:
-      log_level = YS_LOG_SILLY;
+      log_level = YS_LOG_VERBOSE;
       break;
     default:
       log_level = YS_LOG_INFO;

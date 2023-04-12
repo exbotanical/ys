@@ -5,7 +5,7 @@
 
 #define YS_LOG_INFO 6
 #define YS_LOG_DEBUG 7
-#define YS_LOG_SILLY 10
+#define YS_LOG_VERBOSE 10
 
 /**
  * Logs a user-facing error to stderr and exits with return code `rc`.

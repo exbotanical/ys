@@ -7,7 +7,7 @@ Ys is a modern, minimal web application framework for the C programming language
 - [Routing and Middleware](../documentation/routing.md)
 - [TLS support](../documentation/https-support.md)
 - [Logging](../documentation/configuration-and-logging.md)
-- [Request-level metadata](../reference/request.md) e.g. pre-parsed URL and query parameters
+- [Request-level metadata](../reference/request.md)
 - [Zero-config CORS](../documentation/cors.md)
 - [Cookies](../documentation/cookies.md)
 
