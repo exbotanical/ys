@@ -178,3 +178,9 @@ int none; // end of response_internal
 1. install pcre `apt install libpcre3-dev`
 2. add -lm -lpcre to examples' Makefiles (why?)
 3. integ tests source util doesnt work
+
+Everything you need: `apt update && apt install git vim libpcre3-dev make gcc libssl-dev`
+
+
+### Dev
+1. shpec sh -c "`curl -L https://raw.githubusercontent.com/rylnd/shpec/master/install.sh`"

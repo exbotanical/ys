@@ -1,11 +1,12 @@
 CC := gcc
-SRC := $(wildcard ./*.c) $(wildcard ./deps/*/*.c)
+LINK := -lys -lm -lpcre
+SRC := $(wildcard ./*.c)
 TARGET := demo
 
 all: $(TARGET)
 
 $(TARGET): $(SRC)
-	$(CC) $(SRC) -o $(TARGET) -I../../src -I../../deps -Ideps -L../../ -lys -luuid
+	$(CC) -I../../src -I../../deps $(SRC) -o $(TARGET) -L../../ $(LINK)
 
 clean:
 	rm $(TARGET)

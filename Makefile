@@ -1,3 +1,5 @@
+OS := $(shell lsb_release -si)
+
 DEPS_DIR := deps
 SRC_DIR := src
 LIB_DIR := lib
@@ -8,6 +10,7 @@ INTEG_DIR := $(TEST_DIR)/integ
 CC := gcc
 CFLAGS := -g -fPIC -Wall -Wextra -pedantic -Wno-missing-braces -I$(DEPS_DIR) -lm -lpcre -pthread
 LDFLAGS := -shared
+TFLAGS :=
 
 LINTER := clang-format
 INTEG_RUNNER := shpec
@@ -23,8 +26,18 @@ DEPS := $(wildcard $(DEPS_DIR)/*/*.c)
 LIB := $(wildcard $(LIB_DIR)/*.c)
 TESTS := $(wildcard $(TEST_DIR)/*/*.c)
 
+ifeq ($(OS), Ubuntu))
+	TFLAGS += -lm -lpcre
+endif
+
 ifdef USE_TLS
-	CFLAGS += -lcrypto -I/usr/lib/openssl-1.1/ -lssl -DUSE_TLS=1
+	CFLAGS += -lcrypto -lssl -DUSE_TLS=1
+ifeq ($(OS), Ubuntu))
+	CFLAGS += -I/usr/include/openssl/
+	TFLAGS += $(CFLAGS)
+else
+	CFLAGS += -I/usr/lib/openssl-1.1/
+endif
 endif
 
 ifdef DEBUG
@@ -63,7 +76,7 @@ unit_test:
 # make -s integ_test 2>/dev/null
 integ_test:
 	$(MAKE) all
-	$(CC) $(INTEG_DIR)/test_server.c $(wildcard $(INTEG_DIR)/deps/*/*.c) -I$(SRC_DIR) -I$(DEPS_DIR) -L. -lys -o $(INTEG_BASE_BIN)
+	$(CC) $(INTEG_DIR)/test_server.c $(wildcard $(INTEG_DIR)/deps/*/*.c) -I$(SRC_DIR) -I$(DEPS_DIR) -L. -lys $(TFLAGS) -o $(INTEG_BASE_BIN)
 	$(INTEG_RUNNER)
 	$(MAKE) clean
 
