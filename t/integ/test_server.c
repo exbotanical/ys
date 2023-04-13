@@ -280,7 +280,7 @@ response *root_handler(request *req, response *res) {
   return res;
 }
 
-cors_opts *setup_cors() {
+cors_opts *setup_cors(void) {
   cors_opts *opts = cors_opts_init();
 
   set_allowed_methods(opts, METHOD_GET, METHOD_DELETE);

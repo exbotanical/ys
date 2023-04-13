@@ -27,7 +27,7 @@ typedef struct {
 } thread_context;
 
 #ifdef USE_TLS
-SSL_CTX *create_context() {
+static SSL_CTX *create_context(void) {
   const SSL_METHOD *method = TLS_server_method();
   SSL_CTX *ctx = SSL_CTX_new(method);
 
@@ -39,8 +39,8 @@ SSL_CTX *create_context() {
   return ctx;
 }
 
-void configure_context(SSL_CTX *ctx, const char *certfile,
-                       const char *keyfile) {
+static void configure_context(SSL_CTX *ctx, const char *certfile,
+                              const char *keyfile) {
   if (SSL_CTX_use_certificate_file(ctx, certfile, SSL_FILETYPE_PEM) <= 0) {
     ERR_print_errors_fp(stderr);
     DIE("failed to read certificate file %s\n", certfile);
@@ -153,7 +153,7 @@ static void poll_client_connections(thread_pool_t *pool,
   }
 }
 
-static thread_pool_t *setup_thread_pool() {
+static thread_pool_t *setup_thread_pool(void) {
   thread_pool_t *pool = calloc(1, sizeof(thread_pool_t));
   if (!pool) {
     DIE("[server::%s] failed to initialized thread pool\n", __func__);

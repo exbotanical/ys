@@ -27,7 +27,7 @@ static route_action *action_init(generic_handler *handler) {
   return action;
 }
 
-static route_result *result_init() {
+static route_result *result_init(void) {
   route_result *result = xmalloc(sizeof(route_result));
   result->parameters = ht_init(0);
   result->flags = INITIAL_FLAG_STATE;
@@ -40,7 +40,7 @@ static route_result *result_init() {
  *
  * @return trie_node*
  */
-static trie_node *node_init() {
+static trie_node *node_init(void) {
   trie_node *node = xmalloc(sizeof(trie_node));
 
   node->children = ht_init(0);
@@ -58,7 +58,7 @@ static trie_node *node_init() {
   return node;
 }
 
-route_trie *trie_init() {
+route_trie *trie_init(void) {
   route_trie *trie = xmalloc(sizeof(route_trie));
 
   trie->root = node_init();

@@ -122,7 +122,7 @@ cors_opts *make_opts(array_t *allowed_origins, array_t *allowed_methods,
   return o;
 }
 
-void test_cors_middleware() {
+void test_cors_middleware(void) {
   typedef struct {
     char *name;
     cors_opts_internal *options;
@@ -331,7 +331,7 @@ void test_cors_middleware() {
   }
 }
 
-void test_are_headers_allowed() {
+void test_are_headers_allowed(void) {
   typedef struct {
     array_t *test_headers;
     bool is_allowed
@@ -384,7 +384,7 @@ void test_are_headers_allowed() {
   }
 }
 
-void test_is_method_allowed() {
+void test_is_method_allowed(void) {
   typedef struct {
     char *method;
     bool is_allowed;
@@ -424,7 +424,7 @@ void test_is_method_allowed() {
   }
 }
 
-void test_origin_is_allowed() {
+void test_origin_is_allowed(void) {
   typedef struct {
     char *origin;
     bool is_allowed;
@@ -476,7 +476,7 @@ void test_origin_is_allowed() {
   }
 }
 
-void test_is_preflight_request() {
+void test_is_preflight_request(void) {
   typedef struct {
     const char *name;
     request *req;
@@ -510,7 +510,7 @@ void test_is_preflight_request() {
   }
 }
 
-void test_cors_allow_all() {
+void test_cors_allow_all(void) {
   cors_opts *opts = cors_allow_all();
   cors_config *c = cors_init(opts);
 
@@ -522,7 +522,7 @@ void test_cors_allow_all() {
      "cors_allow_all allows all common methods");
 }
 
-void test_set_helpers() {
+void test_set_helpers(void) {
   cors_opts_internal *o = (cors_opts_internal *)cors_opts_init();
 
   const char *o1 = "o1";

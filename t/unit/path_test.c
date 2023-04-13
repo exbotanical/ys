@@ -8,7 +8,7 @@ typedef struct {
   char *expected;
 } test_case_t;
 
-void test_expand_path_ok() {
+void test_expand_path_ok(void) {
   char *test_str = "/path/to/route";
   array_t *paths = expand_path(test_str);
 
@@ -20,7 +20,7 @@ void test_expand_path_ok() {
   array_free(paths);
 }
 
-void test_expand_no_match() {
+void test_expand_no_match(void) {
   char *test_str = "path:to:[^route]";
 
   array_t *paths = expand_path(test_str);
@@ -29,7 +29,7 @@ void test_expand_no_match() {
   array_free(paths);
 }
 
-void test_derive_label_pattern() {
+void test_derive_label_pattern(void) {
   test_case_t tests[] = {
       {.name = "BasicRegex", .input = ":id[^\\d+$]", .expected = "^\\d+$"},
       {.name = "EmptyRegex", .input = ":id[]", .expected = NULL},
@@ -45,7 +45,7 @@ void test_derive_label_pattern() {
   }
 }
 
-void test_derive_parameter_key() {
+void test_derive_parameter_key(void) {
   test_case_t tests[] = {
       {.name = "BasicKey", .input = ":id[^\\d+$]", .expected = "id"},
       {.name = "BasicKeyEmptyRegex", .input = ":val[]", .expected = "val"},
@@ -60,7 +60,7 @@ void test_derive_parameter_key() {
   }
 }
 
-void test_path_split_first_delim() {
+void test_path_split_first_delim(void) {
   typedef struct {
     char *input;
     array_t *expected;
@@ -101,7 +101,7 @@ void test_path_split_first_delim() {
   }
 }
 
-void test_path_split_dir() {
+void test_path_split_dir(void) {
   typedef struct {
     char *input;
     array_t *expected;
@@ -139,14 +139,14 @@ void test_path_split_dir() {
   }
 }
 
-void test_path_get_pure() {
+void test_path_get_pure(void) {
   char *p = "/some/path/with/query?remove=me";
   is(path_get_pure(p), "/some/path/with/query", "extracts the path sans query");
   is(p, "/some/path/with/query?remove=me",
      "leaves the original path unmodified");
 }
 
-void test_path_get_pure_no_query() {
+void test_path_get_pure_no_query(void) {
   char *p = "/some/path/with/query";
   is(path_get_pure(p), "/some/path/with/query", "returns the path as-is");
   is(p, "/some/path/with/query", "leaves the original path unmodified");

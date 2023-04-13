@@ -190,7 +190,7 @@ void response_send_protocol_error(int sockfd) {
   free(resbuf);
 }
 
-response_internal *response_init() {
+response_internal *response_init(void) {
   response_internal *res = xmalloc(sizeof(response));
 
   res->headers = ht_init(0);

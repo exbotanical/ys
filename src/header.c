@@ -34,7 +34,7 @@ static const int to_lower = 'a' - 'A';
 /**
  * init_common_headers initializes the common headers hash set
  */
-static void init_common_headers() {
+static void init_common_headers(void) {
   common_headers = hs_init(39);
 
   hs_insert(common_headers, ACCEPT);
@@ -84,7 +84,7 @@ static void init_common_headers() {
  * RFC 7230.
  * TODO: case sensitive?
  */
-static void init_singleton_headers() {
+static void init_singleton_headers(void) {
   singleton_headers = hs_init(3);
 
   hs_insert(singleton_headers, CONTENT_TYPE);
@@ -99,7 +99,7 @@ static void init_singleton_headers() {
  *
  * @return hash_set*
  */
-static hash_set* get_common_header_set() {
+static hash_set* get_common_header_set(void) {
   pthread_once(&init_common_headers_once, init_common_headers);
 
   return common_headers;
@@ -112,7 +112,7 @@ static hash_set* get_common_header_set() {
  *
  * @return hash_set*
  */
-static hash_set* get_singleton_header_set() {
+static hash_set* get_singleton_header_set(void) {
   pthread_once(&init_singleton_headers_once, init_singleton_headers);
 
   return singleton_headers;

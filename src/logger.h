@@ -20,7 +20,7 @@ extern short log_level;
  * setup_logging configures logging based on the user config (e.g. stderr or
  * file)
  */
-void setup_logging();
+void setup_logging(void);
 
 /**
  * printlogf prints at the specified log level to the log file descriptor the

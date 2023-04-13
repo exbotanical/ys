@@ -477,7 +477,7 @@ typedef struct router_attr_internal router_attr;
  *
  * @return router_attr*
  */
-router_attr* router_attr_init();
+router_attr* router_attr_init(void);
 
 /**
  * router_init allocates memory for a new router and its `trie` member;
@@ -671,7 +671,7 @@ typedef struct cors_opts_internal cors_opts;
  *
  * @return cors_opts*
  */
-cors_opts* cors_opts_init();
+cors_opts* cors_opts_init(void);
 
 /**
  * use_cors binds the CORS global middleware to the router attributes instance
@@ -776,7 +776,7 @@ void set_max_age(cors_opts* opts, int max_age);
  *
  * @return cors_opts*
  */
-cors_opts* cors_allow_all();
+cors_opts* cors_allow_all(void);
 
 /**********************************************************
  * Cookies

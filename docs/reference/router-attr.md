@@ -7,7 +7,7 @@
 ## router_attr_init
 
 ```c
-router_attr *router_attr_init();
+router_attr *router_attr_init(void);
 ```
 
 `router_attr_init` initializes a new router attributes object. This stores data such as the 404, 405, and 500 handlers as well as any middleware set by the user.

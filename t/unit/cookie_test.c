@@ -33,7 +33,7 @@ cookie_internal* tocookie(const char* domain, const char* value,
   return (cookie_internal*)c;
 }
 
-void test_read_cookies() {
+void test_read_cookies(void) {
   test_case tests[] = {
       {.headers = to_headers(
            to_header(
@@ -112,7 +112,7 @@ void test_read_cookies() {
   }
 }
 
-void test_sanitize_cookie_value() {
+void test_sanitize_cookie_value(void) {
   typedef struct {
     char* in;
     char* want;
@@ -139,7 +139,7 @@ void test_sanitize_cookie_value() {
   }
 }
 
-void test_sanitize_cookie_path() {
+void test_sanitize_cookie_path(void) {
   typedef struct {
     char* in;
     char* want;
@@ -157,7 +157,7 @@ void test_sanitize_cookie_path() {
   }
 }
 
-void test_cookie_serialize() {
+void test_cookie_serialize(void) {
   const char* expected =
       "cookie-9=i3e01nf61b6t23bvfmplnanol3; Path=/restricted/; "
       "Domain=example.com; Expires=Tue, 10 Nov 2009 23:00:00 GMT; Max-Age=3600";
@@ -172,7 +172,7 @@ void test_cookie_serialize() {
   cookie_free(c);
 }
 
-void test_get_cookie() {
+void test_get_cookie(void) {
   cookie_internal* c =
       tocookie(".somesite.gov", "value", "NotThisCookie", "/path", 1257894000,
                3600, SAME_SITE_STRICT_MODE, true, true);
@@ -221,7 +221,7 @@ void test_get_cookie() {
   cookie_free(expected);
 }
 
-void test_set_cookie() {
+void test_set_cookie(void) {
   cookie* c = tocookie(".testsite.com", "test", "ThisCookie", "/", 2257894000,
                        86400, SAME_SITE_LAX_MODE, false, true);
 
@@ -237,7 +237,7 @@ void test_set_cookie() {
   cookie_free(c);
 }
 
-void test_cookie_free() {
+void test_cookie_free(void) {
   cookie* c = tocookie(".testsite.com", "test", "ThisCookie", "/", 2257894000,
                        86400, SAME_SITE_LAX_MODE, false, true);
 

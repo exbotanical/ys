@@ -7,7 +7,7 @@
 #include "tap.c/tap.h"
 #include "test_util.h"
 
-void test_is_2xx_connect() {
+void test_is_2xx_connect(void) {
   request_internal* req = malloc(sizeof(req));
   response_internal* res = response_init();
 
@@ -27,7 +27,7 @@ void test_is_2xx_connect() {
      "a 204 OPTIONS request is not a 2xx connect");
 }
 
-void test_is_informational() {
+void test_is_informational(void) {
   response_internal* res = response_init();
 
   set_status(res, STATUS_EARLY_HINTS);
@@ -37,7 +37,7 @@ void test_is_informational() {
   ok(is_informational(res) == false, "a 2xx response is not informational");
 }
 
-void test_is_nocontent() {
+void test_is_nocontent(void) {
   response_internal* res = response_init();
 
   set_status(res, STATUS_NO_CONTENT);
@@ -47,7 +47,7 @@ void test_is_nocontent() {
   ok(is_nocontent(res) == false, "a 200 response is not a no content response");
 }
 
-void test_response_serialize() {
+void test_response_serialize(void) {
   typedef struct {
     char* name;
     char* expected;

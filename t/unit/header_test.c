@@ -18,7 +18,7 @@ char expected_tokens[] = {
     'd', 'e', 'f', 'g', 'h', 'i',  'j', 'k', 'l', 'm', 'n', 'o', 'p',
     'q', 'r', 's', 't', 'u', 'v',  'w', 'x', 'y', 'z', '|', '~'};
 
-void test_token_table() {
+void test_token_table(void) {
   unsigned int expected_matches = 0;
   unsigned int actual_matches = 0;
 
@@ -41,7 +41,7 @@ void test_token_table() {
      "has the expected number of true values in token table");
 }
 
-void test_to_canonical_mime_header_key() {
+void test_to_canonical_mime_header_key(void) {
   test_case tests[] = {
       {.in = "a-b-c", .expected = "A-B-C"},
       {.in = "a-1-c", .expected = "A-1-C"},
@@ -77,7 +77,7 @@ void test_to_canonical_mime_header_key() {
   }
 }
 
-void test_get_header() {
+void test_get_header(void) {
   const char *k1 = "k1";
   const char *v1 = "v1";
   const char *v2 = "v2";
@@ -99,7 +99,7 @@ void test_get_header() {
   array_free(arr);
 }
 
-void test_req_header_values() {
+void test_req_header_values(void) {
   const char *k1 = "k1";
   const char *v1 = "v1";
   const char *v2 = "v2";
@@ -127,7 +127,7 @@ void test_req_header_values() {
   array_free(arr);
 }
 
-void test_insert_header() {
+void test_insert_header(void) {
   const char *k1 = "k1";
   const char *v1 = "v1";
   const char *singleton = "Content-Length";
@@ -151,7 +151,7 @@ void test_insert_header() {
      "ignores duplicate header of singleton type if is_request=false");
 }
 
-void test_derive_headers() {
+void test_derive_headers(void) {
   const char *header_str = "x-test-1, x-test-2, x-test-3";
 
   array_t *expected = array_collect("x-test-1", "x-test-2", "x-test-3");

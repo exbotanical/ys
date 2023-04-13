@@ -8,7 +8,7 @@
 const char *hex = "0123456789ABCDEF";
 const char *nothex = "GHIJKLMNOPQRSTUVWXYZ";
 
-void test_split_ok() {
+void test_split_ok(void) {
   char *test_str = "aa:b:c:d";
   array_t *paths = split(test_str, PARAMETER_DELIMITER);
 
@@ -21,7 +21,7 @@ void test_split_ok() {
   array_free(paths);
 }
 
-void test_split_no_match() {
+void test_split_no_match(void) {
   char *test_str = "a:b:c:d";
   array_t *paths = split(test_str, PATH_ROOT);
 
@@ -30,7 +30,7 @@ void test_split_no_match() {
   array_free(paths);
 }
 
-void test_split_empty_input() {
+void test_split_empty_input(void) {
   char *test_str = "";
   array_t *paths = split(test_str, PATH_ROOT);
 
@@ -39,7 +39,7 @@ void test_split_empty_input() {
   array_free(paths);
 }
 
-void test_split_end_match() {
+void test_split_end_match(void) {
   char *test_str = "a:b:c:d/test";
   array_t *paths = split(test_str, PATH_ROOT);
 
@@ -50,7 +50,7 @@ void test_split_end_match() {
   array_free(paths);
 }
 
-void test_str_join() {
+void test_str_join(void) {
   array_t *arr = array_init();
   array_push(arr, "a");
   array_push(arr, "b");
@@ -62,7 +62,7 @@ void test_str_join() {
   array_free(arr);
 }
 
-void test_str_cut() {
+void test_str_cut(void) {
   const char *ts = "test&string";
 
   array_t *pair = str_cut(ts, "&");
@@ -83,7 +83,7 @@ void test_str_cut() {
   array_free(pair2);
 }
 
-void test_str_cut_nomatch() {
+void test_str_cut_nomatch(void) {
   const char *ts = "test&string";
 
   array_t *pair = str_cut(ts, "?");
@@ -93,7 +93,7 @@ void test_str_cut_nomatch() {
   array_free(pair);
 }
 
-void test_str_cut_halfmatch() {
+void test_str_cut_halfmatch(void) {
   const char *ts = "test&";
 
   array_t *pair = str_cut(ts, "&");
@@ -114,7 +114,7 @@ void test_str_cut_halfmatch() {
   array_free(pair2);
 }
 
-void test_str_contains_ctl_char() {
+void test_str_contains_ctl_char(void) {
   ok(str_contains_ctl_char("some\x01") == true,
      "detects the control-byte");  // SOH
   ok(str_contains_ctl_char("some\x02") == true,
@@ -127,7 +127,7 @@ void test_str_contains_ctl_char() {
      "detects the control-byte");  // ENQ
 }
 
-void test_ishex() {
+void test_ishex(void) {
   for (unsigned int i = 0; i < strlen(hex); i++) {
     char c = hex[i];
     ok(ishex(c) == true,

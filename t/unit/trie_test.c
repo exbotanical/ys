@@ -33,7 +33,7 @@ array_t *collect_methods(http_method method, ...) {
 
 void *test_handler(void *a, void *b) { return NULL; }
 
-void test_trie_init() {
+void test_trie_init(void) {
   route_trie *trie;
 
   lives_ok({ trie = trie_init(); }, "initializes the trie");
@@ -41,7 +41,7 @@ void test_trie_init() {
   ok(trie->root != NULL, "root is initialized");
 }
 
-void test_trie_insert() {
+void test_trie_insert(void) {
   route_record records[] = {
       {.path = s_copy(PATH_ROOT),
        .methods = collect_methods(METHOD_GET, NULL),
@@ -77,7 +77,7 @@ void test_trie_insert() {
   }
 }
 
-void test_trie_search_ok() {
+void test_trie_search_ok(void) {
   route_record records[] = {{.path = s_copy(PATH_ROOT),
                              .methods = collect_methods(METHOD_GET, NULL),
                              .handler = test_handler},
@@ -161,7 +161,7 @@ void test_trie_search_ok() {
   free(trie);
 }
 
-void test_trie_search_no_match() {
+void test_trie_search_no_match(void) {
   route_record records[] = {
       {.path = s_copy(PATH_ROOT),
        .methods = collect_methods(METHOD_GET, NULL),
@@ -224,7 +224,7 @@ void test_trie_search_no_match() {
   free(trie);
 }
 
-void test_trie_search_ignore_trailing_slash() {
+void test_trie_search_ignore_trailing_slash(void) {
   route_trie *trie = trie_init();
 
   trie_insert(trie, array_collect("GET"), "/foo", test_handler);
@@ -244,7 +244,7 @@ void test_trie_search_ignore_trailing_slash() {
   free(trie);
 }
 
-void test_trie_search_with_queries() {
+void test_trie_search_with_queries(void) {
   route_trie *trie = trie_init();
 
   trie_insert(trie, array_collect("GET"), "/foo", test_handler);
@@ -262,7 +262,7 @@ void test_trie_search_with_queries() {
   free(trie);
 }
 
-void test_trie_search_april2023_bugs() {
+void test_trie_search_april2023_bugs(void) {
   route_trie *trie = trie_init();
 
   trie_insert(trie, array_collect("GET"), "/", test_handler);

@@ -2,14 +2,14 @@
 
 #include "tap.c/tap.h"
 
-void reset_server_conf() {
+void reset_server_conf(void) {
   server_conf.log_file = NULL;
   server_conf.log_level = DEFAULT_LOG_LEVEL;
   server_conf.threads = DEFAULT_NUM_THREADS;
   server_conf.port = DEFAULT_PORT_NUM;
 }
 
-void test_config_defaults() {
+void test_config_defaults(void) {
   is(server_conf.log_file, NULL, "log file is NULL by default");
   is(server_conf.log_level, DEFAULT_LOG_LEVEL, "default log level is set");
   ok(server_conf.threads == DEFAULT_NUM_THREADS,
@@ -17,7 +17,7 @@ void test_config_defaults() {
   ok(server_conf.port == DEFAULT_PORT_NUM, "default port number is set");
 }
 
-void test_parse_config_ok() {
+void test_parse_config_ok(void) {
   const char* test_config = "t/unit/fixtures/test.conf";
 
   ok(parse_config(test_config) == true, "parsing a valid config returns true");
@@ -30,7 +30,7 @@ void test_parse_config_ok() {
   ok(server_conf.port == 8000, "port number is what's specified in config");
 }
 
-void test_parse_config_ok_empty() {
+void test_parse_config_ok_empty(void) {
   const char* test_config = "t/unit/fixtures/invalid2.conf";
 
   ok(parse_config(test_config) == true, "parsing an empty config returns true");
@@ -44,7 +44,7 @@ void test_parse_config_ok_empty() {
      "port number is default when config is empty");
 }
 
-void test_parse_config_ok_no_config() {
+void test_parse_config_ok_no_config(void) {
   const char* test_config = "nope";
 
   ok(parse_config(test_config) == true,
@@ -59,7 +59,7 @@ void test_parse_config_ok_no_config() {
      "port number is default when no config");
 }
 
-void test_parse_config_err_missing_value() {
+void test_parse_config_err_missing_value(void) {
   const char* test_config = "t/unit/fixtures/invalid.conf";
 
   ok(parse_config(test_config) == false,
@@ -74,7 +74,7 @@ void test_parse_config_err_missing_value() {
      "port number is default when parse_config fails");
 }
 
-void test_parse_config_err_unknown_opt() {
+void test_parse_config_err_unknown_opt(void) {
   const char* test_config = "t/unit/fixtures/invalid3.conf";
 
   ok(parse_config(test_config) == false,

@@ -24,7 +24,7 @@ static const char CONFIG_FILE_NAME[] = "ys.conf";  //
  *
  * TODO: relocate
  */
-static void setup_env() {
+static void setup_env(void) {
   if (!parse_config(CONFIG_FILE_NAME)) {
     DIE("Invalid config file\n");
   }
@@ -160,7 +160,7 @@ static bool router_run_sub(router_internal *router, client_context *ctx,
   return false;
 }
 
-router_attr *router_attr_init() {
+router_attr *router_attr_init(void) {
   router_attr_internal *attr = xmalloc(sizeof(router_attr_internal));
   attr->use_cors = false;
   attr->middlewares = NULL;

@@ -4,7 +4,7 @@
 
 #include "tap.c/tap.h"
 
-void sanity_test_regex_cache_get() {
+void sanity_test_regex_cache_get(void) {
   hash_table *ht = ht_init(0);
   const char *regex = "^\\d+$";
 

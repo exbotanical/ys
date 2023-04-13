@@ -281,7 +281,7 @@ static void handle_preflight_request(request_internal *req, response *res) {
   array_free(reqd_headers);
 }
 
-cors_opts *cors_opts_init() {
+cors_opts *cors_opts_init(void) {
   cors_opts_internal *opts = xmalloc(sizeof(cors_opts_internal));
   opts->allow_credentials = false;
   opts->max_age = 0;
@@ -362,7 +362,7 @@ cors_config *cors_init(cors_opts_internal *opts) {
   return cors_conf;
 }
 
-cors_opts *cors_allow_all() {
+cors_opts *cors_allow_all(void) {
   cors_opts_internal *opts = xmalloc(sizeof(cors_opts_internal));
   opts->allowed_origins = array_collect("*");
   opts->allowed_methods =

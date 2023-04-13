@@ -135,7 +135,7 @@ static void vlog(int level, int fd, const char *fmt, va_list va) {
  * setup_log_level configures the log level global based on the level specified
  * in the server_conf (or default if none specified)
  */
-static void setup_log_level() {
+static void setup_log_level(void) {
   const char *lvl = server_conf.log_level;
 
   unsigned int i;
@@ -160,7 +160,7 @@ static void setup_log_level() {
   }
 }
 
-void setup_logging() {
+void setup_logging(void) {
   setup_log_level();
 
   if (server_conf.log_file) {

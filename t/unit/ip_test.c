@@ -10,7 +10,7 @@ typedef struct {
   bool ok;
 } test_case;
 
-void test_validate_ip() {
+void test_validate_ip(void) {
   test_case tests[] = {{"127.0.1.2", true},
                        {"127.0.0.1", true},
                        {"::ffff:127.1.2.3", true},
@@ -47,7 +47,7 @@ void test_validate_ip() {
   }
 }
 
-int main(int argc, char const* argv[]) {
+int main() {
   plan(25);
 
   test_validate_ip();

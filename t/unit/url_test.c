@@ -25,7 +25,7 @@ pair* topair(char* k, array_t* v) {
   return p;
 }
 
-void test_parse_query() {
+void test_parse_query(void) {
   parse_test tests[] = {
       {.query = "a=1",
        .expected = array_collect(topair("a", array_collect("1"))),
@@ -108,7 +108,7 @@ void test_parse_query() {
   }
 }
 
-void test_has_query_string() {
+void test_has_query_string(void) {
   typedef struct {
     bool has;
     char* name;

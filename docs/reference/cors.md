@@ -12,7 +12,7 @@
 ## cors_allow_all
 
 ```c
-cors_opts *cors_allow_all();
+cors_opts *cors_allow_all(void);
 ```
 
 `cors_allow_all` initializes a new CORS options object with sensibly liberal defaults.

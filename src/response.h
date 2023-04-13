@@ -33,7 +33,7 @@ typedef struct {
  *
  * @return response_internal*
  */
-response_internal *response_init();
+response_internal *response_init(void);
 
 /**
  * response_serialize converts a user-defined response object into a buffer that

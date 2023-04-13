@@ -26,7 +26,7 @@ typedef struct {
 
 bool eq(const char *s1, const char *s2) { return strcmp(s1, s2) == 0; }
 
-char *create_sid() {
+char *create_sid(void) {
   char uuid[UUID_STR_LEN];
 
   uuid_t bin_uuid;

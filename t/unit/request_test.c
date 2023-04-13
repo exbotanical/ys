@@ -5,7 +5,7 @@
 #include "libys.h"
 #include "tap.c/tap.h"
 
-static request *make_req() {
+static request *make_req(void) {
   request_internal *req = malloc(sizeof(request));
   req->parameters = ht_init(0);
 
@@ -15,7 +15,7 @@ static request *make_req() {
   return (request *)req;
 }
 
-void test_fix_pragma_cache_control() {
+void test_fix_pragma_cache_control(void) {
   hash_table *headers = ht_init(0);
 
   insert_header(headers, PRAGMA, NO_CACHE, true);
@@ -31,7 +31,7 @@ void test_fix_pragma_cache_control() {
   ok(headers->count == 2, "has two header keys");
 }
 
-void test_fix_pragma_cache_control_has_cache_control() {
+void test_fix_pragma_cache_control_has_cache_control(void) {
   hash_table *headers = ht_init(0);
 
   insert_header(headers, PRAGMA, NO_CACHE, true);
@@ -48,7 +48,7 @@ void test_fix_pragma_cache_control_has_cache_control() {
   ok(headers->count == 2, "has two header keys");
 }
 
-void test_fix_pragma_cache_control_no_pragma() {
+void test_fix_pragma_cache_control_no_pragma(void) {
   hash_table *headers = ht_init(0);
 
   fix_pragma_cache_control(headers);
@@ -58,7 +58,7 @@ void test_fix_pragma_cache_control_no_pragma() {
   ok(headers->count == 0, "has no header keys");
 }
 
-void test_req_get_parameter() {
+void test_req_get_parameter(void) {
   request *req = make_req();
 
   is(req_get_parameter(req, "k1"), "v1", "returns the correct parameter value");
@@ -67,25 +67,25 @@ void test_req_get_parameter() {
      "returns the NULL if parameter value not found");
 }
 
-void test_req_get_parameter_no_param() {
+void test_req_get_parameter_no_param(void) {
   request *req = malloc(sizeof(request));
 
   is(req_get_parameter(req, "k1"), NULL, "returns NULL if no parameters");
 }
 
-void test_req_num_parameters() {
+void test_req_num_parameters(void) {
   request *req = make_req();
 
   ok(req_num_parameters(req) == 2, "returns the correct number of parameters");
 }
 
-void test_req_num_parameters_no_param() {
+void test_req_num_parameters_no_param(void) {
   request *req = malloc(sizeof(request));
 
   ok(req_num_parameters(req) == 0, "returns the correct number of parameters");
 }
 
-void test_req_has_parameters() {
+void test_req_has_parameters(void) {
   request *req = make_req();
 
   ok(req_has_parameters(req) == true,

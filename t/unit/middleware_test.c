@@ -13,7 +13,7 @@ void assert_middleware(middleware_handler* mw, route_handler* h) {
   ok(mw->handler == h, "handler address matches");
 }
 
-void test_middlewares_macro() {
+void test_middlewares_macro(void) {
   router_attr* attr = router_attr_init();
   middlewares(attr, h1, h2, h3);
 
@@ -28,7 +28,7 @@ void test_middlewares_macro() {
      "ignore paths initialized to NULL");
 }
 
-void test_add_middleware() {
+void test_add_middleware(void) {
   router_attr* attr = router_attr_init();
   middlewares(attr, h1, h3);
 
@@ -48,7 +48,7 @@ void test_add_middleware() {
      "ignore paths initialized to NULL");
 }
 
-void test_add_middleware_empty_attr() {
+void test_add_middleware_empty_attr(void) {
   router_attr* attr = router_attr_init();
 
   add_middleware(attr, h1);
@@ -58,7 +58,7 @@ void test_add_middleware_empty_attr() {
   assert_middleware(array_get(r->middlewares, 0), h1);
 }
 
-void test_use_cors() {
+void test_use_cors(void) {
   router_attr* attr = router_attr_init();
 
   use_cors(attr, cors_allow_all());
@@ -71,7 +71,7 @@ void test_use_cors() {
      "ignore paths initialized to NULL");
 }
 
-void test_add_middleware_with_opts_macro() {
+void test_add_middleware_with_opts_macro(void) {
   router_attr* attr = router_attr_init();
 
   add_middleware_with_opts(attr, h2, "^/ignore1$", "^/ignore2$");
