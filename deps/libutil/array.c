@@ -24,7 +24,7 @@ void *array_get(array_t *array, int index) {
   return internal->state[index];
 }
 
-array_t *array_init() {
+array_t *array_init(void) {
   array_t *array = malloc(sizeof(array_t));
   if (!array) {
     errno = ENOMEM;
