@@ -41,6 +41,7 @@ function sidebarMain() {
       collapsed: false,
       items: [
         { text: 'What is Ys?', link: '/guide/what-is-ys' },
+        { text: 'Platform Support', link: '/guide/platform-support' },
         { text: 'Getting Started', link: '/guide/getting-started' },
         { text: 'Basic Tutorial', link: '/guide/basic-tutorial' },
       ],

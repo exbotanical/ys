@@ -184,3 +184,6 @@ Everything you need: `apt update && apt install git vim libpcre3-dev make gcc li
 
 ### Dev
 1. shpec sh -c "`curl -L https://raw.githubusercontent.com/rylnd/shpec/master/install.sh`"
+
+## Fedora
+`yum install git vim make gcc curl pcre-devel openssl-devel`

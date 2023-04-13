@@ -18,7 +18,7 @@ describe 'libys auth integration tests'
     assert equal "$status" '401 Unauthorized'
   ti
 
-    it 'returns a Cookie on successful login'
+  it 'returns a Cookie on successful login'
     res="$(curl -s -i "$SERVER_ADDR/auth/login" -d 'x')"
 
     status="$(get_status <<< "$res")"

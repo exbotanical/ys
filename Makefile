@@ -26,13 +26,13 @@ DEPS := $(wildcard $(DEPS_DIR)/*/*.c)
 LIB := $(wildcard $(LIB_DIR)/*.c)
 TESTS := $(wildcard $(TEST_DIR)/*/*.c)
 
-ifeq ($(OS), Ubuntu))
+ifeq ($(OS), Ubuntu)
 	TFLAGS += -lm -lpcre
 endif
 
 ifdef USE_TLS
 	CFLAGS += -lcrypto -lssl -DUSE_TLS=1
-ifeq ($(OS), Ubuntu))
+ifeq ($(OS), Ubuntu)
 	CFLAGS += -I/usr/include/openssl/
 	TFLAGS += $(CFLAGS)
 else
