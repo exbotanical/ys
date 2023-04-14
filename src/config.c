@@ -60,8 +60,8 @@ bool parse_config(const char* filename) {
     return ret;
   }
 
-  int port;
-  int threads;
+  int port = 0;
+  int threads = 0;
   char* log_level = NULL;
   char* log_file = NULL;
 

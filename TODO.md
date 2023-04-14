@@ -12,6 +12,7 @@
 - [x] Name this project: Ys?
 - [ ] Lock deps versions
 - [x] Document
+- [ ] Filter out test deps in builds
 
 - [x] Clean up all objects w/ free where necessary
 - [x] Validate NULLs and allocated objects
@@ -187,3 +188,7 @@ Everything you need: `apt update && apt install git vim libpcre3-dev make gcc li
 
 ## Fedora
 `yum install git vim make gcc curl pcre-devel openssl-devel`
+
+## macos
+
+weird struct shit happens with the response headers (x-powered-by) and the hash table if initialized in diff order in response_init

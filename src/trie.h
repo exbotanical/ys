@@ -50,7 +50,7 @@ typedef struct {
  *
  * @return route_trie*
  */
-route_trie *trie_init();
+route_trie *trie_init(void);
 
 /**
  * trie_insert inserts a node into the trie at `path` and each method of
