@@ -45,10 +45,6 @@ typedef struct {
 /**
  * router_run matches an inbound HTTP request against a route and executes the
  * appropriate handler
- *
- * @param router
- * @param ctx
- * @param req
  */
 void router_run(router_internal *router, client_context *ctx,
                 request_internal *req);

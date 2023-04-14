@@ -25,10 +25,6 @@ void setup_logging(void);
 /**
  * printlogf prints at the specified log level to the log file descriptor the
  * given data
- *
- * @param level The log level at which to write the log (i.e. may be ignored)
- * @param fmt
- * @param ...
  */
 void printlogf(int level, const char* fmt, ...);
 

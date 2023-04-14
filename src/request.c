@@ -23,7 +23,6 @@
 /**
  * fix_pragma_cache_control implements RFC 7234, section 5.4:
  * Should treat Pragma: no-cache like Cache-Control: no-cache
- * @param header
  */
 static void fix_pragma_cache_control(hash_table* headers) {
   if (s_equals(get_first_header(headers, PRAGMA), NO_CACHE)) {

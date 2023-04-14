@@ -4,13 +4,6 @@
 
 A `http_router*` is a router / HTTP multiplexer.
 
-sets the handlers for 404 and 405 (if none provided, defaults will be
-used).
-@param router_attr* Router attributes to apply to the new http_router
-instance
-@return http_router*
-
-
 ## router_init
 
 ```c

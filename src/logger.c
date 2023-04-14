@@ -67,10 +67,6 @@ char *gen_timestamp(void) {
 
 /**
  * fdprintf writes the data to a given file descriptor
- *
- * @param fd
- * @param fmt
- * @param ...
  */
 static void fdprintf(int fd, const char *fmt, ...) {
   va_list va;
@@ -85,11 +81,6 @@ static void fdprintf(int fd, const char *fmt, ...) {
 /**
  * vlog writes the log message to the given file descriptor conditionally, based
  * on the specified log level
- *
- * @param level
- * @param fd
- * @param fmt
- * @param va
  */
 static void vlog(int level, int fd, const char *fmt, va_list va) {
   if (level <= log_level) {

@@ -8,7 +8,7 @@ First we include the Ys header.
 #include "libys.h"
 ```
 
-This is the only header file you'll need to include in order to have access to the full Ys feature-set. All of the constants and APIs in the Ys header file are documented with Doxygen doc comments so you can access documentation from your IDE.
+This is the only header file you'll need to include in order to have access to the full Ys feature-set. All of the constants and APIs in the Ys header file are documented with doc comments so you can access documentation from your IDE.
 
 First, we'll define a `PORT` macro — this will be the port number on which the Ys server will listen for client connections. The port number must be outside of the range of standard reserved ports i.e. it must be greater than 1024 and less than 65535.
 

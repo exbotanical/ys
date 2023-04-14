@@ -51,8 +51,6 @@ static void configure_context(SSL_CTX *ctx, const char *certfile,
 /**
  * client_thread_handler handles client connections and executes the
  * user-defined router
- * @param arg
- * @return void*
  */
 static void *client_thread_handler(void *arg) {
   thread_context *ctx = arg;

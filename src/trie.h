@@ -47,30 +47,19 @@ typedef struct {
 
 /**
  * trie_init allocates memory for a trie and its root node
- *
- * @return route_trie*
  */
 route_trie *trie_init(void);
 
 /**
  * trie_insert inserts a node into the trie at `path` and each method of
- * `methods`.
- *
- * @param trie The trie instance in which to insert
- * @param methods The methods on which to create a node
- * @param path The path on which to create a node
- * @param handler The handler to be associated with the inserted node
+ * `methods`
  */
 void trie_insert(route_trie *trie, array_t *methods, const char *path,
                  generic_handler *handler);
 
 /**
- * trie_search searches a trie for a node matching the given method and path
- *
- * @param trie The trie in which to perform the search
- * @param method A method to search against
- * @param search_path A path to search against
- * @return route_result* A result object, or NULL if not found
+ * trie_search searches a trie for a node matching the given method and path and
+ * returns a result object, or NULL if not found
  */
 route_result *trie_search(route_trie *trie, const char *method,
                           const char *search_path);

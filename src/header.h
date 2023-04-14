@@ -33,9 +33,6 @@ static const char token_table[] =
 /**
  * is_valid_header_field_char returns a bool indicating whether the given char
  * is a valid header char
- *
- * @param c
- * @return bool
  */
 bool is_valid_header_field_char(int c);
 
@@ -49,9 +46,6 @@ bool is_valid_header_field_char(int c);
  *
  * If `key` contains a space or invalid header field chars, it is returned
  * without modifications.
- *
- * @param key
- * @return char*
  */
 char* to_canonical_mime_header_key(char* key);
 
@@ -61,20 +55,12 @@ array_t* get_header_values(hash_table* headers, const char* key);
 /**
  * get_first_header retrieves the first value for a given header key from
  * `headers`, or NULL if not found
- *
- * @param headers
- * @param key
- * @return char*
  */
 char* get_first_header(hash_table* headers, const char* key);
 
 /**
  * req_header_values returns a char array of all values for the given header key
  * `key`. Returns NULL if the header does not exist
- *
- * @param headers
- * @param key
- * @return char**
  *
  * TODO: public
  */
@@ -89,12 +75,6 @@ char** req_header_values(hash_table* headers, const char* key);
  *
  * Can be used for both request and response headers, as they follow these same
  * rules.
- *
- * @param headers
- * @param key
- * @param value
- * @param bool
- * @return bool
  */
 bool insert_header(hash_table* headers, const char* key, const char* value,
                    bool is_request);
@@ -102,9 +82,6 @@ bool insert_header(hash_table* headers, const char* key, const char* value,
 /**
  * derive_headers extracts the comma-delimited headers in the value of the
  * given header
- *
- * @param header_str
- * @return array_t*
  */
 array_t* derive_headers(const char* header_str);
 #endif /* HEADER_H */

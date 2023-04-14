@@ -37,11 +37,7 @@ extern const short MAX_QUEUED_CONNECTIONS;
 
 /**
  * parse_config parses the given config file at `filename` and set
- * `server_conf`
- *
- * @param filename
- * @return true if the config was valid
- * @return false if the config was invalid
+ * `server_conf`. Returns a bool indicating whether the config was valid
  *
  * @internal
  */

@@ -6,9 +6,6 @@
 
 /**
  * unescape unescapes a string `s`
- *
- * @param s
- * @return char*
  */
 static char* unescape(const char* s) {
   // % char count

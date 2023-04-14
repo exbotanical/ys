@@ -39,10 +39,6 @@ static bool should_set_content_len(request_internal *req,
 /**
  * response_serialize converts a user-defined response object into a buffer that
  * can be sent over the wire
- *
- * @param req
- * @param res
- * @return buffer_t*
  */
 buffer_t *response_serialize(request_internal *req, response_internal *res) {
   buffer_t *buf = buffer_init(NULL);

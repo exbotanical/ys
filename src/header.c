@@ -96,8 +96,6 @@ static void init_singleton_headers(void) {
  * get_common_header_set atomically initializes and retrieves the common headers
  * hash set. Initialization is guaranteed to only run once, on the first
  * invocation
- *
- * @return hash_set*
  */
 static hash_set* get_common_header_set(void) {
   pthread_once(&init_common_headers_once, init_common_headers);
@@ -109,8 +107,6 @@ static hash_set* get_common_header_set(void) {
  * get_singleton_header_set atomically initializes and retrieves the singleton
  * headers hash set. Initialization is guaranteed to only run once, on the first
  * invocation
- *
- * @return hash_set*
  */
 static hash_set* get_singleton_header_set(void) {
   pthread_once(&init_singleton_headers_once, init_singleton_headers);
@@ -121,9 +117,6 @@ static hash_set* get_singleton_header_set(void) {
 /**
  * is_singleton_header returns a bool indicating whether the given header
  * `key` is a singleton header
- *
- * @param key
- * @return bool
  */
 static bool is_singleton_header(const char* key) {
   return hs_contains(get_singleton_header_set(), key);
@@ -131,9 +124,6 @@ static bool is_singleton_header(const char* key) {
 
 /**
  * canonical_mime_header_key modifies a header key into a valid format
- *
- * @param s
- * @return char*
  */
 static char* canonical_mime_header_key(char* key) {
   hash_set* common_headers = get_common_header_set();

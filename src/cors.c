@@ -53,20 +53,12 @@ static cors_config *cors_conf;
 /**
  * match is a matcher function for comparing array values against a given value
  * `s2`
- *
- * @param s1
- * @param s2
- * @return bool
  */
 bool match(void *s1, void *s2) { return s_casecmp((char *)s1, (char *)s2); }
 
 /**
  * is_origin_allowed determines whether the given origin is allowed per the
  * user-defined allow list
- *
- * @param c
- * @param origin
- * @return bool
  */
 static bool is_origin_allowed(cors_config *c, char *origin) {
   if (c->allow_all_origins) {
@@ -86,10 +78,6 @@ static bool is_origin_allowed(cors_config *c, char *origin) {
 /**
  * is_method_allowed determines whether the given method is allowed per the
  * user-defined allow list
- *
- * @param c
- * @param method
- * @return bool
  */
 static bool is_method_allowed(cors_config *c, char *method) {
   if (!has_elements(c->allowed_methods)) {
@@ -114,10 +102,6 @@ static bool is_method_allowed(cors_config *c, char *method) {
 /**
  * are_headers_allowed determines whether the given headers are allowed per
  * the user-defined allow list
- *
- * @param c
- * @param headers
- * @return bool
  */
 static bool are_headers_allowed(cors_config *c, array_t *headers) {
   if (c->allow_all_headers || !has_elements(headers)) {
@@ -141,9 +125,6 @@ static bool are_headers_allowed(cors_config *c, array_t *headers) {
  * 1) use the OPTIONS method
  * 2) include an Origin request header
  * 3) Include an Access-Control-Request-Method header
- *
- * @param req
- * @return bool
  */
 static bool is_preflight_request(request_internal *req) {
   bool is_options_req =
@@ -159,9 +140,6 @@ static bool is_preflight_request(request_internal *req) {
 /**
  * handleRequest handles actual HTTP requests subsequent to or standalone from
  * Preflight requests
- *
- * @param req
- * @param res
  */
 static void handle_request(request_internal *req, response *res) {
   char *origin = get_first_header(req->headers, ORIGIN_HEADER);
@@ -205,9 +183,6 @@ static void handle_request(request_internal *req, response *res) {
 
 /**
  * handle_preflight_request handles preflight requests
- *
- * @param req
- * @param res
  */
 static void handle_preflight_request(request_internal *req, response *res) {
   char *origin = get_first_header(req->headers, ORIGIN_HEADER);

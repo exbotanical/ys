@@ -35,11 +35,6 @@ static void setup_env(void) {
 /**
  * invoke_chain reduces the route handler and middlewares into a final response
  * object that is then sent over the socket
- *
- * @param req
- * @param res
- * @param mws
- * @return bool indicating whether the `done` flag should be set
  */
 static bool invoke_chain(request_internal *req, response_internal *res,
                          array_t *mws) {
@@ -70,10 +65,6 @@ static bool invoke_chain(request_internal *req, response_internal *res,
 
 /**
  * default_internal_error_handler is the internal/default 500 handler
- *
- * @param req
- * @param res
- * @return response*
  */
 static response *default_internal_error_handler(request *req, response *res) {
   printlogf(YS_LOG_INFO,
@@ -87,10 +78,6 @@ static response *default_internal_error_handler(request *req, response *res) {
 
 /**
  * default_not_found_handler is the internal/default 404 handler
- *
- * @param req
- * @param res
- * @return response*
  */
 static response *default_not_found_handler(request *req, response *res) {
   printlogf(YS_LOG_INFO,
@@ -105,10 +92,6 @@ static response *default_not_found_handler(request *req, response *res) {
 
 /**
  * default_method_not_allowed_handler is the internal/default 405 handler
- *
- * @param req
- * @param res
- * @return response*
  */
 static response *default_method_not_allowed_handler(request *req,
                                                     response *res) {
@@ -123,14 +106,10 @@ static response *default_method_not_allowed_handler(request *req,
 }
 
 /**
- * router_run_sub runs a sub-router against nested paths
- *
- * @param router
- * @param ctx
- * @param req
- * @return true A sub-route was matched and the router was run
- * @return false A sub-route was not matched and we should continue to running
- * the router on the full path
+ * router_run_sub runs a sub-router against nested paths and returns a boolean
+ * indicating whether sub-route was matched and the router was run. If a
+ * sub-route was not matched, we should continue to running the router on the
+ * full path
  */
 static bool router_run_sub(router_internal *router, client_context *ctx,
                            request_internal *req) {

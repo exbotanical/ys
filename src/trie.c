@@ -37,8 +37,6 @@ static route_result *result_init(void) {
 
 /**
  * node_init allocates memory for a new node, its children and action members
- *
- * @return trie_node*
  */
 static trie_node *node_init(void) {
   trie_node *node = xmalloc(sizeof(trie_node));

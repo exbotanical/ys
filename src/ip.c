@@ -22,10 +22,8 @@ const int IPV6_LEN = 16;
 const int V4_AS_V6_PREFIX[] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff};
 
 /**
- * xtoi performs a hexadecimal to int conversion.
- *
- * @param s
- * @return int* An int array of [retval, n chars consumed, ok]
+ * xtoi performs a hexadecimal to int conversion. Returns an int array of
+ * [retval, n chars consumed, ok].
  */
 static int* xtoi(const char* s) {
   int* ret = xmalloc(3 * sizeof(int));
@@ -69,10 +67,8 @@ static int* xtoi(const char* s) {
 }
 
 /**
- * dtoi performs a decimal to integer conversion.
- *
- * @param s
- * @return int* An int array of [retval, n chars consumed, ok]
+ * dtoi performs a decimal to integer conversion. Returns an int array of
+ * [retval, n chars consumed, ok]
  */
 static int* dtoi(const char* s) {
   int* ret = xmalloc(3 * sizeof(int));
@@ -107,13 +103,8 @@ static int* dtoi(const char* s) {
 }
 
 /**
- * to_ipv4 formats 4 given integers into a valid IPv4 address
- *
- * @param a
- * @param b
- * @param c
- * @param d
- * @return int* An int array representing the IPv4 address
+ * to_ipv4 formats 4 given integers into a valid IPv4 address. Returns an int
+ * array representing the IPv4 address
  */
 static int* to_ipv4(int a, int b, int c, int d) {
   int* p = xmalloc(IPV6_LEN * sizeof(int));
@@ -133,9 +124,6 @@ static int* to_ipv4(int a, int b, int c, int d) {
 /**
  * parse_ipv4 parses s into a int array representing an IPv4 address
  * (d.d.d.d)
- *
- * @param s
- * @return int*
  */
 static int* parse_ipv4(const char* s) {
   int* ret = NULL;
@@ -192,10 +180,6 @@ done:
 /**
  * validate_ipv6 validates whether s is a valid IPv6 address as described in RFC
  * 4291 and RFC 5952
- *
- * @param s
- * @return true
- * @return false
  */
 static bool validate_ipv6(const char* s) {
   char* cp = s_copy(s);

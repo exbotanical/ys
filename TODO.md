@@ -131,7 +131,7 @@
   ```
 - [x] Shared test utils
 - [x] Consolidate integ test servers
-- [ ] get rid of doc comments with `@param` - it offers no value since we're not generating anything with the doc comments and is difficult to maintain
+- [x] get rid of doc comments with `@param` - it offers no value since we're not generating anything with the doc comments and is difficult to maintain
 - [ ] cleanup unit tests Makefile rule + `gcc` commands in bash script (compiling should be done in the Makefile)
 
 ## Fixes

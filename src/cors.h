@@ -37,19 +37,12 @@ typedef struct {
 /**
  * cors_init initializes a CORS context using the user-specified settings on the
  * given cors_opts_internal `opts`
- *
- * @param opts
- * @return cors_config*
  */
 cors_config *cors_init(cors_opts_internal *opts);
 
 /**
  * cors_handler is a middleware handler that executes a spec-compliant CORS
  * workflow
- *
- * @param req
- * @param res
- * @return response*
  */
 response *cors_handler(request *req, response *res);
 

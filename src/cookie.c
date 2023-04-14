@@ -23,11 +23,6 @@ static const char COOKIE[] = "Cookie";
 
 /**
  * sanitize cleans and formats the cookie field
- *
- * @param field_name
- * @param test
- * @param v
- * @return char*
  */
 static char* sanitize(const char* field_name, bool (*test)(const char),
                       const char* v) {
@@ -62,10 +57,7 @@ static char* sanitize(const char* field_name, bool (*test)(const char),
 
 /**
  * is_valid_cookie_value_char tests whether a char c is a valid cookie value
- * character
- *
- * @param c
- * @return bool indicating whether c is ASCII but not " OR ; OR \
+ * character. Returns a bool indicating whether c is ASCII but not " OR ; OR \
  */
 static bool is_valid_cookie_value_char(char c) {
   return is_ascii(c) && c != '"' && c != ';' && c != '\\';
@@ -73,20 +65,15 @@ static bool is_valid_cookie_value_char(char c) {
 
 /**
  * is_valid_cookie_path_char tests whether a char c is a valid cookie path
- * character i.e. ASCII but not ;
- *
- * @param c
- * @return bool indicating whether c is ASCII but not ;
+ * character. Returns a bool bool indicating whether c is ASCII but not ;
  */
 static bool is_valid_cookie_path_char(char c) {
   return is_ascii(c) && c != ';';
 }
 
 /**
- * is_valid_cookie_name tests whether the given string is a valid cookie name
- *
- * @param name
- * @return bool indicating whether name is non-NULL, non-empty, and contains
+ * is_valid_cookie_name tests whether the given string is a valid cookie name.
+ * Returns a bool indicating whether name is non-NULL, non-empty, and contains
  * only valid header field chars
  */
 static bool is_valid_cookie_name(const char* name) {
@@ -108,9 +95,6 @@ static bool is_valid_cookie_name(const char* name) {
 /**
  * is_valid_cookie_domain_name tests whether s is a valid domain name or a valid
  * domain name with a leading dot '.'
- *
- * @param s
- * @return bool indicating whether the string s is a valid domain name
  */
 static bool is_valid_cookie_domain_name(const char* s) {
   if (strlen(s) == 0) {
@@ -184,9 +168,6 @@ done:
 /**
  * is_valid_cookie_domain tests whether string d is a valid cookie domain or IP
  * address
- *
- * @param d
- * @return bool indicating whether the string d is a valid domain
  */
 static bool is_valid_cookie_domain(const char* d) {
   if (is_valid_cookie_domain_name(d)) {
@@ -204,9 +185,6 @@ static bool is_valid_cookie_domain(const char* d) {
  * is_valid_cookie_expiry tests whether t is a valid cookie expiry. Valid here
  * means t's year is greater than 1601 and t itself is not less than or equal to
  * zero.
- *
- * @param t
- * @return bool indicating whether time t is a valid expiry
  */
 static bool is_valid_cookie_expiry(time_t t) {
   if (t <= 0) return false;
@@ -218,10 +196,6 @@ static bool is_valid_cookie_expiry(time_t t) {
 
 /**
  * parse_cookie_value parses the raw cookie string to extract a value
- *
- * @param raw
- * @param allow_dbl_quote
- * @return char*
  */
 static char* parse_cookie_value(const char* raw, bool allow_dbl_quote) {
   if (raw == NULL) {
@@ -248,9 +222,6 @@ static char* parse_cookie_value(const char* raw, bool allow_dbl_quote) {
 
 /**
  * sanitize_cookie_value sanitizes and cleans the cookie value
- *
- * @param v
- * @return char*
  */
 static char* sanitize_cookie_value(char* v) {
   v = sanitize("Cookie.Value", is_valid_cookie_value_char, v);
@@ -270,19 +241,14 @@ static char* sanitize_cookie_value(char* v) {
 
 /**
  * sanitize_cookie_path sanitizes and cleans the cookie path
- *
- * @param p
- * @return char*
  */
 static char* sanitize_cookie_path(const char* p) {
   return sanitize("Cookie.Path", is_valid_cookie_path_char, p);
 }
 
 /**
- * cookie_serialize returns the stringified cookie* for use in a Cookie header
-
- * @param c
- * @return char* or NULL if the cookie name is invalid
+ * cookie_serialize returns the stringified cookie* for use in a Cookie header,
+ * or NULL if the cookie name is invalid
  */
 static char* cookie_serialize(cookie_internal* c) {
   if (c == NULL || !is_valid_cookie_name(c->name)) {
@@ -413,9 +379,6 @@ static array_t* read_browser_cookie(hash_table* headers) {
 /**
  * read_cookies parses all "Cookie" values from the given headers and returns
  * the successfully parsed cookies
- *
- * @param headers
- * @return array_t*
  */
 static array_t* read_cookies(hash_table* headers) {
   array_t* cookies = (array_t*)ht_get(headers, COOKIE);
