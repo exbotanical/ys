@@ -2,6 +2,7 @@
 
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 
 header* to_header(const char* key, array_t* values) {
   header* h = malloc(sizeof(header));

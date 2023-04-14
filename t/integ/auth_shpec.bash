@@ -6,7 +6,6 @@ SERVER_ADDR='localhost:6124'
 
 export LD_LIBRARY_PATH=.
 
-./test_server_bin >/dev/null &
 
 COOKIE='TestCookie=100; Expires=Sat, 01 Apr 2023 02:02:26 GMT'
 
@@ -48,5 +47,3 @@ describe 'libys auth integration tests'
     assert egrep "$cookie" 'Max-Age=0'
   ti
 end_describe
-
-kill $!

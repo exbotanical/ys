@@ -6,7 +6,6 @@ SERVER_ADDR='localhost:6124'
 
 export LD_LIBRARY_PATH=.
 
-./test_server_bin >/dev/null &
 
 describe 'libys basic integration tests'
   it 'GET request returns payload'
@@ -262,5 +261,3 @@ describe 'middleware'
     assert equal '' "$res"
   ti
 end_describe
-
-kill $!

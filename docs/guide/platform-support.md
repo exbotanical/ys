@@ -2,25 +2,27 @@
 
 Ys currently supports UNIX-like environments and has been tested on the following operating systems
 
-## Arch Linux
+## Linux
+
+### Arch Linux
 
 Full support for usage + development.
 
-## Ubuntu
+### Ubuntu
 
 Full support for usage.
 
 For development, we need to fix the integration tests. If someone on Ubuntu wants to contribute, let me know and I will expedite this.
 
-### Everything you need
+#### Everything you need
 
-#### General Usage
+##### General Usage
 
 ```sh
 apt update && apt install libpcre3-dev make gcc libssl-dev
 ```
 
-#### Development
+##### Development
 
 ```sh
 apt install curl
@@ -30,19 +32,19 @@ apt install curl
 sh -c "`curl -L https://raw.githubusercontent.com/rylnd/shpec/master/install.sh`"
 ```
 
-## Fedora
+### Fedora
 
 Full support for usage + development.
 
-### Everything you need
+#### Everything you need
 
-#### General Usage
+##### General Usage
 
 ```sh
 yum install make gcc pcre-devel openssl-devel redhat-lsb-core
 ```
 
-#### Development
+##### Development
 
 ```sh
 yum install curl
@@ -52,19 +54,19 @@ yum install curl
 sh -c "`curl -L https://raw.githubusercontent.com/rylnd/shpec/master/install.sh`"
 ```
 
-## AL2 Linux
+### AL2 Linux
 
 Partial support for usage (TLS support not working yet). Development support needs work.
 
-### Everything you need
+#### Everything you need
 
-#### General Usage
+##### General Usage
 
 ```sh
 yum install pcre-devel openssl-devel
 ```
 
-#### Development
+##### Development
 
 ```sh
 yum install curl
@@ -79,7 +81,13 @@ We're working on expanding cross-platform support and need your help!
 [Improve Cross-platform Support](https://github.com/exbotanical/ys/issues/1)
 
 
-<!-- ## AL2 Linux
+## Other Unix-Like Systems
+
+### macos
+
+Yes, Ys works on macos.
+
+<!-- ### AL2 Linux
 
 1. const in server_conf
 2. /usr/include/openssl (not working) -->

@@ -23,24 +23,6 @@ declare -a SKIP_FILES=(
   # 'util_test.c'
 )
 
-not_test_file () {
-	local test=$1
-	local ret=0
-
-  if [[ $test != *_test.c ]]; then
-     return 1;
-  fi
-
-	for (( i=0; i < ${#SKIP_FILES[@]}; i++ )); do
-		if [[ $test == ${SKIP_FILES[i]} ]]; then
-			ret=1
-			break
-		fi
-	done
-
-	return $ret
-}
-
 run_test () {
 	local file_name="$1"
 
@@ -57,7 +39,7 @@ run_test () {
 main () {
 	export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
 
-	declare -a tests=($(ls $TESTING_DIR | filter not_test_file))
+	declare -a tests=($(ls $TESTING_DIR | filter not_test_file _test.c))
 
 	for_each run_test ${tests[*]}
 }

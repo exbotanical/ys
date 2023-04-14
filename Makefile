@@ -74,10 +74,9 @@ unit_test:
 	$(MAKE) clean
 
 # make -s integ_test 2>/dev/null
-integ_test:
-	$(MAKE) all
+integ_test: all
 	$(CC) $(INTEG_DIR)/test_server.c $(wildcard $(INTEG_DIR)/deps/*/*.c) -I$(SRC_DIR) -I$(DEPS_DIR) -L. -lys $(TFLAGS) -o $(INTEG_BASE_BIN)
-	$(INTEG_RUNNER)
+	./scripts/integ.bash
 	$(MAKE) clean
 
 lint:

@@ -191,4 +191,4 @@ Everything you need: `apt update && apt install git vim libpcre3-dev make gcc li
 
 ## macos
 
-weird struct shit happens with the response headers (x-powered-by) and the hash table if initialized in diff order in response_init
+Ensure libcrypto, libssl and openssl are in `LD_LIBRARY_PATH` and `DYLD_LIBARY_PATH`
