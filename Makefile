@@ -61,9 +61,7 @@ test:
 
 # make -s unit_test 2>/dev/null
 unit_test:
-# TODO: all and add lib to the tests
 	$(CC) $(CFLAGS) $(DEPS) $(SRC) $(LIB) $(LDFLAGS) -o $(SO_TARGET)
-# TODO: echo deps and flags
 	./scripts/test.bash
 	$(MAKE) clean
 
