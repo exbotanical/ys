@@ -2,8 +2,6 @@
 
 #include "libys.h"
 
-#define PORT 9000
-
 response *root_handler(request *req, response *res) {
   set_header(res, "Content-Type", "text/plain");
   set_header(res, "X-Powered-By", "demo");
@@ -43,13 +41,12 @@ int main() {
   router_register(api_router, "/", api_handler, METHOD_GET, NULL);
   router_register(api_router, "/demo", demo_handler, METHOD_GET, NULL);
 
-  // passing PORT explicitly overrides config value if there is one
-  tcp_server *server = server_init(router, PORT);
+  tcp_server *server = server_init(server_attr_init(router));
   server_start(server);
 
   return EXIT_SUCCESS;
 }
 
-// curl localhost:9000 -v
-// curl localhost:9000/api -v
-// curl localhost:9000/api/demo -v
+// curl localhost:5000 -v
+// curl localhost:5000/api -v
+// curl localhost:5000/api/demo -v

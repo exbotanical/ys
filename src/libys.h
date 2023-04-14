@@ -559,17 +559,63 @@ void router_register_500_handler(router_attr* attr, route_handler* h);
  **********************************************************/
 
 /**
- * A server configuration object that stores settings for the HTTP server
+ * A server attributes object that stores settings for the tcp_server
+ */
+typedef struct server_attr_internal* tcp_server_attr;
+
+/**
+ * A server object that represents the HTTP server
  */
 typedef struct server_internal* tcp_server;
 
 /**
- * server_init allocates the necessary memory for a `tcp_server`
+ * server_attr_init initializes a new server attributes object
+ *
+ * @param router The router instance to run on new client connections
+ * @return tcp_server_attr*
+ */
+tcp_server_attr* server_attr_init(http_router* router);
+
+/**
+ * server_attr_init_with aggregates all of the server_attr_* methods into a
+ * single, convenient helper function
  *
  * @param router The router instance to run on new client connections
  * @param port The port on which the server will listen for incoming connections
+ * @param cert_path The certificate file path - if NULL, use_https will be false
+ * @param key_path The key file path - if NULL, use_https will be false
+ * @return tcp_server_attr*
  */
-tcp_server* server_init(http_router* router, int port);
+tcp_server_attr* server_attr_init_with(http_router* router, int port,
+                                       char* cert_path, char* key_path);
+
+/**
+ * server_set_port sets a non-default port on the server
+ *
+ * @param port The port on which the server will listen for incoming connections
+ */
+void server_set_port(tcp_server_attr* attr, int port);
+
+/**
+ * server_use_https instructs Ys to use SSL for the server
+ */
+void server_use_https(tcp_server_attr* attr, char* cert_path, char* key_path);
+
+/**
+ * server_disable_https disables HTTPs support. This is a convenience function
+ * typically used for testing, where cert files were set on the tcp_server_attr*
+ * (meaning HTTPs is enabled), but you still do not want to use HTTPs
+ *
+ * @param attr
+ */
+void server_disable_https(tcp_server_attr* attr);
+
+/**
+ * server_init allocates the necessary memory for a `tcp_server`
+ *
+ * @param tcp_server_attr*
+ */
+tcp_server* server_init(tcp_server_attr*);
 
 /**
  * server_start listens for client connections and executes routing
@@ -583,10 +629,11 @@ void server_start(tcp_server* server);
  * This has no effect whatsoever unless you've compiled with the `USE_TLS` flag
  *
  * @param server
- * @param certfile
- * @param keyfile
+ * @param cert_path
+ * @param key_path
+ * TODO: rm
  */
-void server_set_cert(tcp_server* server, char* certfile, char* keyfile);
+void server_set_cert(tcp_server* server, char* cert_path, char* key_path);
 
 /**
  * server_free deallocates memory for the provided tcp_server* instance

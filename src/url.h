@@ -23,8 +23,7 @@ hash_table* parse_query(const char* query);
  * has_query_string tests whether a string `url` has a valid query string
  *
  * @param url
- * @return true
- * @return false
+ * @return bool
  *
  * @see
  * https://stackoverflow.com/questions/1617058/ok-to-skip-slash-before-query-string

@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <openssl/ssl.h>
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
@@ -16,10 +17,6 @@
 #include "picohttpparser/picohttpparser.h"
 #include "request.h"
 #include "xmalloc.h"
-
-#ifdef USE_TLS
-#include <openssl/ssl.h>
-#endif
 
 #define REQ_BUFFER_SIZE 4096
 
@@ -50,17 +47,17 @@ maybe_request req_read_and_parse(client_context* ctx) {
   ssize_t bytes_read;
 
   while (true) {
-#ifdef USE_TLS
-    while ((bytes_read =
-                SSL_read(ctx->ssl, buf + buflen, sizeof(buf) - buflen)) == -1 &&
-           errno == EINTR)
-      ;
-#else
-    while ((bytes_read =
-                read(ctx->sockfd, buf + buflen, sizeof(buf) - buflen)) == -1 &&
-           errno == EINTR)
-      ;
-#endif
+    if (ctx->ssl) {
+      while ((bytes_read = SSL_read(ctx->ssl, buf + buflen,
+                                    sizeof(buf) - buflen)) == -1 &&
+             errno == EINTR)
+        ;
+    } else {
+      while ((bytes_read = read(ctx->sockfd, buf + buflen,
+                                sizeof(buf) - buflen)) == -1 &&
+             errno == EINTR)
+        ;
+    }
 
     if (bytes_read <= 0) {
       maybe_request meta = {.err = IO_ERR};

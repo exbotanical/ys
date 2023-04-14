@@ -22,7 +22,7 @@ void __add_middleware_with_opts(router_attr *attr, route_handler *mw,
     while (ignore_path) {
       pcre *re = regex_compile(ignore_path);
       if (!re) {
-        printlogf(LOG_INFO,
+        printlogf(YS_LOG_INFO,
                   "failed to compile regex %s; this path will be omitted from "
                   "ignore paths\n",
                   ignore_path);

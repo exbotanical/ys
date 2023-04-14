@@ -22,13 +22,13 @@ make libys.a
 
 #include <stdlib.h>
 
-#define PORT 9000
-
 int main(int argc, char **argv) {
   router_attr *attr = router_attr_init();
   http_router *router = router_init(attr);
 
-  tcp_server *server = server_init(router, PORT);
+  tcp_server_attr* srv_attr = server_attr_init(router);
+  tcp_server *server = server_init(srv_attr);
+
   server_start(server);
 
   return EXIT_SUCCESS;
@@ -39,8 +39,6 @@ int main(int argc, char **argv) {
 
 ```c{7-14,20}
 #include "libys.h"
-
-#define PORT 9000
 
 response *root_handler(request *req, response *res) {
   set_header(res, "Content-Type", "text/plain");
@@ -57,7 +55,9 @@ int main(int argc, char **argv) {
 
   router_register(router, "/", root_handler, METHOD_GET, NULL);
 
-  tcp_server *server = server_init(router, PORT);
+  tcp_server_attr* srv_attr = server_attr_init(router);
+  tcp_server *server = server_init(srv_attr);
+
   server_start(server);
 
   return 0;
@@ -71,5 +71,5 @@ gcc main.c libys.a -o main
 
 ./main
 
-curl localhost:9000/ # Hello World!
+curl localhost:5000/ # Hello World!
 ```

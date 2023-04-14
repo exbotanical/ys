@@ -1,6 +1,7 @@
 #include "response.h"
 
 #include <errno.h>
+#include <openssl/ssl.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,10 +12,6 @@
 #include "logger.h"
 #include "util.h"
 #include "xmalloc.h"
-
-#ifdef USE_TLS
-#include <openssl/ssl.h>
-#endif
 
 #define REQ_BUFFER_SIZE 4096
 
@@ -108,13 +105,13 @@ void response_send(client_context *ctx, buffer_t *buf) {
   while (total_sent < buffer_size(buf)) {
     ssize_t sent;
 
-#ifdef USE_TLS
-    sent = SSL_write(ctx->ssl, buffer_state(buf) + total_sent,
-                     buffer_size(buf) - total_sent);
-#else
-    sent = write(ctx->sockfd, buffer_state(buf) + total_sent,
-                 buffer_size(buf) - total_sent);
-#endif
+    if (ctx->ssl) {
+      sent = SSL_write(ctx->ssl, buffer_state(buf) + total_sent,
+                       buffer_size(buf) - total_sent);
+    } else {
+      sent = write(ctx->sockfd, buffer_state(buf) + total_sent,
+                   buffer_size(buf) - total_sent);
+    }
 
     if (sent == -1) {
       if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) {
@@ -122,10 +119,11 @@ void response_send(client_context *ctx, buffer_t *buf) {
         continue;
       }
 
-      printlogf(LOG_INFO, "[response::%s] failed to send response on sockfd %d",
-                __func__, ctx->sockfd);
-      printlogf(LOG_DEBUG, "[response::%s] full response body: %s\n", __func__,
-                buffer_state(buf));
+      printlogf(YS_LOG_INFO,
+                "[response::%s] failed to send response on sockfd %d", __func__,
+                ctx->sockfd);
+      printlogf(YS_LOG_DEBUG, "[response::%s] full response body: %s\n",
+                __func__, buffer_state(buf));
       goto done;
 
     } else {
@@ -138,10 +136,10 @@ void response_send(client_context *ctx, buffer_t *buf) {
 done:
   buffer_free(buf);
 
-#ifdef USE_TLS
-  SSL_shutdown(ctx->ssl);
-  SSL_free(ctx->ssl);
-#endif
+  if (ctx->ssl) {
+    SSL_shutdown(ctx->ssl);
+    SSL_free(ctx->ssl);
+  }
 
   close(ctx->sockfd);
 

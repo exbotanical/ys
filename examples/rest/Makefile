@@ -1,6 +1,6 @@
 CC := gcc
 LINK := -lys -lm -lpcre
-SRC := $(wildcard ./*.c)
+SRC := $(wildcard ./*.c) $(wildcard ./deps/*/*.c)
 TARGET := demo
 
 all: $(TARGET)

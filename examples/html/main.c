@@ -2,8 +2,6 @@
 
 #include "libys.h"
 
-#define PORT 9000
-
 const char *html =
     "<!DOCTYPE html>"
     "<html lang=\"en\">"
@@ -47,7 +45,7 @@ int main() {
   router_register(router, "/", handler, METHOD_GET, NULL);
   router_register(router, "/style.css", css_handler, METHOD_GET, NULL);
 
-  tcp_server *server = server_init(router, PORT);
+  tcp_server *server = server_init(server_attr_init(router));
   server_start(server);
 
   return EXIT_SUCCESS;

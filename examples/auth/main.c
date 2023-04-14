@@ -8,7 +8,6 @@
 #include "libhash/libhash.h"
 #include "libys.h"
 
-#define PORT 9000
 #define SESSION_TIMEOUT_MINUTES 10
 
 // TODO: mutex
@@ -65,6 +64,7 @@ char *hash_password(char *pw) {
 
 response *index_handler(request *req, response *res) {
   set_status(res, STATUS_OK);
+  set_header(res, "Content-Type", MIME_TYPE_HTML);
   set_body(res, from_file("./index.html"));
 
   return res;
@@ -72,6 +72,7 @@ response *index_handler(request *req, response *res) {
 
 response *css_handler(request *req, response *res) {
   set_status(res, STATUS_OK);
+  set_header(res, "Content-Type", MIME_TYPE_CSS);
   set_body(res, from_file("./style.css"));
 
   return res;
@@ -83,7 +84,7 @@ response *data_handler(request *req, response *res) {
   char *username = ht_get(session_store, sid);
 
   set_body(res, fmt_str("{ \"data\": \"Hello, %s!\" }", username));
-  set_header(res, "Content-Type", "application/json");
+  set_header(res, "Content-Type", MIME_TYPE_JSON);
   set_status(res, STATUS_OK);
 
   return res;
@@ -240,7 +241,7 @@ int main() {
   router_register(router, "/", index_handler, METHOD_GET, NULL);
   router_register(router, "/style.css", css_handler, METHOD_GET, NULL);
 
-  tcp_server *server = server_init(router, PORT);
+  tcp_server *server = server_init(server_attr_init(router));
   server_start(server);
 
   return EXIT_SUCCESS;

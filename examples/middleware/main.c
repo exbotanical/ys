@@ -4,8 +4,6 @@
 
 #include "libys.h"
 
-#define PORT 9000
-
 response *handler(request *req, response *res) {
   printf("handler\n");
 
@@ -40,7 +38,7 @@ int main() {
 
   router_register(router, "/:key[^\\d+$]", handler, METHOD_GET, NULL);
 
-  tcp_server *server = server_init(router, PORT);
+  tcp_server *server = server_init(server_attr_init(router));
   server_start(server);
 
   return EXIT_SUCCESS;

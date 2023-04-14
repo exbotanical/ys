@@ -130,7 +130,8 @@
   #define isnull(thing) printf("IS NULL? %s\n", thing == NULL ? "yes" : "no")
   ```
 - [x] Shared test utils
-- [ ] Consolidate integ test servers
+- [x] Consolidate integ test servers
+- [ ] get rid of doc comments with `@param` - it offers no value since we're not generating anything with the doc comments and is difficult to maintain
 
 ## Fixes
 - [x] Allow OPTIONS requests by default in router when CORS enabled

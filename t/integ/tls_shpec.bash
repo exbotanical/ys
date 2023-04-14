@@ -4,11 +4,6 @@ source "$ROOT_DIR/shpec_util.bash"
 
 SERVER_ADDR='https://localhost:6124'
 
-make USE_TLS=1
-export LD_LIBRARY_PATH=.
-
-./test_server_bin >/dev/null &
-
 describe 'libys TLS integration tests'
   it 'GET request returns payload'
     res="$(curl -k "$SERVER_ADDR")"

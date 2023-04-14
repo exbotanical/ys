@@ -1,22 +1,23 @@
 # HTTPs Support
 
-Ys ships with support for TLS from openssl. Requirements
+Ys ships with support for SSL from openssl.
+
+## Requirements
 
 * A local installation of openssl
-* Compile Ys with the `USE_TLS` flag set to a non-zero value
+* SSL certificate and key files
 
-```sh
-make libys.a USE_TLS=1
-```
+## Code
 
-Once compiled, modify your server code to include your TLS cert and key files.
+Once compiled, modify your server code to include your SSL cert and key files.
 
 ```c
 int main() {
   // ...
-  tcp_server *server = server_init(router, PORT);
-  server_set_cert(server, "./certs/yoursite.pem", "./certs/yoursite-key.pem");
+  tcp_server_attr* srv_attr = server_attr_init(router);
+  server_use_https("./certs/yoursite.pem", "./certs/yoursite-key.pem");
 
+  tcp_server *server = server_init(srv_attr);
   server_start(server);
 }
 ```

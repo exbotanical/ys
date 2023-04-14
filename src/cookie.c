@@ -37,8 +37,9 @@ static char* sanitize(const char* field_name, bool (*test)(const char),
       continue;
     }
 
-    printlogf(LOG_DEBUG, "invalid char %c in %s; dropping invalid characters",
-              v[i], field_name);
+    printlogf(YS_LOG_DEBUG,
+              "invalid char %c in %s; dropping invalid characters", v[i],
+              field_name);
     ok = false;
     break;
   }
@@ -313,7 +314,7 @@ static char* cookie_serialize(cookie_internal* c) {
       buffer_append(b, d);
 
     } else {
-      printlogf(LOG_DEBUG,
+      printlogf(YS_LOG_DEBUG,
                 "invalid cookie domain %s; dropping domain attribute",
                 c->domain);
     }
@@ -507,7 +508,7 @@ static array_t* read_cookies(hash_table* headers) {
         int seconds = atoi(value);
 
         if (!seconds || (seconds != 0 && value[0] == '0')) {
-          printlogf(LOG_DEBUG, "max_age value %s is invalid", seconds);
+          printlogf(YS_LOG_DEBUG, "max_age value %s is invalid", seconds);
         } else {
           if (seconds <= 0) {
             seconds = -1;

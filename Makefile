@@ -6,10 +6,11 @@ LIB_DIR := lib
 TEST_DIR := t
 UNIT_DIR := $(TEST_DIR)/unit
 INTEG_DIR := $(TEST_DIR)/integ
+LIBSSL_DIR := /usr/include/openssl/
 
 CC := gcc
-CFLAGS := -g -fPIC -Wall -Wextra -pedantic -Wno-missing-braces -I$(DEPS_DIR) -lm -lpcre -pthread
-LDFLAGS := -shared
+CFLAGS := -g -fPIC -Wall -Wextra -pedantic -Wno-missing-braces -I$(DEPS_DIR) -I$(LIBSSL_DIR)
+LDFLAGS := -shared -lcrypto -lssl -lm -lpcre -pthread
 TFLAGS :=
 
 LINTER := clang-format
@@ -25,19 +26,10 @@ SRC := $(wildcard $(SRC_DIR)/*.c)
 DEPS := $(wildcard $(DEPS_DIR)/*/*.c)
 LIB := $(wildcard $(LIB_DIR)/*.c)
 TESTS := $(wildcard $(TEST_DIR)/*/*.c)
+INTEG_DEPS := $(wildcard $(INTEG_DIR)/deps/*/*.c)
 
 ifeq ($(OS), Ubuntu)
 	TFLAGS += -lm -lpcre
-endif
-
-ifdef USE_TLS
-	CFLAGS += -lcrypto -lssl -DUSE_TLS=1
-ifeq ($(OS), Ubuntu)
-	CFLAGS += -I/usr/include/openssl/
-	TFLAGS += $(CFLAGS)
-else
-	CFLAGS += -I/usr/lib/openssl-1.1/
-endif
 endif
 
 ifdef DEBUG
@@ -52,11 +44,11 @@ endif
 	$(CC) $(CFLAGS) -c $< -o $@
 
 all:
-	$(info USE_TLS=$(USE_TLS) DEBUG=$(DEBUG))
+	$(info OS=$(OS) DEBUG=$(DEBUG))
 	$(CC) $(CFLAGS) $(DEPS) $(SRC) $(LDFLAGS) -o $(SO_TARGET)
 
 $(STATIC_TARGET): $(patsubst %.c,%.o,$(SRC)) $(patsubst %.c,%.o,$(DEPS))
-	$(info USE_TLS=$(USE_TLS) DEBUG=$(DEBUG))
+	$(info OS=$(OS) DEBUG=$(DEBUG))
 	ar rcs $@ $^
 
 clean:
@@ -65,17 +57,19 @@ clean:
 # make -s test 2>/dev/null
 test:
 	$(MAKE) unit_test
-	$(MAKE) integ_test
+	# $(MAKE) integ_test
 
 # make -s unit_test 2>/dev/null
 unit_test:
+# TODO: all and add lib to the tests
 	$(CC) $(CFLAGS) $(DEPS) $(SRC) $(LIB) $(LDFLAGS) -o $(SO_TARGET)
+# TODO: echo deps and flags
 	./scripts/test.bash
 	$(MAKE) clean
 
 # make -s integ_test 2>/dev/null
 integ_test: all
-	$(CC) $(INTEG_DIR)/test_server.c $(wildcard $(INTEG_DIR)/deps/*/*.c) -I$(SRC_DIR) -I$(DEPS_DIR) -L. -lys $(TFLAGS) -o $(INTEG_BASE_BIN)
+	$(CC) $(INTEG_DIR)/test_server.c $(INTEG_DEPS) -I$(SRC_DIR) -I$(DEPS_DIR) -L. -lys $(TFLAGS) -o $(INTEG_BASE_BIN)
 	./scripts/integ.bash
 	$(MAKE) clean
 

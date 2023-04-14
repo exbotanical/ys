@@ -327,10 +327,12 @@ int main() {
   router_register(auth_router, "/logout", logout_handler, METHOD_POST, NULL);
   router_register(auth_router, "/data", data_handler, METHOD_GET, NULL);
 
-  tcp_server *server = server_init(router, PORT);
+  tcp_server_attr *srv_attr =
+      server_attr_init_with(router, PORT, "./t/integ/certs/localhost.pem",
+                            "./t/integ/certs/localhost-key.pem");
 
-  server_set_cert(server, "./t/integ/certs/localhost.pem",
-                  "./t/integ/certs/localhost-key.pem");
+  server_disable_https(srv_attr);
+  tcp_server *server = server_init(srv_attr);
 
   server_start(server);
   server_free(server);

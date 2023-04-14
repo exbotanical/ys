@@ -27,7 +27,7 @@ run_test () {
 	local file_name="$1"
 
 	gcc -w -Ideps -Isrc -Ilib -c "$TESTING_DIR/$file_name" -o main.o
-	gcc -o main main.o -L./ -l$LIB -lm -lpcre
+	gcc -o main main.o -L./ -l$LIB -lm -lpcre -lcrypto -lssl
 
 	green "\n[+] Running test $file_name...\n\n"
 

@@ -184,7 +184,7 @@ route_result *trie_search(route_trie *trie, const char *method,
 
         pcre *re = regex_cache_get(trie->regex_cache, pattern);
         if (!re) {
-          printlogf(LOG_INFO, "[trie::%s] regex was NULL\n", __func__);
+          printlogf(YS_LOG_INFO, "[trie::%s] regex was NULL\n", __func__);
 
           return NULL;  // 500
         }
@@ -200,7 +200,7 @@ route_result *trie_search(route_trie *trie, const char *method,
 
         ht_record *next = ht_search(curr->children, child->label);
         if (!next) {
-          printlogf(LOG_INFO,
+          printlogf(YS_LOG_INFO,
                     "[trie::%s] did not match a route but expected "
                     "to, where label is %s\n",
                     __func__, child->label);

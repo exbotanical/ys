@@ -52,7 +52,7 @@ array_t *split(const char *s, const char *delim) {
 
   char *token = strtok(input, delim);
   if (token == NULL) {
-    printlogf(LOG_INFO,
+    printlogf(YS_LOG_INFO,
               "[path::%s] `strtok` returned NULL for its initial token; "
               "this is likely a bug because the input contains the delimiter. "
               "input was %s and delimiter was %s\n",
@@ -133,3 +133,5 @@ char *tostr(char c) {
 }
 
 bool is_ascii(char c) { return 0x20 <= c && c < 0x7f; }
+
+bool is_port_in_range(int port) { return port < 1024 || port > 65535; }

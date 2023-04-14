@@ -76,8 +76,9 @@ static bool invoke_chain(request_internal *req, response_internal *res,
  * @return response*
  */
 static response *default_internal_error_handler(request *req, response *res) {
-  printlogf(LOG_INFO, "[router::%s] 500 handler in effect at request path %s\n",
-            __func__, req_get_path(req));
+  printlogf(YS_LOG_INFO,
+            "[router::%s] 500 handler in effect at request path %s\n", __func__,
+            req_get_path(req));
 
   set_status(res, STATUS_INTERNAL_SERVER_ERROR);
 
@@ -92,7 +93,7 @@ static response *default_internal_error_handler(request *req, response *res) {
  * @return response*
  */
 static response *default_not_found_handler(request *req, response *res) {
-  printlogf(LOG_INFO,
+  printlogf(YS_LOG_INFO,
             "[router::%s] default 404 handler in effect "
             "at request path %s\n",
             __func__, req_get_path(req));
@@ -111,7 +112,7 @@ static response *default_not_found_handler(request *req, response *res) {
  */
 static response *default_method_not_allowed_handler(request *req,
                                                     response *res) {
-  printlogf(LOG_INFO,
+  printlogf(YS_LOG_INFO,
             "[router::%s] default 405 handler in "
             "effect at request path %s\n",
             __func__, req_get_path(req));
@@ -144,8 +145,9 @@ static bool router_run_sub(router_internal *router, client_context *ctx,
       if (sub_router) {
         char *sub_path = suffix ? suffix : "/";
         strcpy(req->route_path, sub_path);
-        printlogf(LOG_DEBUG, "matched sub-router at path %s and sub-path %s\n",
-                  prefix, req->route_path);
+        printlogf(YS_LOG_DEBUG,
+                  "matched sub-router at path %s and sub-path %s\n", prefix,
+                  req->route_path);
 
         router_run(sub_router, ctx, req);
 
@@ -182,14 +184,14 @@ http_router *router_init(router_attr *attr) {
   router->sub_routers = NULL;
 
   if (!attr_internal->not_found_handler) {
-    printlogf(LOG_DEBUG,
+    printlogf(YS_LOG_DEBUG,
               "[router::%s] not_found_handler is NULL, registering fallback "
               "handler\n",
               __func__);
 
     router->not_found_handler = default_not_found_handler;
   } else {
-    printlogf(LOG_DEBUG,
+    printlogf(YS_LOG_DEBUG,
               "[router::%s] registering user-defined not_found_handler\n",
               __func__);
 
@@ -197,7 +199,7 @@ http_router *router_init(router_attr *attr) {
   }
 
   if (!attr_internal->method_not_allowed_handler) {
-    printlogf(LOG_DEBUG,
+    printlogf(YS_LOG_DEBUG,
               "[router::%s] method_not_allowed_handler is NULL, registering "
               "fallback handler\n",
               __func__);
@@ -214,14 +216,14 @@ http_router *router_init(router_attr *attr) {
   }
 
   if (!attr_internal->internal_error_handler) {
-    printlogf(LOG_DEBUG,
+    printlogf(YS_LOG_DEBUG,
               "[router::%s] internal_error_handler is NULL, registering "
               "fallback handler\n",
               __func__);
 
     router->internal_error_handler = default_internal_error_handler;
   } else {
-    printlogf(LOG_DEBUG,
+    printlogf(YS_LOG_DEBUG,
               "[router::%s] registering user-defined internal_error_handler\n",
               __func__);
 
@@ -272,7 +274,6 @@ void router_run(router_internal *router, client_context *ctx,
   }
 
   response_internal *res = response_init();
-
   array_t *mws = router->middlewares;
   if (has_elements(mws)) {
     res->done = invoke_chain(req, res, mws);

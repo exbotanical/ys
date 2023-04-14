@@ -1,6 +1,7 @@
 #include "server.h"
 
-#include <stdio.h>
+#include <openssl/err.h>
+#include <openssl/ssl.h>
 #include <string.h>
 #include <sys/select.h>
 
@@ -16,24 +17,18 @@
 #include "util.h"
 #include "xmalloc.h"
 
-#ifdef USE_TLS
-#include <openssl/err.h>
-#include <openssl/ssl.h>
-#endif
-
 typedef struct {
   router_internal *r;
   client_context *c;
 } thread_context;
 
-#ifdef USE_TLS
 static SSL_CTX *create_context(void) {
   const SSL_METHOD *method = TLS_server_method();
   SSL_CTX *ctx = SSL_CTX_new(method);
 
   if (!ctx) {
     ERR_print_errors_fp(stderr);
-    DIE("failed to create SSL context\n");
+    DIE("[server::%s] failed to create SSL context\n", __func__);
   }
 
   return ctx;
@@ -43,15 +38,15 @@ static void configure_context(SSL_CTX *ctx, const char *certfile,
                               const char *keyfile) {
   if (SSL_CTX_use_certificate_file(ctx, certfile, SSL_FILETYPE_PEM) <= 0) {
     ERR_print_errors_fp(stderr);
-    DIE("failed to read certificate file %s\n", certfile);
+    DIE("[server::%s] failed to read certificate file %s\n", __func__,
+        certfile);
   }
 
   if (SSL_CTX_use_PrivateKey_file(ctx, keyfile, SSL_FILETYPE_PEM) <= 0) {
     ERR_print_errors_fp(stderr);
-    DIE("failed to read private key file %s\n", keyfile);
+    DIE("[server::%s] failed to read private key file %s\n", __func__, keyfile);
   }
 }
-#endif
 
 /**
  * client_thread_handler handles client connections and executes the
@@ -67,7 +62,7 @@ static void *client_thread_handler(void *arg) {
   // TODO: test + fix
   if (maybe_req.err.code == IO_ERR || maybe_req.err.code == PARSE_ERR ||
       maybe_req.err.code == REQ_TOO_LONG || maybe_req.err.code == DUP_HDR) {
-    printlogf(LOG_INFO,
+    printlogf(YS_LOG_INFO,
               "[server::%s] error parsing client request with error code %d. "
               "Pre-empting response with internal error handler\n",
               __func__, maybe_req.err.code);
@@ -80,8 +75,8 @@ static void *client_thread_handler(void *arg) {
 
   request_internal *req = maybe_req.req;
 
-  printlogf(LOG_INFO, "[server::%s] client request received: %s %s\n", __func__,
-            req->method, req->path);
+  printlogf(YS_LOG_INFO, "[server::%s] client request received: %s %s\n",
+            __func__, req->method, req->path);
 
   router_run(ctx->r, ctx->c, req);
 
@@ -102,7 +97,7 @@ static void poll_client_connections(thread_pool_t *pool,
 
     if (select(server_sockfd + 1, &readfds, NULL, NULL, NULL) == -1) {
       perror("select");
-      printlogf(LOG_DEBUG, "[server::%s] select failed; retrying...\n",
+      printlogf(YS_LOG_DEBUG, "[server::%s] select failed; retrying...\n",
                 __func__);
     }
 
@@ -110,41 +105,41 @@ static void poll_client_connections(thread_pool_t *pool,
       if ((client_sockfd = accept(server_sockfd, (struct sockaddr *)&address,
                                   (socklen_t *)&addr_len)) < 0) {
         perror("accept");
-        printlogf(LOG_INFO,
+        printlogf(YS_LOG_INFO,
                   "[server::%s] failed to accept client socket on %s:%d\n",
                   __func__, address.sin_addr, port);
 
         continue;
       }
 
-#ifdef USE_TLS
-      SSL *ssl = SSL_new(((server_internal *)server)->sslctx);
-      SSL_set_fd(ssl, client_sockfd);
+      SSL *ssl = NULL;
+      if (server->sslctx) {
+        ssl = SSL_new(server->sslctx);
+        SSL_set_fd(ssl, client_sockfd);
 
-      if (SSL_accept(ssl) <= 0) {
-        ERR_print_errors_fp(stderr);
+        if (SSL_accept(ssl) <= 0) {
+          ERR_print_errors_fp(stderr);
+          printlogf(YS_LOG_INFO,
+                    "[server::%s] failed to accept SSL connection\n", __func__);
 
-        response_send_protocol_error(client_sockfd);
-        SSL_free(ssl);
-        continue;
+          response_send_protocol_error(client_sockfd);
+          SSL_free(ssl);
+          continue;
+        }
       }
-#endif
 
-      printlogf(LOG_DEBUG,
+      printlogf(YS_LOG_DEBUG,
                 "[server::%s] accepted connection from new client; spawning "
                 "handler thread...\n",
                 __func__);
 
       client_context *ctx = xmalloc(sizeof(client_context));
       ctx->sockfd = client_sockfd;
-
-#ifdef USE_TLS
       ctx->ssl = ssl;
-#endif
 
       thread_context *tc = xmalloc(sizeof(thread_context));
       tc->c = ctx;
-      tc->r = ((server_internal *)server)->router;
+      tc->r = server->router;
 
       if (!thread_pool_dispatch(pool, client_thread_handler, tc, true)) {
         DIE("[server::%s] failed to dispatch thread from pool\n", __func__);
@@ -166,6 +161,7 @@ static thread_pool_t *setup_thread_pool(void) {
     thread_t *client_thread = thread_init(0, "client thread");
 
     // Make this a detached thread
+    // TODO: change threads API to use detached method for clarity
     thread_set_attr(client_thread, false);
     thread_pool_insert(pool, client_thread);
   }
@@ -173,36 +169,88 @@ static thread_pool_t *setup_thread_pool(void) {
   return pool;
 }
 
-tcp_server *server_init(http_router *router, int port) {
-  if (port == -1) {
+tcp_server_attr *server_attr_init(http_router *router) {
+  server_attr_internal *attr = xmalloc(sizeof(server_attr_internal));
+  attr->router = (router_internal *)router;
+  attr->use_https = false;
+  attr->port = 0;
+  attr->cert_path = NULL;
+  attr->key_path = NULL;
+
+  return (tcp_server_attr *)attr;
+}
+
+void server_set_port(tcp_server_attr *attr, int port) {
+  if (!is_port_in_range(port)) {
     port = server_conf.port;
+    printlogf(YS_LOG_INFO, "[server::%s] invalid port %d - defaulting to \n",
+              __func__, port, server_conf.port);
+  } else {
+    ((server_attr_internal *)attr)->port = port;
   }
+}
+
+void server_use_https(tcp_server_attr *attr, char *cert_path, char *key_path) {
+  bool use_https = cert_path && key_path;
+  server_attr_internal *attr_internal = (server_attr_internal *)attr;
+
+  if (use_https) {
+    printlogf(YS_LOG_DEBUG, "[server::%s] HTTPs enabled on tcp_server_attr\n",
+              __func__);
+
+    attr_internal->use_https = use_https;
+    attr_internal->cert_path = cert_path;
+    attr_internal->key_path = key_path;
+  }
+}
+
+void server_disable_https(tcp_server_attr *attr) {
+  ((server_attr_internal *)attr)->use_https = false;
+}
+
+tcp_server_attr *server_attr_init_with(http_router *router, int port,
+                                       char *cert_path, char *key_path) {
+  tcp_server_attr *attr = server_attr_init(router);
+  server_set_port(attr, port);
+  server_use_https(attr, cert_path, key_path);
+
+  return (tcp_server_attr *)attr;
+}
+
+tcp_server *server_init(tcp_server_attr *attr) {
+  server_attr_internal *a = (server_attr_internal *)attr;
 
   server_internal *server = xmalloc(sizeof(server_internal));
-  server->router = (router_internal *)router;
-  server->port = port;
+  server->router = (router_internal *)a->router;
+  server->port = a->port ? a->port : server_conf.port;
 
-#ifdef USE_TLS
-  printlogf(LOG_INFO, "Using TLS - initializing SSL context\n");
-  server->sslctx = create_context();
-#endif
+  if (a->use_https) {
+    printlogf(YS_LOG_INFO, "HTTPs enabled - initializing SSL context\n");
+
+    server->key_path = a->key_path;
+    server->cert_path = a->cert_path;
+    server->sslctx = create_context();
+  } else {
+    server->sslctx = NULL;
+  }
 
   return (tcp_server *)server;
 }
 
 void server_start(tcp_server *server) {
-#ifdef USE_TLS
   server_internal *s = (server_internal *)server;
-  printlogf(LOG_INFO, "Loading TLS cert %s and key %s\n", s->cert_path,
-            s->key_path);
-  configure_context(s->sslctx, s->cert_path, s->key_path);
-#endif
+
+  if (s->sslctx) {
+    printlogf(YS_LOG_INFO, "Loading TLS cert %s and key %s\n", s->cert_path,
+              s->key_path);
+    configure_context(s->sslctx, s->cert_path, s->key_path);
+  }
 
   setup_sigint_handler();
   setup_sigsegv_handler();
 
   thread_pool_t *pool = setup_thread_pool();
-  int port = ((server_internal *)server)->port;
+  int port = s->port;
 
   int server_sockfd;
   if ((server_sockfd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == 0) {
@@ -241,18 +289,13 @@ void server_start(tcp_server *server) {
         port);
   }
 
-  printlogf(LOG_INFO, "[server::%s] Listening on port %d...\n", __func__, port);
+  printlogf(YS_LOG_INFO, "[server::%s] Listening on port %d...\n", __func__,
+            port);
 
-  poll_client_connections(pool, (server_internal *)server, server_sockfd, port,
-                          address, addr_len);
+  poll_client_connections(pool, s, server_sockfd, port, address, addr_len);
 }
 
 void server_free(tcp_server *server) {
   router_free((http_router *)((server_internal *)server)->router);
   free(server);
-}
-
-void server_set_cert(tcp_server *server, char *certfile, char *keyfile) {
-  ((server_internal *)server)->cert_path = certfile;
-  ((server_internal *)server)->key_path = keyfile;
 }

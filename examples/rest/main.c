@@ -7,8 +7,6 @@
 #include "deps/jsob/jsob.h"
 #include "libys.h"
 
-#define PORT 9000
-
 typedef struct record {
   char *key;
   char *value;
@@ -192,7 +190,7 @@ int main() {
   router_register(router, record_path, handle_put, METHOD_PUT, NULL);
   router_register(router, record_path, handle_post, METHOD_POST, NULL);
 
-  tcp_server *server = server_init(router, PORT);
+  tcp_server *server = server_init(server_attr_init(router));
   server_start(server);
 
   return EXIT_SUCCESS;
@@ -200,29 +198,29 @@ int main() {
 
 /*
 GET record 2. It doesn't exist (yet):
-curl localhost:9000/records/2 -v
+curl localhost:5000/records/2 -v
 
 Let's create it:
-curl localhost:9000/records/2 -v -H 'Content-Type: application/json' -d '{"v":
+curl localhost:5000/records/2 -v -H 'Content-Type: application/json' -d '{"v":
 "someval" }'
 
 If we try to create this record again, we'll get a 400:
-curl localhost:9000/records/2 -v -H 'Content-Type: application/json' -d '{"v":
+curl localhost:5000/records/2 -v -H 'Content-Type: application/json' -d '{"v":
 "someval" }'
 
 Let's GET the record we just created:
-curl localhost:9000/records/2 -v
+curl localhost:5000/records/2 -v
 
 And now let's update it with PUT:
-curl localhost:9000/records/2 -v -X PUT -H 'Content-Type: application/json' -d
+curl localhost:5000/records/2 -v -X PUT -H 'Content-Type: application/json' -d
 '{"v": "updatedval"}'
 
 Let's GET it to verify our updates:
-curl localhost:9000/records/2 -v
+curl localhost:5000/records/2 -v
 
 Now let's DELETE the record:
-curl localhost:9000/records/2 -v -X DELETE
+curl localhost:5000/records/2 -v -X DELETE
 
 And finally, verify it no longer exists:
-curl localhost:9000/records/2 -v
+curl localhost:5000/records/2 -v
 */

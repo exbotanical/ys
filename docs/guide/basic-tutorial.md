@@ -201,7 +201,7 @@ response *root_handler(request *req, response *res) {
 }
 ```
 
-Now that we've configured our root handler, let's finish setting up the server so we can run it locally.
+Now that we've configured our root handler, let's finish setting up the server so we can run it locally. First, we create an attributes object for our server.
 
 ```c{7-8}
 int main(int argc, char **argv) {
@@ -210,14 +210,37 @@ int main(int argc, char **argv) {
 
   router_register(router, "/", root_handler, METHOD_GET, NULL);
 
-  tcp_server *server = server_init(router, PORT);
+  tcp_server_attr* srv_attr = server_attr_init(router);
+  server_set_port(PORT);
+
+  return 0;
+}
+```
+
+We've added two new lines. The first initializes a new `tcp_server_attr`, a required settings object for our server. It is on this object that we can configure a port (or not - and use the default port: 5000) and certs for HTTPs. The only argument for `server_attr_init` is the root router instance for the server.
+
+We've also overridden the default port to 9000 using the `server_set_port` helper. You can read about the other `tcp_server_attr*` helper methods and convenience functions [here](../reference/server-attr.md).
+
+Now let's add two more lines to create and start the server.
+
+```c{10-11}
+int main(int argc, char **argv) {
+  router_attr *attr = router_attr_init();
+  http_router *router = router_init(attr);
+
+  router_register(router, "/", root_handler, METHOD_GET, NULL);
+
+  tcp_server_attr* srv_attr = server_attr_init(router);
+  server_set_port(PORT);
+
+  tcp_server *server = server_init(srv_attr);
   server_start(server);
 
   return 0;
 }
 ```
 
-We've added two new lines. The first initializes a new `tcp_server` instance. By default, the server will not use TLS (see [HTTPs Support](../documentation/https-support.md)). To initialize a new server, we pass the root router instance and the port number on which the server will listen. Passing the port argument to `server_init` is optional; passing `NULL` instead will cause Ys to use the default port number — 5000.
+The first new line initializes a new `tcp_server` instance. By default, the server will not use SSL (see [HTTPs Support](../documentation/https-support.md)). To initialize a new server, we pass the attributes object we created in the previous step.
 
 Once we have our `tcp_server` instance, we can pass it to `server_start`, which will start the server, configure signal handlers for `SIGINT` and `SIGSEGV` (for controlled shutdowns), and begin listening on port 9000.
 

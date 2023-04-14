@@ -10,7 +10,7 @@
 /**
  * Logs a user-facing error to stderr and exits with return code `rc`.
  */
-#define DIE(...) printlogf(LOG_INFO, __VA_ARGS__), exit(EXIT_FAILURE)
+#define DIE(...) printlogf(YS_LOG_INFO, __VA_ARGS__), exit(EXIT_FAILURE)
 
 extern const char* log_header;
 extern const char* log_levels[];

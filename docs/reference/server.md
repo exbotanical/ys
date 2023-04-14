@@ -7,7 +7,7 @@ A `tcp_server*` is a server configuration object that stores settings for the HT
 ## server_init
 
 ```c
-tcp_server *server_init(http_router *router, int port);
+tcp_server *server_init(tcp_server_attr *attr);
 ```
 
 `server_init` allocates the necessary memory for a `tcp_server`.
@@ -19,15 +19,6 @@ void server_start(tcp_server *server);
 ```
 
 `server_start` listens for client connections and executes routing.
-
-## server_set_cert
-
-```c
-void server_set_cert(tcp_server *server, char *certfile, char *keyfile);
-```
-
-`server_set_cert` sets the cert and key filepaths for use with TLS.
-This has no effect whatsoever unless you've compiled with the `USE_TLS` flag.
 
 ## server_free
 

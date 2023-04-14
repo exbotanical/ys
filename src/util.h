@@ -93,4 +93,11 @@ char *tostr(char c);
  */
 bool is_ascii(char c);
 
+/**
+ * is_port_in_range tests whether the port is valid and non-reserved
+ *
+ * @param port
+ * @return bool
+ */
+bool is_port_in_range(int port);
 #endif /* UTIL_H */

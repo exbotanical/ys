@@ -48,14 +48,14 @@ bool parse_config(const char* filename) {
   char line[CONFIG_MAX_LINE_LEN];
 
   if (access(filename, F_OK) == -1) {
-    printlogf(LOG_DEBUG, "Config file %s does not exist. Using defaults\n",
+    printlogf(YS_LOG_DEBUG, "Config file %s does not exist. Using defaults\n",
               filename);
     return true;
   }
 
   FILE* fp = fopen(filename, "r");
   if (fp == NULL) {
-    printlogf(LOG_INFO, "Error opening config file '%s'\n", filename);
+    printlogf(YS_LOG_INFO, "Error opening config file '%s'\n", filename);
 
     return ret;
   }
@@ -81,33 +81,33 @@ bool parse_config(const char* filename) {
     if (s_equals(name, SERVER_PORT_KEY)) {
       port = atoi(value);
 
-      if (port < 1024 || port > 65535) {
-        printlogf(LOG_INFO, "Invalid port number\n");
+      if (is_port_in_range(port)) {
+        printlogf(YS_LOG_INFO, "Invalid port number\n");
         goto cleanup;
       }
     } else if (s_equals(name, NUM_THREADS_KEY)) {
       threads = atoi(value);
 
       if (threads < 0) {
-        printlogf(LOG_INFO, "Invalid number of threads\n");
+        printlogf(YS_LOG_INFO, "Invalid number of threads\n");
         goto cleanup;
       }
     } else if (s_equals(name, LOG_LEVEL_KEY)) {
       if (s_nullish(value)) {
-        printlogf(LOG_INFO, "Invalid log level\n");
+        printlogf(YS_LOG_INFO, "Invalid log level\n");
         goto cleanup;
       }
 
       log_level = s_copy(value);
     } else if (s_equals(name, LOG_FILE_KEY)) {
       if (s_nullish(value)) {
-        printlogf(LOG_INFO, "Invalid log file\n");
+        printlogf(YS_LOG_INFO, "Invalid log file\n");
         goto cleanup;
       }
 
       log_file = s_copy(value);
     } else {
-      printlogf(LOG_INFO, "Unknown option '%s' in config file\n", name);
+      printlogf(YS_LOG_INFO, "Unknown option '%s' in config file\n", name);
       goto cleanup;
     }
   }

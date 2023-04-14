@@ -117,6 +117,10 @@ function sidebarReference() {
           link: '/reference/server',
         },
         {
+          text: 'Server Attributes',
+          link: '/reference/server-attr',
+        },
+        {
           text: 'Middleware',
           link: '/reference/middleware',
         },
