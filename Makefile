@@ -57,7 +57,7 @@ clean:
 # make -s test 2>/dev/null
 test:
 	$(MAKE) unit_test
-	# $(MAKE) integ_test
+	$(MAKE) integ_test
 
 # make -s unit_test 2>/dev/null
 unit_test:

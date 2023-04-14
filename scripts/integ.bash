@@ -7,7 +7,7 @@ UTIL_F=util.bash
 declare -a SKIP_FILES=(
   # 'auth_shpec.bash'
   # 'basic_shpec.bash'
-  'tls_shpec.bash'
+  # 'tls_shpec.bash'
 )
 
 run_test () {
@@ -16,14 +16,38 @@ run_test () {
   shpec "$TESTING_DIR/$file_name"
 }
 
-main () {
-  export LD_LIBRARY_PATH=.
+run () {
   ./test_server_bin &
-  trap 'echo Cleaning up...; kill $!' EXIT
+  pid=$!
 
-	declare -a tests=($(ls $TESTING_DIR | filter not_test_file _shpec.bash))
+	declare -a tests=(
+    $(ls $TESTING_DIR | filter not_test_file _shpec.bash | grep -v 'tls_')
+  )
 
 	for_each run_test ${tests[*]}
+
+  quietly_kill $pid
+}
+
+run_ssl () {
+  ./test_server_bin USE_SSL &
+  pid=$!
+
+  declare -a tests=(
+    $(ls $TESTING_DIR | filter not_test_file _shpec.bash | grep 'tls_')
+  )
+
+	for_each run_test ${tests[*]}
+
+  quietly_kill $pid
+}
+
+main () {
+  export LD_LIBRARY_PATH=.
+
+  run
+
+  run_ssl
 }
 
 . "$(dirname "$(readlink -f "$BASH_SOURCE")")"/$UTIL_F

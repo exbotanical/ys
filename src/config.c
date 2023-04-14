@@ -81,33 +81,36 @@ bool parse_config(const char* filename) {
     if (s_equals(name, SERVER_PORT_KEY)) {
       port = atoi(value);
 
-      if (is_port_in_range(port)) {
-        printlogf(YS_LOG_INFO, "Invalid port number\n");
+      if (!is_port_in_range(port)) {
+        printlogf(YS_LOG_INFO, "[config::%s] Invalid port number\n", __func__);
         goto cleanup;
       }
     } else if (s_equals(name, NUM_THREADS_KEY)) {
       threads = atoi(value);
 
       if (threads < 0) {
-        printlogf(YS_LOG_INFO, "Invalid number of threads\n");
+        printlogf(YS_LOG_INFO, "[config::%s] Invalid number of threads\n",
+                  __func__);
         goto cleanup;
       }
     } else if (s_equals(name, LOG_LEVEL_KEY)) {
       if (s_nullish(value)) {
-        printlogf(YS_LOG_INFO, "Invalid log level\n");
+        printlogf(YS_LOG_INFO, "[config::%s] Invalid log level\n", __func__);
         goto cleanup;
       }
 
       log_level = s_copy(value);
     } else if (s_equals(name, LOG_FILE_KEY)) {
       if (s_nullish(value)) {
-        printlogf(YS_LOG_INFO, "Invalid log file\n");
+        printlogf(YS_LOG_INFO, "[config::%s] Invalid log file\n", __func__);
         goto cleanup;
       }
 
       log_file = s_copy(value);
     } else {
-      printlogf(YS_LOG_INFO, "Unknown option '%s' in config file\n", name);
+      printlogf(YS_LOG_INFO,
+                "[config::%s] Unknown option '%s' in config file\n", __func__,
+                name);
       goto cleanup;
     }
   }

@@ -58,3 +58,7 @@ not_test_file () {
 
 	return $ret
 }
+
+quietly_kill () {
+  kill $1 2>/dev/null
+}

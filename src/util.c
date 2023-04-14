@@ -134,4 +134,4 @@ char *tostr(char c) {
 
 bool is_ascii(char c) { return 0x20 <= c && c < 0x7f; }
 
-bool is_port_in_range(int port) { return port < 1024 || port > 65535; }
+bool is_port_in_range(int port) { return port >= 1024 && port < 65535; }

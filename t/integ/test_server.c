@@ -291,7 +291,9 @@ cors_opts *setup_cors(void) {
   return opts;
 }
 
-int main() {
+int main(int argc, char **argv) {
+  const char *use_ssl = argc > 0 && s_equals("USE_SSL", argv[1]);
+
   records = malloc(sizeof(db_record));
 
   /* Root Router */
@@ -331,7 +333,9 @@ int main() {
       server_attr_init_with(router, PORT, "./t/integ/certs/localhost.pem",
                             "./t/integ/certs/localhost-key.pem");
 
-  server_disable_https(srv_attr);
+  if (!use_ssl) {
+    server_disable_https(srv_attr);
+  }
   tcp_server *server = server_init(srv_attr);
 
   server_start(server);

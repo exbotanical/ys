@@ -57,5 +57,3 @@ describe 'libys TLS integration tests'
     assert equal 'api root' "$res"
   ti
 end_describe
-
-kill $!
