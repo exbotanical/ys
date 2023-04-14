@@ -4,9 +4,6 @@ source "$ROOT_DIR/shpec_util.bash"
 
 SERVER_ADDR='localhost:6124'
 
-export LD_LIBRARY_PATH=.
-
-
 describe 'libys basic integration tests'
   it 'GET request returns payload'
     res="$(curl "$SERVER_ADDR")"

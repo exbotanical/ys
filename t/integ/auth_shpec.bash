@@ -4,9 +4,6 @@ source "$ROOT_DIR/shpec_util.bash"
 
 SERVER_ADDR='localhost:6124'
 
-export LD_LIBRARY_PATH=.
-
-
 COOKIE='TestCookie=100; Expires=Sat, 01 Apr 2023 02:02:26 GMT'
 
 describe 'libys auth integration tests'

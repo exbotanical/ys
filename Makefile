@@ -1,4 +1,4 @@
-OS := $(shell lsb_release -si)
+OS := $(shell uname -s)
 
 DEPS_DIR := deps
 SRC_DIR := src
@@ -6,10 +6,9 @@ LIB_DIR := lib
 TEST_DIR := t
 UNIT_DIR := $(TEST_DIR)/unit
 INTEG_DIR := $(TEST_DIR)/integ
-LIBSSL_DIR := /usr/include/openssl/
 
 CC := gcc
-CFLAGS := -g -fPIC -Wall -Wextra -pedantic -Wno-missing-braces -I$(DEPS_DIR) -I$(LIBSSL_DIR)
+CFLAGS := -g -fPIC -Wall -Wextra -pedantic -Wno-missing-braces -I$(DEPS_DIR)
 LDFLAGS := -shared -lcrypto -lssl -lm -lpcre -pthread
 TFLAGS :=
 
@@ -28,8 +27,16 @@ LIB := $(wildcard $(LIB_DIR)/*.c)
 TESTS := $(wildcard $(TEST_DIR)/*/*.c)
 INTEG_DEPS := $(wildcard $(INTEG_DIR)/deps/*/*.c)
 
-ifeq ($(OS), Ubuntu)
-	TFLAGS += -lm -lpcre
+ifeq ($(OS), Darwin)
+	CFLAGS += -L/usr/local/include/
+else
+	CFLAGS += -I/usr/include/openssl/
+
+	OS := $(shell lsb_release -si)
+	ifeq ($(OS), Arch)
+		TFLAGS += -lm -lpcre
+	endif
+
 endif
 
 ifdef DEBUG

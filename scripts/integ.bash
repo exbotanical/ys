@@ -19,6 +19,7 @@ run_test () {
 run () {
   ./test_server_bin &
   pid=$!
+  sleep 1
 
 	declare -a tests=(
     $(ls $TESTING_DIR | filter not_test_file _shpec.bash | grep -v 'tls_')
@@ -32,6 +33,7 @@ run () {
 run_ssl () {
   ./test_server_bin USE_SSL &
   pid=$!
+  sleep 1
 
   declare -a tests=(
     $(ls $TESTING_DIR | filter not_test_file _shpec.bash | grep 'tls_')
@@ -43,10 +45,14 @@ run_ssl () {
 }
 
 main () {
-  export LD_LIBRARY_PATH=.
+  kill $(pgrep test_server_bin) 2>/dev/null ||:
+
+  export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:."
+  [[ "$OSTYPE" == "darwin"* ]] && {
+    export DYLD_LIBARY_PATH="$DYLD_LIBARY_PATH:$LD_LIBRARY_PATH"
+  }
 
   run
-
   run_ssl
 }
 

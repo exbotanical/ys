@@ -4,6 +4,7 @@ IFS=$'\n'
 TESTING_DIR=t/unit
 UTIL_F=util.bash
 LIB=ys
+LD_FLAGS="-L./ -l$LIB -lm -lpcre -lcrypto -lssl"
 
 declare -a SKIP_FILES=(
   # 'cache_test.c'
@@ -27,7 +28,7 @@ run_test () {
 	local file_name="$1"
 
 	gcc -w -Ideps -Isrc -Ilib -c "$TESTING_DIR/$file_name" -o main.o
-	gcc -o main main.o -L./ -l$LIB -lm -lpcre -lcrypto -lssl
+	eval "gcc -o main main.o $LD_FLAGS"
 
 	green "\n[+] Running test $file_name...\n\n"
 
@@ -37,7 +38,11 @@ run_test () {
 }
 
 main () {
-	export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
+  export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:."
+  [[ "$OSTYPE" == "darwin"* ]] && {
+    export DYLD_LIBARY_PATH="$DYLD_LIBARY_PATH:$LD_LIBRARY_PATH"
+    LD_FLAGS="$LD_FLAGS -L/usr/local/include/"
+  }
 
 	declare -a tests=($(ls $TESTING_DIR | filter not_test_file _test.c))
 

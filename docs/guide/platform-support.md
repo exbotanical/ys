@@ -4,6 +4,8 @@ Ys currently supports UNIX-like environments and has been tested on the followin
 
 ## Linux
 
+On Linux systems, you will need to ensure openssl is symlinked to `/usr/include/openssl/`.
+
 ### Arch Linux
 
 Full support for usage + development.
@@ -85,7 +87,19 @@ We're working on expanding cross-platform support and need your help!
 
 ### macos
 
-Yes, Ys works on macos.
+Yes, Ys works on macos. You will need to symlink the following dependencies to `/usr/local/include`:
+
+- `libcrypto`
+- `libssl`
+- `pcre.h`
+- `openssl`
+
+For example, if you've installed openssl with homebrew:
+
+```sh
+sudo ln -s /opt/homebrew/opt/openssl/lib/libcrypto.dylib /usr/local/include
+# ...
+```
 
 <!-- ### AL2 Linux
 

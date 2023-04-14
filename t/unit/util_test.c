@@ -1,6 +1,7 @@
 #include "util.h"
 
 #include <ctype.h>
+#include <string.h>
 
 #include "path.h"
 #include "tap.c/tap.h"

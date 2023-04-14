@@ -10,7 +10,7 @@ get_header () {
 }
 
 get_status () {
-  grep -Eo '\b[0-9]{3} .*\b'
+  grep -Eo '\b[0-9]{3} .*\b' | sed -e 's/\r$//'
 }
 
 get_cookie () {
