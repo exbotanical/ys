@@ -59,9 +59,8 @@
 - [ ] fmt string in `set_body`
 - [x] Default Content-Type to text/plain?
 - [x] Remove the need for null-terminator everywhere else (incl `router_register`)
-- [ ] Provide a mocking lib (req, res)
 - [x] set default status on registered fallback handlers with no `set_status` call
-- [ ] User-logger that serializes opaque objects
+
 
 ## New Features
 - [x] ~~global hooks/interceptors (e.g. global HTTP headers)~~ just use middleware
@@ -75,7 +74,7 @@
 - [x] SSL/TLS support
 - [x] JSON parsed body in context (decided to offer JSON opt-in utilities)
 - [ ] async i/o option using epoll
-  - [ ] Evented server e.g. `onRequest`
+  - [ ] Fully evented server e.g. `onRequest`
 - [x] global middlewares
 - [x] multiple routers
 - [x] handle signals for graceful shutdown
@@ -154,46 +153,5 @@
 ## Ecosystem
 - [ ] Addon / plugin libraries
   - [ ] Metrics
-  - [ ] Testing (stubs, mock calls etc)
-
-# Style Guide
-- Use [Go Doc-style](https://tip.golang.org/doc/comment) for doc  comments e.g. `// function_name does thing`
-
-# Cross Platform
-
-## Macos
-
-```sh
-brew install pcre
-sudo ln -s /opt/homebrew/include/pcre.h /usr/local/include
-```
-```c
-int none; // end of response_internal
-```
-
-`export DYLD_LIBRARY_PATH=...`
-
-## AL2 Linux
-
-1. const in server_conf
-2. Install pcre `yum install pcre-devel`
-3. Install openssl `yum install openssl-devel`
-4. /usr/include/openssl (not working)
-
-## Ubuntu
-1. install pcre `apt install libpcre3-dev`
-2. add -lm -lpcre to examples' Makefiles (why?)
-3. integ tests source util doesnt work
-
-Everything you need: `apt update && apt install git vim libpcre3-dev make gcc libssl-dev`
-
-
-### Dev
-1. shpec sh -c "`curl -L https://raw.githubusercontent.com/rylnd/shpec/master/install.sh`"
-
-## Fedora
-`yum install git vim make gcc curl pcre-devel openssl-devel`
-
-## macos
-
-Ensure libcrypto, libssl and openssl are in `LD_LIBRARY_PATH` and `DYLD_LIBARY_PATH`
+  - [ ] Testing (stubs, mock calls etc) (req, res)
+  - [ ] User-logger that serializes opaque objects
