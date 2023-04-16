@@ -16,7 +16,7 @@ if not extant. By parameter, we mean a route match value.
 For example, the following route
 
 ```c
-router_register(router, "/:key[^\\d+$]", handler, METHOD_GET, NULL);
+router_register(router, "/:key[^\\d+$]", handler, METHOD_GET);
 ```
 
 will match any digit after `/`. For a request `/10`, the resulting `request*` will contain the parameter `key=10`. Thus, `req_get_parameter(req, "key");` will yield `"10"`.
@@ -32,7 +32,7 @@ request. For example, given the route
 
 <!-- TODO: test -->
 ```c
-router_register(router, "/:key[^\\d+$]/:fruit[(.+)]", handler, METHOD_GET, NULL);
+router_register(router, "/:key[^\\d+$]/:fruit[(.+)]", handler, METHOD_GET);
 ```
 
 and a request

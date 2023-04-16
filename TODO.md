@@ -58,7 +58,7 @@
 - [x] Use user-defined content length header OR overwrite it - but handle it
 - [ ] fmt string in `set_body`
 - [x] Default Content-Type to text/plain?
-- [ ] Remove the need for null-terminator everywhere else (incl `router_register`)
+- [x] Remove the need for null-terminator everywhere else (incl `router_register`)
 - [ ] Provide a mocking lib (req, res)
 - [ ] set default status on registered fallback handlers with no `set_status` call
 - [ ] User-logger that serializes opaque objects

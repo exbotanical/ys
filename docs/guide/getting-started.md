@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
   router_attr *attr = router_attr_init();
   http_router *router = router_init(attr);
 
-  router_register(router, "/", root_handler, METHOD_GET, NULL);
+  router_register(router, "/", root_handler, METHOD_GET);
 
   tcp_server_attr* srv_attr = server_attr_init(router);
   tcp_server *server = server_init(srv_attr);

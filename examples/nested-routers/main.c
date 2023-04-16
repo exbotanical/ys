@@ -35,11 +35,11 @@ response *demo_handler(request *req, response *res) {
 int main() {
   router_attr *attr = router_attr_init();
   http_router *router = router_init(attr);
-  router_register(router, "/", root_handler, METHOD_GET, NULL);
+  router_register(router, "/", root_handler, METHOD_GET);
 
   http_router *api_router = router_register_sub(router, attr, "/api");
-  router_register(api_router, "/", api_handler, METHOD_GET, NULL);
-  router_register(api_router, "/demo", demo_handler, METHOD_GET, NULL);
+  router_register(api_router, "/", api_handler, METHOD_GET);
+  router_register(api_router, "/demo", demo_handler, METHOD_GET);
 
   tcp_server *server = server_init(server_attr_init(router));
   server_start(server);

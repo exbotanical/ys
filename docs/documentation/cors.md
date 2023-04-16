@@ -27,7 +27,6 @@ You may use a wildcard (`*`) to set the allowed headers or origins to allow all 
 :::
 
 To build your own CORS policy, use `cors_opts_init` to initialize a new CORS options object, then use the `cors_set_*` utilities to customize it.
-<!-- TODO: PRERELEASE FIX NEEDED set_ -> cors_* -->
 
 ```c
 cors_opts *opts = cors_opts_init();

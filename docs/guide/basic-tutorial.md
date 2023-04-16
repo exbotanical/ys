@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
   router_attr *attr = router_attr_init();
   http_router *router = router_init(attr);
 
-  router_register(router, "/", root_handler, METHOD_GET, NULL);
+  router_register(router, "/", root_handler, METHOD_GET);
 
   return 0;
 }
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
 
 Here, we've registered a request handler `root_handler` on our root router. The second argument to `router_register` is the request path on which the router will match `root_handler`. Any time a request is made to `/`, `root_handler` will be invoked.
 
-The third and subsequent arguments to `router_register` specify the request methods on which to register the handler — here, we've specified `METHOD_GET`. Note we terminate the variadic list of methods with a `NULL` terminator, which tells `router_register` our list has ended. *Failure to pass the `NULL` terminator will result in undefined behavior.*<!-- TODO: PRERELEASE FIX NEEDED -->
+The third and subsequent arguments to `router_register` specify the request methods on which to register the handler — here, we've specified `METHOD_GET`. Note we do not need to terminate the variadic list of methods with a `NULL` sentinel terminator; the `router_register` macro is written such that it is inserted automatically.
 
 ::: info TIP
 Ys provides several enum constants for all possible HTTP methods and statuses, prefixed with `METHOD_` and `STATUS_`, respectively.
@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
   router_attr *attr = router_attr_init();
   http_router *router = router_init(attr);
 
-  router_register(router, "/", root_handler, METHOD_GET, NULL);
+  router_register(router, "/", root_handler, METHOD_GET);
 
   return 0;
 }
@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
   router_attr *attr = router_attr_init();
   http_router *router = router_init(attr);
 
-  router_register(router, "/", root_handler, METHOD_GET, NULL);
+  router_register(router, "/", root_handler, METHOD_GET);
 
   return 0;
 }
@@ -218,7 +218,7 @@ int main(int argc, char **argv) {
   router_attr *attr = router_attr_init();
   http_router *router = router_init(attr);
 
-  router_register(router, "/", root_handler, METHOD_GET, NULL);
+  router_register(router, "/", root_handler, METHOD_GET);
 
   tcp_server_attr* srv_attr = server_attr_init(router);
   server_set_port(PORT);
@@ -238,7 +238,7 @@ int main(int argc, char **argv) {
   router_attr *attr = router_attr_init();
   http_router *router = router_init(attr);
 
-  router_register(router, "/", root_handler, METHOD_GET, NULL);
+  router_register(router, "/", root_handler, METHOD_GET);
 
   tcp_server_attr* srv_attr = server_attr_init(router);
   server_set_port(PORT);

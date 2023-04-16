@@ -36,7 +36,7 @@ int main() {
   use_middlewares(attr, middleware1, middleware2);
   http_router *router = router_init(attr);
 
-  router_register(router, "/:key[^\\d+$]", handler, METHOD_GET, NULL);
+  router_register(router, "/:key[^\\d+$]", handler, METHOD_GET);
 
   tcp_server *server = server_init(server_attr_init(router));
   server_start(server);

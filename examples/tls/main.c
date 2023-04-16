@@ -17,7 +17,7 @@ response *handler(request *req, response *res) {
 int main() {
   router_attr *attr = router_attr_init();
   http_router *router = router_init(attr);
-  router_register(router, "/", handler, METHOD_GET, NULL);
+  router_register(router, "/", handler, METHOD_GET);
 
   tcp_server_attr *srv_attr = server_attr_init_with(
       router, PORT, "./certs/localhost.pem", "./certs/localhost-key.pem");

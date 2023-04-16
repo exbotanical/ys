@@ -50,8 +50,8 @@ Requests will always be matched using this router instance. However, if we regis
 http_router *router = router_init(router_attr *attr);
 
 http_router *api_router = router_register_sub(router, attr, "/api");
-router_register(api_router, "/", api_handler, METHOD_GET, NULL);
-router_register(api_router, "/demo", demo_handler, METHOD_GET, NULL);
+router_register(api_router, "/", api_handler, METHOD_GET);
+router_register(api_router, "/demo", demo_handler, METHOD_GET);
 ```
 
 ...all requests to `api_router` will be relative to that sub-router's root path `/api`. Thus, `/` matches on `/api`, and `/demo` matches on `/api/demo`.

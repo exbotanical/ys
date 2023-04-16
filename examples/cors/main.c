@@ -17,7 +17,7 @@ int main() {
   use_cors(attr, cors_allow_all());
 
   http_router *router = router_init(attr);
-  router_register(router, "/", handler, METHOD_GET, NULL);
+  router_register(router, "/", handler, METHOD_GET);
 
   tcp_server *server = server_init(server_attr_init(router));
   server_start(server);

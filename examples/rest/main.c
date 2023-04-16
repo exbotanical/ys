@@ -185,10 +185,10 @@ int main() {
   http_router *router = router_init(attr);
   char *record_path = "/records/:id[^\\d+$]";
 
-  router_register(router, record_path, handle_get, METHOD_GET, NULL);
-  router_register(router, record_path, handle_delete, METHOD_DELETE, NULL);
-  router_register(router, record_path, handle_put, METHOD_PUT, NULL);
-  router_register(router, record_path, handle_post, METHOD_POST, NULL);
+  router_register(router, record_path, handle_get, METHOD_GET);
+  router_register(router, record_path, handle_delete, METHOD_DELETE);
+  router_register(router, record_path, handle_put, METHOD_PUT);
+  router_register(router, record_path, handle_post, METHOD_POST);
 
   tcp_server *server = server_init(server_attr_init(router));
   server_start(server);

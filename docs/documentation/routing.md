@@ -59,7 +59,7 @@ int main () {
   router_attr *attr = router_attr_init();
   http_router *router = router_init(attr);
 
-  router_register(router, "/", handler, METHOD_GET, METHOD_POST, NULL);
+  router_register(router, "/", handler, METHOD_GET, METHOD_POST);
 
   // ...
 }
@@ -83,7 +83,7 @@ int main () {
   router_attr *attr = router_attr_init();
   http_router *router = router_init(attr);
 
-  router_register(router, "/:id[^\\d+$]", handler, METHOD_GET, NULL);
+  router_register(router, "/:id[^\\d+$]", handler, METHOD_GET);
 
   // ...
 }
@@ -133,8 +133,8 @@ int main () {
   router_attr *attr = router_attr_init();
   http_router *router = router_init(attr);
 
-  router_register(router, "/", handler, METHOD_GET, NULL);
-  router_register(router, "/", handler, METHOD_POST, NULL);
+  router_register(router, "/", handler, METHOD_GET);
+  router_register(router, "/", handler, METHOD_POST);
 
   // ...
 }
@@ -164,7 +164,7 @@ int main () {
 
   http_router *router = router_init(attr);
 
-  router_register(router, "/", handler, METHOD_GET, NULL);
+  router_register(router, "/", handler, METHOD_GET);
   // ...
 }
 ```
@@ -181,11 +181,11 @@ Ys supports nested routing, allowing you to encapsulate route logic in a specifi
 int main() {
   router_attr *attr = router_attr_init();
   http_router *router = router_init(attr);
-  router_register(router, "/", root_handler, METHOD_GET, NULL);
+  router_register(router, "/", root_handler, METHOD_GET);
 
   http_router *api_router = router_register_sub(router, attr, "/api");
-  router_register(api_router, "/", api_handler, METHOD_GET, NULL);
-  router_register(api_router, "/demo", demo_handler, METHOD_GET, NULL);
+  router_register(api_router, "/", api_handler, METHOD_GET);
+  router_register(api_router, "/demo", demo_handler, METHOD_GET);
 
   tcp_server *server = server_init(server_attr_init(router));
   server_start(server);
@@ -220,7 +220,7 @@ int main() {
   use_middlewares(attr, middleware1, middleware2);
   http_router *router = router_init(attr);
 
-  router_register(router, "/", handler, METHOD_GET, NULL);
+  router_register(router, "/", handler, METHOD_GET);
   // ...
 }
 ```

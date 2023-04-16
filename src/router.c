@@ -214,8 +214,8 @@ http_router *router_init(router_attr *attr) {
 
 bool has(void *s, void *cmp) { return s_equals((char *)s, (char *)cmp); }
 
-void router_register(http_router *router, const char *path,
-                     route_handler *handler, http_method method, ...) {
+void __router_register(http_router *router, const char *path,
+                       route_handler *handler, http_method method, ...) {
   array_t *methods = array_init();
   if (!methods) {
     DIE("[router::%s] failed to allocate methods array via array_init\n",

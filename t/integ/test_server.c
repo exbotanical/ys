@@ -305,18 +305,18 @@ int main(int argc, char **argv) {
   http_router *router = router_init(attr);
   char *record_path = "/records/:id[^\\d+$]";
 
-  router_register(router, "/", root_handler, METHOD_GET, NULL);
-  router_register(router, "/metadata", meta_handler, METHOD_GET, NULL);
+  router_register(router, "/", root_handler, METHOD_GET);
+  router_register(router, "/metadata", meta_handler, METHOD_GET);
 
-  router_register(router, record_path, handle_get, METHOD_GET, NULL);
-  router_register(router, record_path, handle_delete, METHOD_DELETE, NULL);
-  router_register(router, record_path, handle_put, METHOD_PUT, NULL);
-  router_register(router, record_path, handle_post, METHOD_POST, NULL);
+  router_register(router, record_path, handle_get, METHOD_GET);
+  router_register(router, record_path, handle_delete, METHOD_DELETE);
+  router_register(router, record_path, handle_put, METHOD_PUT);
+  router_register(router, record_path, handle_post, METHOD_POST);
 
   /* API Router */
   http_router *api_router = router_register_sub(router, attr, "/api");
-  router_register(api_router, "/", handle_api_root, METHOD_GET, NULL);
-  router_register(api_router, "/demo", handle_api_demo, METHOD_POST, NULL);
+  router_register(api_router, "/", handle_api_root, METHOD_GET);
+  router_register(api_router, "/demo", handle_api_demo, METHOD_POST);
 
   /* Auth Router */
   router_attr *auth_attr = router_attr_init();
@@ -325,9 +325,9 @@ int main(int argc, char **argv) {
   use_cors(auth_attr, cors);
 
   http_router *auth_router = router_register_sub(router, auth_attr, "/auth");
-  router_register(auth_router, "/login", login_handler, METHOD_POST, NULL);
-  router_register(auth_router, "/logout", logout_handler, METHOD_POST, NULL);
-  router_register(auth_router, "/data", data_handler, METHOD_GET, NULL);
+  router_register(auth_router, "/login", login_handler, METHOD_POST);
+  router_register(auth_router, "/logout", logout_handler, METHOD_POST);
+  router_register(auth_router, "/data", data_handler, METHOD_GET);
 
   tcp_server_attr *srv_attr =
       server_attr_init_with(router, PORT, "./t/integ/certs/localhost.pem",

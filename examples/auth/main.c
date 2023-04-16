@@ -233,13 +233,13 @@ int main() {
 
   http_router *router = router_init(attr);
 
-  router_register(router, "/register", register_handler, METHOD_POST, NULL);
-  router_register(router, "/login", login_handler, METHOD_POST, NULL);
-  router_register(router, "/logout", logout_handler, METHOD_POST, NULL);
-  router_register(router, "/data", data_handler, METHOD_GET, NULL);
+  router_register(router, "/register", register_handler, METHOD_POST);
+  router_register(router, "/login", login_handler, METHOD_POST);
+  router_register(router, "/logout", logout_handler, METHOD_POST);
+  router_register(router, "/data", data_handler, METHOD_GET);
 
-  router_register(router, "/", index_handler, METHOD_GET, NULL);
-  router_register(router, "/style.css", css_handler, METHOD_GET, NULL);
+  router_register(router, "/", index_handler, METHOD_GET);
+  router_register(router, "/style.css", css_handler, METHOD_GET);
 
   tcp_server *server = server_init(server_attr_init(router));
   server_start(server);

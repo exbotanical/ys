@@ -418,12 +418,13 @@ http_router* router_init(router_attr* attr);
 /**
  * router_register registers a new route record. Registered routes will be
  * matched against when used with `router_run`. Last argument is methods to
- * associate with the route. You must pass a NULL sentinel to indicate the end
- * of the list e.g. `router_register(...args, METHOD_GET, METHOD_POST, NULL)`
- * TODO: f
+ * associate with the route.
  */
-void router_register(http_router* router, const char* path,
-                     route_handler* handler, http_method method, ...);
+#define router_register(router, path, handler, ...) \
+  __router_register(router, path, handler, __VA_ARGS__, NULL)
+
+void __router_register(http_router* router, const char* path,
+                       route_handler* handler, http_method method, ...);
 
 /**
  * router_free deallocates memory for http_router `router`
