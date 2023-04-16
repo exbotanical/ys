@@ -58,7 +58,7 @@ void __middlewares(router_attr *attr, route_handler *mw, ...) {
   va_end(args);
 }
 
-void add_middleware(router_attr *attr, route_handler *mw) {
+void use_middleware(router_attr *attr, route_handler *mw) {
   __add_middleware_with_opts(attr, mw, NULL);
 }
 
@@ -66,5 +66,5 @@ void use_cors(router_attr *attr, cors_opts *opts) {
   ((router_attr_internal *)attr)->use_cors = true;
   cors_init((cors_opts_internal *)opts);
   // TODO: ensure CORS runs first for OPTIONS requests
-  add_middleware(attr, cors_handler);
+  use_middleware(attr, cors_handler);
 }

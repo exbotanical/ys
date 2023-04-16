@@ -1,12 +1,12 @@
 # Middleware APIs
 
-## middlewares
+## use_middlewares
 
 ```c
-void middlewares(router_attr *attr, route_handler *mw, ...);
+void use_middlewares(router_attr *attr, route_handler *mw, ...);
 ```
 
-`middlewares` binds *n* middleware handlers to the router attributes instance.
+`use_middlewares` binds *n* middleware handlers to the router attributes instance.
 You do not need to pass a `NULL` sentinel to terminate the list; the `middleware` macro
 will do this for you.
 
@@ -25,19 +25,19 @@ response *middleware2(request *req, response *res) {
 
 int main() {
   router_attr *attr = router_attr_init();
-  middlewares(attr, middleware1, middleware2);
+  use_middlewares(attr, middleware1, middleware2);
 
   // ...
 }
 ```
 
-## add_middleware
+## use_middleware
 
 ```c
-void add_middleware(router_attr *attr, route_handler *mw);
+void use_middleware(router_attr *attr, route_handler *mw);
 ```
 
-`add_middleware` binds a new middleware to the routes attributes object. Middlewares will be run in a LIFO fashion before the route handler.
+`use_middleware` binds a new middleware to the routes attributes object. Middlewares will be run in a LIFO fashion before the route handler.
 
 ## add_middleware_with_opts
 

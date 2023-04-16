@@ -15,7 +15,7 @@ void assert_middleware(middleware_handler* mw, route_handler* h) {
 
 void test_middlewares_macro(void) {
   router_attr* attr = router_attr_init();
-  middlewares(attr, h1, h2, h3);
+  use_middlewares(attr, h1, h2, h3);
 
   router_internal* r = (router_internal*)router_init(attr);
 
@@ -30,14 +30,14 @@ void test_middlewares_macro(void) {
 
 void test_add_middleware(void) {
   router_attr* attr = router_attr_init();
-  middlewares(attr, h1, h3);
+  use_middlewares(attr, h1, h3);
 
   router_internal* r = (router_internal*)router_init(attr);
 
   ok(array_size(r->middlewares) == 2, "has the expected number of middlewares");
   assert_middleware(array_get(r->middlewares, 0), h1);
   assert_middleware(array_get(r->middlewares, 1), h3);
-  add_middleware(attr, h2);
+  use_middleware(attr, h2);
 
   ok(array_size(r->middlewares) == 3, "has the expected number of middlewares");
   assert_middleware(array_get(r->middlewares, 0), h1);
@@ -51,7 +51,7 @@ void test_add_middleware(void) {
 void test_add_middleware_empty_attr(void) {
   router_attr* attr = router_attr_init();
 
-  add_middleware(attr, h1);
+  use_middleware(attr, h1);
   router_internal* r = (router_internal*)router_init(attr);
 
   ok(array_size(r->middlewares) == 1, "has the expected number of middlewares");

@@ -520,11 +520,11 @@ void server_free(tcp_server* server);
  **********************************************************/
 
 /**
- * middlewares binds n middleware handlers to the router attributes instance.
- * You do not need to pass a NULL sentinel to terminate the list; this macro
- * will do this for you.
+ * use_middlewares binds n middleware handlers to the router attributes
+ * instance. You do not need to pass a NULL sentinel to terminate the list; this
+ * macro will do this for you.
  */
-#define middlewares(attr, ...) __middlewares(attr, __VA_ARGS__, NULL)
+#define use_middlewares(attr, ...) __middlewares(attr, __VA_ARGS__, NULL)
 
 /**
  * @internal
@@ -563,10 +563,10 @@ void __add_middleware_with_opts(router_attr* attr, route_handler* mw,
                                 char* ignore_path, ...);
 
 /**
- * add_middleware binds a new middleware to the routes attributes object.
+ * use_middleware binds a new middleware to the routes attributes object.
  * Middlewares will be run in a LIFO fashion.
  */
-void add_middleware(router_attr* attr, route_handler* mw);
+void use_middleware(router_attr* attr, route_handler* mw);
 
 /**********************************************************
  * CORS

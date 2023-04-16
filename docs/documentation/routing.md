@@ -217,7 +217,7 @@ response *middleware2(request *req, response *res) {
 
 int main() {
   router_attr *attr = router_attr_init();
-  middlewares(attr, middleware1, middleware2);
+  use_middlewares(attr, middleware1, middleware2);
   http_router *router = router_init(attr);
 
   router_register(router, "/", handler, METHOD_GET, NULL);

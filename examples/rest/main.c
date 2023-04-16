@@ -181,7 +181,7 @@ int main() {
   records = malloc(sizeof(db_record));
 
   router_attr *attr = router_attr_init();
-  add_middleware(attr, set_global_headers);
+  use_middleware(attr, set_global_headers);
   http_router *router = router_init(attr);
   char *record_path = "/records/:id[^\\d+$]";
 
