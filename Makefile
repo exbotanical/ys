@@ -1,84 +1,65 @@
-OS := $(shell uname -s)
-
-DEPS_DIR := deps
-SRC_DIR := src
-LIB_DIR := lib
-TEST_DIR := t
-UNIT_DIR := $(TEST_DIR)/unit
-INTEG_DIR := $(TEST_DIR)/integ
-
-CC := gcc
-CFLAGS := -g -fPIC -Wall -Wextra -pedantic -Wno-missing-braces -I$(DEPS_DIR)
-LDFLAGS := -shared -lcrypto -lssl -lm -lpcre -pthread
-TFLAGS :=
-
+CC ?= gcc
+AR ?= ar
 LINTER := clang-format
-INTEG_RUNNER := shpec
 
-SO_TARGET := libys.so
+DYNAMIC_TARGET := libys.so
 STATIC_TARGET := libys.a
+INTEG_TARGET := test_server_bin
 
-INTEG_BASE_BIN := test_server_bin
-INTEG_AUTH_BIN := auth_bin
+PREFIX := /usr/local
+INCDIR := $(PREFIX)/include
+LIBDIR := $(PREFIX)/lib
 
-SRC := $(wildcard $(SRC_DIR)/*.c)
-DEPS := $(wildcard $(DEPS_DIR)/*/*.c)
-LIB := $(wildcard $(LIB_DIR)/*.c)
-TESTS := $(wildcard $(TEST_DIR)/*/*.c)
-INTEG_DEPS := $(wildcard $(INTEG_DIR)/deps/*/*.c)
+SRC := $(wildcard src/*.c)
+DEPS := $(wildcard deps/*/*.c)
+OBJ := $(addprefix obj/, $(notdir $(SRC:.c=.o)) $(notdir $(DEPS:.c=.o)))
 
-ifeq ($(OS), Darwin)
-	CFLAGS += -L/usr/local/include/
-else
-	CFLAGS += -I/usr/include/openssl/
+CFLAGS = -Iinclude -Ideps -g -ggdb -fPIC -Wall -Wextra -pedantic -Wno-missing-braces
+LIBS := -lcrypto -lssl -lm -lpcre -pthread
 
-	OS := $(shell lsb_release -si)
-	ifeq ($(OS), Arch)
-		TFLAGS += -lm -lpcre
-	endif
+all: $(DYNAMIC_TARGET) $(STATIC_TARGET)
 
-endif
+$(DYNAMIC_TARGET): $(OBJ)
+	$(CC) $(CFLAGS) $(OBJ) -shared $(LIBS) -o $(DYNAMIC_TARGET)
 
-ifdef DEBUG
-	SRC += $(LIB_DIR)/debug.h
-	CFLAGS += -I$(LIB_DIR)
-endif
+$(STATIC_TARGET): $(OBJ)
+	$(AR) rcs $@ $(OBJ)
 
-%.o: $(SRC_DIR)/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+obj/%.o: src/%.c include/libys.h | obj
+	$(CC) $< -c $(CFLAGS) -o $@
 
-%.o: $(DEP_DIR)/%/%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+obj/%.o: deps/*/%.c | obj
+	$(CC) $< -c $(CFLAGS) -o $@
 
-all:
-	$(info OS=$(OS) DEBUG=$(DEBUG))
-	$(CC) $(CFLAGS) $(DEPS) $(SRC) $(LDFLAGS) -o $(SO_TARGET)
+obj:
+	mkdir -p obj
 
-$(STATIC_TARGET): $(patsubst %.c,%.o,$(SRC)) $(patsubst %.c,%.o,$(DEPS))
-	$(info OS=$(OS) DEBUG=$(DEBUG))
-	ar rcs $@
+install: $(STATIC_TARGET)
+	mkdir -p ${LIBDIR} && cp -f ${STATIC_TARGET} ${LIBDIR}/$(STATIC_TARGET)
+	mkdir -p ${INCDIR} && cp -r include/libys.h ${INCDIR}
 
-clean:
-	rm -f $(filter-out %.h, $(SRC:.c=.o)) $(filter-out %.h, $(DEPS:.c=.o)) $(SO_TARGET) $(INTEG_AUTH_BIN) $(INTEG_BASE_BIN) main*
+uninstall:
+	rm -f ${LIBDIR}/$(STATIC_TARGET)
+	rm -f ${INCDIR}/libys.h
 
-# make -s test 2>/dev/null
 test:
 	$(MAKE) unit_test
 	$(MAKE) integ_test
 
-# make -s unit_test 2>/dev/null
-unit_test:
-	$(CC) $(CFLAGS) $(DEPS) $(SRC) $(LIB) $(LDFLAGS) -o $(SO_TARGET)
+unit_test: OBJ += lib/test_util.c
+unit_test: $(DYNAMIC_TARGET)
 	./scripts/test.bash
 	$(MAKE) clean
 
-# make -s integ_test 2>/dev/null
-integ_test: all
-	$(CC) $(INTEG_DIR)/test_server.c $(INTEG_DEPS) -I$(SRC_DIR) -I$(DEPS_DIR) -L. -lys $(TFLAGS) -o $(INTEG_BASE_BIN)
+integ_test: $(STATIC_TARGET)
+	$(CC) t/integ/test_server.c $(wildcard t/integ/deps/*/*.c) $(LIBS) $(STATIC_TARGET) -o $(INTEG_TARGET)
 	./scripts/integ.bash
 	$(MAKE) clean
+
+clean:
+	rm -f $(OBJ) $(STATIC_TARGET) $(DYNAMIC_TARGET) $(INTEG_TARGET) main
 
 lint:
 	$(LINTER) -i $(SRC) $(TESTS)
 
-.PHONY: all clean test unit_test integ_test lint
+.PHONY: all obj install uninstall test unit_test integ_test clean lint

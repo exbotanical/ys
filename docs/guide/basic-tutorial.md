@@ -256,12 +256,12 @@ Once we have our `tcp_server` instance, we can pass it to `server_start`, which 
 
 Let's compile, run, and try sending a request to our new server!
 
-<!-- TODO: PRERELEASE FIX NEEDED -->
+-->
 ```sh
-# Compile Ys into a statically-linked library
-make libys.a
-# Compile our server program, linking it to Ys
-gcc main.c libys.a -o main
+# Compile Ys into a statically-linked library and install
+make install
+# Compile our server program, linking it to Ys - we'll likely need to link these other libs as well
+gcc main.c -o main -lm -lpcre -lssl -lcrypto -lys
 # Run the server program
 ./main
 # In a separate terminal, send a request to the server using curl

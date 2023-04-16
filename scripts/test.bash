@@ -4,7 +4,6 @@ IFS=$'\n'
 TESTING_DIR=t/unit
 UTIL_F=util.bash
 LIB=ys
-LD_FLAGS="-L./ -l$LIB -lm -lpcre -lcrypto -lssl"
 
 declare -a SKIP_FILES=(
   # 'cache_test.c'
@@ -27,8 +26,7 @@ declare -a SKIP_FILES=(
 run_test () {
 	local file_name="$1"
 
-	gcc -w -Ideps -Isrc -Ilib -c "$TESTING_DIR/$file_name" -o main.o
-	eval "gcc -o main main.o $LD_FLAGS"
+	gcc -w -L./ -l$LIB -lm -lpcre -lcrypto -lssl -Ideps -Isrc -Ilib "$TESTING_DIR/$file_name" -o main
 
 	green "\n[+] Running test $file_name...\n\n"
 

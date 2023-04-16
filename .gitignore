@@ -5,4 +5,4 @@ main
 *.o
 *.so
 .vscode
-lib/addons.c
+obj

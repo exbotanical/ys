@@ -134,7 +134,7 @@
 - [x] Shared test utils
 - [x] Consolidate integ test servers
 - [x] get rid of doc comments with `@param` - it offers no value since we're not generating anything with the doc comments and is difficult to maintain
-- [ ] cleanup unit tests Makefile rule + `gcc` commands in bash script (compiling should be done in the Makefile)
+- [ ] cleanup tests and use unified framework so we have full test count in aggregate, can filter tests, and have a reporter
 
 ## Fixes
 - [x] Allow OPTIONS requests by default in router when CORS enabled
