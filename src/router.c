@@ -267,10 +267,19 @@ void router_run(router_internal *router, client_context *ctx,
 
   if (!result) {
     res = CR(router->internal_error_handler(CRR(req, res)));
+    if (!res->status) {  // TODO: t
+      res->status = STATUS_INTERNAL_SERVER_ERROR;
+    }
   } else if ((result->flags & NOT_FOUND_MASK) == NOT_FOUND_MASK) {
     res = CR(router->not_found_handler(CRR(req, res)));
+    if (!res->status) {
+      res->status = STATUS_NOT_FOUND;
+    }
   } else if ((result->flags & NOT_ALLOWED_MASK) == NOT_ALLOWED_MASK) {
     res = CR(router->method_not_allowed_handler(CRR(req, res)));
+    if (!res->status) {
+      res->status = STATUS_METHOD_NOT_ALLOWED;
+    }
   } else {
     req->parameters = result->parameters;
     req->queries = result->queries;

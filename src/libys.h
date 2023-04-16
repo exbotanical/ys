@@ -441,19 +441,22 @@ http_router* router_register_sub(http_router* parent_router, router_attr* attr,
 
 /**
  * router_register_404_handler registers the handler to be used for handling
- * requests to a non-registered route.
+ * requests to a non-registered route. If you do not set a status in this
+ * handler, it will be defaulted to 404.
  */
 void router_register_404_handler(router_attr* attr, route_handler* h);
 
 /**
  * router_register_405_handler registers the handler to be used for handling
- * requests to a non-registered method for a registered path.
+ * requests to a non-registered method for a registered path. If you do not set
+ * a status in this handler, it will be defaulted to 405.
  */
 void router_register_405_handler(router_attr* attr, route_handler* h);
 
 /**
  * router_register_500_handler registers the handler to be used for handling
- * erroneous requests.
+ * erroneous requests. If you do not set a status in this handler, it will be
+ * defaulted to 500.
  */
 void router_register_500_handler(router_attr* attr, route_handler* h);
 

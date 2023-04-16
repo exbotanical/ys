@@ -19,14 +19,26 @@ For more details, see [the middleware reference](./middleware.md).
 void router_register_404_handler(router_attr *attr, route_handler *h);
 ```
 
+`router_register_404_handler` registers a custom 404 handler that will be used whenever a route path is not found.
+
+If you do not set a status in this handler, it will be defaulted to 404.
+
 ## router_register_405_handler
 
 ```c
 void router_register_405_handler(router_attr *attr, route_handler *h);
 ```
 
+`router_register_405_handler` registers a custom 405 handler that will be used whenever a route path is not found.
+
+If you do not set a status in this handler, it will be defaulted to 405.
+
 ## router_register_500_handler
 
 ```c
 void router_register_500_handler(router_attr *attr, route_handler *h);
 ```
+
+`router_register_500_handler` registers a custom 405 handler that will be used whenever a route path is not found.
+
+If you do not set a status in this handler, it will be defaulted to 500.

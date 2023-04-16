@@ -192,7 +192,6 @@ response_internal *response_init(void) {
   res->status = STATUS_OK;  // Default
   res->done = false;
 
-  // TODO: why must be here on macos (struct packing?)
   insert_header(res->headers, "X-Powered-By", "Ys", false);
 
   return res;

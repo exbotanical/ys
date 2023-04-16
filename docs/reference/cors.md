@@ -60,7 +60,7 @@ it for you.
 ```c
 void cors_expose_headers(cors_opts *opts, char *header, ...);
 ```
-<!-- TODO: explain what these are -->
+
 `cors_expose_headers` sets the expose headers on the given `cors_opts*`. You do
 not need to pass a `NULL` sentinel to terminate the list; this macro will do
 it for you.
