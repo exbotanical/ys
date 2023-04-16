@@ -35,7 +35,7 @@ void set_status(response *res, http_status status);
 bool get_done(response *res);
 ```
 
-`get_done` returns the `done` status of the response. The `done` flag is a response property that informs Ys to complete the request immediately after the handler that sets `done` to `true` has returned. Specifically, if any middlewares are scheduled to run, they will be skipped and the response will be sent to the client.
+`get_done` returns the `done` status of the response. The `done` flag is a response property that informs Ys to complete the request immediately after the handler has returned. Specifically, if any middlewares are scheduled to run, they will be skipped and the response will be sent to the client.
 
 
 ## set_done
@@ -57,7 +57,7 @@ char *from_file(const char *filename);
 `from_file` reads a file into a string buffer, which may then be passed
 directly to `set_body`.
 
-For example,
+For example
 
 ```c
 set_body(res, from_file("./index.html"));

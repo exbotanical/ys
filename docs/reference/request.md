@@ -10,7 +10,7 @@ A `request*` contains request data such as the path, method, body, route and que
 char* req_get_parameter(request* req, const char* key);
 ```
 
-`req_get_parameter` returns the parameter value matching `key`, or NULL
+`req_get_parameter` returns the parameter value matching `key`, or `NULL`
 if not extant. By parameter, we mean a route match value.
 
 For example, the following route
@@ -32,7 +32,7 @@ request. For example, given the route
 
 <!-- TODO: test -->
 ```c
-router_register(router, "/:key[^\\d+$]/:orange[(.+)]", handler, METHOD_GET, NULL);
+router_register(router, "/:key[^\\d+$]/:fruit[(.+)]", handler, METHOD_GET, NULL);
 ```
 
 and a request
@@ -58,8 +58,8 @@ any matched parameters.
 char **req_get_query(request *req, const char *key);
 ```
 
-`req_get_query` returns a char* array of all values corresponding to a given URL query key.
-For example, if the request URL was `/some-url/?key=1&key=2&key=3`, `req_get_query` will return `["1", "2", "3"]`.
+`req_get_query` returns a `char*` array of all values corresponding to a given URL query key.
+For example, if the request URL was `/some-url/?num=1&num=2&num=3`, `req_get_query(req, "num")` will return `["1", "2", "3"]`.
 
 Use `req_num_queries` to determine the size of this list.
 
@@ -127,7 +127,7 @@ char *req_get_raw(request *req);
 `req_get_raw` returns the entire, raw request as it was received by the
 server.
 
-## request_get_protocol
+## req_get_version
 
 ```c
 char *req_get_version(request *req);

@@ -1,6 +1,6 @@
 # Platform Support
 
-Ys currently supports UNIX-like environments and has been tested on the following operating systems
+Ys currently supports UNIX-like environments and has been tested on the following operating systems.
 
 ## Linux
 
@@ -16,15 +16,13 @@ Full support for usage.
 
 For development, we need to fix the integration tests. If someone on Ubuntu wants to contribute, let me know and I will expedite this.
 
-#### Everything you need
-
-##### General Usage
+#### Everything you need for general usage
 
 ```sh
 apt update && apt install libpcre3-dev make gcc libssl-dev
 ```
 
-##### Development
+#### Everything you need for development
 
 ```sh
 apt install curl
@@ -38,15 +36,13 @@ sh -c "`curl -L https://raw.githubusercontent.com/rylnd/shpec/master/install.sh`
 
 Full support for usage + development.
 
-#### Everything you need
-
-##### General Usage
+#### Everything you need for general usage
 
 ```sh
 yum install make gcc pcre-devel openssl-devel redhat-lsb-core
 ```
 
-##### Development
+#### Everything you need for development
 
 ```sh
 yum install curl
@@ -60,15 +56,13 @@ sh -c "`curl -L https://raw.githubusercontent.com/rylnd/shpec/master/install.sh`
 
 Partial support for usage (TLS support not working yet). Development support needs work.
 
-#### Everything you need
-
-##### General Usage
+#### Everything you need for general usage
 
 ```sh
 yum install pcre-devel openssl-devel
 ```
 
-##### Development
+#### Everything you need for development
 
 ```sh
 yum install curl
@@ -77,11 +71,6 @@ yum install curl
 ```sh
 sh -c "`curl -L https://raw.githubusercontent.com/rylnd/shpec/master/install.sh`"
 ```
-
-We're working on expanding cross-platform support and need your help!
-
-[Improve Cross-platform Support](https://github.com/exbotanical/ys/issues/1)
-
 
 ## Other Unix-Like Systems
 
@@ -100,6 +89,12 @@ For example, if you've installed openssl with homebrew:
 sudo ln -s /opt/homebrew/opt/openssl/lib/libcrypto.dylib /usr/local/include
 # ...
 ```
+
+### Don't See Your System?
+
+We're working on expanding cross-platform support and need your help!
+
+[Improve Cross-platform Support](https://github.com/exbotanical/ys/issues/1)
 
 <!-- ### AL2 Linux
 

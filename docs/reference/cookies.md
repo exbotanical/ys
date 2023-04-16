@@ -1,5 +1,6 @@
 # Cookies APIs
 
+<!-- TODO: document -->
 ## cookie*
 
 A `cookie*` is an object that stores all necessary information and metadata for Cookies.

@@ -1,6 +1,6 @@
 # Ys
 
-Ys is a modern, minimal web application framework for the C programming language. Ys is designed to help you bootstrap functional APIs with minimal dev effort using a rich feature-set of high-level primitives.
+Ys is a modern, minimal web application framework for the C programming language. With Ys, you can bootstrap functional APIs with minimal dev effort using a rich feature-set of high-level utilities.
 
 [Read the docs](https://exbotanical.github.io/ys)
 

@@ -18,7 +18,7 @@ will do this for you.
 void add_middleware(router_attr *attr, route_handler *mw);
 ```
 
-`add_middleware` binds a new middleware to the routes attributes object. Middlewares will be run in a LIFO fashion.
+`add_middleware` binds a new middleware to the routes attributes object. Middlewares will be run in a LIFO fashion before the route handler.
 
 ## add_middleware_with_opts
 
@@ -26,8 +26,8 @@ void add_middleware(router_attr *attr, route_handler *mw);
 void add_middleware_with_opts(router_attr *attr, route_handler *mw, char *ignore_path, ...);
 ```
 
-`add_middleware_with_opts` binds a new middleware - along with ignore
-paths - to the routes attributes object, where `ignore_paths` is a list of paths or regular expressions on which the middleware should be ignored.
+`add_middleware_with_opts` binds a new middleware — along with ignore
+paths — to the routes attributes object, where `ignore_paths` is a list of paths or regular expressions on which the middleware should be ignored.
 That is, when handling a request, if the request path matches one of the ignore paths for a middleware, that
 middleware will not be invoked. Think of ignore paths as a disallow-list.
 

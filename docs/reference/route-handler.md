@@ -1,7 +1,5 @@
 # Route Handler APIs
 
-
-/**
- * An alias type for request handlers
- */
+```c
 typedef response *route_handler(request *, response *);
+```

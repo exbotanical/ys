@@ -65,11 +65,15 @@ int main(int argc, char **argv) {
 ```
 
 5. Compile and run!
-
+<!-- TODO: PRERELEASE FIX NEEDED -->
 ```sh
 gcc main.c libys.a -o main
+```
 
+```sh
 ./main
+```
 
+```sh
 curl localhost:5000/ # Hello World!
 ```

@@ -18,7 +18,7 @@ hero:
 
 features:
   - title: Focus on Building Your App
-    details: Ys offers a rich feature-set of high-level primitives that handle the difficult work of building servers in C so you can focus on what matters.
+    details: Ys offers a rich feature-set of high-level utilities that handle the difficult work of building servers in C so you can focus on what matters.
     icon: 📝
   - title: First-class DX
     details: Ys prioritizes developer experience and ease-of-use. C programmers should have a way to bootstrap servers with minimal effort and hassle.

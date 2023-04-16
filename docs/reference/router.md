@@ -2,7 +2,7 @@
 
 ## http_router*
 
-A `http_router*` is a router / HTTP multiplexer.
+A `http_router*` is a request router / HTTP multiplexer.
 
 ## router_init
 
@@ -46,7 +46,7 @@ http_router *router = router_init(router_attr *attr);
 
 Requests will always be matched using this router instance. However, if we register a sub-router at `/api`...
 
-```c{4-6}
+```c{3-6}
 http_router *router = router_init(router_attr *attr);
 
 http_router *api_router = router_register_sub(router, attr, "/api");
@@ -54,4 +54,4 @@ router_register(api_router, "/", api_handler, METHOD_GET, NULL);
 router_register(api_router, "/demo", demo_handler, METHOD_GET, NULL);
 ```
 
-...all requests to `api_router` will be relative to that sub-router's root path `/api`. Thus, `/` matches on `/api` and `/demo` matches on `/api/demo`.
+...all requests to `api_router` will be relative to that sub-router's root path `/api`. Thus, `/` matches on `/api`, and `/demo` matches on `/api/demo`.

@@ -21,7 +21,7 @@ tcp_server_attr* server_attr_init_with(http_router* router, int port,
 ```
 
 `server_attr_init_with` aggregates all of the `server_attr_*` methods into a
-single, convenient helper function.
+single convenience function.
 
 
 ### server_set_port
@@ -46,6 +46,6 @@ void server_use_https(tcp_server_attr* attr, char* cert_path, char* key_path);
 void server_disable_https(tcp_server_attr* attr);
 ```
 
-`server_disable_https` disables HTTPs support. This is a convenience function
+`server_disable_https` disables HTTPs support. This convenience function is
 typically used for testing, where cert files were set on the `tcp_server_attr*`
 (meaning HTTPs is enabled), but you still do not want to use HTTPs.

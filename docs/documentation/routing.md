@@ -8,7 +8,10 @@ If the trie search yields no result, the 404 handler is invoked. If the user doe
 
 If the trie search *does* yield a result, but the request method does not match any request method registered in the route record, the 405 handler is invoked.
 
-Finally, if the trie search yields a result and the request method is valid, the matching route handler is invoked, but not before any registered middlewares. Middlewares are invoked in a LIFO fashion, with the actual route handler executed last.
+Finally, if the trie search yields a result and the request method is valid, the matching route handler is invoked.
+
+
+You can use middleware to pre-empt these handlers. Middlewares are invoked in a LIFO fashion, with the actual route or fallback handler executed last.
 
 This means middleware handlers have an opportunity to intercept route handlers and perform tasks such as authorization, apply a CORS policy, etc. In order to stop a request handler chain, you can set the `done` flag on the `response*` with `set_done`. If a middleware handler sets the `done` flag, no subsequent handlers will be invoked; instead, the response will immediately be serialized and sent back to the client.
 
@@ -40,7 +43,7 @@ int main () {
 
 Route handlers are functions that implement the `route_handler*` interface, then registered as either route record handlers or middleware. Route handlers and middleware are executed as part of a LIFO chain.
 
-When invoked, each route handler is passed the `request*` and a pre-initialized `response*`. While the `request*` should be treated as immutable, the `response*` may be modified to craft what will eventually be sent to the client.
+When invoked, each route handler is passed the `request*` and a pre-initialized `response*`. While the `request*` is immutable, the `response*` may be modified to customize what will eventually be sent to the client.
 
 Each route handler should return the response so it may be passed to the next handler.
 
@@ -62,11 +65,11 @@ int main () {
 }
 ```
 
-Here, `handler` will be invoked for any `GET` or `POST` request at `/`. Non-route matches will trigger the 404 handler. Route matches with an un-registered HTTP method will trigger the 405 handler. Errors will be diverted to the 500 handler. See [Registering Custom Fallback Handlers](#registering-custom-fallback-handlers).
+Here, `handler` will be invoked for any `GET` or `POST` request at `/`. Non-route matches will trigger the 404 handler. Route matches with an non-registered HTTP method will trigger the 405 handler. For erroneous or invalid requests, the route will be diverted to the 500 handler. See [Registering Custom Fallback Handlers](#registering-custom-fallback-handlers).
 
 
 ## Registering a Parameterized Route Handler
-```c{3-6,12}
+```c{3-6,14}
 #include "libys.h"
 
 response* handler(request* req, response* res) {
@@ -113,7 +116,7 @@ URL queries are not matched during routing. When matching a request path, anythi
 
 ## Registering Multiple Routes
 
-```c{3-6,12}
+```c{3-6,8-11,17-18}
 #include "libys.h"
 
 response* get_handler(request* req, response* res) {
@@ -137,11 +140,11 @@ int main () {
 }
 ```
 
-Here, we've registered two separate route handlers at `/` - one for `GET` requests, and one for `POST` requests.
+Here, we've registered two separate route handlers at `/` — one for `GET` requests, and one for `POST` requests.
 
 ## Registering Custom Fallback Handlers
 
-```c{3-6,12}
+```c{8-12,16}
 #include "libys.h"
 
 response* handler(request* req, response* res) {
@@ -174,7 +177,7 @@ Similarly, use `router_register_405_handler` for 405 handling and `router_regist
 
 There are two ways to register middleware on a router. The first way we'll look at collects multiple middlewares and registers them at once. Recall that middlewares will be executed in a LIFO fashion, followed finally by the route handler.
 
-```c
+```c{7-10,12-15,19}
 // ...
 response *handler(request *req, response *res) {
   printf("handler\n");
@@ -201,7 +204,7 @@ int main() {
 }
 ```
 
-Making a `GET` request to `/` would result in the following stdout output:
+Making a `GET` request to `/`, the following will be printed to stdout:
 
 ```sh
 middleware 2
@@ -216,3 +219,4 @@ Middlewares are specific to the `router_attr*` on which they've been registered.
 ## Using CORS
 
 [See CORS](./cors.md).
+<!-- TODO: PRERELEASE FIX NEEDED - SUBROUTING -->

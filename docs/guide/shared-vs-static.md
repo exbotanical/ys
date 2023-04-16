@@ -3,9 +3,9 @@
 ## Shared Objects
 
 ### Pros
-* Are smaller in size, as they are not linked with the application at compile time.
-* Are loaded into memory at runtime, meaning multiple applications can use the same shared object, reducing memory usage.
-* If updated, all applications that use it will benefit from the updates.
+* Smaller in size, as they are not linked with the application at compile time.
+* Loaded into memory at runtime. Multiple applications can use the same shared object, reducing memory usage.
+* If updated, all applications that use the shared object will benefit from the updates.
 
 ### Cons
 * There is a performance cost to loading a shared object into memory at runtime.

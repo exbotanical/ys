@@ -1,7 +1,7 @@
 # TODOs
 
 ## Docs
-- [ ] replace - with em dash
+- [x] replace - with em dash —_— —v— —^— —7—
 - [x] name header file
 - [ ] ensure all examples run
 - [ ] Use Fathom analytics
@@ -59,6 +59,9 @@
 - [ ] fmt string in `set_body`
 - [x] Default Content-Type to text/plain?
 - [ ] Remove the need for null-terminator everywhere else (incl `router_register`)
+- [ ] Provide a mocking lib (req, res)
+- [ ] set default status on registered fallback handlers with no `set_status` call
+- [ ] User-logger that serializes opaque objects
 
 ## New Features
 - [x] ~~global hooks/interceptors (e.g. global HTTP headers)~~ just use middleware

@@ -1,6 +1,6 @@
 # What is Ys?
 
-Ys is a modern, minimal web application framework for the C programming language. Ys is designed to help you bootstrap functional APIs with minimal dev effort using a rich feature-set of high-level primitives.
+Ys is a modern, minimal web application framework for the C programming language. With Ys, you can bootstrap functional APIs with minimal dev effort using a rich feature-set of high-level utilities.
 
 ## At a Glance
 
@@ -13,7 +13,7 @@ Ys is a modern, minimal web application framework for the C programming language
 
 ## Why?
 
-C programs tend to be verbose. You seldom see C servers in the wild because the development overhead is absolutely massive and mired in complexity; before you can think about building an API, you'll need to sift through syscalls, parse raw requests, juggle socket descriptors, and become intimately familiar with the HTTP specification.
+C programs tend to be verbose. You seldom see C servers in the wild because the development overhead is absolutely massive and mired in complexity; before you can think about building an API, you'll need to sift through system calls, parse raw requests, juggle socket descriptors, and become intimately familiar with the HTTP specification.
 
 Shipped with a robust feature-set inspired by the Express JavaScript framework, Ys provides the building blocks you'll need for most use-cases and takes care of the complexity so you can focus on what matters — building your application.
 
