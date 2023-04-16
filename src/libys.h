@@ -588,11 +588,11 @@ cors_opts* cors_opts_init(void);
 void use_cors(router_attr* attr, cors_opts* opts);
 
 /**
- * set_allowed_origins sets allowed origins on given the cors_opts. You do not
+ * cors_allow_origins sets allowed origins on given the cors_opts. You do not
  * need to pass a NULL sentinel to terminate the list; this macro will do this
  * for you.
  */
-#define set_allowed_origins(opts, ...) \
+#define cors_allow_origins(opts, ...) \
   __set_allowed_origins(opts, array_collect(__VA_ARGS__))
 
 /**
@@ -601,11 +601,11 @@ void use_cors(router_attr* attr, cors_opts* opts);
 void __set_allowed_origins(cors_opts* opts, array_t* origins);
 
 /**
- * set_allowed_methods sets the allowed methods on the given cors_opts. You do
+ * cors_allow_methods sets the allowed methods on the given cors_opts. You do
  * not need to pass a NULL sentinel to terminate the list; this macro will do
  * this for you.
  */
-#define set_allowed_methods(opts, ...) \
+#define cors_allow_methods(opts, ...) \
   __set_allowed_methods(opts, array_collect(__VA_ARGS__))
 
 /**
@@ -614,11 +614,11 @@ void __set_allowed_origins(cors_opts* opts, array_t* origins);
 void __set_allowed_methods(cors_opts* opts, array_t* methods);
 
 /**
- * set_allowed_headers sets the allowed headers on the given cors_opts. You do
+ * cors_allow_headers sets the allowed headers on the given cors_opts. You do
  * not need to pass a NULL sentinel to terminate the list; this macro will do
  * this for you.
  */
-#define set_allowed_headers(opts, ...) \
+#define cors_allow_headers(opts, ...) \
   __set_allowed_headers(opts, array_collect(__VA_ARGS__))
 
 /**
@@ -627,11 +627,11 @@ void __set_allowed_methods(cors_opts* opts, array_t* methods);
 void __set_allowed_headers(cors_opts* opts, array_t* headers);
 
 /**
- * set_expose_headers sets the expose headers on the given cors_opts. You do
+ * cors_expose_headers sets the expose headers on the given cors_opts. You do
  * not need to pass a NULL sentinel to terminate the list; this macro will do
  * this for you.
  */
-#define set_expose_headers(opts, ...) \
+#define cors_expose_headers(opts, ...) \
   __set_expose_headers(opts, array_collect(__VA_ARGS__))
 
 /**
@@ -640,20 +640,20 @@ void __set_allowed_headers(cors_opts* opts, array_t* headers);
 void __set_expose_headers(cors_opts* opts, array_t* headers);
 
 /**
- * set_allow_credentials sets the cors_opts allowed_credentials option
+ * cors_allow_credentials sets the cors_opts allowed_credentials option
  */
-void set_allow_credentials(cors_opts* opts, bool allow);
+void cors_allow_credentials(cors_opts* opts, bool allow);
 
 /**
- * set_use_options_passthrough sets the cors_opts use_options_passthrough
+ * cors_use_options_passthrough sets the cors_opts use_options_passthrough
  * option
  */
-void set_use_options_passthrough(cors_opts* opts, bool use);
+void cors_use_options_passthrough(cors_opts* opts, bool use);
 
 /**
- * set_max_age sets the cors_opts max age option
+ * cors_set_max_age sets the cors_opts max age option
  */
-void set_max_age(cors_opts* opts, int max_age);
+void cors_set_max_age(cors_opts* opts, int max_age);
 
 /**
  * cors_allow_all initializes a new CORS options object with sensible, lax

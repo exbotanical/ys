@@ -10,7 +10,26 @@ void middlewares(router_attr *attr, route_handler *mw, ...);
 You do not need to pass a `NULL` sentinel to terminate the list; the `middleware` macro
 will do this for you.
 
-<!-- TODO: examples in reference -->
+```c
+response *middleware1(request *req, response *res) {
+  printf("middleware 1\n");
+
+  return res;
+}
+
+response *middleware2(request *req, response *res) {
+  printf("middleware 2\n");
+
+  return res;
+}
+
+int main() {
+  router_attr *attr = router_attr_init();
+  middlewares(attr, middleware1, middleware2);
+
+  // ...
+}
+```
 
 ## add_middleware
 

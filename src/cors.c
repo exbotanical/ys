@@ -374,15 +374,15 @@ response *cors_handler(request *req, response *res) {
   return res;
 }
 
-void set_allow_credentials(cors_opts *opts, bool allow) {
+void cors_allow_credentials(cors_opts *opts, bool allow) {
   ((cors_opts_internal *)opts)->allow_credentials = allow;
 }
 
-void set_use_options_passthrough(cors_opts *opts, bool use) {
+void cors_use_options_passthrough(cors_opts *opts, bool use) {
   ((cors_opts_internal *)opts)->use_options_passthrough = use;
 }
 
-void set_max_age(cors_opts *opts, int max_age) {
+void cors_set_max_age(cors_opts *opts, int max_age) {
   ((cors_opts_internal *)opts)->max_age = max_age;
 }
 

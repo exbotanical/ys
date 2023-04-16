@@ -528,65 +528,65 @@ void test_set_helpers(void) {
   const char *o1 = "o1";
   const char *o2 = "o2";
   const char *o3 = "o3";
-  set_allowed_origins(o, o1, o2, o3);
+  cors_allow_origins(o, o1, o2, o3);
 
-  set_allowed_methods(o, METHOD_GET, METHOD_PUT, METHOD_DELETE);
+  cors_allow_methods(o, METHOD_GET, METHOD_PUT, METHOD_DELETE);
 
   const char *h1 = "h1";
   const char *h2 = "h2";
   const char *h3 = "h3";
-  set_allowed_headers(o, h1, h2, h3);
+  cors_allow_headers(o, h1, h2, h3);
 
   const int m = 3600;
-  set_max_age(o, m);
+  cors_set_max_age(o, m);
   ok(o->max_age == 3600, "max_age is 0 by default");
 
   cors_config *c = cors_init(o);
 
   ok(c->allow_credentials == false, "allow_credentials is false by default");
 
-  set_allow_credentials(o, true);
+  cors_allow_credentials(o, true);
   ok(o->allow_credentials == true,
-     "set_allow_credentials(o, true) sets allow_credentials to true");
+     "cors_allow_credentials(o, true) sets allow_credentials to true");
 
-  set_allow_credentials(o, false);
+  cors_allow_credentials(o, false);
   ok(o->allow_credentials == false,
-     "set_allow_credentials(o, false) sets allow_credentials to false");
+     "cors_allow_credentials(o, false) sets allow_credentials to false");
 
   ok(o->use_options_passthrough == false,
      "use_options_passthrough is false by default");
 
-  set_use_options_passthrough(o, true);
+  cors_use_options_passthrough(o, true);
   ok(o->use_options_passthrough == true,
-     "set_use_options_passthrough(o, true) sets use_options_passthrough to "
+     "cors_use_options_passthrough(o, true) sets use_options_passthrough to "
      "true");
 
-  set_use_options_passthrough(o, false);
+  cors_use_options_passthrough(o, false);
   ok(o->use_options_passthrough == false,
-     "set_use_options_passthrough(o, false) sets use_options_passthrough to "
+     "cors_use_options_passthrough(o, false) sets use_options_passthrough to "
      "false");
 
-  ok(c->max_age == m, "set_max_age(o, n) sets max_age to n");
+  ok(c->max_age == m, "cors_set_max_age(o, n) sets max_age to n");
 
   ok(is_origin_allowed(c, "o4") == false,
-     "set_allowed_origins functions properly");
-  ok(is_origin_allowed(c, o1) == true, "set_allowed_origins allows the origin");
-  ok(is_origin_allowed(c, o2) == true, "set_allowed_origins allows the origin");
-  ok(is_origin_allowed(c, o3) == true, "set_allowed_origins allows the origin");
+     "cors_allow_origins functions properly");
+  ok(is_origin_allowed(c, o1) == true, "cors_allow_origins allows the origin");
+  ok(is_origin_allowed(c, o2) == true, "cors_allow_origins allows the origin");
+  ok(is_origin_allowed(c, o3) == true, "cors_allow_origins allows the origin");
 
   ok(is_method_allowed(c, "PATCH") == false,
-     "set_allowed_methods functions properly");
+     "cors_allow_methods functions properly");
   ok(is_method_allowed(c, "GET") == true,
-     "set_allowed_methods allows the method");
+     "cors_allow_methods allows the method");
   ok(is_method_allowed(c, "PUT") == true,
-     "set_allowed_methods allows the method");
+     "cors_allow_methods allows the method");
   ok(is_method_allowed(c, "DELETE") == true,
-     "set_allowed_methods allows the method");
+     "cors_allow_methods allows the method");
 
   ok(are_headers_allowed(c, array_collect("h4")) == false,
-     "set_allowed_headers functions properly");
+     "cors_allow_headers functions properly");
   ok(are_headers_allowed(c, array_collect(h1, h2, h3)) == true,
-     "set_allowed_headers allows the headers");
+     "cors_allow_headers allows the headers");
 }
 
 int main() {

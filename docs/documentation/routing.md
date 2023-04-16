@@ -173,6 +173,27 @@ Using `router_register_404_handler`, we can set a custom 404 handler that will b
 
 Similarly, use `router_register_405_handler` for 405 handling and `router_register_500_handler` for 500 handling.
 
+## Nested Routing
+
+Ys supports nested routing, allowing you to encapsulate route logic in a specific router instance. To initialize a sub-router, use the `router_register_sub` and bind the sub-router to the root router instance.
+
+```c{6-8}
+int main() {
+  router_attr *attr = router_attr_init();
+  http_router *router = router_init(attr);
+  router_register(router, "/", root_handler, METHOD_GET, NULL);
+
+  http_router *api_router = router_register_sub(router, attr, "/api");
+  router_register(api_router, "/", api_handler, METHOD_GET, NULL);
+  router_register(api_router, "/demo", demo_handler, METHOD_GET, NULL);
+
+  tcp_server *server = server_init(server_attr_init(router));
+  server_start(server);
+}
+```
+
+With this example configuration, calls to `/api` and `/api/demo` will be handled by the `api_router`; meanwhile, calls to `/` will be directed to the root router `router`.
+
 ## Registering Middleware
 
 There are two ways to register middleware on a router. The first way we'll look at collects multiple middlewares and registers them at once. Recall that middlewares will be executed in a LIFO fashion, followed finally by the route handler.
@@ -219,4 +240,3 @@ Middlewares are specific to the `router_attr*` on which they've been registered.
 ## Using CORS
 
 [See CORS](./cors.md).
-<!-- TODO: PRERELEASE FIX NEEDED - SUBROUTING -->

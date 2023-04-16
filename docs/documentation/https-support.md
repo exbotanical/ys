@@ -1,10 +1,10 @@
 # HTTPs Support
 
-Ys ships with support for SSL using openssl.
-<!-- TODO: PRERELEASE FIX NEEDED openssl link -->
+Ys ships with support for SSL using [openssl](https://www.openssl.org/).
+
 ## Requirements
 
-* A local installation of openssl
+* A local [installation of openssl](https://github.com/openssl/openssl#build-and-install)
 * SSL certificate and key files
 
 ## Code
