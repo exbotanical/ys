@@ -3,8 +3,9 @@
 ## Docs
 - [x] replace - with em dash —_— —v— —^— —7—
 - [x] name header file
-- [ ] ensure all examples run
+- [ ] ensure example + docs code runs
 - [ ] Use Fathom analytics
+- [ ] github workflows
 
 ## Pre-release
 - [x] SSL support

@@ -4,6 +4,7 @@
 #include "regexpr.h"
 #include "router.h"
 #include "tap.c/tap.h"
+#include "tests.h"
 
 static response* h1(request* req, response* res) { return NULL; }
 static response* h2(request* req, response* res) { return NULL; }
@@ -97,14 +98,10 @@ void test_add_middleware_with_opts_macro(void) {
   assert_middleware(mh, h2);
 }
 
-int main() {
-  plan(25);
-
+void run_middleware_tests(void) {
   test_middlewares_macro();
   test_add_middleware();
   test_add_middleware_empty_attr();
   test_use_cors();
   test_add_middleware_with_opts_macro();
-
-  done_testing();
 }

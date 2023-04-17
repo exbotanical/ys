@@ -1,4 +1,4 @@
-#include "signal.h"
+#include "sighandler.h"
 
 #include <signal.h>
 #include <stdlib.h>

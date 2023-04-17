@@ -4,6 +4,7 @@
 
 #include "libys.h"
 #include "tap.c/tap.h"
+#include "tests.h"
 
 static request *make_req(void) {
   request_internal *req = malloc(sizeof(request));
@@ -97,9 +98,7 @@ void test_req_has_parameters(void) {
      "returns false if the request has no parameters");
 }
 
-int main() {
-  plan(16);
-
+void run_request_tests(void) {
   test_fix_pragma_cache_control();
   test_fix_pragma_cache_control_has_cache_control();
   test_fix_pragma_cache_control_no_pragma();
@@ -111,6 +110,4 @@ int main() {
   test_req_num_parameters_no_param();
 
   test_req_has_parameters();
-
-  done_testing();
 }

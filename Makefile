@@ -1,21 +1,28 @@
 CC ?= gcc
 AR ?= ar
-LINTER := clang-format
+LINTER ?= clang-format
 
-DYNAMIC_TARGET := libys.so
-STATIC_TARGET := libys.a
-INTEG_TARGET := test_server_bin
+PROG := ys
+
+DYNAMIC_TARGET := lib$(PROG).so
+STATIC_TARGET := lib$(PROG).a
+UNIT_TARGET := unit_test
+INTEG_TARGET := integ_test
 
 PREFIX := /usr/local
 INCDIR := $(PREFIX)/include
 LIBDIR := $(PREFIX)/lib
+SRCDIR := src
+DEPSDIR := deps
+TESTDIR := t
+LINCDIR := include
 
-SRC := $(wildcard src/*.c)
-DEPS := $(wildcard deps/*/*.c)
+SRC := $(wildcard $(SRCDIR)/*.c)
+DEPS := $(wildcard $(DEPSDIR)/*/*.c)
 OBJ := $(addprefix obj/, $(notdir $(SRC:.c=.o)) $(notdir $(DEPS:.c=.o)))
 
-CFLAGS = -Iinclude -Ideps -g -ggdb -fPIC -Wall -Wextra -pedantic -Wno-missing-braces
-LIBS := -lcrypto -lssl -lm -lpcre -pthread
+CFLAGS = -I$(LINCDIR) -I$(DEPSDIR) -g -ggdb -fPIC -Wall -Wextra -pedantic -Wno-missing-braces
+LIBS := -lcrypto -lssl -lm -lpcre -lpthread
 
 all: $(DYNAMIC_TARGET) $(STATIC_TARGET)
 
@@ -25,10 +32,10 @@ $(DYNAMIC_TARGET): $(OBJ)
 $(STATIC_TARGET): $(OBJ)
 	$(AR) rcs $@ $(OBJ)
 
-obj/%.o: src/%.c include/libys.h | obj
+obj/%.o: $(SRCDIR)/%.c $(LINCDIR)/lib$(PROG).h | obj
 	$(CC) $< -c $(CFLAGS) -o $@
 
-obj/%.o: deps/*/%.c | obj
+obj/%.o: $(DEPSDIR)/*/%.c | obj
 	$(CC) $< -c $(CFLAGS) -o $@
 
 obj:
@@ -36,30 +43,31 @@ obj:
 
 install: $(STATIC_TARGET)
 	mkdir -p ${LIBDIR} && cp -f ${STATIC_TARGET} ${LIBDIR}/$(STATIC_TARGET)
-	mkdir -p ${INCDIR} && cp -r include/libys.h ${INCDIR}
+	mkdir -p ${INCDIR} && cp -r $(LINCDIR)/lib$(PROG).h ${INCDIR}
 
 uninstall:
 	rm -f ${LIBDIR}/$(STATIC_TARGET)
-	rm -f ${INCDIR}/libys.h
+	rm -f ${INCDIR}/lib$(PROG).h
 
+# Use make -s test 2>/dev/null to see only test results
 test:
 	$(MAKE) unit_test
 	$(MAKE) integ_test
 
-unit_test: OBJ += lib/test_util.c
-unit_test: $(DYNAMIC_TARGET)
-	./scripts/test.bash
+unit_test: $(STATIC_TARGET)
+	$(CC) $(wildcard $(TESTDIR)/unit/*.c) $(STATIC_TARGET) -lys -I$(SRCDIR) -I$(DEPSDIR) $(LIBS) -o $(UNIT_TARGET)
+	./$(UNIT_TARGET)
 	$(MAKE) clean
 
 integ_test: $(STATIC_TARGET)
-	$(CC) t/integ/test_server.c $(wildcard t/integ/deps/*/*.c) $(LIBS) $(STATIC_TARGET) -o $(INTEG_TARGET)
+	$(CC) $(TESTDIR)/integ/main.c $(wildcard $(TESTDIR)/integ/$(DEPSDIR)/*/*.c) $(LIBS) $(STATIC_TARGET) -o $(INTEG_TARGET)
 	./scripts/integ.bash
 	$(MAKE) clean
 
 clean:
-	rm -f $(OBJ) $(STATIC_TARGET) $(DYNAMIC_TARGET) $(INTEG_TARGET) main
+	rm -f $(OBJ) $(STATIC_TARGET) $(DYNAMIC_TARGET) $(UNIT_TARGET) $(INTEG_TARGET) main
 
 lint:
-	$(LINTER) -i $(SRC) $(TESTS)
+	$(LINTER) -i $(SRC) $(wildcard $(TESTDIR)/*/*.c) $(LINCDIR)/lib$(PROG).h
 
 .PHONY: all obj install uninstall test unit_test integ_test clean lint

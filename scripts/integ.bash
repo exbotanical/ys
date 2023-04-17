@@ -17,7 +17,7 @@ run_test () {
 }
 
 run () {
-  ./test_server_bin &
+  ./integ_test &
   pid=$!
   sleep 1
 
@@ -31,7 +31,7 @@ run () {
 }
 
 run_ssl () {
-  ./test_server_bin USE_SSL &
+  ./integ_test USE_SSL &
   pid=$!
   sleep 1
 
@@ -45,7 +45,7 @@ run_ssl () {
 }
 
 main () {
-  kill $(pgrep test_server_bin) 2>/dev/null ||:
+  kill $(pgrep integ_test) 2>/dev/null ||:
 
   export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:."
   [[ "$OSTYPE" == "darwin"* ]] && {

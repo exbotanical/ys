@@ -4,6 +4,7 @@
 #include "path.h"
 #include "router.h"
 #include "tap.c/tap.h"
+#include "tests.h"
 
 typedef struct {
   const char *method;
@@ -278,9 +279,7 @@ void test_trie_search_april2023_bugs(void) {
      "query count is commensurate with number of valid queries");
 }
 
-int main() {
-  plan(46);
-
+void run_trie_tests(void) {
   test_trie_init();
   test_trie_insert();
   test_trie_search_ok();
@@ -289,6 +288,4 @@ int main() {
   test_trie_search_with_queries();
 
   test_trie_search_april2023_bugs();
-
-  done_testing();
 }

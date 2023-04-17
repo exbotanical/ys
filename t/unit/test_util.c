@@ -1,7 +1,7 @@
-#include "test_util.h"
-
 #include <stdarg.h>
 #include <stdlib.h>
+
+#include "tests.h"
 
 header* to_header(const char* key, array_t* values) {
   header* h = malloc(sizeof(header));

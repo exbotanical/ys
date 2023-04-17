@@ -1,6 +1,7 @@
 #include "config.c"
 
 #include "tap.c/tap.h"
+#include "tests.h"
 
 void reset_server_conf(void) {
   server_conf.log_file = NULL;
@@ -89,9 +90,7 @@ void test_parse_config_err_unknown_opt(void) {
      "port number is default when parse_config fails");
 }
 
-int main() {
-  plan(29);
-
+void run_config_tests(void) {
   test_config_defaults();
   reset_server_conf();
 
@@ -109,6 +108,4 @@ int main() {
 
   test_parse_config_ok_no_config();
   reset_server_conf();
-
-  done_testing();
 }

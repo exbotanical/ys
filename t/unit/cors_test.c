@@ -8,7 +8,7 @@
 #include "libys.h"
 #include "response.h"
 #include "tap.c/tap.h"
-#include "test_util.h"
+#include "tests.h"
 
 /**
  * A key/value pair for response headers
@@ -589,9 +589,7 @@ void test_set_helpers(void) {
      "cors_allow_headers allows the headers");
 }
 
-int main() {
-  plan(85);
-
+void run_cors_tests(void) {
   test_cors_middleware();
   test_are_headers_allowed();
   test_is_method_allowed();
@@ -599,6 +597,4 @@ int main() {
   test_is_preflight_request();
   test_cors_allow_all();
   test_set_helpers();
-
-  done_testing();
 }

@@ -1,6 +1,7 @@
 demo
 main
-*_bin
+unit_test
+integ_test
 *.a
 *.o
 *.so

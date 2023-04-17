@@ -5,7 +5,7 @@
 
 #include "header.h"
 #include "tap.c/tap.h"
-#include "test_util.h"
+#include "tests.h"
 
 void test_is_2xx_connect(void) {
   request_internal* req = malloc(sizeof(req));
@@ -135,14 +135,10 @@ void test_response_serialize(void) {
   }
 }
 
-int main() {
-  plan(14);
-
+void run_response_tests(void) {
   test_is_2xx_connect();
   test_is_informational();
   test_is_nocontent();
 
   test_response_serialize();
-
-  done_testing();
 }

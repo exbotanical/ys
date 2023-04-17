@@ -1,5 +1,6 @@
 #include "libys.h"
 #include "tap.c/tap.h"
+#include "tests.h"
 
 void sanity_test_enum_macros(void) {
   is(http_method_names[METHOD_GET], "GET", "transforms method enum to name");
@@ -7,10 +8,4 @@ void sanity_test_enum_macros(void) {
      "gets the expected status string using the enum");
 }
 
-int main() {
-  plan(2);
-
-  sanity_test_enum_macros();
-
-  done_testing();
-}
+void run_enum_tests(void) { sanity_test_enum_macros(); }

@@ -5,6 +5,7 @@
 
 #include "path.h"
 #include "tap.c/tap.h"
+#include "tests.h"
 
 const char *hex = "0123456789ABCDEF";
 const char *nothex = "GHIJKLMNOPQRSTUVWXYZ";
@@ -146,9 +147,7 @@ void test_ishex(void) {
   }
 }
 
-int main() {
-  plan(97);
-
+void run_util_tests(void) {
   test_split_ok();
   test_split_no_match();
   test_split_empty_input();
@@ -162,6 +161,4 @@ int main() {
 
   test_str_contains_ctl_char();
   test_ishex();
-
-  done_testing();
 }

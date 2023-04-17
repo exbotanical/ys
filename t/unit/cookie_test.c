@@ -7,7 +7,7 @@
 #include "libys.h"
 #include "response.h"
 #include "tap.c/tap.h"
-#include "test_util.h"
+#include "tests.h"
 
 typedef struct {
   hash_table* headers;
@@ -244,9 +244,7 @@ void test_cookie_free(void) {
   lives_ok({ cookie_free(c); }, "cookie_free does not segfault");
 }
 
-int main() {
-  plan(70);
-
+void run_cookie_tests(void) {
   test_cookie_free();
 
   test_read_cookies();
@@ -255,6 +253,4 @@ int main() {
   test_cookie_serialize();
   test_get_cookie();
   test_set_cookie();
-
-  done_testing();
 }

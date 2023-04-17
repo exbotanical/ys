@@ -13,7 +13,7 @@
 #include "request.h"
 #include "response.h"
 #include "router.h"
-#include "signal.h"
+#include "sighandler.h"
 #include "util.h"
 #include "xmalloc.h"
 

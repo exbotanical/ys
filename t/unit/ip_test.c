@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "tap.c/tap.h"
+#include "tests.h"
 
 typedef struct {
   char* in;
@@ -47,10 +48,4 @@ void test_validate_ip(void) {
   }
 }
 
-int main() {
-  plan(25);
-
-  test_validate_ip();
-
-  done_testing();
-}
+void run_ip_tests(void) { test_validate_ip(); }

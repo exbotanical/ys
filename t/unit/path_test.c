@@ -1,6 +1,7 @@
 #include "path.h"
 
 #include "tap.c/tap.h"
+#include "tests.h"
 
 typedef struct {
   char *name;
@@ -152,9 +153,7 @@ void test_path_get_pure_no_query(void) {
   is(p, "/some/path/with/query", "leaves the original path unmodified");
 }
 
-int main() {
-  plan(71);
-
+void run_path_tests(void) {
   test_expand_path_ok();
   test_expand_no_match();
 
@@ -166,6 +165,4 @@ int main() {
 
   test_path_get_pure();
   test_path_get_pure_no_query();
-
-  done_testing();
 }

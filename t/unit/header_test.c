@@ -4,6 +4,7 @@
 
 #include "libhash/libhash.h"
 #include "tap.c/tap.h"
+#include "tests.h"
 
 typedef struct {
   char *in;
@@ -168,9 +169,7 @@ void test_derive_headers(void) {
   array_free(actual);
 }
 
-int main() {
-  plan(30);
-
+void run_header_tests(void) {
   test_token_table();
   test_to_canonical_mime_header_key();
 
@@ -179,6 +178,4 @@ int main() {
   test_derive_headers();
 
   test_insert_header();
-
-  done_testing();
 }

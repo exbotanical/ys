@@ -3,6 +3,7 @@
 #include <pcre.h>
 
 #include "tap.c/tap.h"
+#include "tests.h"
 
 void sanity_test_regex_cache_get(void) {
   hash_table *ht = ht_init(0);
@@ -17,10 +18,4 @@ void sanity_test_regex_cache_get(void) {
      "retrieved regex is valid");
 }
 
-int main() {
-  plan(2);
-
-  sanity_test_regex_cache_get();
-
-  done_testing();
-}
+void run_cache_tests(void) { sanity_test_regex_cache_get(); }

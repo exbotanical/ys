@@ -5,6 +5,7 @@
 #include "libhash/libhash.h"
 #include "libutil/libutil.h"
 #include "tap.c/tap.h"
+#include "tests.h"
 
 typedef struct {
   bool ok;
@@ -152,11 +153,7 @@ void test_has_query_string(void) {
   }
 }
 
-int main() {
-  plan(46);
-
+void run_url_tests(void) {
   test_parse_query();
   test_has_query_string();
-
-  done_testing();
 }
