@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "libutil/libutil.h"
@@ -11,6 +12,9 @@
 #include "response.h"
 #include "util.h"
 #include "xmalloc.h"
+
+// see: https://twitter.com/mcclure111/status/1281672964602310657?lang=en
+#define INT2VOIDP(i) (void*)(uintptr_t)(i)
 
 const char CACHE_CONTROL[] = "Cache-Control";
 const char NO_CACHE[] = "no-cache";
@@ -167,7 +171,7 @@ static char* canonical_mime_header_key(char* key) {
   return key;
 }
 
-bool is_valid_header_field_char(int c) {
+bool is_valid_header_field_char(unsigned int c) {
   return c < sizeof(token_table) && token_table[c];
 }
 
@@ -286,11 +290,11 @@ array_t* derive_headers(const char* header_str) {
 
     if ((c >= 'a' && c <= 'z') || c == '_' || c == '-' || c == '.' ||
         (c >= '0' && c <= '9')) {
-      array_push(tmp, c);
+      array_push(tmp, INT2VOIDP(c));
     }
 
     if (c >= 'A' && c <= 'Z') {
-      array_push(tmp, tolower(c));
+      array_push(tmp, INT2VOIDP(tolower(c)));
     }
 
     if (c == ' ' || c == ',' || i == len - 1) {
@@ -299,7 +303,7 @@ array_t* derive_headers(const char* header_str) {
         char* v = xmalloc(size + 1);
         unsigned int i;
         for (i = 0; i < size; i++) {
-          v[i] = (char)array_get(tmp, i);
+          v[i] = (char)((uintptr_t)array_get(tmp, i));
         }
 
         v[i + 1] = NULL_TERMINATOR;

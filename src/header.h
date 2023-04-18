@@ -34,7 +34,7 @@ static const char token_table[] =
  * is_valid_header_field_char returns a bool indicating whether the given char
  * is a valid header char
  */
-bool is_valid_header_field_char(int c);
+bool is_valid_header_field_char(unsigned int c);
 
 /**
  * to_canonical_mime_header_key returns the canonical format of the MIME

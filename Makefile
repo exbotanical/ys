@@ -21,7 +21,7 @@ SRC := $(wildcard $(SRCDIR)/*.c)
 DEPS := $(wildcard $(DEPSDIR)/*/*.c)
 OBJ := $(addprefix obj/, $(notdir $(SRC:.c=.o)) $(notdir $(DEPS:.c=.o)))
 
-CFLAGS = -I$(LINCDIR) -I$(DEPSDIR) -g -ggdb -fPIC -Wall -Wextra -pedantic -Wno-missing-braces
+CFLAGS = -I$(LINCDIR) -I$(DEPSDIR) -g -ggdb -fPIC -Wall -Wextra -pedantic -Wnonnull-compare -Wno-missing-braces
 LIBS := -lcrypto -lssl -lm -lpcre -lpthread
 
 all: $(DYNAMIC_TARGET) $(STATIC_TARGET)

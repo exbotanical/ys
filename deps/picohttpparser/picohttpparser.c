@@ -70,7 +70,7 @@
 
 #define ADVANCE_TOKEN(tok, toklen)                                  \
   do {                                                              \
-    const char *tok_start = buf;                                    \
+    char *tok_start = buf;                                          \
     static const char ALIGNED(16) ranges2[16] = "\000\040\177\177"; \
     int found2;                                                     \
     buf = findchar_fast(buf, buf_end, ranges2, 4, &found2);         \
@@ -103,9 +103,8 @@ static const char *token_char_map =
     "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
     "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
 
-static const char *findchar_fast(const char *buf, const char *buf_end,
-                                 const char *ranges, size_t ranges_size,
-                                 int *found) {
+static char *findchar_fast(char *buf, const char *buf_end, const char *ranges,
+                           size_t ranges_size, int *found) {
   *found = 0;
 #if __SSE4_2__
   if (likely(buf_end - buf >= 16)) {
@@ -135,10 +134,9 @@ static const char *findchar_fast(const char *buf, const char *buf_end,
   return buf;
 }
 
-static const char *get_token_to_eol(const char *buf, const char *buf_end,
-                                    const char **token, size_t *token_len,
-                                    int *ret) {
-  const char *token_start = buf;
+static char *get_token_to_eol(char *buf, const char *buf_end, char **token,
+                              size_t *token_len, int *ret) {
+  char *token_start = buf;
 
 #ifdef __SSE4_2__
   static const char ALIGNED(16) ranges1[16] =
@@ -201,8 +199,8 @@ FOUND_CTL:
   return buf;
 }
 
-static const char *is_complete(const char *buf, const char *buf_end,
-                               size_t last_len, int *ret) {
+static const char *is_complete(char *buf, const char *buf_end, size_t last_len,
+                               int *ret) {
   int ret_cnt = 0;
   buf = last_len < 3 ? buf : buf + last_len - 3;
 
@@ -238,9 +236,8 @@ static const char *is_complete(const char *buf, const char *buf_end,
   *(valp_) = (mul_) * (*buf++ - '0');
 
 /* returned pointer is always within [buf, buf_end), or null */
-static const char *parse_token(const char *buf, const char *buf_end,
-                               const char **token, size_t *token_len,
-                               char next_char, int *ret) {
+static char *parse_token(char *buf, const char *buf_end, char **token,
+                         size_t *token_len, char next_char, int *ret) {
   /* We use pcmpestri to detect non-token characters. This instruction can take
    * no more than eight character ranges (8*2*8=128 bits that is the size of a
    * SSE register). Due to this restriction, characters `|` and `~` are handled
@@ -254,7 +251,7 @@ static const char *parse_token(const char *buf, const char *buf_end,
       ":@"     /* 0x3a-0x40 */
       "[]"     /* 0x5b-0x5d */
       "{\xff"; /* 0x7b-0xff */
-  const char *buf_start = buf;
+  char *buf_start = buf;
   int found;
   buf = findchar_fast(buf, buf_end, ranges, sizeof(ranges) - 1, &found);
   if (!found) {
@@ -276,8 +273,8 @@ static const char *parse_token(const char *buf, const char *buf_end,
 }
 
 /* returned pointer is always within [buf, buf_end), or null */
-static const char *parse_http_version(const char *buf, const char *buf_end,
-                                      int *minor_version, int *ret) {
+static char *parse_http_version(char *buf, const char *buf_end,
+                                int *minor_version, int *ret) {
   /* we want at least [HTTP/1.<two chars>] to try to parse */
   if (buf_end - buf < 9) {
     *ret = -2;
@@ -294,10 +291,9 @@ static const char *parse_http_version(const char *buf, const char *buf_end,
   return buf;
 }
 
-static const char *parse_headers(const char *buf, const char *buf_end,
-                                 struct phr_header *headers,
-                                 size_t *num_headers, size_t max_headers,
-                                 int *ret) {
+static char *parse_headers(char *buf, const char *buf_end,
+                           struct phr_header *headers, size_t *num_headers,
+                           size_t max_headers, int *ret) {
   for (;; ++*num_headers) {
     CHECK_EOF();
     if (*buf == '\015') {
@@ -335,7 +331,7 @@ static const char *parse_headers(const char *buf, const char *buf_end,
       headers[*num_headers].name = NULL;
       headers[*num_headers].name_len = 0;
     }
-    const char *value;
+    char *value;
     size_t value_len;
     if ((buf = get_token_to_eol(buf, buf_end, &value, &value_len, ret)) ==
         NULL) {
@@ -355,12 +351,10 @@ static const char *parse_headers(const char *buf, const char *buf_end,
   return buf;
 }
 
-static const char *parse_request(const char *buf, const char *buf_end,
-                                 const char **method, size_t *method_len,
-                                 const char **path, size_t *path_len,
-                                 int *minor_version, struct phr_header *headers,
-                                 size_t *num_headers, size_t max_headers,
-                                 int *ret) {
+static char *parse_request(char *buf, const char *buf_end, char **method,
+                           size_t *method_len, char **path, size_t *path_len,
+                           int *minor_version, struct phr_header *headers,
+                           size_t *num_headers, size_t max_headers, int *ret) {
   /* skip first empty line (some clients add CRLF after POST content) */
   CHECK_EOF();
   if (*buf == '\015') {
@@ -403,11 +397,11 @@ static const char *parse_request(const char *buf, const char *buf_end,
   return parse_headers(buf, buf_end, headers, num_headers, max_headers, ret);
 }
 
-int phr_parse_request(const char *buf_start, size_t len, char **method,
+int phr_parse_request(char *buf_start, size_t len, char **method,
                       size_t *method_len, char **path, size_t *path_len,
                       int *minor_version, struct phr_header *headers,
                       size_t *num_headers, size_t last_len) {
-  const char *buf = buf_start, *buf_end = buf_start + len;
+  char *buf = buf_start, *buf_end = buf_start + len;
   size_t max_headers = *num_headers;
   int r;
 

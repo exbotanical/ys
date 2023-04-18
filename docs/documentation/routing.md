@@ -65,7 +65,7 @@ int main () {
 }
 ```
 
-Here, `handler` will be invoked for any `GET` or `POST` request at `/`. Non-route matches will trigger the 404 handler. Route matches with an non-registered HTTP method will trigger the 405 handler. For erroneous or invalid requests, the route will be diverted to the 500 handler. See [Registering Custom Fallback Handlers](#registering-custom-fallback-handlers).
+Here, `handler` will be invoked for any `GET` or `POST` request at `/`. Non-route matches will trigger the 404 handler. Route matches with a non-registered HTTP method will trigger the 405 handler. For erroneous or invalid requests, the route will be diverted to the 500 handler. See [Registering Custom Fallback Handlers](#registering-custom-fallback-handlers).
 
 
 ## Registering a Parameterized Route Handler
@@ -175,7 +175,7 @@ Similarly, use `router_register_405_handler` for 405 handling and `router_regist
 
 ## Nested Routing
 
-Ys supports nested routing, allowing you to encapsulate route logic in a specific router instance. To initialize a sub-router, use the `router_register_sub` and bind the sub-router to the root router instance.
+Ys supports nested routing, allowing you to encapsulate route logic in a specific router instance. To initialize a sub-router, use the `router_register_sub` function and bind the sub-router to the root router instance.
 
 ```c{6-8}
 int main() {

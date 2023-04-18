@@ -1,3 +1,7 @@
+#define __USE_XOPEN  // See `man 7 feature_test_macros`
+#define _XOPEN_SOURCE
+#define _GNU_SOURCE
+
 #include "cookie.h"
 
 #include <stdio.h>

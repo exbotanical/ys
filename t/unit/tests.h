@@ -9,7 +9,7 @@ typedef struct {
   array_t* values;
 } header;
 
-header* to_header(const char* key, array_t* values);
+header* to_header(char* key, array_t* values);
 
 hash_table* to_headers(header* h, ...);
 

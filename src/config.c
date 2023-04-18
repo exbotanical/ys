@@ -21,7 +21,7 @@ static const short DEFAULT_NUM_THREADS = 4;
 static const int DEFAULT_PORT_NUM = 5000;
 
 // Default log level
-static const char DEFAULT_LOG_LEVEL[] = "info";
+static char DEFAULT_LOG_LEVEL[] = "info";
 
 // Environment variable key for user-defined number of threads
 static const char NUM_THREADS_KEY[] = "NUM_THREADS";

@@ -41,18 +41,18 @@ extern "C" {
 /* contains name and value of a header (name == NULL if is a continuing line
  * of a multiline header */
 struct phr_header {
-  const char *name;
+  char *name;
   size_t name_len;
-  const char *value;
+  char *value;
   size_t value_len;
 };
 
 /* returns number of bytes consumed if successful, -2 if request is partial,
  * -1 if failed */
-int phr_parse_request(const char *buf, size_t len, char **method,
-                      size_t *method_len, char **path, size_t *path_len,
-                      int *minor_version, struct phr_header *headers,
-                      size_t *num_headers, size_t last_len);
+int phr_parse_request(char *buf, size_t len, char **method, size_t *method_len,
+                      char **path, size_t *path_len, int *minor_version,
+                      struct phr_header *headers, size_t *num_headers,
+                      size_t last_len);
 
 #ifdef __cplusplus
 }

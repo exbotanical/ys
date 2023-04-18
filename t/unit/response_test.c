@@ -12,17 +12,17 @@ void test_is_2xx_connect(void) {
   response_internal* res = response_init();
 
   req->method = "CONNECT";
-  set_status(res, STATUS_NO_CONTENT);
+  set_status((response*)res, STATUS_NO_CONTENT);
   ok(is_2xx_connect(req, res) == true,
      "a 204 CONNECT request is a 2xx connect");
 
   req->method = "CONNECT";
-  set_status(res, STATUS_NOT_FOUND);
+  set_status((response*)res, STATUS_NOT_FOUND);
   ok(is_2xx_connect(req, res) == false,
      "a 404 CONNECT request is not a 2xx connect");
 
   req->method = "OPTIONS";
-  set_status(res, STATUS_NO_CONTENT);
+  set_status((response*)res, STATUS_NO_CONTENT);
   ok(is_2xx_connect(req, res) == false,
      "a 204 OPTIONS request is not a 2xx connect");
 }
@@ -30,20 +30,20 @@ void test_is_2xx_connect(void) {
 void test_is_informational(void) {
   response_internal* res = response_init();
 
-  set_status(res, STATUS_EARLY_HINTS);
+  set_status((response*)res, STATUS_EARLY_HINTS);
   ok(is_informational(res) == true, "a 1xx response is informational");
 
-  set_status(res, STATUS_OK);
+  set_status((response*)res, STATUS_OK);
   ok(is_informational(res) == false, "a 2xx response is not informational");
 }
 
 void test_is_nocontent(void) {
   response_internal* res = response_init();
 
-  set_status(res, STATUS_NO_CONTENT);
+  set_status((response*)res, STATUS_NO_CONTENT);
   ok(is_nocontent(res) == true, "a 204 response is a no content response");
 
-  set_status(res, STATUS_OK);
+  set_status((response*)res, STATUS_OK);
   ok(is_nocontent(res) == false, "a 200 response is not a no content response");
 }
 
@@ -125,8 +125,8 @@ void test_response_serialize(void) {
 
     response_internal* res = response_init();
     res->headers = test.headers;
-    set_body(res, test.body);
-    set_status(res, test.status);
+    set_body((response*)res, test.body);
+    set_status((response*)res, test.status);
 
     char* response = buffer_state(response_serialize(req, res));
 
@@ -138,8 +138,8 @@ void test_response_serialize(void) {
 void set_body_test(void) {
   response_internal* res = response_init();
 
-  set_body(res, "%s - %s\n%s - %s \t\t%d\n", "test", "xtestx", "cookie",
-           "x\t cookie\t x", 20);
+  set_body((response*)res, "%s - %s\n%s - %s \t\t%d\n", "test", "xtestx",
+           "cookie", "x\t cookie\t x", 20);
   is(res->body, "test - xtestx\ncookie - x\t cookie\t x \t\t20\n");
 }
 

@@ -395,7 +395,7 @@ void __set_allowed_methods(cors_opts *opts, array_t *methods) {
 
   foreach (methods, i) {
     array_push(allowed_methods,
-               http_method_names[(http_method)array_get(methods, i)]);
+               s_copy(http_method_names[(http_method)array_get(methods, i)]));
   }
 }
 

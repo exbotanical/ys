@@ -3,7 +3,7 @@
 
 #include "tests.h"
 
-header* to_header(const char* key, array_t* values) {
+header* to_header(char* key, array_t* values) {
   header* h = malloc(sizeof(header));
   h->key = key;
   h->values = values;

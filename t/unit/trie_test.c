@@ -254,9 +254,9 @@ void test_trie_search_with_queries(void) {
 
   ht_record *rr = ht_search(r->queries, "cookie");
 
-  is(array_get(ht_get(r->queries, "cookie"), 0), "1",
+  is(array_get((array_t *)ht_get(r->queries, "cookie"), 0), "1",
      "stores the query key/value pairs");
-  is(array_get(ht_get(r->queries, "value"), 0), "12",
+  is(array_get((array_t *)ht_get(r->queries, "value"), 0), "12",
      "stores the query key/value pairs");
   ok(r->queries->count, "has only 2 query results");
 
