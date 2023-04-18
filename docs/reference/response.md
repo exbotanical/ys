@@ -16,10 +16,10 @@ bool set_header(response *res, const char *key, const char *value);
 ## set_body
 
 ```c
-void set_body(response *res, const char *body);
+void set_body(response *res, const char *fmt, ...);
 ```
 
-`set_body` sets the given body on the response.
+`set_body` sets the given body on the response. You can pass a regular string or a format string plus *n* values to interpolate. `fmt` here uses the same format syntax as `printf`.
 
 ## set_status
 

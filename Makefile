@@ -55,12 +55,12 @@ test:
 	$(MAKE) integ_test
 
 unit_test: $(STATIC_TARGET)
-	$(CC) $(wildcard $(TESTDIR)/unit/*.c) $(STATIC_TARGET) -lys -I$(SRCDIR) -I$(DEPSDIR) $(LIBS) -o $(UNIT_TARGET)
+	$(CC) $(wildcard $(TESTDIR)/unit/*.c) $(STATIC_TARGET) -I$(LINCDIR) -I$(SRCDIR) -I$(DEPSDIR) $(LIBS) -o $(UNIT_TARGET)
 	./$(UNIT_TARGET)
 	$(MAKE) clean
 
 integ_test: $(STATIC_TARGET)
-	$(CC) $(TESTDIR)/integ/main.c $(wildcard $(TESTDIR)/integ/$(DEPSDIR)/*/*.c) $(LIBS) $(STATIC_TARGET) -o $(INTEG_TARGET)
+	$(CC) $(TESTDIR)/integ/main.c $(wildcard $(TESTDIR)/integ/$(DEPSDIR)/*/*.c) $(STATIC_TARGET) -I$(LINCDIR) $(LIBS) -o $(INTEG_TARGET)
 	./scripts/integ.bash
 	$(MAKE) clean
 

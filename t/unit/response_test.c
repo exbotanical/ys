@@ -135,10 +135,20 @@ void test_response_serialize(void) {
   }
 }
 
+void set_body_test(void) {
+  response_internal* res = response_init();
+
+  set_body(res, "%s - %s\n%s - %s \t\t%d\n", "test", "xtestx", "cookie",
+           "x\t cookie\t x", 20);
+  is(res->body, "test - xtestx\ncookie - x\t cookie\t x \t\t20\n");
+}
+
 void run_response_tests(void) {
   test_is_2xx_connect();
   test_is_informational();
   test_is_nocontent();
 
   test_response_serialize();
+
+  set_body_test();
 }

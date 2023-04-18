@@ -57,7 +57,7 @@
 - [ ] Use hash set for headers to de-duplicate
 - [x] Comma-delimit duplicate response headers
 - [x] Use user-defined content length header OR overwrite it - but handle it
-- [ ] fmt string in `set_body`
+- [x] fmt string in `set_body`
 - [x] Default Content-Type to text/plain?
 - [x] Remove the need for null-terminator everywhere else (incl `router_register`)
 - [x] set default status on registered fallback handlers with no `set_status` call

@@ -354,7 +354,7 @@ bool set_header(response* res, const char* key, const char* value);
 /**
  * set_body sets the given body on the response
  */
-void set_body(response* res, const char* body);
+void set_body(response* res, const char* fmt, ...);
 
 /**
  * set_status sets the given status code on the response

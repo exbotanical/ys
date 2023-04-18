@@ -2,7 +2,7 @@
 #include "tests.h"
 
 int main() {
-  plan(558);
+  plan(559);
 
   run_cache_tests();
   run_config_tests();

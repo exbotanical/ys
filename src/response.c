@@ -2,6 +2,7 @@
 
 #include <errno.h>
 #include <openssl/ssl.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -197,8 +198,25 @@ response_internal *response_init(void) {
   return res;
 }
 
-void set_body(response *res, const char *body) {
-  ((response_internal *)res)->body = s_copy(body);
+void set_body(response *res, const char *fmt, ...) {
+  if (!fmt) {
+    return;
+  }
+
+  va_list args, args_cp;
+  va_start(args, fmt);
+  va_copy(args_cp, args);
+
+  // Pass length of zero first to determine number of bytes needed
+  unsigned int n = vsnprintf(NULL, 0, fmt, args) + 1;
+  char *buf = xmalloc(n);
+
+  vsnprintf(buf, n, fmt, args_cp);
+
+  va_end(args);
+  va_end(args_cp);
+
+  ((response_internal *)res)->body = buf;
 }
 
 void set_status(response *res, http_status status) {
