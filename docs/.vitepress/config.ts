@@ -30,7 +30,10 @@ export default defineConfig({
 function nav() {
   return [
     { text: 'Home', link: '/' },
-    { text: 'Examples', link: 'https://github.com/exbotanical/ys/examples' },
+    {
+      text: 'Examples',
+      link: 'https://github.com/exbotanical/ys/tree/master/examples',
+    },
   ]
 }
 

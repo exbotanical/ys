@@ -2,9 +2,20 @@
 
 Ys currently supports UNIX-like environments and has been tested on the following operating systems.
 
-## Linux
+On both Linux and macos, you'll want to ensure the following dependencies are somewhere in the include paths searched by `gcc` when linking:
 
-On Linux systems, you will need to ensure openssl is symlinked to `/usr/include/openssl/`.
+- `pcre`
+- `openssl`
+  - `libcrypto`
+  - `libssl`
+
+If you're unsure of which directories `gcc` is searching, you can find a list by running
+
+```sh
+`gcc -print-prog-name=cc1` -v < /dev/null
+```
+
+## Linux
 
 ### Arch Linux
 
@@ -19,7 +30,7 @@ For development, we need to fix the integration tests. If someone on Ubuntu want
 #### Everything you need for general usage
 
 ```sh
-apt update && apt install libpcre3-dev make gcc libssl-dev
+apt update && apt install make gcc libpcre3-dev libssl-dev
 ```
 
 #### Everything you need for development
@@ -39,7 +50,7 @@ Full support for usage + development.
 #### Everything you need for general usage
 
 ```sh
-yum install make gcc pcre-devel openssl-devel redhat-lsb-core
+yum install make gcc pcre-devel openssl-devel
 ```
 
 #### Everything you need for development

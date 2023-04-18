@@ -221,7 +221,7 @@ int main(int argc, char **argv) {
   router_register(router, "/", root_handler, METHOD_GET);
 
   tcp_server_attr* srv_attr = server_attr_init(router);
-  server_set_port(PORT);
+  server_set_port(srv_attr, PORT);
 
   return 0;
 }
@@ -241,7 +241,7 @@ int main(int argc, char **argv) {
   router_register(router, "/", root_handler, METHOD_GET);
 
   tcp_server_attr* srv_attr = server_attr_init(router);
-  server_set_port(PORT);
+  server_set_port(srv_attr, PORT);
 
   tcp_server *server = server_init(srv_attr);
   server_start(server);

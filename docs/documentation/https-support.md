@@ -15,7 +15,7 @@ Once compiled, modify your server code to include your SSL cert and key files.
 int main() {
   // ...
   tcp_server_attr* srv_attr = server_attr_init(router);
-  server_use_https("./certs/yoursite.pem", "./certs/yoursite-key.pem");
+  server_use_https(srv_attr, "./certs/yoursite.pem", "./certs/yoursite-key.pem");
 
   tcp_server *server = server_init(srv_attr);
   server_start(server);

@@ -45,13 +45,13 @@
 - [x] documentation
 - [x] make all public structs opaque
 - [x] Use method enum in CORS middleware helpers
-- [ ] Ensure everything opaque has getters and setters
+- [x] Ensure everything opaque has getters and setters
 - [x] Deny list paths for middleware
   - [ ] Store URL in struct (if needed)
   - [x] Allow the deny list to use regex
   - [x] Handle paths with params etc
-- [ ] middleware ordering - before err handlers?
-- [ ] ask users - should CORS be inherited by sub-routers automatically?
+- [x] middleware ordering - before err handlers?
+- [ ] ask users - should CORS be inherited by sub-routers automatically? try an `inherit` mode
 - [ ] Non-param path regex
 - [x] Offer Content-Types
 - [ ] Use hash set for headers to de-duplicate
@@ -135,7 +135,8 @@
 - [x] Shared test utils
 - [x] Consolidate integ test servers
 - [x] get rid of doc comments with `@param` - it offers no value since we're not generating anything with the doc comments and is difficult to maintain
-- [ ] cleanup tests and use unified framework so we have full test count in aggregate, can filter tests, and have a reporter
+- [x] cleanup tests and use unified framework so we have full test count in aggregate, can filter tests, and have a reporter
+- [ ] Remove localhost SSL certs and add a script for developers to generate their own
 
 ## Fixes
 - [x] Allow OPTIONS requests by default in router when CORS enabled

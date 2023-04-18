@@ -8,9 +8,9 @@
 git clone https://github.com/exbotanical/ys.git
 ```
 
-2. For compilation, you have two options: you can compile Ys as a shared object, or a static library. We generally recommend going with the latter, so this guide will assume you're compiling against Ys as a static library. If you need a primer on shared objects vs static libraries, see [A Primer on Shared Objects and Static Libraries](./shared-vs-static.md).
+2. For compilation, you have two options: you can compile Ys as a shared object, or a static library. We generally recommend going with the latter, so the installation process will install Ys as a static library. If you need a primer on shared objects vs static libraries, see [A Primer on Shared Objects and Static Libraries](./shared-vs-static.md).
 
-Compile Ys as a static library:
+Compile Ys and install:
 ```sh
 make install
 ```
@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
 
 4. Add a request handler
 
-```c{7-14,20}
+```c{3-10,16}
 #include "libys.h"
 
 response *root_handler(request *req, response *res) {
