@@ -1,0 +1,15 @@
+on: [push]
+
+jobs:
+  test_job:
+    runs-on: ubuntu-latest
+    name: A job to run the Ys tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Test action step
+        id: test
+        uses: ./.github/actions/test
+
+      - name: Get the output data
+        run: echo "ls -la results ${{ steps.test.outputs.files }}"
