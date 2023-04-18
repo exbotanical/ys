@@ -55,7 +55,7 @@ buffer_t *response_serialize(request_internal *req, response_internal *res) {
                 fmt_str("HTTP/1.1 %d %s", status, http_status_names[status]));
   buffer_append(buf, CRLF);
 
-  bool has_content_type;
+  bool has_content_type = false;
   for (unsigned int i = 0; i < (unsigned int)headers->capacity; i++) {
     ht_record *header = headers->records[i];
     if (!header) continue;

@@ -2,18 +2,12 @@
 
 Ys currently supports UNIX-like environments and has been tested on the following operating systems.
 
-On both Linux and macos, you'll want to ensure the following dependencies are somewhere in the include paths searched by `gcc` when linking:
+On both Linux and macos, you'll want to ensure the following dependencies are available in `/usr/local/include` when linking:
 
 - `pcre`
 - `openssl`
   - `libcrypto`
   - `libssl`
-
-If you're unsure of which directories `gcc` is searching, you can find a list by running
-
-```sh
-`gcc -print-prog-name=cc1` -v < /dev/null
-```
 
 ## Linux
 

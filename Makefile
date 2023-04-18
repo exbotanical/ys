@@ -60,7 +60,7 @@ unit_test: $(STATIC_TARGET)
 	$(MAKE) clean
 
 integ_test: $(STATIC_TARGET)
-	$(CC) $(TESTDIR)/integ/main.c $(wildcard $(TESTDIR)/integ/$(DEPSDIR)/*/*.c) $(STATIC_TARGET) -I$(LINCDIR) $(LIBS) -o $(INTEG_TARGET)
+	$(CC) $(TESTDIR)/integ/main.c $(wildcard $(TESTDIR)/integ/$(DEPSDIR)/*/*.c) $(STATIC_TARGET) -I$(LINCDIR) -I$(DEPSDIR) $(LIBS) -o $(INTEG_TARGET)
 	./scripts/integ.bash
 	$(MAKE) clean
 
