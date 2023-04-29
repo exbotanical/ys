@@ -5,15 +5,15 @@
 - [x] name header file
 - [ ] ensure example + docs code runs
 - [ ] Use Fathom analytics
-- [ ] github workflows
+- [x] github workflows
 
 ## Pre-release
 - [x] SSL support
 - [x] Cookies
 - [x] Name this project: Ys?
-- [ ] Lock deps versions
+- [x] Lock deps versions
 - [x] Document
-- [ ] Filter out test deps in builds
+- [x] Filter out test deps in builds
 
 - [x] Clean up all objects w/ free where necessary
 - [x] Validate NULLs and allocated objects

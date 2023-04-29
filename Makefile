@@ -18,7 +18,7 @@ TESTDIR := t
 LINCDIR := include
 
 SRC := $(wildcard $(SRCDIR)/*.c)
-DEPS := $(wildcard $(DEPSDIR)/*/*.c)
+DEPS := $(filter-out $(wildcard $(DEPSDIR)/tap.c/*), $(wildcard $(DEPSDIR)/*/*.c))
 OBJ := $(addprefix obj/, $(notdir $(SRC:.c=.o)) $(notdir $(DEPS:.c=.o)))
 
 CFLAGS = -I$(LINCDIR) -I$(DEPSDIR) -g -ggdb -fPIC -Wall -Wextra -pedantic -Wnonnull-compare -Wno-missing-braces
@@ -55,7 +55,7 @@ test:
 	$(MAKE) integ_test
 
 unit_test: $(STATIC_TARGET)
-	$(CC) $(wildcard $(TESTDIR)/unit/*.c) $(STATIC_TARGET) -I$(LINCDIR) -I$(SRCDIR) -I$(DEPSDIR) $(LIBS) -o $(UNIT_TARGET)
+	$(CC) $(wildcard $(TESTDIR)/unit/*.c) $(wildcard $(DEPSDIR)/tap.c/*.c) $(STATIC_TARGET) -I$(LINCDIR) -I$(SRCDIR) -I$(DEPSDIR) $(LIBS) -o $(UNIT_TARGET)
 	./$(UNIT_TARGET)
 	$(MAKE) clean
 

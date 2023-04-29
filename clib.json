@@ -4,7 +4,7 @@
   "author": "Matthew Zito",
   "repo": "exbotanical/libys",
   "license": "MIT",
-  "description": "A C server framework",
+  "description": "The Modern Web Application Framework for C",
   "keywords": [
     "rest",
     "api",
@@ -13,28 +13,30 @@
     "concurrency"
   ],
   "src": [
-    "src/libys.h",
-
+    "include/libys.h",
     "src/cache.c",
     "src/cache.h",
     "src/client.h",
     "src/config.c",
     "src/config.h",
+    "src/const.c",
+    "src/cookie.c",
+    "src/cookie.h",
     "src/cors.c",
     "src/cors.h",
     "src/file.c",
-    "src/fs_router.c",
-    "src/fs_router.h",
     "src/header.c",
     "src/header.h",
-    "src/const.c",
-    "src/json.c",
-    "src/json.h",
+    "src/ip.c",
+    "src/ip.h",
     "src/logger.c",
     "src/logger.h",
     "src/middleware.c",
+    "src/middleware.h",
     "src/path.c",
     "src/path.h",
+    "src/regexpr.c",
+    "src/regexpr.h",
     "src/request.c",
     "src/request.h",
     "src/response.c",
@@ -42,6 +44,10 @@
     "src/router.c",
     "src/router.h",
     "src/server.c",
+    "src/server.h",
+    "src/sighandler.c",
+    "src/sighandler.h",
+    "src/time.c",
     "src/trie.c",
     "src/trie.h",
     "src/url.c",
@@ -52,9 +58,9 @@
     "src/xmalloc.h"
   ],
   "dependencies": {
-    "exbotanical/libhash": "*",
-    "exbotanical/lib.thread": "*",
-    "exbotanical/libutil": "*"
+    "exbotanical/libhash": "0.0.6",
+    "exbotanical/lib.thread": "0.0.1",
+    "exbotanical/libutil": "0.0.9"
   },
   "development": {
     "thlorenz/tap.c": "*"
