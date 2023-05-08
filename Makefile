@@ -21,8 +21,16 @@ SRC := $(wildcard $(SRCDIR)/*.c)
 DEPS := $(filter-out $(wildcard $(DEPSDIR)/tap.c/*), $(wildcard $(DEPSDIR)/*/*.c))
 OBJ := $(addprefix obj/, $(notdir $(SRC:.c=.o)) $(notdir $(DEPS:.c=.o)))
 
-CFLAGS = -I$(LINCDIR) -I$(DEPSDIR) -g -ggdb -fPIC -Wall -Wextra -pedantic -Wnonnull-compare -Wno-missing-braces
+CFLAGS = -I$(LINCDIR) -I$(DEPSDIR) -g -ggdb -fPIC -Wall -Wextra -pedantic -Wno-missing-braces
 LIBS := -lcrypto -lssl -lm -lpcre -lpthread
+
+PLATFORM := $(shell uname)
+
+ifeq ($(findstring Darwin,$(PLATFORM)),Darwin)
+	LIBS += -L$(INCDIR)
+else
+	CFLAGS += -Wnonnull-compare
+endif
 
 all: $(DYNAMIC_TARGET) $(STATIC_TARGET)
 

@@ -6,7 +6,7 @@ TARGET := demo
 all: $(TARGET)
 
 $(TARGET): $(SRC)
-	$(CC) -I../../src -I../../deps $(SRC) -o $(TARGET) -L../../ $(LINK)
+	$(CC) -I../../src -I../../deps -I../../include $(SRC) -o $(TARGET) -L../../ $(LINK)
 
 clean:
 	rm $(TARGET)

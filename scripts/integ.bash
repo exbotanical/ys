@@ -49,7 +49,7 @@ main () {
 
   export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:."
   [[ "$OSTYPE" == "darwin"* ]] && {
-    export DYLD_LIBARY_PATH="$DYLD_LIBARY_PATH:$LD_LIBRARY_PATH"
+    export DYLD_LIBRARY_PATH="$DYLD_LIBRARY_PATH:$LD_LIBRARY_PATH"
   }
 
   run

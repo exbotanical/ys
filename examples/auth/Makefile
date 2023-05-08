@@ -6,7 +6,7 @@ LINK := -lys -luuid -lpcre -lm
 all: $(TARGET)
 
 $(TARGET): $(SRC)
-	$(CC) $(SRC) -o $(TARGET) -I../../src -I../../deps -Ideps -L../../ $(LINK)
+	$(CC) $(SRC) -o $(TARGET) -I../../src -I../../deps -I../../include -Ideps -L../../ $(LINK)
 
 clean:
 	rm $(TARGET)
