@@ -26,7 +26,7 @@ LIBS := -lcrypto -lssl -lm -lpcre -lpthread
 
 PLATFORM := $(shell uname)
 
-ifeq ($(findstring Darwin,$(PLATFORM)),Darwin)
+ifeq ($(findstring Darwin, $(PLATFORM)), Darwin)
 	LIBS += -L$(INCDIR)
 else
 	CFLAGS += -Wnonnull-compare

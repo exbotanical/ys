@@ -1,3 +1,4 @@
+#include <pthread.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +11,9 @@
 
 #define SESSION_TIMEOUT_MINUTES 10
 
-// TODO: mutex
+static pthread_mutex_t session_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t user_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 hash_table *session_store;
 hash_table *user_store;
 
@@ -44,7 +47,11 @@ user *create_user(char *username, char *password) {
 }
 
 bool user_exists(char *username) {
-  return ht_search(user_store, username) != NULL;
+  pthread_mutex_lock(&user_mutex);
+  bool ret = ht_search(user_store, username) != NULL;
+  pthread_mutex_unlock(&user_mutex);
+
+  return ret;
 }
 
 // This is for the demo ONLY! Do NOT use this for actual auth - it is NOT
@@ -81,9 +88,12 @@ response *css_handler(request *req, response *res) {
 response *data_handler(request *req, response *res) {
   cookie *c = get_cookie(req, COOKIE_ID);
   char *sid = cookie_get_value(c);
-  char *username = ht_get(session_store, sid);
 
-  set_body(res, fmt_str("{ \"data\": \"Hello, %s!\" }", username));
+  pthread_mutex_lock(&session_mutex);
+  char *username = ht_get(session_store, sid);
+  pthread_mutex_unlock(&session_mutex);
+
+  set_body(res, "{ \"data\": \"Hello, %s!\" }", username);
   set_header(res, "Content-Type", MIME_TYPE_JSON);
   set_status(res, STATUS_OK);
 
@@ -107,15 +117,21 @@ response *register_handler(request *req, response *res) {
 
   if (user_exists(username)) {
     set_status(res, STATUS_BAD_REQUEST);
-    set_body(res, fmt_str("Username %s exists", username));  // TODO: fmt
+    set_body(res, "Username %s exists", username);
     return res;
   }
 
   user *u = create_user(username, hash_password(password));
+
+  pthread_mutex_lock(&user_mutex);
   ht_insert(user_store, username, u);
+  pthread_mutex_unlock(&user_mutex);
 
   char *sid = create_sid();
+
+  pthread_mutex_lock(&session_mutex);
   ht_insert(session_store, sid, username);
+  pthread_mutex_unlock(&session_mutex);
 
   cookie *c = cookie_init(COOKIE_ID, sid);
   cookie_set_expires(c, n_minutes_from_now(SESSION_TIMEOUT_MINUTES));
@@ -148,7 +164,9 @@ response *login_handler(request *req, response *res) {
     return res;
   }
 
+  pthread_mutex_lock(&user_mutex);
   user *u = (char *)ht_get(user_store, username);
+  pthread_mutex_unlock(&user_mutex);
 
   if (!u || !s_equals(hash_password(u->password), password)) {
     set_status(res, STATUS_BAD_REQUEST);
@@ -158,7 +176,10 @@ response *login_handler(request *req, response *res) {
   }
 
   char *session_id = create_sid();
+
+  pthread_mutex_lock(&session_mutex);
   ht_insert(session_store, session_id, username);
+  pthread_mutex_unlock(&session_mutex);
 
   cookie *c = cookie_init(COOKIE_ID, session_id);
   cookie_set_expires(c, n_minutes_from_now(SESSION_TIMEOUT_MINUTES));
@@ -187,7 +208,9 @@ response *logout_handler(request *req, response *res) {
     return res;
   }
 
+  pthread_mutex_lock(&session_mutex);
   ht_delete(session_store, sid);
+  pthread_mutex_unlock(&session_mutex);
 
   cookie_set_max_age(c, -1);
   set_cookie(res, c);
@@ -208,7 +231,10 @@ response *auth_middleware(request *req, response *res) {
 
   char *sid = cookie_get_value(c);
 
+  pthread_mutex_lock(&session_mutex);
   char *username = ht_get(session_store, sid);
+  pthread_mutex_unlock(&session_mutex);
+
   if (!username || !user_exists(username)) {
     set_status(res, STATUS_UNAUTHORIZED);
     set_done(res);
@@ -222,7 +248,6 @@ response *auth_middleware(request *req, response *res) {
   return res;
 }
 
-// TODO: cors
 int main() {
   session_store = ht_init(0);
   user_store = ht_init(0);

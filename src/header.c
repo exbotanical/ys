@@ -157,7 +157,6 @@ static char* canonical_mime_header_key(char* key) {
       c += to_lower;
     }
 
-    // TODO: fix ... ugh this is disgusting
     unsigned int l = strlen(key);
     char* ca = xmalloc(l + 1);
     strncpy(ca, key, l);
