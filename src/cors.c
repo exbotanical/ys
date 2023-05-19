@@ -80,21 +80,23 @@ static bool is_origin_allowed(cors_config *c, char *origin) {
  * user-defined allow list
  */
 static bool is_method_allowed(cors_config *c, char *method) {
-  if (!has_elements(c->allowed_methods)) {
-    return false;
-  }
-
-  // Always allow preflight requests
-  if (s_casecmp(method, ys_http_method_names[YS_METHOD_OPTIONS])) {
-    return true;
-  }
-
-  foreach (c->allowed_methods, i) {
-    char *allowed_method = array_get(c->allowed_methods, i);
-    if (s_casecmp(method, allowed_method)) {
+  if (has_elements(c->allowed_methods)) {
+    // Always allow preflight requests
+    if (s_casecmp(method, ys_http_method_names[YS_METHOD_OPTIONS])) {
       return true;
     }
+
+    foreach (c->allowed_methods, i) {
+      char *allowed_method = array_get(c->allowed_methods, i);
+      if (s_casecmp(method, allowed_method)) {
+        return true;
+      }
+    }
   }
+
+  return false;
+}
+
 
   return false;
 }
