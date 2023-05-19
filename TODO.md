@@ -29,7 +29,7 @@
 - [x] send entire response in chunks
 - [x] fix request hangups
   - [x] mostly fixed, happens when calling with a not allowed/found method w/body `Could not resolve host: <body>` (was non-issue; using curl wrong :|)
-- [x] prefix all enums with `METHOD_` or `STATUS_`
+- [x] prefix all enums with `YS_METHOD_` or `YS_STATUS_`
 - [x] handle duplicate request headers
   - Go style: append subsequent values, but `Get` retrieves the first only. `Values` returns list of all. In response, each duplicate header is written separately
 - [x] xmalloc that dies
@@ -57,10 +57,10 @@
 - [ ] Use hash set for headers to de-duplicate
 - [x] Comma-delimit duplicate response headers
 - [x] Use user-defined content length header OR overwrite it - but handle it
-- [x] fmt string in `set_body`
+- [x] fmt string in `ys_set_body`
 - [x] Default Content-Type to text/plain?
-- [x] Remove the need for null-terminator everywhere else (incl `router_register`)
-- [x] set default status on registered fallback handlers with no `set_status` call
+- [x] Remove the need for null-terminator everywhere else (incl `ys_router_register`)
+- [x] set default status on registered fallback handlers with no `ys_set_status` call
 
 
 ## New Features

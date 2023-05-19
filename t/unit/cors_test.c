@@ -47,7 +47,7 @@ inline static array_t *toheaders(char *s, ...) {
   return arr;
 }
 
-request_internal *toreq(http_method method, array_t *headers) {
+request_internal *toreq(ys_http_method method, array_t *headers) {
   hash_table *ht = ht_init(0);
   foreach (headers, i) {
     header_pair *h = array_get(headers, i);
@@ -56,7 +56,7 @@ request_internal *toreq(http_method method, array_t *headers) {
   }
 
   request_internal *req = malloc(sizeof(request_internal));
-  req->method = http_method_names[method];
+  req->method = ys_http_method_names[method];
   req->headers = ht;
 
   return req;
@@ -109,9 +109,9 @@ void check_headers(char *test_name, hash_table *actual, array_t *expected) {
   }
 }
 
-cors_opts *make_opts(array_t *allowed_origins, array_t *allowed_methods,
-                     array_t *allowed_headers, array_t *expose_headers,
-                     bool allow_credentials) {
+ys_cors_opts *make_opts(array_t *allowed_origins, array_t *allowed_methods,
+                        array_t *allowed_headers, array_t *expose_headers,
+                        bool allow_credentials) {
   cors_opts_internal *o = malloc(sizeof(cors_opts_internal));
   o->allowed_origins = allowed_origins;
   o->allowed_methods = allowed_methods;
@@ -126,187 +126,190 @@ void test_cors_middleware(void) {
   typedef struct {
     char *name;
     cors_opts_internal *options;
-    http_method method;
+    ys_http_method method;
     array_t *req_headers;
     array_t *res_headers;
-    http_status code;
+    ys_http_status code;
   } test_case;
 
   test_case tests[] = {
       {.name = "AllOriginAllowed",
        .options = make_opts(array_collect("*"), NULL, NULL, NULL, false),
-       .method = METHOD_GET,
+       .method = YS_METHOD_GET,
        .req_headers = toheaders("Origin", "http://foo.com", NULL),
        .res_headers = toheaders("Vary", "Origin", "Access-Control-Allow-Origin",
                                 "*", NULL),
-       .code = STATUS_OK},
+       .code = YS_STATUS_OK},
       {.name = "OriginAllowed",
        .options =
            make_opts(array_collect("http://foo.com"), NULL, NULL, NULL, false),
-       .method = METHOD_GET,
+       .method = YS_METHOD_GET,
        .req_headers = toheaders("Origin", "http://foo.com", NULL),
        .res_headers = toheaders("Vary", "Origin", "Access-Control-Allow-Origin",
                                 "http://foo.com", NULL),
-       .code = STATUS_OK},
+       .code = YS_STATUS_OK},
       {.name = "OriginAllowedMultipleProvided",
        .options = make_opts(array_collect("http://foo.com", "http://bar.com"),
                             NULL, NULL, NULL, false),
-       .method = METHOD_GET,
+       .method = YS_METHOD_GET,
        .req_headers = toheaders("Origin", "http://bar.com", NULL),
        .res_headers = toheaders("Vary", "Origin", "Access-Control-Allow-Origin",
                                 "http://bar.com", NULL),
-       .code = STATUS_OK},
+       .code = YS_STATUS_OK},
       {.name = "GETMethodAllowedDefault",
        .options =
            make_opts(array_collect("http://foo.com"), NULL, NULL, NULL, false),
-       .method = METHOD_GET,
+       .method = YS_METHOD_GET,
        .req_headers = toheaders("Origin", "http://foo.com", NULL),
        .res_headers = toheaders("Vary", "Origin", "Access-Control-Allow-Origin",
                                 "http://foo.com", NULL),
-       .code = STATUS_OK},
+       .code = YS_STATUS_OK},
       {.name = "POSTMethodAllowedDefault",
        .options =
            make_opts(array_collect("http://foo.com"), NULL, NULL, NULL, false),
-       .method = METHOD_POST,
+       .method = YS_METHOD_POST,
        .req_headers = toheaders("Origin", "http://foo.com", NULL),
        .res_headers = toheaders("Vary", "Origin", "Access-Control-Allow-Origin",
                                 "http://foo.com", NULL),
-       .code = STATUS_OK},
+       .code = YS_STATUS_OK},
       {.name = "HEADMethodAllowedDefault",
        .options =
            make_opts(array_collect("http://foo.com"), NULL, NULL, NULL, false),
-       .method = METHOD_HEAD,
+       .method = YS_METHOD_HEAD,
        .req_headers = toheaders("Origin", "http://foo.com", NULL),
        .res_headers = toheaders("Vary", "Origin", "Access-Control-Allow-Origin",
                                 "http://foo.com", NULL),
-       .code = STATUS_OK},
+       .code = YS_STATUS_OK},
       {.name = "MethodAllowed",
-       .options = make_opts(array_collect("*"),
-                            array_collect(http_method_names[METHOD_DELETE]),
-                            NULL, NULL, false),
-       .method = METHOD_OPTIONS,
+       .options =
+           make_opts(array_collect("*"),
+                     array_collect(ys_http_method_names[YS_METHOD_DELETE]),
+                     NULL, NULL, false),
+       .method = YS_METHOD_OPTIONS,
        .req_headers = toheaders("Origin", "http://foo.com",
                                 "Access-Control-Request-Method",
-                                http_method_names[METHOD_DELETE], NULL),
+                                ys_http_method_names[YS_METHOD_DELETE], NULL),
        .res_headers = toheaders("Vary",
                                 "Origin, Access-Control-Request-Method, Access-"
                                 "Control-Request-Headers",
                                 "Access-Control-Allow-Origin", "*",
                                 "Access-Control-Allow-Methods",
-                                http_method_names[METHOD_DELETE], NULL),
-       .code = STATUS_NO_CONTENT},
+                                ys_http_method_names[YS_METHOD_DELETE], NULL),
+       .code = YS_STATUS_NO_CONTENT},
       {.name = "HeadersAllowed",
        .options = make_opts(array_collect("*"), NULL,
                             array_collect("X-Testing"), NULL, false),
-       .method = METHOD_OPTIONS,
+       .method = YS_METHOD_OPTIONS,
        .req_headers = toheaders(
            "Origin", "http://foo.com", "Access-Control-Request-Method",
-           http_method_names[METHOD_GET], "Access-Control-Request-Headers",
-           "X-Testing", NULL),
+           ys_http_method_names[YS_METHOD_GET],
+           "Access-Control-Request-Headers", "X-Testing", NULL),
        .res_headers = toheaders(
            "Vary",
            "Origin, Access-Control-Request-Method, "
            "Access-Control-Request-Headers",
            "Access-Control-Allow-Origin", "*", "Access-Control-Allow-Headers",
            "X-Testing, Origin", "Access-Control-Allow-Methods",
-           http_method_names[METHOD_GET], NULL),
-       .code = STATUS_NO_CONTENT},
+           ys_http_method_names[YS_METHOD_GET], NULL),
+       .code = YS_STATUS_NO_CONTENT},
       {.name = "HeadersAllowedMultiple",
        .options =
            make_opts(array_collect("*"), NULL,
                      array_collect("X-Testing", "X-Testing-2", "X-Testing-3"),
                      NULL, false),
-       .method = METHOD_OPTIONS,
-       .req_headers = toheaders(
-           "Origin", "http://foo.com", "Access-Control-Request-Method",
-           http_method_names[METHOD_GET], "Access-Control-Request-Headers",
-           "X-Testing, X-Testing-2, X-Testing-3", NULL),
-       .res_headers = toheaders(
-           "Vary",
-           "Origin, Access-Control-Request-Method, "
-           "Access-Control-Request-Headers",
-           "Access-Control-Allow-Origin", "*", "Access-Control-Allow-Headers",
-           "X-Testing, X-Testing-2, X-Testing-3, Origin",
-           "Access-Control-Allow-Methods", http_method_names[METHOD_GET], NULL),
-       .code = STATUS_NO_CONTENT},
-      {.name = "CredentialsAllowed",
-       .options = make_opts(array_collect("*"), NULL, NULL, NULL, true),
-       .method = METHOD_OPTIONS,
+       .method = YS_METHOD_OPTIONS,
        .req_headers = toheaders("Origin", "http://foo.com",
                                 "Access-Control-Request-Method",
-                                http_method_names[METHOD_GET], NULL),
+                                ys_http_method_names[YS_METHOD_GET],
+                                "Access-Control-Request-Headers",
+                                "X-Testing, X-Testing-2, X-Testing-3", NULL),
+       .res_headers = toheaders("Vary",
+                                "Origin, Access-Control-Request-Method, "
+                                "Access-Control-Request-Headers",
+                                "Access-Control-Allow-Origin", "*",
+                                "Access-Control-Allow-Headers",
+                                "X-Testing, X-Testing-2, X-Testing-3, Origin",
+                                "Access-Control-Allow-Methods",
+                                ys_http_method_names[YS_METHOD_GET], NULL),
+       .code = YS_STATUS_NO_CONTENT},
+      {.name = "CredentialsAllowed",
+       .options = make_opts(array_collect("*"), NULL, NULL, NULL, true),
+       .method = YS_METHOD_OPTIONS,
+       .req_headers = toheaders("Origin", "http://foo.com",
+                                "Access-Control-Request-Method",
+                                ys_http_method_names[YS_METHOD_GET], NULL),
        .res_headers = toheaders("Vary",
                                 "Origin, Access-Control-Request-Method, "
                                 "Access-Control-Request-Headers",
                                 "Access-Control-Allow-Credentials", "true",
                                 "Access-Control-Allow-Origin", "*",
                                 "Access-Control-Allow-Methods",
-                                http_method_names[METHOD_GET], NULL),
-       .code = STATUS_NO_CONTENT},
+                                ys_http_method_names[YS_METHOD_GET], NULL),
+       .code = YS_STATUS_NO_CONTENT},
       {.name = "ExposeHeaders",
        .options = make_opts(array_collect("http://foo.com"), NULL, NULL,
                             array_collect("x-test"), false),
-       .method = METHOD_POST,
+       .method = YS_METHOD_POST,
        .req_headers = toheaders("Origin", "http://foo.com", NULL),
        .res_headers = toheaders(
            "Vary", "Origin", "Access-Control-Allow-Origin", "http://foo.com",
            "Access-Control-Expose-Headers", "x-test", NULL),
-       .code = STATUS_OK},
+       .code = YS_STATUS_OK},
       {.name = "ExposeHeadersMultiple",
        .options = make_opts(array_collect("http://foo.com"), NULL, NULL,
                             array_collect("x-test-1", "x-test-2"), false),
-       .method = METHOD_POST,
+       .method = YS_METHOD_POST,
        .req_headers = toheaders("Origin", "http://foo.com", NULL),
        .res_headers = toheaders(
            "Vary", "Origin", "Access-Control-Allow-Origin", "http://foo.com",
            "Access-Control-Expose-Headers", "x-test-1, x-test-2", NULL),
-       .code = STATUS_OK},
+       .code = YS_STATUS_OK},
 
       // CORS Rejections
       {.name = "OriginNotAllowed",
        .options =
            make_opts(array_collect("http://foo.com"), NULL, NULL, NULL, false),
-       .method = METHOD_GET,
+       .method = YS_METHOD_GET,
        .req_headers = toheaders("Origin", "http://bar.com", NULL),
        .res_headers = toheaders("Vary", "Origin", NULL),
-       .code = STATUS_OK},
+       .code = YS_STATUS_OK},
       {.name = "OriginNotAllowedPortMismatch",
        .options = make_opts(array_collect("http://foo.com:443"), NULL, NULL,
                             NULL, false),
-       .method = METHOD_GET,
+       .method = YS_METHOD_GET,
        .req_headers = toheaders("Origin", "http://foo.com:444", NULL),
        .res_headers = toheaders("Vary", "Origin", NULL),
-       .code = STATUS_OK},
+       .code = YS_STATUS_OK},
       {.name = "MethodNotAllowed",
        .options = make_opts(array_collect("*"), NULL, NULL, NULL, false),
-       .method = METHOD_OPTIONS,
+       .method = YS_METHOD_OPTIONS,
        .req_headers = toheaders("Origin", "http://foo.com",
                                 "Access-Control-Request-Method",
-                                http_method_names[METHOD_DELETE], NULL),
+                                ys_http_method_names[YS_METHOD_DELETE], NULL),
        .res_headers = toheaders("Vary",
                                 "Origin, Access-Control-Request-Method, "
                                 "Access-Control-Request-Headers",
                                 NULL),
-       .code = STATUS_NO_CONTENT},
+       .code = YS_STATUS_NO_CONTENT},
       {.name = "HeadersNotAllowed",
        .options = make_opts(array_collect("*"), NULL, NULL, NULL, false),
-       .method = METHOD_OPTIONS,
+       .method = YS_METHOD_OPTIONS,
        .req_headers = toheaders(
            "Origin", "http://foo.com", "Access-Control-Request-Method",
-           http_method_names[METHOD_GET], "Access-Control-Request-Headers",
-           "X-Testing", NULL),
+           ys_http_method_names[YS_METHOD_GET],
+           "Access-Control-Request-Headers", "X-Testing", NULL),
        .res_headers = toheaders("Vary",
                                 "Origin, Access-Control-Request-Method, "
                                 "Access-Control-Request-Headers",
                                 NULL),
-       .code = STATUS_NO_CONTENT}};
+       .code = YS_STATUS_NO_CONTENT}};
 
   for (unsigned int i = 0; i < sizeof(tests) / sizeof(test_case); i++) {
     test_case test = tests[i];
 
     // Build mock request
     request_internal *req = &(request_internal){
-        .method = http_method_names[test.method],
+        .method = ys_http_method_names[test.method],
     };
     req->headers = ht_init(0);
 
@@ -396,19 +399,20 @@ void test_is_method_allowed(void) {
     array_t *cases;
   } test;
 
-  test tests[] = {{.name = "ExplicitMethod",
-                   .cors = cors_init(
-                       make_opts(array_collect("*"),
-                                 array_collect(http_method_names[METHOD_DELETE],
-                                               http_method_names[METHOD_PUT]),
-                                 NULL, NULL, false)),
-                   .cases = array_collect(
-                       &(test_case){.method = http_method_names[METHOD_DELETE],
-                                    .is_allowed = true},
-                       &(test_case){.method = http_method_names[METHOD_PUT],
-                                    .is_allowed = true},
-                       &(test_case){.method = http_method_names[METHOD_PATCH],
-                                    .is_allowed = false})}};
+  test tests[] = {
+      {.name = "ExplicitMethod",
+       .cors = cors_init(
+           make_opts(array_collect("*"),
+                     array_collect(ys_http_method_names[YS_METHOD_DELETE],
+                                   ys_http_method_names[YS_METHOD_PUT]),
+                     NULL, NULL, false)),
+       .cases = array_collect(
+           &(test_case){.method = ys_http_method_names[YS_METHOD_DELETE],
+                        .is_allowed = true},
+           &(test_case){.method = ys_http_method_names[YS_METHOD_PUT],
+                        .is_allowed = true},
+           &(test_case){.method = ys_http_method_names[YS_METHOD_PATCH],
+                        .is_allowed = false})}};
 
   for (unsigned int i = 0; i < sizeof(tests) / sizeof(test); i++) {
     test t = tests[i];
@@ -479,27 +483,27 @@ void test_origin_is_allowed(void) {
 void test_is_preflight_request(void) {
   typedef struct {
     const char *name;
-    request *req;
+    ys_request *req;
     bool is_preflight;
   } test_case;
 
   test_case tests[] = {
       {.name = "ValidCORSRequest",
        .is_preflight = true,
-       .req = toreq(METHOD_OPTIONS,
+       .req = toreq(YS_METHOD_OPTIONS,
                     toheaders("Origin", "https://test.com",
                               "Access-Control-Request-Method", "POST", NULL))},
       {.name = "MissingOriginHeader",
        .is_preflight = false,
-       .req = toreq(METHOD_OPTIONS,
+       .req = toreq(YS_METHOD_OPTIONS,
                     toheaders("Access-Control-Request-Method", "POST", NULL))},
       {.name = "MissingRequestMethodHeader",
        .is_preflight = false,
-       .req = toreq(METHOD_OPTIONS,
+       .req = toreq(YS_METHOD_OPTIONS,
                     toheaders("Origin", "https://test.com", NULL))},
       {.name = "NotOPTIONSRequest",
        .is_preflight = false,
-       .req = toreq(METHOD_GET,
+       .req = toreq(YS_METHOD_GET,
                     toheaders("Origin", "https://test.com",
                               "Access-Control-Request-Method", "POST", NULL))}};
 
@@ -510,83 +514,87 @@ void test_is_preflight_request(void) {
   }
 }
 
-void test_cors_allow_all(void) {
-  cors_opts *opts = cors_allow_all();
+void test_ys_cors_allow_all(void) {
+  ys_cors_opts *opts = ys_cors_allow_all();
   cors_config *c = cors_init(opts);
 
-  ok(c->allow_all_origins == true, "cors_allow_all allows all origins");
-  ok(c->allow_all_headers == true, "cors_allow_all allows all headers");
+  ok(c->allow_all_origins == true, "ys_cors_allow_all allows all origins");
+  ok(c->allow_all_headers == true, "ys_cors_allow_all allows all headers");
   ok(c->allow_credentials == false,
-     "cors_allow_all does not allow credentials");
+     "ys_cors_allow_all does not allow credentials");
   ok(array_size(c->allowed_methods) == 6,
-     "cors_allow_all allows all common methods");
+     "ys_cors_allow_all allows all common methods");
 }
 
 void test_set_helpers(void) {
-  cors_opts_internal *o = (cors_opts_internal *)cors_opts_init();
+  cors_opts_internal *o = (cors_opts_internal *)ys_cors_opts_init();
 
   const char *o1 = "o1";
   const char *o2 = "o2";
   const char *o3 = "o3";
-  cors_allow_origins(o, o1, o2, o3);
+  ys_cors_allow_origins(o, o1, o2, o3);
 
-  cors_allow_methods(o, METHOD_GET, METHOD_PUT, METHOD_DELETE);
+  ys_cors_allow_methods(o, YS_METHOD_GET, YS_METHOD_PUT, YS_METHOD_DELETE);
 
   const char *h1 = "h1";
   const char *h2 = "h2";
   const char *h3 = "h3";
-  cors_allow_headers(o, h1, h2, h3);
+  ys_cors_allow_headers(o, h1, h2, h3);
 
   const int m = 3600;
-  cors_set_max_age(o, m);
+  ys_cors_set_max_age(o, m);
   ok(o->max_age == 3600, "max_age is 0 by default");
 
   cors_config *c = cors_init(o);
 
   ok(c->allow_credentials == false, "allow_credentials is false by default");
 
-  cors_allow_credentials(o, true);
+  ys_cors_allow_credentials(o, true);
   ok(o->allow_credentials == true,
-     "cors_allow_credentials(o, true) sets allow_credentials to true");
+     "ys_cors_allow_credentials(o, true) sets allow_credentials to true");
 
-  cors_allow_credentials(o, false);
+  ys_cors_allow_credentials(o, false);
   ok(o->allow_credentials == false,
-     "cors_allow_credentials(o, false) sets allow_credentials to false");
+     "ys_cors_allow_credentials(o, false) sets allow_credentials to false");
 
   ok(o->use_options_passthrough == false,
      "use_options_passthrough is false by default");
 
-  cors_use_options_passthrough(o, true);
+  ys_cors_use_options_passthrough(o, true);
   ok(o->use_options_passthrough == true,
-     "cors_use_options_passthrough(o, true) sets use_options_passthrough to "
+     "ys_cors_use_options_passthrough(o, true) sets use_options_passthrough to "
      "true");
 
-  cors_use_options_passthrough(o, false);
+  ys_cors_use_options_passthrough(o, false);
   ok(o->use_options_passthrough == false,
-     "cors_use_options_passthrough(o, false) sets use_options_passthrough to "
+     "ys_cors_use_options_passthrough(o, false) sets use_options_passthrough "
+     "to "
      "false");
 
-  ok(c->max_age == m, "cors_set_max_age(o, n) sets max_age to n");
+  ok(c->max_age == m, "ys_cors_set_max_age(o, n) sets max_age to n");
 
   ok(is_origin_allowed(c, "o4") == false,
-     "cors_allow_origins functions properly");
-  ok(is_origin_allowed(c, o1) == true, "cors_allow_origins allows the origin");
-  ok(is_origin_allowed(c, o2) == true, "cors_allow_origins allows the origin");
-  ok(is_origin_allowed(c, o3) == true, "cors_allow_origins allows the origin");
+     "ys_cors_allow_origins functions properly");
+  ok(is_origin_allowed(c, o1) == true,
+     "ys_cors_allow_origins allows the origin");
+  ok(is_origin_allowed(c, o2) == true,
+     "ys_cors_allow_origins allows the origin");
+  ok(is_origin_allowed(c, o3) == true,
+     "ys_cors_allow_origins allows the origin");
 
   ok(is_method_allowed(c, "PATCH") == false,
-     "cors_allow_methods functions properly");
+     "ys_cors_allow_methods functions properly");
   ok(is_method_allowed(c, "GET") == true,
-     "cors_allow_methods allows the method");
+     "ys_cors_allow_methods allows the method");
   ok(is_method_allowed(c, "PUT") == true,
-     "cors_allow_methods allows the method");
+     "ys_cors_allow_methods allows the method");
   ok(is_method_allowed(c, "DELETE") == true,
-     "cors_allow_methods allows the method");
+     "ys_cors_allow_methods allows the method");
 
   ok(are_headers_allowed(c, array_collect("h4")) == false,
-     "cors_allow_headers functions properly");
+     "ys_cors_allow_headers functions properly");
   ok(are_headers_allowed(c, array_collect(h1, h2, h3)) == true,
-     "cors_allow_headers allows the headers");
+     "ys_cors_allow_headers allows the headers");
 }
 
 void run_cors_tests(void) {
@@ -595,6 +603,6 @@ void run_cors_tests(void) {
   test_is_method_allowed();
   test_origin_is_allowed();
   test_is_preflight_request();
-  test_cors_allow_all();
+  test_ys_cors_allow_all();
   test_set_helpers();
 }

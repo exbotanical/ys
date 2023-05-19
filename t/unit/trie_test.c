@@ -17,14 +17,14 @@ typedef struct {
   const unsigned int expected_flag;
 } test_case;
 
-array_t *collect_methods(http_method method, ...) {
+array_t *collect_methods(ys_http_method method, ...) {
   array_t *methods = array_init();
   va_list args;
   va_start(args, method);
 
   while (method != 0) {
-    array_push(methods, s_copy(http_method_names[method]));
-    method = va_arg(args, http_method);
+    array_push(methods, s_copy(ys_http_method_names[method]));
+    method = va_arg(args, ys_http_method);
   }
 
   va_end(args);
@@ -45,25 +45,25 @@ void test_trie_init(void) {
 void test_trie_insert(void) {
   route_record records[] = {
       {.path = s_copy(PATH_ROOT),
-       .methods = collect_methods(METHOD_GET, NULL),
+       .methods = collect_methods(YS_METHOD_GET, NULL),
        .handler = test_handler},
       {.path = s_copy(PATH_ROOT),
-       .methods = collect_methods(METHOD_GET, METHOD_POST, NULL),
+       .methods = collect_methods(YS_METHOD_GET, YS_METHOD_POST, NULL),
        .handler = test_handler},
       {.path = "/test",
-       .methods = collect_methods(METHOD_GET, NULL),
+       .methods = collect_methods(YS_METHOD_GET, NULL),
        .handler = test_handler},
       {.path = "/test/path",
-       .methods = collect_methods(METHOD_GET, NULL),
+       .methods = collect_methods(YS_METHOD_GET, NULL),
        .handler = test_handler},
       {.path = "/test/path",
-       .methods = collect_methods(METHOD_POST, NULL),
+       .methods = collect_methods(YS_METHOD_POST, NULL),
        .handler = test_handler},
       {.path = "/test/path/paths",
-       .methods = collect_methods(METHOD_GET, NULL),
+       .methods = collect_methods(YS_METHOD_GET, NULL),
        .handler = test_handler},
       {.path = "/foo/bar",
-       .methods = collect_methods(METHOD_GET, NULL),
+       .methods = collect_methods(YS_METHOD_GET, NULL),
        .handler = test_handler}};
 
   route_trie *trie = trie_init();
@@ -79,36 +79,37 @@ void test_trie_insert(void) {
 }
 
 void test_trie_search_ok(void) {
-  route_record records[] = {{.path = s_copy(PATH_ROOT),
-                             .methods = collect_methods(METHOD_GET, NULL),
-                             .handler = test_handler},
-                            {.path = "/test",
-                             .methods = collect_methods(METHOD_GET, NULL),
-                             .handler = test_handler},
-                            {.path = "/test/path",
-                             .methods = collect_methods(METHOD_GET, NULL),
-                             .handler = test_handler},
-                            {.path = "/test/path",
-                             .methods = collect_methods(METHOD_POST, NULL),
-                             .handler = test_handler},
-                            {.path = "/test/path/paths",
-                             .methods = collect_methods(METHOD_GET, NULL),
-                             .handler = test_handler},
-                            {.path = "/test/path/:id[^\\d+$]",
-                             .methods = collect_methods(METHOD_GET, NULL),
-                             .handler = test_handler},
-                            {.path = "/foo",
-                             .methods = collect_methods(METHOD_GET, NULL),
-                             .handler = test_handler},
-                            {.path = "/bar/:id[^\\d+$]/:user[^\\D+$]",
-                             .methods = collect_methods(METHOD_POST, NULL),
-                             .handler = test_handler},
-                            {.path = "/:*[(.+)]",
-                             .methods = collect_methods(METHOD_OPTIONS, NULL),
-                             .handler = test_handler},
-                            {.path = "/futon",
-                             .methods = collect_methods(METHOD_OPTIONS, NULL),
-                             .handler = test_handler}};
+  route_record records[] = {
+      {.path = s_copy(PATH_ROOT),
+       .methods = collect_methods(YS_METHOD_GET, NULL),
+       .handler = test_handler},
+      {.path = "/test",
+       .methods = collect_methods(YS_METHOD_GET, NULL),
+       .handler = test_handler},
+      {.path = "/test/path",
+       .methods = collect_methods(YS_METHOD_GET, NULL),
+       .handler = test_handler},
+      {.path = "/test/path",
+       .methods = collect_methods(YS_METHOD_POST, NULL),
+       .handler = test_handler},
+      {.path = "/test/path/paths",
+       .methods = collect_methods(YS_METHOD_GET, NULL),
+       .handler = test_handler},
+      {.path = "/test/path/:id[^\\d+$]",
+       .methods = collect_methods(YS_METHOD_GET, NULL),
+       .handler = test_handler},
+      {.path = "/foo",
+       .methods = collect_methods(YS_METHOD_GET, NULL),
+       .handler = test_handler},
+      {.path = "/bar/:id[^\\d+$]/:user[^\\D+$]",
+       .methods = collect_methods(YS_METHOD_POST, NULL),
+       .handler = test_handler},
+      {.path = "/:*[(.+)]",
+       .methods = collect_methods(YS_METHOD_OPTIONS, NULL),
+       .handler = test_handler},
+      {.path = "/futon",
+       .methods = collect_methods(YS_METHOD_OPTIONS, NULL),
+       .handler = test_handler}};
 
   test_case tests[] = {
       {.name = "SearchRoot", .search = {.method = "GET", .path = "/"}},
@@ -165,25 +166,25 @@ void test_trie_search_ok(void) {
 void test_trie_search_no_match(void) {
   route_record records[] = {
       {.path = s_copy(PATH_ROOT),
-       .methods = collect_methods(METHOD_GET, NULL),
+       .methods = collect_methods(YS_METHOD_GET, NULL),
        .handler = test_handler},
       {.path = s_copy(PATH_ROOT),
-       .methods = collect_methods(METHOD_GET, METHOD_POST, NULL),
+       .methods = collect_methods(YS_METHOD_GET, YS_METHOD_POST, NULL),
        .handler = test_handler},
       {.path = "/test",
-       .methods = collect_methods(METHOD_GET, NULL),
+       .methods = collect_methods(YS_METHOD_GET, NULL),
        .handler = test_handler},
       {.path = "/test/path",
-       .methods = collect_methods(METHOD_GET, NULL),
+       .methods = collect_methods(YS_METHOD_GET, NULL),
        .handler = test_handler},
       {.path = "/test/path",
-       .methods = collect_methods(METHOD_POST, NULL),
+       .methods = collect_methods(YS_METHOD_POST, NULL),
        .handler = test_handler},
       {.path = "/test/path/paths",
-       .methods = collect_methods(METHOD_GET, NULL),
+       .methods = collect_methods(YS_METHOD_GET, NULL),
        .handler = test_handler},
       {.path = "/test/path/:id[^\\d+$]",
-       .methods = collect_methods(METHOD_GET, NULL),
+       .methods = collect_methods(YS_METHOD_GET, NULL),
        .handler = test_handler}};
 
   test_case tests[] = {{.name = "SearchComplexRegex",

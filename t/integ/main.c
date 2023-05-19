@@ -68,225 +68,225 @@ bool delete_record(char *id) {
   return true;
 }
 
-response *data_handler(request *req, response *res) {
-  set_body(res, "{ \"data\": \"Hello World!\" }");
-  set_header(res, "Content-Type", "application/json");
-  set_status(res, STATUS_OK);
+ys_response *data_handler(ys_request *req, ys_response *res) {
+  ys_set_body(res, "{ \"data\": \"Hello World!\" }");
+  ys_set_header(res, "Content-Type", "application/json");
+  ys_set_status(res, YS_STATUS_OK);
 
   return res;
 }
 
-response *login_handler(request *req, response *res) {
+ys_response *login_handler(ys_request *req, ys_response *res) {
   char *session_id = "200";
 
-  cookie *c = cookie_init(COOKIE_ID, session_id);
-  cookie_set_expires(c, n_minutes_from_now(1));
-  cookie_set_path(c, "/");
-  set_cookie(res, c);
+  ys_cookie *c = ys_cookie_init(COOKIE_ID, session_id);
+  ys_cookie_set_expires(c, ys_n_minutes_from_now(1));
+  ys_cookie_set_path(c, "/");
+  ys_set_cookie(res, c);
 
-  set_status(res, STATUS_OK);
+  ys_set_status(res, YS_STATUS_OK);
 
   return res;
 }
 
-response *logout_handler(request *req, response *res) {
-  cookie *c = get_cookie(req, COOKIE_ID);
+ys_response *logout_handler(ys_request *req, ys_response *res) {
+  ys_cookie *c = ys_get_cookie(req, COOKIE_ID);
   if (!c) {
-    set_status(res, STATUS_UNAUTHORIZED);
-    set_done(res);
+    ys_set_status(res, YS_STATUS_UNAUTHORIZED);
+    ys_set_done(res);
 
     return res;
   }
 
-  char *sid = cookie_get_value(c);
+  char *sid = ys_cookie_get_value(c);
   if (!sid) {
-    set_status(res, STATUS_UNAUTHORIZED);
-    set_done(res);
+    ys_set_status(res, YS_STATUS_UNAUTHORIZED);
+    ys_set_done(res);
 
     return res;
   }
 
-  cookie_set_max_age(c, -1);
-  set_cookie(res, c);
+  ys_cookie_set_max_age(c, -1);
+  ys_set_cookie(res, c);
 
   return res;
 }
 
-response *auth_middleware(request *req, response *res) {
-  set_header(res, "X-Authorized-By", "TheDemoApp");
+ys_response *auth_middleware(ys_request *req, ys_response *res) {
+  ys_set_header(res, "X-Authorized-By", "TheDemoApp");
 
-  cookie *c = get_cookie(req, COOKIE_ID);
+  ys_cookie *c = ys_get_cookie(req, COOKIE_ID);
 
   if (!c) {
-    set_status(res, STATUS_UNAUTHORIZED);
-    set_done(res);
+    ys_set_status(res, YS_STATUS_UNAUTHORIZED);
+    ys_set_done(res);
 
     return res;
   }
 
-  cookie_set_expires(c, n_minutes_from_now(1));
-  set_cookie(res, c);
+  ys_cookie_set_expires(c, ys_n_minutes_from_now(1));
+  ys_set_cookie(res, c);
 
   return res;
 }
 
-response *set_global_headers(request *req, response *res) {
-  set_header(res, "X-Powered-By", "demo");
-  set_header(res, "X-Middleware", "test");
+ys_response *set_global_headers(ys_request *req, ys_response *res) {
+  ys_set_header(res, "X-Powered-By", "demo");
+  ys_set_header(res, "X-Middleware", "test");
 
   return res;
 }
 
-response *handle_api_root(request *req, response *res) {
-  set_body(res, "api root");
+ys_response *handle_api_root(ys_request *req, ys_response *res) {
+  ys_set_body(res, "api root");
   return res;
 }
 
-response *handle_api_demo(request *req, response *res) {
-  set_body(res, req_get_body(req));
+ys_response *handle_api_demo(ys_request *req, ys_response *res) {
+  ys_set_body(res, ys_req_get_body(req));
   return res;
 }
 
-response *handle_get(request *req, response *res) {
-  set_header(res, "Content-Type", "application/json");
+ys_response *handle_get(ys_request *req, ys_response *res) {
+  ys_set_header(res, "Content-Type", "application/json");
 
-  char *id = req_get_parameter(req, "id");
+  char *id = ys_req_get_parameter(req, "id");
   if (!id) {
-    set_body(res, res_err("must provide an id"));
-    set_status(res, STATUS_BAD_REQUEST);
+    ys_set_body(res, res_err("must provide an id"));
+    ys_set_status(res, YS_STATUS_BAD_REQUEST);
     return res;
   }
 
   db_record *record = search_records(id);
   if (!record) {
-    set_body(res, res_err("no matching record"));
-    set_status(res, STATUS_NOT_FOUND);
+    ys_set_body(res, res_err("no matching record"));
+    ys_set_status(res, YS_STATUS_NOT_FOUND);
     return res;
   }
 
-  set_body(res, res_ok(fmt_str("{\"key\":\"%s\",\"value\":\"%s\"}", record->key,
-                               record->value)));
-  set_status(res, STATUS_OK);
+  ys_set_body(res, res_ok(fmt_str("{\"key\":\"%s\",\"value\":\"%s\"}",
+                                  record->key, record->value)));
+  ys_set_status(res, YS_STATUS_OK);
   return res;
 }
 
-response *handle_delete(request *req, response *res) {
-  set_header(res, "Content-Type", "application/json");
+ys_response *handle_delete(ys_request *req, ys_response *res) {
+  ys_set_header(res, "Content-Type", "application/json");
 
-  char *id = req_get_parameter(req, "id");
+  char *id = ys_req_get_parameter(req, "id");
   if (!id) {
-    set_body(res, res_err("must provide an id"));
-    set_status(res, STATUS_BAD_REQUEST);
+    ys_set_body(res, res_err("must provide an id"));
+    ys_set_status(res, YS_STATUS_BAD_REQUEST);
     return res;
   }
 
   bool ok = delete_record(id);
   if (!ok) {
-    set_body(res, res_err("no matching record"));
-    set_status(res, STATUS_NOT_FOUND);
+    ys_set_body(res, res_err("no matching record"));
+    ys_set_status(res, YS_STATUS_NOT_FOUND);
     return res;
   }
 
-  set_status(res, STATUS_OK);
+  ys_set_status(res, YS_STATUS_OK);
 
   return res;
 }
 
-response *handle_put(request *req, response *res) {
-  set_header(res, "Content-Type", "application/json");
+ys_response *handle_put(ys_request *req, ys_response *res) {
+  ys_set_header(res, "Content-Type", "application/json");
 
-  char *id = req_get_parameter(req, "id");
+  char *id = ys_req_get_parameter(req, "id");
   if (!id) {
-    set_body(res, res_err("must provide an id"));
-    set_status(res, STATUS_BAD_REQUEST);
+    ys_set_body(res, res_err("must provide an id"));
+    ys_set_status(res, YS_STATUS_BAD_REQUEST);
     return res;
   }
 
-  char *v = jsob_getstr(req_get_body(req), "v");
+  char *v = jsob_getstr(ys_req_get_body(req), "v");
   if (!v) {
-    set_body(res, res_err("must provide a value"));
-    set_status(res, STATUS_BAD_REQUEST);
+    ys_set_body(res, res_err("must provide a value"));
+    ys_set_status(res, YS_STATUS_BAD_REQUEST);
     return res;
   }
 
   int idx = search_records_idx(id);
   if (idx == -1) {
-    set_body(res, res_err("no matching record"));
-    set_status(res, STATUS_NOT_FOUND);
+    ys_set_body(res, res_err("no matching record"));
+    ys_set_status(res, YS_STATUS_NOT_FOUND);
     return res;
   }
 
   db_record *record = &records[idx];
   memcpy(record->value, v, strlen(v));
 
-  set_status(res, STATUS_OK);
+  ys_set_status(res, YS_STATUS_OK);
   return res;
 }
 
-response *handle_post(request *req, response *res) {
-  set_header(res, "Content-Type", "application/json");
+ys_response *handle_post(ys_request *req, ys_response *res) {
+  ys_set_header(res, "Content-Type", "application/json");
 
-  char *id = req_get_parameter(req, "id");
+  char *id = ys_req_get_parameter(req, "id");
   if (!id) {
-    set_body(res, res_err("must provide an id"));
-    set_status(res, STATUS_BAD_REQUEST);
+    ys_set_body(res, res_err("must provide an id"));
+    ys_set_status(res, YS_STATUS_BAD_REQUEST);
     return res;
   }
 
-  char *v = jsob_getstr(req_get_body(req), "v");
+  char *v = jsob_getstr(ys_req_get_body(req), "v");
 
   if (!v) {
-    set_body(res, res_err("must provide a value"));
-    set_status(res, STATUS_BAD_REQUEST);
+    ys_set_body(res, res_err("must provide a value"));
+    ys_set_status(res, YS_STATUS_BAD_REQUEST);
     return res;
   }
 
   db_record *record = search_records(id);
   if (record) {
-    set_body(res, res_err("record exists"));
-    set_status(res, STATUS_BAD_REQUEST);
+    ys_set_body(res, res_err("record exists"));
+    ys_set_status(res, YS_STATUS_BAD_REQUEST);
     return res;
   }
 
   add_record(id, v);
 
-  set_status(res, STATUS_CREATED);
+  ys_set_status(res, YS_STATUS_CREATED);
 
   return res;
 }
 
-response *meta_handler(request *req, response *res) {
-  char **movies = req_get_query(req, "movies");
+ys_response *meta_handler(ys_request *req, ys_response *res) {
+  char **movies = ys_req_get_query(req, "movies");
 
   buffer_t *buf = buffer_init(NULL);
-  for (unsigned int i = 0; i < req_num_queries(req, "movies"); i++) {
+  for (unsigned int i = 0; i < ys_req_num_queries(req, "movies"); i++) {
     buffer_append(buf, movies[i]);
   }
 
-  set_body(res, buffer_state(buf));
+  ys_set_body(res, buffer_state(buf));
 
   // status defaults to 200 when not set explicitly
   return res;
 }
 
-response *root_handler(request *req, response *res) {
-  set_header(res, "X-Powered-By", "integ-test");
-  set_header(res, "X-Not-Exposed", "integ-test");
-  set_header(res, "X-Root-Handler", "test");
+ys_response *root_handler(ys_request *req, ys_response *res) {
+  ys_set_header(res, "X-Powered-By", "integ-test");
+  ys_set_header(res, "X-Not-Exposed", "integ-test");
+  ys_set_header(res, "X-Root-Handler", "test");
 
-  set_body(res, "Hello World!");
-  set_status(res, STATUS_OK);
+  ys_set_body(res, "Hello World!");
+  ys_set_status(res, YS_STATUS_OK);
 
   return res;
 }
 
-cors_opts *setup_cors(void) {
-  cors_opts *opts = cors_opts_init();
+ys_cors_opts *setup_cors(void) {
+  ys_cors_opts *opts = ys_cors_opts_init();
 
-  cors_allow_methods(opts, METHOD_GET, METHOD_DELETE);
-  cors_allow_headers(opts, "X-Test-Header");
-  cors_expose_headers(opts, "X-Powered-By");
-  cors_allow_origins(opts, "test.com");
+  ys_cors_allow_methods(opts, YS_METHOD_GET, YS_METHOD_DELETE);
+  ys_cors_allow_headers(opts, "X-Test-Header");
+  ys_cors_expose_headers(opts, "X-Powered-By");
+  ys_cors_allow_origins(opts, "test.com");
 
   return opts;
 }
@@ -297,49 +297,49 @@ int main(int argc, char **argv) {
   records = malloc(sizeof(db_record));
 
   /* Root Router */
-  router_attr *attr = router_attr_init();
-  add_middleware_with_opts(attr, set_global_headers, "^/ignore");
-  cors_opts *cors = setup_cors();
-  use_cors(attr, cors);
+  ys_router_attr *attr = ys_router_attr_init();
+  ys_add_middleware_with_opts(attr, set_global_headers, "^/ignore");
+  ys_cors_opts *cors = setup_cors();
+  ys_use_cors(attr, cors);
 
-  http_router *router = router_init(attr);
+  ys_router *router = ys_router_init(attr);
   char *record_path = "/records/:id[^\\d+$]";
 
-  router_register(router, "/", root_handler, METHOD_GET);
-  router_register(router, "/metadata", meta_handler, METHOD_GET);
+  ys_router_register(router, "/", root_handler, YS_METHOD_GET);
+  ys_router_register(router, "/metadata", meta_handler, YS_METHOD_GET);
 
-  router_register(router, record_path, handle_get, METHOD_GET);
-  router_register(router, record_path, handle_delete, METHOD_DELETE);
-  router_register(router, record_path, handle_put, METHOD_PUT);
-  router_register(router, record_path, handle_post, METHOD_POST);
+  ys_router_register(router, record_path, handle_get, YS_METHOD_GET);
+  ys_router_register(router, record_path, handle_delete, YS_METHOD_DELETE);
+  ys_router_register(router, record_path, handle_put, YS_METHOD_PUT);
+  ys_router_register(router, record_path, handle_post, YS_METHOD_POST);
 
   /* API Router */
-  http_router *api_router = router_register_sub(router, attr, "/api");
-  router_register(api_router, "/", handle_api_root, METHOD_GET);
-  router_register(api_router, "/demo", handle_api_demo, METHOD_POST);
+  ys_router *api_router = ys_router_register_sub(router, attr, "/api");
+  ys_router_register(api_router, "/", handle_api_root, YS_METHOD_GET);
+  ys_router_register(api_router, "/demo", handle_api_demo, YS_METHOD_POST);
 
   /* Auth Router */
-  router_attr *auth_attr = router_attr_init();
-  add_middleware_with_opts(auth_attr, auth_middleware, "^/auth/login$",
-                           "^/auth/register$");
-  use_cors(auth_attr, cors);
+  ys_router_attr *auth_attr = ys_router_attr_init();
+  ys_add_middleware_with_opts(auth_attr, auth_middleware, "^/auth/login$",
+                              "^/auth/register$");
+  ys_use_cors(auth_attr, cors);
 
-  http_router *auth_router = router_register_sub(router, auth_attr, "/auth");
-  router_register(auth_router, "/login", login_handler, METHOD_POST);
-  router_register(auth_router, "/logout", logout_handler, METHOD_POST);
-  router_register(auth_router, "/data", data_handler, METHOD_GET);
+  ys_router *auth_router = ys_router_register_sub(router, auth_attr, "/auth");
+  ys_router_register(auth_router, "/login", login_handler, YS_METHOD_POST);
+  ys_router_register(auth_router, "/logout", logout_handler, YS_METHOD_POST);
+  ys_router_register(auth_router, "/data", data_handler, YS_METHOD_GET);
 
-  tcp_server_attr *srv_attr =
-      server_attr_init_with(router, PORT, "./t/integ/certs/localhost.pem",
-                            "./t/integ/certs/localhost-key.pem");
+  ys_server_attr *srv_attr =
+      ys_server_attr_init_with(router, PORT, "./t/integ/certs/localhost.pem",
+                               "./t/integ/certs/localhost-key.pem");
 
   if (!use_ssl) {
-    server_disable_https(srv_attr);
+    ys_server_disable_https(srv_attr);
   }
-  tcp_server *server = server_init(srv_attr);
+  ys_server *server = ys_server_init(srv_attr);
 
-  server_start(server);
-  server_free(server);
+  ys_server_start(server);
+  ys_server_free(server);
 
   return EXIT_SUCCESS;
 }

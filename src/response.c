@@ -20,7 +20,7 @@ static const char *CRLF = "\r\n";
 
 static bool is_2xx_connect(request_internal *req, response_internal *res) {
   return (res->status >= 200 && res->status < 300) &&
-         s_equals(req->method, http_method_names[METHOD_CONNECT]);
+         s_equals(req->method, ys_http_method_names[YS_METHOD_CONNECT]);
 }
 
 static bool is_informational(response_internal *res) {
@@ -28,7 +28,7 @@ static bool is_informational(response_internal *res) {
 }
 
 static bool is_nocontent(response_internal *res) {
-  return res->status == STATUS_NO_CONTENT;
+  return res->status == YS_STATUS_NO_CONTENT;
 }
 
 static bool should_set_content_len(request_internal *req,
@@ -51,8 +51,8 @@ buffer_t *response_serialize(request_internal *req, response_internal *res) {
   const int status = res->status;
   const char *body = res->body;
 
-  buffer_append(buf,
-                fmt_str("HTTP/1.1 %d %s", status, http_status_names[status]));
+  buffer_append(
+      buf, fmt_str("HTTP/1.1 %d %s", status, ys_http_status_names[status]));
   buffer_append(buf, CRLF);
 
   bool has_content_type = false;
@@ -77,7 +77,7 @@ buffer_t *response_serialize(request_internal *req, response_internal *res) {
   if (should_set_content_len(req, res)) {
     // Default to text/plain if we've a body and Content-Type not set by user
     if (body && !has_content_type) {
-      buffer_append(buf, fmt_str("%s: %s", CONTENT_TYPE, MIME_TYPE_TXT));
+      buffer_append(buf, fmt_str("%s: %s", CONTENT_TYPE, YS_MIME_TYPE_TXT));
       buffer_append(buf, CRLF);
     }
 
@@ -149,19 +149,19 @@ void response_send_error(client_context *ctx, parse_error err) {
   switch (err) {
     case IO_ERR:
     case PARSE_ERR:
-      res->status = STATUS_INTERNAL_SERVER_ERROR;
+      res->status = YS_STATUS_INTERNAL_SERVER_ERROR;
       break;
 
     case DUP_HDR:
-      res->status = STATUS_BAD_REQUEST;
+      res->status = YS_STATUS_BAD_REQUEST;
       break;
 
     case REQ_TOO_LONG:
-      res->status = STATUS_REQUEST_ENTITY_TOO_LARGE;
+      res->status = YS_STATUS_REQUEST_ENTITY_TOO_LARGE;
       break;
 
     default:
-      res->status = STATUS_INTERNAL_SERVER_ERROR;
+      res->status = YS_STATUS_INTERNAL_SERVER_ERROR;
   }
 
   response_send(ctx, response_serialize(NULL, res));
@@ -173,7 +173,7 @@ void response_send_error(client_context *ctx, parse_error err) {
 void response_send_protocol_error(int sockfd) {
   response_internal *res = response_init();
 
-  res->status = STATUS_INTERNAL_SERVER_ERROR;
+  res->status = YS_STATUS_INTERNAL_SERVER_ERROR;
   res->body = "invalid protocol";
 
   buffer_t *resbuf = response_serialize(NULL, res);
@@ -190,7 +190,7 @@ response_internal *response_init(void) {
 
   res->headers = ht_init(0);
   res->body = NULL;
-  res->status = STATUS_OK;  // Default
+  res->status = YS_STATUS_OK;  // Default
   res->done = false;
 
   insert_header(res->headers, "X-Powered-By", "Ys", false);
@@ -198,7 +198,7 @@ response_internal *response_init(void) {
   return res;
 }
 
-void set_body(response *res, const char *fmt, ...) {
+void ys_set_body(ys_response *res, const char *fmt, ...) {
   if (!fmt) {
     return;
   }
@@ -219,14 +219,14 @@ void set_body(response *res, const char *fmt, ...) {
   ((response_internal *)res)->body = buf;
 }
 
-void set_status(response *res, http_status status) {
+void ys_set_status(ys_response *res, ys_http_status status) {
   ((response_internal *)res)->status = status;
 }
 
-bool get_done(response *res) { return ((response_internal *)res)->done; }
+bool ys_get_done(ys_response *res) { return ((response_internal *)res)->done; }
 
-void set_done(response *res) { ((response_internal *)res)->done = true; }
+void ys_set_done(ys_response *res) { ((response_internal *)res)->done = true; }
 
-char *get_header(response *res, const char *key) {
+char *ys_get_header(ys_response *res, const char *key) {
   return get_first_header(((response_internal *)res)->headers, key);
 }

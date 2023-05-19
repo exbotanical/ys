@@ -23,13 +23,13 @@ make install
 #include <stdlib.h>
 
 int main(int argc, char **argv) {
-  router_attr *attr = router_attr_init();
-  http_router *router = router_init(attr);
+  ys_router_attr *attr = ys_router_attr_init();
+  ys_router *router = ys_router_init(attr);
 
-  tcp_server_attr* srv_attr = server_attr_init(router);
-  tcp_server *server = server_init(srv_attr);
+  ys_server_attr* srv_attr = ys_server_attr_init(router);
+  ys_server *server = ys_server_init(srv_attr);
 
-  server_start(server);
+  ys_server_start(server);
 
   return EXIT_SUCCESS;
 }
@@ -40,25 +40,25 @@ int main(int argc, char **argv) {
 ```c{3-10,16}
 #include "libys.h"
 
-response *root_handler(request *req, response *res) {
-  set_header(res, "Content-Type", "text/plain");
+ys_response *root_handler(ys_request *req, ys_response *res) {
+  ys_set_header(res, "Content-Type", "text/plain");
 
-  set_body(res, "Hello World!");
-  set_status(res, STATUS_OK);
+  ys_set_body(res, "Hello World!");
+  ys_set_status(res, YS_STATUS_OK);
 
   return res;
 }
 
 int main(int argc, char **argv) {
-  router_attr *attr = router_attr_init();
-  http_router *router = router_init(attr);
+  ys_router_attr *attr = ys_router_attr_init();
+  ys_router *router = ys_router_init(attr);
 
-  router_register(router, "/", root_handler, METHOD_GET);
+  ys_router_register(router, "/", root_handler, YS_METHOD_GET);
 
-  tcp_server_attr* srv_attr = server_attr_init(router);
-  tcp_server *server = server_init(srv_attr);
+  ys_server_attr* srv_attr = ys_server_attr_init(router);
+  ys_server *server = ys_server_init(srv_attr);
 
-  server_start(server);
+  ys_server_start(server);
 
   return 0;
 }

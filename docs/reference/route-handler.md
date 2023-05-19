@@ -1,5 +1,5 @@
 # Route Handler APIs
 
 ```c
-typedef response *route_handler(request *, response *);
+typedef ys_response *ys_route_handler(ys_request *, ys_response *);
 ```

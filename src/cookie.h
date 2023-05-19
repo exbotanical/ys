@@ -12,7 +12,7 @@ typedef struct {
   // expiry-time be the current date and time plus delta-seconds seconds.
   int max_age;
   time_t expires;
-  same_site_mode same_site;
+  ys_same_site_mode same_site;
   char* name;
   char* value;
   char* path;

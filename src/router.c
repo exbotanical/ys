@@ -15,7 +15,7 @@
 #include "xmalloc.h"
 
 #define CR(op) (response_internal *)op
-#define CRR(req, res) (request *)req, (response *)res
+#define CRR(req, res) (ys_request *)req, (ys_response *)res
 
 static const char CONFIG_FILE_NAME[] = "ys.conf";  //
 
@@ -66,12 +66,13 @@ static bool invoke_chain(request_internal *req, response_internal *res,
 /**
  * default_internal_error_handler is the internal/default 500 handler
  */
-static response *default_internal_error_handler(request *req, response *res) {
+static ys_response *default_internal_error_handler(ys_request *req,
+                                                   ys_response *res) {
   printlogf(YS_LOG_INFO,
             "[router::%s] 500 handler in effect at request path %s\n", __func__,
-            req_get_path(req));
+            ys_req_get_path(req));
 
-  set_status(res, STATUS_INTERNAL_SERVER_ERROR);
+  ys_set_status(res, YS_STATUS_INTERNAL_SERVER_ERROR);
 
   return res;
 }
@@ -79,13 +80,14 @@ static response *default_internal_error_handler(request *req, response *res) {
 /**
  * default_not_found_handler is the internal/default 404 handler
  */
-static response *default_not_found_handler(request *req, response *res) {
+static ys_response *default_not_found_handler(ys_request *req,
+                                              ys_response *res) {
   printlogf(YS_LOG_INFO,
             "[router::%s] default 404 handler in effect "
             "at request path %s\n",
-            __func__, req_get_path(req));
+            __func__, ys_req_get_path(req));
 
-  set_status(res, STATUS_NOT_FOUND);
+  ys_set_status(res, YS_STATUS_NOT_FOUND);
 
   return res;
 }
@@ -93,14 +95,14 @@ static response *default_not_found_handler(request *req, response *res) {
 /**
  * default_method_not_allowed_handler is the internal/default 405 handler
  */
-static response *default_method_not_allowed_handler(request *req,
-                                                    response *res) {
+static ys_response *default_method_not_allowed_handler(ys_request *req,
+                                                       ys_response *res) {
   printlogf(YS_LOG_INFO,
             "[router::%s] default 405 handler in "
             "effect at request path %s\n",
-            __func__, req_get_path(req));
+            __func__, ys_req_get_path(req));
 
-  set_status(res, STATUS_METHOD_NOT_ALLOWED);
+  ys_set_status(res, YS_STATUS_YS_METHOD_NOT_ALLOWED);
 
   return res;
 }
@@ -141,15 +143,15 @@ static bool router_run_sub(router_internal *router, client_context *ctx,
   return false;
 }
 
-router_attr *router_attr_init(void) {
+ys_router_attr *ys_router_attr_init(void) {
   router_attr_internal *attr = xmalloc(sizeof(router_attr_internal));
   attr->use_cors = false;
   attr->middlewares = NULL;
 
-  return (router_attr *)attr;
+  return (ys_router_attr *)attr;
 }
 
-http_router *router_init(router_attr *attr) {
+ys_router *ys_router_init(ys_router_attr *attr) {
   router_attr_internal *attr_internal = (router_attr_internal *)attr;
 
   // Initialize config opts
@@ -209,13 +211,13 @@ http_router *router_init(router_attr *attr) {
     router->internal_error_handler = attr_internal->internal_error_handler;
   }
 
-  return (http_router *)router;
+  return (ys_router *)router;
 }
 
 bool has(void *s, void *cmp) { return s_equals((char *)s, (char *)cmp); }
 
-void __router_register(http_router *router, const char *path,
-                       route_handler *handler, http_method method, ...) {
+void __router_register(ys_router *router, const char *path,
+                       ys_route_handler *handler, ys_http_method method, ...) {
   array_t *methods = array_init();
   if (!methods) {
     DIE("[router::%s] failed to allocate methods array via array_init\n",
@@ -226,12 +228,12 @@ void __router_register(http_router *router, const char *path,
   va_start(args, method);
 
   while (method != 0) {
-    if (!array_push(methods, s_copy(http_method_names[method]))) {
+    if (!array_push(methods, s_copy(ys_http_method_names[method]))) {
       free(methods);
       DIE("[router::%s] failed to insert into methods array\n", __func__);
     }
 
-    method = va_arg(args, http_method);
+    method = va_arg(args, ys_http_method);
   }
 
   va_end(args);
@@ -268,23 +270,23 @@ void router_run(router_internal *router, client_context *ctx,
   if (!result) {
     res = CR(router->internal_error_handler(CRR(req, res)));
     if (!res->status) {  // TODO: t
-      res->status = STATUS_INTERNAL_SERVER_ERROR;
+      res->status = YS_STATUS_INTERNAL_SERVER_ERROR;
     }
   } else if ((result->flags & NOT_FOUND_MASK) == NOT_FOUND_MASK) {
     res = CR(router->not_found_handler(CRR(req, res)));
     if (!res->status) {
-      res->status = STATUS_NOT_FOUND;
+      res->status = YS_STATUS_NOT_FOUND;
     }
   } else if ((result->flags & NOT_ALLOWED_MASK) == NOT_ALLOWED_MASK) {
     res = CR(router->method_not_allowed_handler(CRR(req, res)));
     if (!res->status) {
-      res->status = STATUS_METHOD_NOT_ALLOWED;
+      res->status = YS_STATUS_YS_METHOD_NOT_ALLOWED;
     }
   } else {
     req->parameters = result->parameters;
     req->queries = result->queries;
 
-    route_handler *h = (route_handler *)result->action->handler;
+    ys_route_handler *h = (ys_route_handler *)result->action->handler;
 
     if (!res->done) {
       res = CR(h(CRR(req, res)));
@@ -303,33 +305,33 @@ done:
   free(ctx);
 }
 
-http_router *router_register_sub(http_router *parent_router, router_attr *attr,
-                                 const char *subpath) {
+ys_router *ys_router_register_sub(ys_router *parent_router,
+                                  ys_router_attr *attr, const char *subpath) {
   router_internal *parent = (router_internal *)parent_router;
 
   if (!parent->sub_routers) {
     parent->sub_routers = ht_init(0);
   }
 
-  router_internal *sub_router = (router_internal *)router_init(attr);
+  router_internal *sub_router = (router_internal *)ys_router_init(attr);
   ht_insert(parent->sub_routers, subpath, sub_router);
 
-  return (http_router *)sub_router;
+  return (ys_router *)sub_router;
 }
 
-void router_register_404_handler(router_attr *attr, route_handler *h) {
+void ys_router_register_404_handler(ys_router_attr *attr, ys_route_handler *h) {
   ((router_attr_internal *)attr)->not_found_handler = h;
 }
 
-void router_register_405_handler(router_attr *attr, route_handler *h) {
+void ys_router_register_405_handler(ys_router_attr *attr, ys_route_handler *h) {
   ((router_attr_internal *)attr)->method_not_allowed_handler = h;
 }
 
-void router_register_500_handler(router_attr *attr, route_handler *h) {
+void ys_router_register_500_handler(ys_router_attr *attr, ys_route_handler *h) {
   ((router_attr_internal *)attr)->internal_error_handler = h;
 }
 
-void router_free(http_router *router) {
+void ys_router_free(ys_router *router) {
   free(router);
   // TODO: free sub-routers
 }

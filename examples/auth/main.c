@@ -69,55 +69,55 @@ char *hash_password(char *pw) {
   return strdup(ret);
 }
 
-response *index_handler(request *req, response *res) {
-  set_status(res, STATUS_OK);
-  set_header(res, "Content-Type", MIME_TYPE_HTML);
-  set_body(res, from_file("./index.html"));
+ys_response *index_handler(ys_request *req, ys_response *res) {
+  ys_set_status(res, YS_STATUS_OK);
+  ys_set_header(res, "Content-Type", YS_MIME_TYPE_HTML);
+  ys_set_body(res, ys_from_file("./index.html"));
 
   return res;
 }
 
-response *css_handler(request *req, response *res) {
-  set_status(res, STATUS_OK);
-  set_header(res, "Content-Type", MIME_TYPE_CSS);
-  set_body(res, from_file("./style.css"));
+ys_response *css_handler(ys_request *req, ys_response *res) {
+  ys_set_status(res, YS_STATUS_OK);
+  ys_set_header(res, "Content-Type", YS_MIME_TYPE_CSS);
+  ys_set_body(res, ys_from_file("./style.css"));
 
   return res;
 }
 
-response *data_handler(request *req, response *res) {
-  cookie *c = get_cookie(req, COOKIE_ID);
-  char *sid = cookie_get_value(c);
+ys_response *data_handler(ys_request *req, ys_response *res) {
+  ys_cookie *c = ys_get_cookie(req, COOKIE_ID);
+  char *sid = ys_cookie_get_value(c);
 
   pthread_mutex_lock(&session_mutex);
   char *username = ht_get(session_store, sid);
   pthread_mutex_unlock(&session_mutex);
 
-  set_body(res, "{ \"data\": \"Hello, %s!\" }", username);
-  set_header(res, "Content-Type", MIME_TYPE_JSON);
-  set_status(res, STATUS_OK);
+  ys_set_body(res, "{ \"data\": \"Hello, %s!\" }", username);
+  ys_set_header(res, "Content-Type", YS_MIME_TYPE_JSON);
+  ys_set_status(res, YS_STATUS_OK);
 
   return res;
 }
 
-response *register_handler(request *req, response *res) {
-  char *username = jsob_getstr(req_get_body(req), "username");
+ys_response *register_handler(ys_request *req, ys_response *res) {
+  char *username = jsob_getstr(ys_req_get_body(req), "username");
   if (!username) {
-    set_status(res, STATUS_BAD_REQUEST);
-    set_body(res, "Must provide a username");
+    ys_set_status(res, YS_STATUS_BAD_REQUEST);
+    ys_set_body(res, "Must provide a username");
     return res;
   }
 
-  char *password = jsob_getstr(req_get_body(req), "password");
+  char *password = jsob_getstr(ys_req_get_body(req), "password");
   if (!password) {
-    set_status(res, STATUS_BAD_REQUEST);
-    set_body(res, "Must provide a password");
+    ys_set_status(res, YS_STATUS_BAD_REQUEST);
+    ys_set_body(res, "Must provide a password");
     return res;
   }
 
   if (user_exists(username)) {
-    set_status(res, STATUS_BAD_REQUEST);
-    set_body(res, "Username %s exists", username);
+    ys_set_status(res, YS_STATUS_BAD_REQUEST);
+    ys_set_body(res, "Username %s exists", username);
     return res;
   }
 
@@ -133,33 +133,33 @@ response *register_handler(request *req, response *res) {
   ht_insert(session_store, sid, username);
   pthread_mutex_unlock(&session_mutex);
 
-  cookie *c = cookie_init(COOKIE_ID, sid);
-  cookie_set_expires(c, n_minutes_from_now(SESSION_TIMEOUT_MINUTES));
+  ys_cookie *c = ys_cookie_init(COOKIE_ID, sid);
+  ys_cookie_set_expires(c, ys_n_minutes_from_now(SESSION_TIMEOUT_MINUTES));
 
-  set_cookie(res, c);
+  ys_set_cookie(res, c);
 
-  set_status(res, STATUS_CREATED);
+  ys_set_status(res, YS_STATUS_CREATED);
   return res;
 }
 
-response *login_handler(request *req, response *res) {
-  char *username = jsob_getstr(req_get_body(req), "username");
+ys_response *login_handler(ys_request *req, ys_response *res) {
+  char *username = jsob_getstr(ys_req_get_body(req), "username");
   if (!username) {
-    set_status(res, STATUS_BAD_REQUEST);
-    set_body(res, "Must provide a username");
+    ys_set_status(res, YS_STATUS_BAD_REQUEST);
+    ys_set_body(res, "Must provide a username");
     return res;
   }
 
-  char *password = jsob_getstr(req_get_body(req), "password");
+  char *password = jsob_getstr(ys_req_get_body(req), "password");
   if (!password) {
-    set_status(res, STATUS_BAD_REQUEST);
-    set_body(res, "Must provide a password");
+    ys_set_status(res, YS_STATUS_BAD_REQUEST);
+    ys_set_body(res, "Must provide a password");
     return res;
   }
 
   if (!user_exists(username)) {
-    set_status(res, STATUS_BAD_REQUEST);
-    set_body(res, "invalid credentials");
+    ys_set_status(res, YS_STATUS_BAD_REQUEST);
+    ys_set_body(res, "invalid credentials");
 
     return res;
   }
@@ -169,8 +169,8 @@ response *login_handler(request *req, response *res) {
   pthread_mutex_unlock(&user_mutex);
 
   if (!u || !s_equals(hash_password(u->password), password)) {
-    set_status(res, STATUS_BAD_REQUEST);
-    set_body(res, "invalid credentials");
+    ys_set_status(res, YS_STATUS_BAD_REQUEST);
+    ys_set_body(res, "invalid credentials");
 
     return res;
   }
@@ -181,29 +181,29 @@ response *login_handler(request *req, response *res) {
   ht_insert(session_store, session_id, username);
   pthread_mutex_unlock(&session_mutex);
 
-  cookie *c = cookie_init(COOKIE_ID, session_id);
-  cookie_set_expires(c, n_minutes_from_now(SESSION_TIMEOUT_MINUTES));
-  cookie_set_path(c, "/");
-  set_cookie(res, c);
+  ys_cookie *c = ys_cookie_init(COOKIE_ID, session_id);
+  ys_cookie_set_expires(c, ys_n_minutes_from_now(SESSION_TIMEOUT_MINUTES));
+  ys_cookie_set_path(c, "/");
+  ys_set_cookie(res, c);
 
-  set_status(res, STATUS_OK);
+  ys_set_status(res, YS_STATUS_OK);
 
   return res;
 }
 
-response *logout_handler(request *req, response *res) {
-  cookie *c = get_cookie(req, COOKIE_ID);
+ys_response *logout_handler(ys_request *req, ys_response *res) {
+  ys_cookie *c = ys_get_cookie(req, COOKIE_ID);
   if (!c) {
-    set_status(res, STATUS_UNAUTHORIZED);
-    set_done(res);
+    ys_set_status(res, YS_STATUS_UNAUTHORIZED);
+    ys_set_done(res);
 
     return res;
   }
 
-  char *sid = cookie_get_value(c);
+  char *sid = ys_cookie_get_value(c);
   if (!sid) {
-    set_status(res, STATUS_UNAUTHORIZED);
-    set_done(res);
+    ys_set_status(res, YS_STATUS_UNAUTHORIZED);
+    ys_set_done(res);
 
     return res;
   }
@@ -212,38 +212,38 @@ response *logout_handler(request *req, response *res) {
   ht_delete(session_store, sid);
   pthread_mutex_unlock(&session_mutex);
 
-  cookie_set_max_age(c, -1);
-  set_cookie(res, c);
+  ys_cookie_set_max_age(c, -1);
+  ys_set_cookie(res, c);
 
   return res;
 }
 
-response *auth_middleware(request *req, response *res) {
-  set_header(res, "X-Authorized-By", "TheDemoApp");
+ys_response *auth_middleware(ys_request *req, ys_response *res) {
+  ys_set_header(res, "X-Authorized-By", "TheDemoApp");
 
-  cookie *c = get_cookie(req, COOKIE_ID);
+  ys_cookie *c = ys_get_cookie(req, COOKIE_ID);
   if (!c) {
-    set_status(res, STATUS_UNAUTHORIZED);
-    set_done(res);
+    ys_set_status(res, YS_STATUS_UNAUTHORIZED);
+    ys_set_done(res);
 
     return res;
   }
 
-  char *sid = cookie_get_value(c);
+  char *sid = ys_cookie_get_value(c);
 
   pthread_mutex_lock(&session_mutex);
   char *username = ht_get(session_store, sid);
   pthread_mutex_unlock(&session_mutex);
 
   if (!username || !user_exists(username)) {
-    set_status(res, STATUS_UNAUTHORIZED);
-    set_done(res);
+    ys_set_status(res, YS_STATUS_UNAUTHORIZED);
+    ys_set_done(res);
 
     return res;
   }
 
-  cookie_set_expires(c, n_minutes_from_now(SESSION_TIMEOUT_MINUTES));
-  set_cookie(res, c);
+  ys_cookie_set_expires(c, ys_n_minutes_from_now(SESSION_TIMEOUT_MINUTES));
+  ys_set_cookie(res, c);
 
   return res;
 }
@@ -252,22 +252,22 @@ int main() {
   session_store = ht_init(0);
   user_store = ht_init(0);
 
-  router_attr *attr = router_attr_init();
-  add_middleware_with_opts(attr, auth_middleware, "^/$", "^/style.css$",
-                           "^/login$", "^/register$");
+  ys_router_attr *attr = ys_router_attr_init();
+  ys_add_middleware_with_opts(attr, auth_middleware, "^/$", "^/style.css$",
+                              "^/login$", "^/register$");
 
-  http_router *router = router_init(attr);
+  ys_router *router = ys_router_init(attr);
 
-  router_register(router, "/register", register_handler, METHOD_POST);
-  router_register(router, "/login", login_handler, METHOD_POST);
-  router_register(router, "/logout", logout_handler, METHOD_POST);
-  router_register(router, "/data", data_handler, METHOD_GET);
+  ys_router_register(router, "/register", register_handler, YS_METHOD_POST);
+  ys_router_register(router, "/login", login_handler, YS_METHOD_POST);
+  ys_router_register(router, "/logout", logout_handler, YS_METHOD_POST);
+  ys_router_register(router, "/data", data_handler, YS_METHOD_GET);
 
-  router_register(router, "/", index_handler, METHOD_GET);
-  router_register(router, "/style.css", css_handler, METHOD_GET);
+  ys_router_register(router, "/", index_handler, YS_METHOD_GET);
+  ys_router_register(router, "/style.css", css_handler, YS_METHOD_GET);
 
-  tcp_server *server = server_init(server_attr_init(router));
-  server_start(server);
+  ys_server *server = ys_server_init(ys_server_attr_init(router));
+  ys_server_start(server);
 
   return EXIT_SUCCESS;
 }

@@ -3,14 +3,14 @@ Ys offers full support for [CORS](https://en.wikipedia.org/wiki/Cross-origin_res
 
 The CORS middleware will handle Preflight requests and apply the specified CORS policy automatically.
 
-To quickly initialize CORS middleware with sensible defaults, use the `cors_allow_all` utility.
+To quickly initialize CORS middleware with sensible defaults, use the `ys_cors_allow_all` utility.
 
 ```c
-router_attr *attr = router_attr_init();
-use_cors(attr, cors_allow_all());
+ys_router_attr *attr = ys_router_attr_init();
+ys_use_cors(attr, ys_cors_allow_all());
 ```
 
-`cors_allow_all` configures the following CORS policy
+`ys_cors_allow_all` configures the following CORS policy
 
 |property|value|
 |-|-|
@@ -26,22 +26,22 @@ use_cors(attr, cors_allow_all());
 You may use a wildcard (`*`) to set the allowed headers or origins to allow all values.
 :::
 
-To build your own CORS policy, use `cors_opts_init` to initialize a new CORS options object, then use the `cors_set_*` utilities to customize it.
+To build your own CORS policy, use `ys_cors_opts_init` to initialize a new CORS options object, then use the `cors_set_*` utilities to customize it.
 
 ```c
-cors_opts *opts = cors_opts_init();
+ys_cors_opts *opts = ys_cors_opts_init();
 
-cors_allow_methods(opts, METHOD_GET, METHOD_DELETE);
-cors_allow_headers(opts, "X-Test-Header");
-cors_expose_headers(opts, "X-Powered-By");
-cors_allow_origins(opts, "test.com");
+ys_cors_allow_methods(opts, YS_METHOD_GET, YS_METHOD_DELETE);
+ys_cors_allow_headers(opts, "X-Test-Header");
+ys_cors_expose_headers(opts, "X-Powered-By");
+ys_cors_allow_origins(opts, "test.com");
 ```
 
-Finally, we set the `cors_opts*` on the router attributes object.
+Finally, we set the `ys_cors_opts*` on the router attributes object.
 
 ```c
-router_attr *attr = router_attr_init();
-use_cors(attr, cors);
+ys_router_attr *attr = ys_router_attr_init();
+ys_use_cors(attr, cors);
 ```
 
 See a full accounting of the available CORS APIs [here](../reference/cors.md).

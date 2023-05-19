@@ -169,8 +169,8 @@ yyjson_api uint32_t yyjson_version(void) { return YYJSON_VERSION_HEX; }
 
  See also: utils.h in https://github.com/google/double-conversion/
  */
-#if !defined(FLT_EVAL_METHOD) && defined(__FLT_EVAL_METHOD__)
-#define FLT_EVAL_METHOD __FLT_EVAL_METHOD__
+#if !defined(FLT_EVAL_METHOD) && defined(__FLT_EVAL_YS_METHOD__)
+#define FLT_EVAL_METHOD __FLT_EVAL_YS_METHOD__
 #endif
 
 #if defined(FLT_EVAL_METHOD) && FLT_EVAL_METHOD != 0 && FLT_EVAL_METHOD != 1

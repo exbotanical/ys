@@ -1,29 +1,29 @@
 # Server APIs
 
-## tcp_server*
+## ys_server*
 
-A `tcp_server*` is a server configuration object that stores settings for the HTTP server.
+A `ys_server*` is a server configuration object that stores settings for the HTTP server.
 
-## server_init
-
-```c
-tcp_server *server_init(tcp_server_attr *attr);
-```
-
-`server_init` allocates the necessary memory for a `tcp_server`.
-
-## server_start
+## ys_server_init
 
 ```c
-void server_start(tcp_server *server);
+ys_server *ys_server_init(ys_server_attr *attr);
 ```
 
-`server_start` listens for client connections and executes routing.
+`ys_server_init` allocates the necessary memory for a `ys_server`.
 
-## server_free
+## ys_server_start
 
 ```c
-void server_free(tcp_server *server);
+void ys_server_start(ys_server *server);
 ```
 
-`server_free`  deallocates memory for the provided `tcp_server*` instance.
+`ys_server_start` listens for client connections and executes routing.
+
+## ys_server_free
+
+```c
+void ys_server_free(ys_server *server);
+```
+
+`ys_server_free`  deallocates memory for the provided `ys_server*` instance.

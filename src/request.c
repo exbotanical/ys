@@ -126,27 +126,27 @@ maybe_request req_read_and_parse(client_context* ctx) {
   return meta;
 }
 
-char* req_get_parameter(request* req, const char* key) {
+char* ys_req_get_parameter(ys_request* req, const char* key) {
   request_internal* ri = (request_internal*)req;
 
   if (!ri->parameters) return NULL;
   return ht_get(ri->parameters, key);
 }
 
-unsigned int req_num_parameters(request* req) {
+unsigned int ys_req_num_parameters(ys_request* req) {
   request_internal* ri = (request_internal*)req;
 
   if (!ri->parameters) return 0;
   return ri->parameters->count;
 }
 
-bool req_has_parameters(request* req) {
+bool ys_req_has_parameters(ys_request* req) {
   request_internal* ri = (request_internal*)req;
 
   return req && ri->parameters && ri->parameters->count > 0;
 }
 
-char** req_get_query(request* req, const char* key) {
+char** ys_req_get_query(ys_request* req, const char* key) {
   array_t* arr = (array_t*)ht_get(((request_internal*)req)->queries, key);
   if (arr) {
     char** values = xmalloc(array_size(arr));
@@ -159,43 +159,43 @@ char** req_get_query(request* req, const char* key) {
   return NULL;
 }
 
-bool req_has_query(request* req, const char* key) {
+bool ys_req_has_query(ys_request* req, const char* key) {
   request_internal* ri = (request_internal*)req;
   return ri->queries && ht_search(ri->queries, key);
 }
 
-unsigned int req_num_queries(request* req, const char* key) {
-  if (req_has_query(req, key)) {
+unsigned int ys_req_num_queries(ys_request* req, const char* key) {
+  if (ys_req_has_query(req, key)) {
     return array_size((array_t*)ht_get(((request_internal*)req)->queries, key));
   }
 
   return 0;
 }
 
-char* req_get_path(request* req) {
+char* ys_req_get_path(ys_request* req) {
   return s_copy(((request_internal*)req)->path);
 }
 
-char* req_get_route_path(request* req) {
+char* ys_req_get_route_path(ys_request* req) {
   return s_copy(((request_internal*)req)->route_path);
 }
 
-char* req_get_method(request* req) {
+char* ys_req_get_method(ys_request* req) {
   return s_copy(((request_internal*)req)->method);
 }
 
-char* req_get_body(request* req) {
+char* ys_req_get_body(ys_request* req) {
   return s_copy(((request_internal*)req)->body);
 }
 
-char* req_get_raw(request* req) {
+char* ys_req_get_raw(ys_request* req) {
   return s_copy(((request_internal*)req)->raw);
 }
 
-char* req_get_version(request* req) {
+char* ys_req_get_version(ys_request* req) {
   return s_copy(((request_internal*)req)->version);
 }
 
-char* req_get_header(request* req, const char* key) {
+char* ys_req_get_header(ys_request* req, const char* key) {
   return get_first_header(((request_internal*)req)->headers, key);
 }

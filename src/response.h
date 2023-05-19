@@ -15,7 +15,7 @@ typedef struct {
   /**
    * HTTP status code - if not set, will default to 200 OK
    */
-  http_status status;
+  ys_http_status status;
 
   /**
    * HTTP headers - optional, but you should pass content-type if sending a body

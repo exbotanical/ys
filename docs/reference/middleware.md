@@ -1,51 +1,51 @@
 # Middleware APIs
 
-## use_middlewares
+## ys_use_middlewares
 
 ```c
-void use_middlewares(router_attr *attr, route_handler *mw, ...);
+void ys_use_middlewares(ys_router_attr *attr, ys_route_handler *mw, ...);
 ```
 
-`use_middlewares` binds *n* middleware handlers to the router attributes instance.
+`ys_use_middlewares` binds *n* middleware handlers to the router attributes instance.
 You do not need to pass a `NULL` sentinel to terminate the list; the `middleware` macro
 will do this for you.
 
 ```c
-response *middleware1(request *req, response *res) {
+ys_response *middleware1(ys_request *req, ys_response *res) {
   printf("middleware 1\n");
 
   return res;
 }
 
-response *middleware2(request *req, response *res) {
+ys_response *middleware2(ys_request *req, ys_response *res) {
   printf("middleware 2\n");
 
   return res;
 }
 
 int main() {
-  router_attr *attr = router_attr_init();
-  use_middlewares(attr, middleware1, middleware2);
+  ys_router_attr *attr = ys_router_attr_init();
+  ys_use_middlewares(attr, middleware1, middleware2);
 
   // ...
 }
 ```
 
-## use_middleware
+## ys_use_middleware
 
 ```c
-void use_middleware(router_attr *attr, route_handler *mw);
+void ys_use_middleware(ys_router_attr *attr, ys_route_handler *mw);
 ```
 
-`use_middleware` binds a new middleware to the routes attributes object. Middlewares will be run in a LIFO fashion before the route handler.
+`ys_use_middleware` binds a new middleware to the routes attributes object. Middlewares will be run in a LIFO fashion before the route handler.
 
-## add_middleware_with_opts
+## ys_add_middleware_with_opts
 
 ```c
-void add_middleware_with_opts(router_attr *attr, route_handler *mw, char *ignore_path, ...);
+void ys_add_middleware_with_opts(ys_router_attr *attr, ys_route_handler *mw, char *ignore_path, ...);
 ```
 
-`add_middleware_with_opts` binds a new middleware — along with ignore
+`ys_add_middleware_with_opts` binds a new middleware — along with ignore
 paths — to the routes attributes object, where `ignore_paths` is a list of paths or regular expressions on which the middleware should be ignored.
 That is, when handling a request, if the request path matches one of the ignore paths for a middleware, that
 middleware will not be invoked. Think of ignore paths as a disallow-list.

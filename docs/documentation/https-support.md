@@ -14,10 +14,10 @@ Once compiled, modify your server code to include your SSL cert and key files.
 ```c
 int main() {
   // ...
-  tcp_server_attr* srv_attr = server_attr_init(router);
-  server_use_https(srv_attr, "./certs/yoursite.pem", "./certs/yoursite-key.pem");
+  ys_server_attr* srv_attr = ys_server_attr_init(router);
+  ys_server_use_https(srv_attr, "./certs/yoursite.pem", "./certs/yoursite-key.pem");
 
-  tcp_server *server = server_init(srv_attr);
-  server_start(server);
+  ys_server *server = ys_server_init(srv_attr);
+  ys_server_start(server);
 }
 ```

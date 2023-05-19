@@ -8,7 +8,7 @@
 #include "regexpr.h"
 #include "xmalloc.h"
 
-void __add_middleware_with_opts(router_attr *attr, route_handler *mw,
+void __add_middleware_with_opts(ys_router_attr *attr, ys_route_handler *mw,
                                 char *ignore_path, ...) {
   middleware_handler *mh = xmalloc(sizeof(middleware_handler));
   mh->handler = mw;
@@ -45,26 +45,26 @@ void __add_middleware_with_opts(router_attr *attr, route_handler *mw,
   array_push(attr_internal->middlewares, mh);
 }
 
-void __middlewares(router_attr *attr, route_handler *mw, ...) {
+void __middlewares(ys_router_attr *attr, ys_route_handler *mw, ...) {
   va_list args;
   va_start(args, mw);
 
   while (mw != NULL) {
     __add_middleware_with_opts(attr, mw, NULL);
 
-    mw = va_arg(args, route_handler *);
+    mw = va_arg(args, ys_route_handler *);
   }
 
   va_end(args);
 }
 
-void use_middleware(router_attr *attr, route_handler *mw) {
+void ys_use_middleware(ys_router_attr *attr, ys_route_handler *mw) {
   __add_middleware_with_opts(attr, mw, NULL);
 }
 
-void use_cors(router_attr *attr, cors_opts *opts) {
+void ys_use_cors(ys_router_attr *attr, ys_cors_opts *opts) {
   ((router_attr_internal *)attr)->use_cors = true;
   cors_init((cors_opts_internal *)opts);
   // TODO: ensure CORS runs first for OPTIONS requests
-  use_middleware(attr, cors_handler);
+  ys_use_middleware(attr, cors_handler);
 }

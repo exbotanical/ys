@@ -6,19 +6,19 @@
 #include "tap.c/tap.h"
 #include "tests.h"
 
-static response* h1(request* req, response* res) { return NULL; }
-static response* h2(request* req, response* res) { return NULL; }
-static response* h3(request* req, response* res) { return NULL; }
+static ys_response* h1(ys_request* req, ys_response* res) { return NULL; }
+static ys_response* h2(ys_request* req, ys_response* res) { return NULL; }
+static ys_response* h3(ys_request* req, ys_response* res) { return NULL; }
 
-void assert_middleware(middleware_handler* mw, route_handler* h) {
+void assert_middleware(middleware_handler* mw, ys_route_handler* h) {
   ok(mw->handler == h, "handler address matches");
 }
 
 void test_middlewares_macro(void) {
-  router_attr* attr = router_attr_init();
-  use_middlewares(attr, h1, h2, h3);
+  ys_router_attr* attr = ys_router_attr_init();
+  ys_use_middlewares(attr, h1, h2, h3);
 
-  router_internal* r = (router_internal*)router_init(attr);
+  router_internal* r = (router_internal*)ys_router_init(attr);
 
   ok(array_size(r->middlewares) == 3, "has the expected number of middlewares");
   assert_middleware(array_get(r->middlewares, 0), h1);
@@ -30,15 +30,15 @@ void test_middlewares_macro(void) {
 }
 
 void test_add_middleware(void) {
-  router_attr* attr = router_attr_init();
-  use_middlewares(attr, h1, h3);
+  ys_router_attr* attr = ys_router_attr_init();
+  ys_use_middlewares(attr, h1, h3);
 
-  router_internal* r = (router_internal*)router_init(attr);
+  router_internal* r = (router_internal*)ys_router_init(attr);
 
   ok(array_size(r->middlewares) == 2, "has the expected number of middlewares");
   assert_middleware(array_get(r->middlewares, 0), h1);
   assert_middleware(array_get(r->middlewares, 1), h3);
-  use_middleware(attr, h2);
+  ys_use_middleware(attr, h2);
 
   ok(array_size(r->middlewares) == 3, "has the expected number of middlewares");
   assert_middleware(array_get(r->middlewares, 0), h1);
@@ -50,34 +50,34 @@ void test_add_middleware(void) {
 }
 
 void test_add_middleware_empty_attr(void) {
-  router_attr* attr = router_attr_init();
+  ys_router_attr* attr = ys_router_attr_init();
 
-  use_middleware(attr, h1);
-  router_internal* r = (router_internal*)router_init(attr);
+  ys_use_middleware(attr, h1);
+  router_internal* r = (router_internal*)ys_router_init(attr);
 
   ok(array_size(r->middlewares) == 1, "has the expected number of middlewares");
   assert_middleware(array_get(r->middlewares, 0), h1);
 }
 
-void test_use_cors(void) {
-  router_attr* attr = router_attr_init();
+void test_ys_use_cors(void) {
+  ys_router_attr* attr = ys_router_attr_init();
 
-  use_cors(attr, cors_allow_all());
-  router_internal* r = (router_internal*)router_init(attr);
+  ys_use_cors(attr, ys_cors_allow_all());
+  router_internal* r = (router_internal*)ys_router_init(attr);
 
   ok(r->use_cors == true, "sets use_cors flag to true");
-  ok(array_size(r->middlewares) == 1, "use_cors sets CORS middleware");
+  ok(array_size(r->middlewares) == 1, "ys_use_cors sets CORS middleware");
 
   is(((middleware_handler*)array_get(r->middlewares, 0))->ignore_paths, NULL,
      "ignore paths initialized to NULL");
 }
 
-void test_add_middleware_with_opts_macro(void) {
-  router_attr* attr = router_attr_init();
+void test_ys_add_middleware_with_opts_macro(void) {
+  ys_router_attr* attr = ys_router_attr_init();
 
-  add_middleware_with_opts(attr, h2, "^/ignore1$", "^/ignore2$");
+  ys_add_middleware_with_opts(attr, h2, "^/ignore1$", "^/ignore2$");
 
-  router_internal* r = (router_internal*)router_init(attr);
+  router_internal* r = (router_internal*)ys_router_init(attr);
 
   middleware_handler* mh = ((middleware_handler*)array_get(r->middlewares, 0));
   isnt(mh->ignore_paths, NULL, "ignore paths initialized when paths specified");
@@ -102,6 +102,6 @@ void run_middleware_tests(void) {
   test_middlewares_macro();
   test_add_middleware();
   test_add_middleware_empty_attr();
-  test_use_cors();
-  test_add_middleware_with_opts_macro();
+  test_ys_use_cors();
+  test_ys_add_middleware_with_opts_macro();
 }

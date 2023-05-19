@@ -251,8 +251,8 @@ static char* sanitize_cookie_path(const char* p) {
 }
 
 /**
- * cookie_serialize returns the stringified cookie* for use in a Cookie header,
- * or NULL if the cookie name is invalid
+ * cookie_serialize returns the stringified ys_cookie* for use in a Cookie
+ * header, or NULL if the cookie name is invalid
  */
 static char* cookie_serialize(cookie_internal* c) {
   if (c == NULL || !is_valid_cookie_name(c->name)) {
@@ -372,7 +372,7 @@ static array_t* read_browser_cookie(hash_table* headers) {
         continue;
       }
 
-      array_push(cookies, cookie_init(name, value));
+      array_push(cookies, ys_cookie_init(name, value));
     }
     free(line);
   }
@@ -433,7 +433,7 @@ static array_t* read_cookies(hash_table* headers) {
       continue;
     }
 
-    cookie_internal* c = (cookie_internal*)cookie_init(name, value);
+    cookie_internal* c = (cookie_internal*)ys_cookie_init(name, value);
 
     for (unsigned int i = 1; i < array_size(parts); i++) {
       ((__array_t*)parts)->state[i] = s_trim(((__array_t*)parts)->state[i]);
@@ -504,7 +504,7 @@ static array_t* read_cookies(hash_table* headers) {
   return ret;
 }
 
-cookie* cookie_init(const char* name, const char* value) {
+ys_cookie* ys_cookie_init(const char* name, const char* value) {
   cookie_internal* c = xmalloc(sizeof(cookie_internal));
 
   c->domain = NULL;
@@ -517,78 +517,86 @@ cookie* cookie_init(const char* name, const char* value) {
   c->secure = false;
   c->value = s_copy(value);
 
-  return (cookie*)c;
+  return (ys_cookie*)c;
 }
 
-void cookie_set_domain(cookie* c, const char* domain) {
+void ys_cookie_set_domain(ys_cookie* c, const char* domain) {
   ((cookie_internal*)c)->domain = s_copy(domain);
 }
 
-void cookie_set_expires(cookie* c, time_t when) {
+void ys_cookie_set_expires(ys_cookie* c, time_t when) {
   ((cookie_internal*)c)->expires = when;
 }
 
-void cookie_set_http_only(cookie* c, bool http_only) {
+void ys_cookie_set_http_only(ys_cookie* c, bool http_only) {
   ((cookie_internal*)c)->http_only = http_only;
 }
 
-void cookie_set_max_age(cookie* c, int age) {
+void ys_cookie_set_max_age(ys_cookie* c, int age) {
   ((cookie_internal*)c)->max_age = age;
 }
 
-void cookie_set_path(cookie* c, const char* path) {
+void ys_cookie_set_path(ys_cookie* c, const char* path) {
   ((cookie_internal*)c)->path = s_copy(path);
 }
 
-void cookie_set_same_site(cookie* c, same_site_mode mode) {
+void ys_cookie_set_same_site(ys_cookie* c, ys_same_site_mode mode) {
   ((cookie_internal*)c)->same_site = mode;
 }
 
-void cookie_set_secure(cookie* c, bool secure) {
+void ys_cookie_set_secure(ys_cookie* c, bool secure) {
   ((cookie_internal*)c)->secure = secure;
 }
 
-char* cookie_get_name(cookie* c) { return ((cookie_internal*)c)->name; }
+char* ys_cookie_get_name(ys_cookie* c) { return ((cookie_internal*)c)->name; }
 
-char* cookie_get_value(cookie* c) { return ((cookie_internal*)c)->value; }
+char* ys_cookie_get_value(ys_cookie* c) { return ((cookie_internal*)c)->value; }
 
-char* cookie_get_domain(cookie* c) { return ((cookie_internal*)c)->domain; }
+char* ys_cookie_get_domain(ys_cookie* c) {
+  return ((cookie_internal*)c)->domain;
+}
 
-time_t cookie_get_expires(cookie* c) { return ((cookie_internal*)c)->expires; }
+time_t ys_cookie_get_expires(ys_cookie* c) {
+  return ((cookie_internal*)c)->expires;
+}
 
-bool cookie_get_http_only(cookie* c) {
+bool ys_cookie_get_http_only(ys_cookie* c) {
   return ((cookie_internal*)c)->http_only;
 }
 
-int cookie_get_max_age(cookie* c) { return ((cookie_internal*)c)->max_age; }
+int ys_cookie_get_max_age(ys_cookie* c) {
+  return ((cookie_internal*)c)->max_age;
+}
 
-char* cookie_get_path(cookie* c) { return ((cookie_internal*)c)->path; }
+char* ys_cookie_get_path(ys_cookie* c) { return ((cookie_internal*)c)->path; }
 
-same_site_mode cookie_get_same_site(cookie* c) {
+ys_same_site_mode ys_cookie_get_same_site(ys_cookie* c) {
   return ((cookie_internal*)c)->same_site;
 }
 
-bool cookie_get_secure(cookie* c) { return ((cookie_internal*)c)->secure; }
+bool ys_cookie_get_secure(ys_cookie* c) {
+  return ((cookie_internal*)c)->secure;
+}
 
-cookie* get_cookie(request* req, const char* name) {
+ys_cookie* ys_get_cookie(ys_request* req, const char* name) {
   array_t* cookies = read_cookies(((request_internal*)req)->headers);
 
   foreach (cookies, i) {
     cookie_internal* c = (cookie_internal*)array_get(cookies, i);
 
     if (s_equals(c->name, name)) {
-      return (cookie*)c;
+      return (ys_cookie*)c;
     }
   }
 
   return NULL;
 }
 
-void set_cookie(response* res, cookie* c) {
-  set_header(res, SET_COOKIE, cookie_serialize((cookie_internal*)c));
+void ys_set_cookie(ys_response* res, ys_cookie* c) {
+  ys_set_header(res, SET_COOKIE, cookie_serialize((cookie_internal*)c));
 }
 
-void cookie_free(cookie* c) {
+void ys_cookie_free(ys_cookie* c) {
   cookie_internal* ci = (cookie_internal*)c;
 
   free(ci->name);

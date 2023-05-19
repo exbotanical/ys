@@ -16,19 +16,19 @@ typedef struct {
 
 cookie_internal* tocookie(const char* domain, const char* value,
                           const char* name, const char* path, time_t expires,
-                          int max_age, same_site_mode same_site, bool http_only,
-                          bool secure) {
-  cookie* c = cookie_init(name, value);
+                          int max_age, ys_same_site_mode same_site,
+                          bool http_only, bool secure) {
+  ys_cookie* c = ys_cookie_init(name, value);
 
-  cookie_set_domain(c, domain);
-  cookie_set_expires(c, expires);
-  cookie_set_http_only(c, http_only);
+  ys_cookie_set_domain(c, domain);
+  ys_cookie_set_expires(c, expires);
+  ys_cookie_set_http_only(c, http_only);
   if (max_age != 0) {
-    cookie_set_max_age(c, max_age < 0 ? 0 : max_age);
+    ys_cookie_set_max_age(c, max_age < 0 ? 0 : max_age);
   }
-  cookie_set_path(c, path);
-  cookie_set_same_site(c, same_site);
-  cookie_set_secure(c, secure);
+  ys_cookie_set_path(c, path);
+  ys_cookie_set_same_site(c, same_site);
+  ys_cookie_set_secure(c, secure);
 
   return (cookie_internal*)c;
 }
@@ -103,8 +103,8 @@ void test_read_cookies(void) {
          "samesite flag is correctly deserialized - actual is %d",
          actual->same_site);
 
-      cookie_free(actual);
-      cookie_free(expected);
+      ys_cookie_free(actual);
+      ys_cookie_free(expected);
     }
 
     array_free(cookies);
@@ -169,10 +169,10 @@ void test_cookie_serialize(void) {
   const char* actual = cookie_serialize(c);
 
   is(actual, expected, "serializes cookie as expected");
-  cookie_free(c);
+  ys_cookie_free(c);
 }
 
-void test_get_cookie(void) {
+void test_ys_get_cookie(void) {
   cookie_internal* c =
       tocookie(".somesite.gov", "value", "NotThisCookie", "/path", 1257894000,
                3600, SAME_SITE_STRICT_MODE, true, true);
@@ -190,7 +190,7 @@ void test_get_cookie(void) {
   insert_header(req->headers, COOKIE, cookie_serialize(expected), true);
   insert_header(req->headers, COOKIE, cookie_serialize(c2), true);
 
-  cookie_internal* actual = (cookie_internal*)get_cookie(req, "ThisCookie");
+  cookie_internal* actual = (cookie_internal*)ys_get_cookie(req, "ThisCookie");
 
   is(actual->domain, "testsite.com",  // . is stripped
      "retrieved cookie domain matches what was inserted");
@@ -215,18 +215,18 @@ void test_get_cookie(void) {
      "retrieved cookie samesite flag (%d) matches what was inserted",
      actual->same_site);
 
-  cookie_free(c);
-  cookie_free(c2);
-  cookie_free(actual);
-  cookie_free(expected);
+  ys_cookie_free(c);
+  ys_cookie_free(c2);
+  ys_cookie_free(actual);
+  ys_cookie_free(expected);
 }
 
-void test_set_cookie(void) {
-  cookie* c = tocookie(".testsite.com", "test", "ThisCookie", "/", 2257894000,
-                       86400, SAME_SITE_LAX_MODE, false, true);
+void test_ys_set_cookie(void) {
+  ys_cookie* c = tocookie(".testsite.com", "test", "ThisCookie", "/",
+                          2257894000, 86400, SAME_SITE_LAX_MODE, false, true);
 
   response_internal* res = response_init();
-  set_cookie(res, c);
+  ys_set_cookie(res, c);
 
   const char* actual = get_first_header(res->headers, SET_COOKIE);
 
@@ -234,23 +234,23 @@ void test_set_cookie(void) {
       "ThisCookie=test; Path=/; Domain=testsite.com; Expires=Sat, 20 Jul 2041 "
       "00:46:40 GMT; Max-Age=86400; Secure; SameSite=Lax";
 
-  cookie_free(c);
+  ys_cookie_free(c);
 }
 
-void test_cookie_free(void) {
-  cookie* c = tocookie(".testsite.com", "test", "ThisCookie", "/", 2257894000,
-                       86400, SAME_SITE_LAX_MODE, false, true);
+void test_ys_cookie_free(void) {
+  ys_cookie* c = tocookie(".testsite.com", "test", "ThisCookie", "/",
+                          2257894000, 86400, SAME_SITE_LAX_MODE, false, true);
 
-  lives_ok({ cookie_free(c); }, "cookie_free does not segfault");
+  lives_ok({ ys_cookie_free(c); }, "ys_cookie_free does not segfault");
 }
 
 void run_cookie_tests(void) {
-  test_cookie_free();
+  test_ys_cookie_free();
 
   test_read_cookies();
   test_sanitize_cookie_value();
   test_sanitize_cookie_path();
   test_cookie_serialize();
-  test_get_cookie();
-  test_set_cookie();
+  test_ys_get_cookie();
+  test_ys_set_cookie();
 }

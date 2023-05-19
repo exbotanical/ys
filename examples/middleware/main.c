@@ -4,42 +4,42 @@
 
 #include "libys.h"
 
-response *handler(request *req, response *res) {
+ys_response *handler(ys_request *req, ys_response *res) {
   printf("handler\n");
 
-  char *key = req_get_parameter(req, "key");
+  char *key = ys_req_get_parameter(req, "key");
   printf("key=%s\n", key);
 
-  set_header(res, "Content-Type", "text/plain");
-  set_header(res, "X-Powered-By", "demo");
+  ys_set_header(res, "Content-Type", "text/plain");
+  ys_set_header(res, "X-Powered-By", "demo");
 
-  set_body(res, "Hello World!");
-  set_status(res, STATUS_OK);
+  ys_set_body(res, "Hello World!");
+  ys_set_status(res, YS_STATUS_OK);
 
   return res;
 }
 
-response *middleware1(request *req, response *res) {
+ys_response *middleware1(ys_request *req, ys_response *res) {
   printf("middleware 1\n");
 
   return res;
 }
 
-response *middleware2(request *req, response *res) {
+ys_response *middleware2(ys_request *req, ys_response *res) {
   printf("middleware 2\n");
 
   return res;
 }
 
 int main() {
-  router_attr *attr = router_attr_init();
-  use_middlewares(attr, middleware1, middleware2);
-  http_router *router = router_init(attr);
+  ys_router_attr *attr = ys_router_attr_init();
+  ys_use_middlewares(attr, middleware1, middleware2);
+  ys_router *router = ys_router_init(attr);
 
-  router_register(router, "/:key[^\\d+$]", handler, METHOD_GET);
+  ys_router_register(router, "/:key[^\\d+$]", handler, YS_METHOD_GET);
 
-  tcp_server *server = server_init(server_attr_init(router));
-  server_start(server);
+  ys_server *server = ys_server_init(ys_server_attr_init(router));
+  ys_server_start(server);
 
   return EXIT_SUCCESS;
 }

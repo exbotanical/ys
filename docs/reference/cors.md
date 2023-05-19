@@ -1,91 +1,91 @@
 # CORS APIs
 
-## cors_opts*
+## ys_cors_opts*
 
-`cors_opts*` stores CORS configuration options used to execute a CORS policy on applicable requests.
+`ys_cors_opts*` stores CORS configuration options used to execute a CORS policy on applicable requests.
 
 
-## cors_opts_init
+## ys_cors_opts_init
 
-`cors_opts_init` initializes a new CORS options object. Use the `cors_set_*` utilities to build a custom CORS policy.
+`ys_cors_opts_init` initializes a new CORS options object. Use the `cors_set_*` utilities to build a custom CORS policy.
 
-## cors_allow_all
-
-```c
-cors_opts *cors_allow_all(void);
-```
-
-`cors_allow_all` initializes a new CORS options object with sensibly liberal defaults.
-
-## use_cors
+## ys_cors_allow_all
 
 ```c
-void use_cors(router_attr *attr, cors_opts *opts);
+ys_cors_opts *ys_cors_allow_all(void);
 ```
 
-`use_cors` binds the CORS global middleware to the [router attributes](./router-attr.md) instance.
+`ys_cors_allow_all` initializes a new CORS options object with sensibly liberal defaults.
 
-## cors_allow_origins
+## ys_use_cors
 
 ```c
-void cors_allow_origins(cors_opts *opts, char *origin, ...);
+void ys_use_cors(ys_router_attr *attr, ys_cors_opts *opts);
 ```
 
-`cors_allow_origins` sets allowed origins on given the `cors_opts*`. You do not
+`ys_use_cors` binds the CORS global middleware to the [router attributes](./router-attr.md) instance.
+
+## ys_cors_allow_origins
+
+```c
+void ys_cors_allow_origins(ys_cors_opts *opts, char *origin, ...);
+```
+
+`ys_cors_allow_origins` sets allowed origins on given the `ys_cors_opts*`. You do not
 need to pass a `NULL` sentinel to terminate the list; this macro will do it
 for you.
 
-## cors_allow_methods
+## ys_cors_allow_methods
 
 ```c
-void cors_allow_methods(cors_opts *opts, http_method method, ...);
+void ys_cors_allow_methods(ys_cors_opts *opts, ys_http_method method, ...);
 ```
 
-`cors_allow_methods` sets the allowed methods on the given `cors_opts*`. You do
+`ys_cors_allow_methods` sets the allowed methods on the given `ys_cors_opts*`. You do
 not need to pass a `NULL` sentinel to terminate the list; this macro will do
 it for you.
 
-## cors_allow_headers
+## ys_cors_allow_headers
 
 ```c
-void cors_allow_headers(cors_opts *opts, char *origin, ...);
+void ys_cors_allow_headers(ys_cors_opts *opts, char *origin, ...);
 ```
 
-`cors_allow_headers` sets the allowed headers on the given `cors_opts*`. You do
+`ys_cors_allow_headers` sets the allowed headers on the given `ys_cors_opts*`. You do
 not need to pass a `NULL` sentinel to terminate the list; this macro will do
 it for you.
 
-## cors_expose_headers
+## ys_cors_expose_headers
 
 ```c
-void cors_expose_headers(cors_opts *opts, char *header, ...);
+void ys_cors_expose_headers(ys_cors_opts *opts, char *header, ...);
 ```
 
-`cors_expose_headers` sets the expose headers on the given `cors_opts*`. You do
+`ys_cors_expose_headers` sets the expose headers on the given `ys_cors_opts*`. You do
 not need to pass a `NULL` sentinel to terminate the list; this macro will do
 it for you.
 
-## cors_allow_credentials
+## ys_cors_allow_credentials
 
 ```c
-void cors_allow_credentials(cors_opts *opts, bool allow);
+void ys_cors_allow_credentials(ys_cors_opts *opts, bool allow);
 ```
 
-`cors_allow_credentials` sets the `cors_opts*` `allowed_credentials` option.
+`ys_cors_allow_credentials` sets the `ys_cors_opts*` `allowed_credentials` option.
 
-## cors_use_options_passthrough
+## ys_cors_use_options_passthrough
 
 ```c
-void cors_use_options_passthrough(cors_opts *opts, bool use);
+void ys_cors_use_options_passthrough(ys_cors_opts *opts, bool use);
 ```
 
-`cors_use_options_passthrough` sets the `cors_opts*` `use_options_passthrough`
+`ys_cors_use_options_passthrough` sets the `ys_cors_opts*` `use_options_passthrough`
 option  to `use`.
 
-## cors_set_max_age
+## ys_cors_set_max_age
 
 ```c
-void cors_set_max_age(cors_opts *opts, int max_age);
+void ys_cors_set_max_age(ys_cors_opts *opts, int max_age);
 ```
 
-`cors_set_max_age` sets the `cors_opts*` max age to `max_age` seconds.
+`ys_cors_set_max_age` sets the `ys_cors_opts*` max age to `max_age` seconds.

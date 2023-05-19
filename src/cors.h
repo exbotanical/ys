@@ -44,6 +44,6 @@ cors_config *cors_init(cors_opts_internal *opts);
  * cors_handler is a middleware handler that executes a spec-compliant CORS
  * workflow
  */
-response *cors_handler(request *req, response *res);
+ys_response *cors_handler(ys_request *req, ys_response *res);
 
 #endif /* CORS_H */

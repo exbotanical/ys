@@ -167,7 +167,7 @@ static thread_pool_t *setup_thread_pool(void) {
   return pool;
 }
 
-tcp_server_attr *server_attr_init(http_router *router) {
+ys_server_attr *ys_server_attr_init(ys_router *router) {
   server_attr_internal *attr = xmalloc(sizeof(server_attr_internal));
   attr->router = (router_internal *)router;
   attr->use_https = false;
@@ -175,10 +175,10 @@ tcp_server_attr *server_attr_init(http_router *router) {
   attr->cert_path = NULL;
   attr->key_path = NULL;
 
-  return (tcp_server_attr *)attr;
+  return (ys_server_attr *)attr;
 }
 
-void server_set_port(tcp_server_attr *attr, int port) {
+void ys_server_set_port(ys_server_attr *attr, int port) {
   if (!is_port_in_range(port)) {
     port = server_conf.port;
     printlogf(YS_LOG_INFO, "[server::%s] invalid port %d - defaulting to \n",
@@ -188,12 +188,13 @@ void server_set_port(tcp_server_attr *attr, int port) {
   }
 }
 
-void server_use_https(tcp_server_attr *attr, char *cert_path, char *key_path) {
+void ys_server_use_https(ys_server_attr *attr, char *cert_path,
+                         char *key_path) {
   bool use_https = cert_path && key_path;
   server_attr_internal *attr_internal = (server_attr_internal *)attr;
 
   if (use_https) {
-    printlogf(YS_LOG_DEBUG, "[server::%s] HTTPs enabled on tcp_server_attr\n",
+    printlogf(YS_LOG_DEBUG, "[server::%s] HTTPs enabled on ys_server_attr\n",
               __func__);
 
     attr_internal->use_https = use_https;
@@ -202,20 +203,20 @@ void server_use_https(tcp_server_attr *attr, char *cert_path, char *key_path) {
   }
 }
 
-void server_disable_https(tcp_server_attr *attr) {
+void ys_server_disable_https(ys_server_attr *attr) {
   ((server_attr_internal *)attr)->use_https = false;
 }
 
-tcp_server_attr *server_attr_init_with(http_router *router, int port,
-                                       char *cert_path, char *key_path) {
-  tcp_server_attr *attr = server_attr_init(router);
-  server_set_port(attr, port);
-  server_use_https(attr, cert_path, key_path);
+ys_server_attr *ys_server_attr_init_with(ys_router *router, int port,
+                                         char *cert_path, char *key_path) {
+  ys_server_attr *attr = ys_server_attr_init(router);
+  ys_server_set_port(attr, port);
+  ys_server_use_https(attr, cert_path, key_path);
 
-  return (tcp_server_attr *)attr;
+  return (ys_server_attr *)attr;
 }
 
-tcp_server *server_init(tcp_server_attr *attr) {
+ys_server *ys_server_init(ys_server_attr *attr) {
   server_attr_internal *a = (server_attr_internal *)attr;
 
   server_internal *server = xmalloc(sizeof(server_internal));
@@ -232,10 +233,10 @@ tcp_server *server_init(tcp_server_attr *attr) {
     server->sslctx = NULL;
   }
 
-  return (tcp_server *)server;
+  return (ys_server *)server;
 }
 
-void server_start(tcp_server *server) {
+void ys_server_start(ys_server *server) {
   server_internal *s = (server_internal *)server;
 
   if (s->sslctx) {
@@ -293,7 +294,7 @@ void server_start(tcp_server *server) {
   poll_client_connections(pool, s, server_sockfd, port, address, addr_len);
 }
 
-void server_free(tcp_server *server) {
-  router_free((http_router *)((server_internal *)server)->router);
+void ys_server_free(ys_server *server) {
+  ys_router_free((ys_router *)((server_internal *)server)->router);
   free(server);
 }

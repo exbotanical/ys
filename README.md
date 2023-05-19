@@ -11,28 +11,28 @@ With Ys you can do something like this
 #include "libys.h"
 // ...
 
-response *handler(request *req, response *res) {
-  set_header(res, "Content-Type", "text/plain");
+ys_response *handler(ys_request *req, ys_response *res) {
+  ys_set_header(res, "Content-Type", "text/plain");
 
-  cookie *c = cookie_init(COOKIE_ID, sid);
-  cookie_set_expires(c, n_minutes_from_now(10));
-  set_cookie(res, c);
+  ys_cookie *c = ys_cookie_init(COOKIE_ID, sid);
+  ys_cookie_set_expires(c, ys_n_minutes_from_now(10));
+  ys_set_cookie(res, c);
 
-  set_body(res, "Hello World!");
-  set_status(res, STATUS_OK);
+  ys_set_body(res, "Hello World!");
+  ys_set_status(res, YS_STATUS_OK);
 
   return res;
 }
 
 int main() {
-  router_attr *attr = router_attr_init();
-  use_cors(attr, cors_allow_all());
-  http_router *router = router_init(attr);
+  ys_router_attr *attr = ys_router_attr_init();
+  ys_use_cors(attr, ys_cors_allow_all());
+  ys_router *router = ys_router_init(attr);
 
-  router_register(router, "/", handler, METHOD_GET);
+  ys_router_register(router, "/", handler, YS_METHOD_GET);
 
-  tcp_server *server = server_init(router, PORT);
-  server_start(server);
+  ys_server *server = ys_server_init(router, PORT);
+  ys_server_start(server);
 
   return EXIT_SUCCESS;
 }

@@ -12,17 +12,17 @@ void test_is_2xx_connect(void) {
   response_internal* res = response_init();
 
   req->method = "CONNECT";
-  set_status((response*)res, STATUS_NO_CONTENT);
+  ys_set_status((ys_response*)res, YS_STATUS_NO_CONTENT);
   ok(is_2xx_connect(req, res) == true,
      "a 204 CONNECT request is a 2xx connect");
 
   req->method = "CONNECT";
-  set_status((response*)res, STATUS_NOT_FOUND);
+  ys_set_status((ys_response*)res, YS_STATUS_NOT_FOUND);
   ok(is_2xx_connect(req, res) == false,
      "a 404 CONNECT request is not a 2xx connect");
 
   req->method = "OPTIONS";
-  set_status((response*)res, STATUS_NO_CONTENT);
+  ys_set_status((ys_response*)res, YS_STATUS_NO_CONTENT);
   ok(is_2xx_connect(req, res) == false,
      "a 204 OPTIONS request is not a 2xx connect");
 }
@@ -30,20 +30,20 @@ void test_is_2xx_connect(void) {
 void test_is_informational(void) {
   response_internal* res = response_init();
 
-  set_status((response*)res, STATUS_EARLY_HINTS);
+  ys_set_status((ys_response*)res, YS_STATUS_EARLY_HINTS);
   ok(is_informational(res) == true, "a 1xx response is informational");
 
-  set_status((response*)res, STATUS_OK);
+  ys_set_status((ys_response*)res, YS_STATUS_OK);
   ok(is_informational(res) == false, "a 2xx response is not informational");
 }
 
 void test_is_nocontent(void) {
   response_internal* res = response_init();
 
-  set_status((response*)res, STATUS_NO_CONTENT);
+  ys_set_status((ys_response*)res, YS_STATUS_NO_CONTENT);
   ok(is_nocontent(res) == true, "a 204 response is a no content response");
 
-  set_status((response*)res, STATUS_OK);
+  ys_set_status((ys_response*)res, YS_STATUS_OK);
   ok(is_nocontent(res) == false, "a 200 response is not a no content response");
 }
 
@@ -64,14 +64,14 @@ void test_response_serialize(void) {
            to_header("Vary", array_collect("Origin")),
            to_header("X-Powered-By", array_collect("Unit-Test")), NULL),
        .method = "GET",
-       .status = STATUS_OK,
+       .status = YS_STATUS_OK,
        .expected = "HTTP/1.1 200 OK\r\nVary: Origin\r\nX-Powered-By: "
                    "Unit-Test\r\nContent-Type: text/plain\r\nContent-Length: "
                    "15\r\n\r\n{\"test\":\"body\"}"},
 
       {.name = "MultipleValuesSameHeaderKey",
        .body = "body",
-       .status = STATUS_ACCEPTED,
+       .status = YS_STATUS_ACCEPTED,
        .method = "POST",
        .headers = to_headers(
            to_header("Vary", array_collect("Origin", "Request-Method", "Etc")),
@@ -82,14 +82,14 @@ void test_response_serialize(void) {
 
       {.name = "OmitContentLength_For204",
        .body = "body",
-       .status = STATUS_NO_CONTENT,
+       .status = YS_STATUS_NO_CONTENT,
        .method = "OPTIONS",
        .headers = ht_init(0),
        .expected = "HTTP/1.1 204 No Content\r\n\r\n"},
 
       {.name = "OmitContentLength_ForInformational",
        .body = "test",
-       .status = STATUS_SWITCHING_PROTOCOLS,
+       .status = YS_STATUS_SWITCHING_PROTOCOLS,
        .method = "HEAD",
        .headers = ht_init(0),
        .expected = "HTTP/1.1 101 Switching Protocols\r\n\r\n"},
@@ -100,19 +100,19 @@ void test_response_serialize(void) {
            to_header("Vary", array_collect("Origin")),
            to_header("X-Powered-By", array_collect("Unit-Test")), NULL),
        .method = "GET",
-       .status = STATUS_OK,
+       .status = YS_STATUS_OK,
        .expected = "HTTP/1.1 200 OK\r\nVary: Origin\r\nX-Powered-By: "
                    "Unit-Test\r\nContent-Length: 0\r\n\r\n"},
 
       {.name = "NoContentLength_When2xxConnect",
        .body = "body",
-       .status = STATUS_NO_CONTENT,
+       .status = YS_STATUS_NO_CONTENT,
        .method = "CONNECT",
        .headers = ht_init(0),
        .expected = "HTTP/1.1 204 No Content\r\n\r\n"},
       {.name = "AddsTextPlainContentType_WhenGivenBodyAndNotSet",
        .body = "body",
-       .status = STATUS_OK,
+       .status = YS_STATUS_OK,
        .method = "CONNECT",
        .headers = ht_init(0),
        .expected = "HTTP/1.1 200 OK\r\n\r\n"}};
@@ -125,8 +125,8 @@ void test_response_serialize(void) {
 
     response_internal* res = response_init();
     res->headers = test.headers;
-    set_body((response*)res, test.body);
-    set_status((response*)res, test.status);
+    ys_set_body((ys_response*)res, test.body);
+    ys_set_status((ys_response*)res, test.status);
 
     char* response = buffer_state(response_serialize(req, res));
 
@@ -135,11 +135,11 @@ void test_response_serialize(void) {
   }
 }
 
-void set_body_test(void) {
+void ys_set_body_test(void) {
   response_internal* res = response_init();
 
-  set_body((response*)res, "%s - %s\n%s - %s \t\t%d\n", "test", "xtestx",
-           "cookie", "x\t cookie\t x", 20);
+  ys_set_body((ys_response*)res, "%s - %s\n%s - %s \t\t%d\n", "test", "xtestx",
+              "cookie", "x\t cookie\t x", 20);
   is(res->body, "test - xtestx\ncookie - x\t cookie\t x \t\t20\n");
 }
 
@@ -150,5 +150,5 @@ void run_response_tests(void) {
 
   test_response_serialize();
 
-  set_body_test();
+  ys_set_body_test();
 }

@@ -78,7 +78,7 @@ void test_to_canonical_mime_header_key(void) {
   }
 }
 
-void test_get_header(void) {
+void test_ys_get_header(void) {
   const char *k1 = "k1";
   const char *v1 = "v1";
   const char *v2 = "v2";
@@ -173,7 +173,7 @@ void run_header_tests(void) {
   test_token_table();
   test_to_canonical_mime_header_key();
 
-  test_get_header();
+  test_ys_get_header();
   test_req_header_values();
   test_derive_headers();
 

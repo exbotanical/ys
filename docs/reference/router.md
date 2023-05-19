@@ -1,57 +1,57 @@
 # Router APIs
 
-## http_router*
+## ys_router*
 
-A `http_router*` is a request router / HTTP multiplexer.
+A `ys_router*` is a request router / HTTP multiplexer.
 
-## router_init
-
-```c
-http_router *router_init(router_attr *attr);
-```
-
-`router_init` allocates memory for a new router and initializes its members. It uses the `router_attr*` to set the 404, 405, and 500 handlers if set, as well as any registered middleware.
-
-## router_register
+## ys_router_init
 
 ```c
-void router_register(http_router *router, const char *path,
-                     route_handler *handler, http_method method, ...);
+ys_router *ys_router_init(ys_router_attr *attr);
 ```
 
+`ys_router_init` allocates memory for a new router and initializes its members. It uses the `ys_router_attr*` to set the 404, 405, and 500 handlers if set, as well as any registered middleware.
 
-`router_register` registers a new route record. Registered routes will be matched against incoming requests. The list of HTTP methods must be `NULL`-terminated.
-
-## router_free
+## ys_router_register
 
 ```c
-void router_free(http_router *router);
+void ys_router_register(ys_router *router, const char *path,
+                     ys_route_handler *handler, ys_http_method method, ...);
 ```
 
-`router_free` deallocates memory for the provided `http_router*` instance.
 
-## router_register_sub
+`ys_router_register` registers a new route record. Registered routes will be matched against incoming requests. The list of HTTP methods must be `NULL`-terminated.
+
+## ys_router_free
 
 ```c
-http_router *router_register_sub(http_router *parent_router, router_attr *attr, const char *subpath);
+void ys_router_free(ys_router *router);
 ```
 
-`router_register_sub` registers a sub-router on `parent_router` at `subpath`.
+`ys_router_free` deallocates memory for the provided `ys_router*` instance.
+
+## ys_router_register_sub
+
+```c
+ys_router *ys_router_register_sub(ys_router *parent_router, ys_router_attr *attr, const char *subpath);
+```
+
+`ys_router_register_sub` registers a sub-router on `parent_router` at `subpath`.
 
 For example, suppose we have a root router
 
 ```c
-http_router *router = router_init(router_attr *attr);
+ys_router *router = ys_router_init(ys_router_attr *attr);
 ```
 
 Requests will always be matched using this router instance. However, if we register a sub-router at `/api`...
 
 ```c{3-6}
-http_router *router = router_init(router_attr *attr);
+ys_router *router = ys_router_init(ys_router_attr *attr);
 
-http_router *api_router = router_register_sub(router, attr, "/api");
-router_register(api_router, "/", api_handler, METHOD_GET);
-router_register(api_router, "/demo", demo_handler, METHOD_GET);
+ys_router *api_router = ys_router_register_sub(router, attr, "/api");
+ys_router_register(api_router, "/", api_handler, YS_METHOD_GET);
+ys_router_register(api_router, "/demo", demo_handler, YS_METHOD_GET);
 ```
 
 ...all requests to `api_router` will be relative to that sub-router's root path `/api`. Thus, `/` matches on `/api`, and `/demo` matches on `/api/demo`.

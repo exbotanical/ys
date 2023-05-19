@@ -5,7 +5,7 @@
 #include "router.h"
 
 typedef struct {
-  route_handler *handler;
+  ys_route_handler *handler;
   array_t *ignore_paths;
 } middleware_handler;
 

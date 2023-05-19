@@ -2,25 +2,25 @@
 
 #include "libys.h"
 
-response *handler(request *req, response *res) {
-  set_header(res, "Content-Type", "text/plain");
-  set_header(res, "X-Powered-By", "demo");
+ys_response *handler(ys_request *req, ys_response *res) {
+  ys_set_header(res, "Content-Type", "text/plain");
+  ys_set_header(res, "X-Powered-By", "demo");
 
-  set_body(res, "Hello World!");
-  set_status(res, STATUS_OK);
+  ys_set_body(res, "Hello World!");
+  ys_set_status(res, YS_STATUS_OK);
 
   return res;
 }
 
 int main() {
-  router_attr *attr = router_attr_init();
-  use_cors(attr, cors_allow_all());
+  ys_router_attr *attr = ys_router_attr_init();
+  ys_use_cors(attr, ys_cors_allow_all());
 
-  http_router *router = router_init(attr);
-  router_register(router, "/", handler, METHOD_GET);
+  ys_router *router = ys_router_init(attr);
+  ys_router_register(router, "/", handler, YS_METHOD_GET);
 
-  tcp_server *server = server_init(server_attr_init(router));
-  server_start(server);
+  ys_server *server = ys_server_init(ys_server_attr_init(router));
+  ys_server_start(server);
 
   return EXIT_SUCCESS;
 }

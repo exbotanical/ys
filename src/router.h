@@ -20,9 +20,9 @@ typedef struct {
 
 typedef struct {
   bool use_cors;
-  route_handler *not_found_handler;
-  route_handler *internal_error_handler;
-  route_handler *method_not_allowed_handler;
+  ys_route_handler *not_found_handler;
+  ys_route_handler *internal_error_handler;
+  ys_route_handler *method_not_allowed_handler;
   array_t *middlewares;
 } router_attr_internal;
 
@@ -32,9 +32,9 @@ typedef struct {
 typedef struct {
   bool use_cors;
   route_trie *trie;
-  route_handler *not_found_handler;
-  route_handler *method_not_allowed_handler;
-  route_handler *internal_error_handler;
+  ys_route_handler *not_found_handler;
+  ys_route_handler *method_not_allowed_handler;
+  ys_route_handler *internal_error_handler;
 
   // middleware_handler*[]
   array_t *middlewares;
