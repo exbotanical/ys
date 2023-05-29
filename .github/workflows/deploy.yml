@@ -1,4 +1,4 @@
-name: Deploy
+name: Documentation Site Deployment Workflow
 on:
   workflow_dispatch: {}
   push:
