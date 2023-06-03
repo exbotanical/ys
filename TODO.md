@@ -34,6 +34,9 @@
   - Go style: append subsequent values, but `Get` retrieves the first only. `Values` returns list of all. In response, each duplicate header is written separately
 - [x] xmalloc that dies
 
+## Perf
+- [ ] Increase to 15k TPS (As of 06/03/2023, Ys supports ~5k TPS. We want to improve this 3x to ~15k)
+
 ## Testing
 - [x] ~~test handlers with a mocking library?~~ no need w/ integ
 - [ ] test with a real server (E2E)

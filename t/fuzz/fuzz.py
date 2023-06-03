@@ -1,17 +1,29 @@
-from threading import Thread
-import sys, http.client
-from queue import Queue
+import sys, os, http.client, queue, threading, time, signal
 
-concurrent = 200
+NUM_REQUESTS = 100000
+CONCURRENCY = 4
+BASE_URL = "localhost:5000"
 
-def doWork():
+thread_lock = threading.Lock()
+failures = 0
+
+
+def do_work():
     while True:
         url = q.get()
-        res = getStatus(url)
-        doSomethingWithResult(res)
+        start_time = time.time()
+        res = do_request(url)
+        elapsed_time = time.time() - start_time
+
+        # print(f"Request Time: {elapsed_time * 1000}ms")
+        if res.status != 200:
+            with thread_lock:
+                failures += 1
+
         q.task_done()
 
-def getStatus(url):
+
+def do_request(url):
     try:
         conn = http.client.HTTPConnection(url)
         conn.request("GET", "/")
@@ -20,19 +32,31 @@ def getStatus(url):
         return res
     except Exception as e:
         print(e)
-        return "error", url
+        os.kill(os.getpid(), signal.SIGTERM)
 
-def doSomethingWithResult(res):
-    print(res.status, res.getheaders())
 
-q = Queue(concurrent * 2)
-for i in range(concurrent):
-    t = Thread(target=doWork)
-    t.daemon = True
-    t.start()
-try:
-    for i in range(10000):
-        q.put("localhost:9000")
-    q.join()
-except KeyboardInterrupt:
-    sys.exit(1)
+q = queue.Queue(CONCURRENCY * 2)
+
+
+def main():
+    for i in range(CONCURRENCY):
+        t = threading.Thread(target=do_work)
+        t.daemon = True
+        t.start()
+
+    try:
+        start_time = time.time()
+        for i in range(NUM_REQUESTS):
+            q.put(BASE_URL)
+        q.join()
+
+        total_time = time.time() - start_time
+        print(f"Completed run with {NUM_REQUESTS} and {failures} failures")
+        print(f"Total time elapsed: {total_time} seconds")
+
+    except KeyboardInterrupt:
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
