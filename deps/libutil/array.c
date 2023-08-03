@@ -4,6 +4,9 @@
 
 #include "libutil.h"
 
+bool int_comparator(int a, int b) { return a == b; }
+bool str_comparator(char *a, char *b) { return s_equals(a, b); }
+
 unsigned int array_size(array_t *array) { return ((__array_t *)array)->len; }
 
 void *array_get(array_t *array, int index) {
@@ -25,23 +28,22 @@ void *array_get(array_t *array, int index) {
 }
 
 array_t *array_init(void) {
-  array_t *array = malloc(sizeof(array_t));
+  __array_t *array = malloc(sizeof(__array_t));
   if (!array) {
     errno = ENOMEM;
     return NULL;
   }
 
-  __array_t *internal = (__array_t *)array;
-
-  internal->state = malloc(sizeof(void *));
-  if (!internal->state) {
+  array->state = malloc(sizeof(void *));
+  if (!array->state) {
+    free(array);
     errno = ENOMEM;
     return NULL;
   }
 
-  internal->len = 0;
+  array->len = 0;
 
-  return array;
+  return (array_t *)array;
 }
 
 array_t *__array_collect(void *v, ...) {
@@ -60,7 +62,7 @@ array_t *__array_collect(void *v, ...) {
   return arr;
 }
 
-bool array_includes(array_t *array, comparator_function_t *comparator,
+bool array_includes(array_t *array, comparator_t *comparator,
                     void *compare_to) {
   __array_t *internal = (__array_t *)array;
 
@@ -73,8 +75,7 @@ bool array_includes(array_t *array, comparator_function_t *comparator,
   return false;
 }
 
-int array_find(array_t *array, comparator_function_t *comparator,
-               void *compare_to) {
+int array_find(array_t *array, comparator_t *comparator, void *compare_to) {
   __array_t *internal = (__array_t *)array;
 
   for (unsigned int i = 0; i < internal->len; i++) {
@@ -136,8 +137,12 @@ void *array_shift(array_t *array) {
     array_push(new, internal->state[i]);
   }
 
+  free(internal->state);
+
+  internal->state = ((__array_t *)new)->state;  // Assign the new state
   internal->len--;
-  *array = *new;
+
+  free(new);
   return el;
 }
 
@@ -171,7 +176,7 @@ bool array_remove(array_t *array, unsigned int index) {
   return true;
 }
 
-array_t *array_map(array_t *array, callback_function_t *callback) {
+array_t *array_map(array_t *array, callback_t *callback) {
   __array_t *internal = (__array_t *)array;
 
   array_t *ret = array_init();
@@ -182,7 +187,7 @@ array_t *array_map(array_t *array, callback_function_t *callback) {
   return ret;
 }
 
-array_t *array_filter(array_t *array, predicate_function_t *predicate,
+array_t *array_filter(array_t *array, predicate_t *predicate,
                       void *compare_to) {
   __array_t *internal = (__array_t *)array;
 
@@ -197,7 +202,7 @@ array_t *array_filter(array_t *array, predicate_function_t *predicate,
   return ret;
 }
 
-void array_foreach(array_t *array, callback_function_t *callback) {
+void array_foreach(array_t *array, callback_t *callback) {
   __array_t *internal = (__array_t *)array;
 
   for (unsigned int i = 0; i < internal->len; i++) {
@@ -211,4 +216,11 @@ void array_free(array_t *array) {
   free(internal->state);
   internal->state = NULL;
   free(internal);
+}
+
+void array_free_ptrs(array_t *array) {
+  foreach (array, i) {
+    free(array_get(array, i));
+  }
+  array_free(array);
 }

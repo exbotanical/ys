@@ -9,20 +9,20 @@ int buffer_size(buffer_t *buf) { return ((__buffer_t *)buf)->len; }
 char *buffer_state(buffer_t *buf) { return ((__buffer_t *)buf)->state; }
 
 buffer_t *buffer_init(const char *init) {
-  buffer_t *buf = malloc(sizeof(buffer_t));
+  __buffer_t *buf = malloc(sizeof(__buffer_t));
   if (!buf) {
     free(buf);
     return NULL;
   }
 
-  ((__buffer_t *)buf)->state = NULL;
-  ((__buffer_t *)buf)->len = 0;
+  buf->state = NULL;
+  buf->len = 0;
 
   if (init != NULL) {
-    buffer_append(buf, init);
+    buffer_append((buffer_t *)buf, init);
   }
 
-  return buf;
+  return (buffer_t *)buf;
 }
 
 bool buffer_append(buffer_t *buf, const char *s) {
@@ -40,7 +40,8 @@ bool buffer_append(buffer_t *buf, const char *s) {
     return false;
   }
 
-  memcpy(&next[internal->len], s, len + 1);
+  memcpy(&next[internal->len], s, len);
+  next[internal->len + len] = '\0';
   internal->state = next;
   internal->len += len;
 
@@ -50,12 +51,13 @@ bool buffer_append(buffer_t *buf, const char *s) {
 bool buffer_append_with(buffer_t *buf, const char *s, unsigned int len) {
   __buffer_t *internal = (__buffer_t *)buf;
 
-  char *next = realloc(internal->state, internal->len + len);
+  char *next = realloc(internal->state, internal->len + len + 1);
   if (!next) {
     return false;
   }
 
   memcpy(&next[internal->len], s, len);
+  next[internal->len + len] = '\0';
   internal->state = next;
   internal->len += len;
 

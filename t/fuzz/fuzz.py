@@ -8,7 +8,7 @@ thread_lock = threading.Lock()
 failures = 0
 
 
-def do_work():
+def time_request():
     while True:
         url = q.get()
         start_time = time.time()
@@ -40,7 +40,7 @@ q = queue.Queue(CONCURRENCY * 2)
 
 def main():
     for i in range(CONCURRENCY):
-        t = threading.Thread(target=do_work)
+        t = threading.Thread(target=time_request)
         t.daemon = True
         t.start()
 

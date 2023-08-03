@@ -16,14 +16,7 @@ char *s_truncate(const char *s, int n) {
 
   // Simply return a copy if invalid n
   if (n == 0 || trunclen >= full_len) {
-    char *ret = malloc(full_len);
-    if (!ret) {
-      return NULL;
-    }
-
-    strcpy(ret, s);
-
-    return ret;
+    return s_copy(s);
   }
 
   size_t sz = (size_t)full_len - trunclen;
@@ -34,11 +27,9 @@ char *s_truncate(const char *s, int n) {
   }
 
   if (n > 0) {
-    strncpy(ret, s + n, sz);
-    ret[sz + 1] = '\0';
+    sprintf(ret, s + n);
   } else {
-    strncpy(ret, s, full_len - trunclen);
-    ret[n] = '\0';
+    snprintf(ret, full_len - trunclen + 1, s);
   }
 
   return ret;
@@ -105,7 +96,7 @@ char *s_substr(const char *s, int start, int end, bool inclusive) {
   // (old_top == initial_top (av) && old_size == 0) || ((unsigned long)
   // (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end &
   // (pagesize - 1)) == 0)
-  char *ret = malloc(sizeof(char) * size_multiplier + 1);
+  char *ret = malloc(sizeof(char) * size_multiplier + 2);
   if (!ret) {
     return NULL;
   }
@@ -164,12 +155,60 @@ char *s_trim(const char *s) {
   char *scp = s_copy(s);
 
   while (strlen(scp) > 0 && is_ascii_space(scp[0])) {
-    scp = s_substr(scp, 1, strlen(scp), true);
+    char *nscp = s_substr(scp, 1, strlen(scp), true);
+    free(scp);
+    scp = nscp;
   }
 
   while (strlen(scp) > 0 && is_ascii_space(scp[strlen(scp) - 1])) {
-    scp = s_substr(scp, 0, strlen(scp) - 1, false);
+    char *nscp = s_substr(scp, 0, strlen(scp) - 1, false);
+    free(scp);
+    scp = nscp;
   }
 
   return scp;
+}
+
+array_t *s_split(const char *s, const char *delim) {
+  if (s == NULL || delim == NULL) {
+    return NULL;
+  }
+
+  // see:
+  // https://wiki.sei.cmu.edu/confluence/display/c/STR06-C.+Do+not+assume+that+strtok%28%29+leaves+the+parse+string+unchanged
+  char *input = s_copy(s);
+
+  array_t *tokens = array_init();
+  if (tokens == NULL) {
+    free(input);
+    return NULL;
+  }
+
+  // If the input doesn't even contain the delimiter, return early and avoid
+  // further computation
+  if (!strstr(input, delim)) {
+    free(input);
+    return tokens;
+  }
+
+  // If the input *is* the delimiter, just return the empty array
+  if (s_equals(input, delim)) {
+    free(input);
+    return tokens;
+  }
+
+  char *token = strtok(input, delim);
+  if (token == NULL) {
+    free(input);
+    return tokens;
+  }
+
+  while (token != NULL) {
+    array_push(tokens, s_copy(token));
+    token = strtok(NULL, delim);
+  }
+
+  free(input);
+
+  return tokens;
 }
