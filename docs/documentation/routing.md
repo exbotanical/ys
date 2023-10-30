@@ -133,8 +133,8 @@ int main () {
   ys_router_attr *attr = ys_router_attr_init();
   ys_router *router = ys_router_init(attr);
 
-  ys_router_register(router, "/", handler, YS_METHOD_GET);
-  ys_router_register(router, "/", handler, YS_METHOD_POST);
+  ys_router_register(router, "/", get_handler, YS_METHOD_GET);
+  ys_router_register(router, "/", post_handler, YS_METHOD_POST);
 
   // ...
 }
